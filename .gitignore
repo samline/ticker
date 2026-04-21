@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.bunchee-build-*
+*.log
+.DS_Store

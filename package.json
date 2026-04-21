@@ -1,0 +1,103 @@
+{
+  "name": "@samline/ticker",
+  "version": "1.0.0",
+  "description": "A universal ticker (marquee) package for React, Vue, Svelte, vanilla JS, and browser usage.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js",
+      "require": "./dist/core/index.cjs"
+    },
+    "./vanilla": {
+      "types": "./dist/vanilla/index.d.ts",
+      "import": "./dist/vanilla/index.js",
+      "require": "./dist/vanilla/index.cjs"
+    },
+    "./browser": {
+      "types": "./dist/browser/global.d.ts",
+      "default": "./dist/browser/global.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js",
+      "require": "./dist/react/index.cjs"
+    },
+    "./vue": {
+      "types": "./dist/vue/index.d.ts",
+      "import": "./dist/vue/index.js",
+      "require": "./dist/vue/index.cjs"
+    },
+    "./svelte": {
+      "types": "./dist/svelte/index.d.ts",
+      "import": "./dist/svelte/index.js",
+      "require": "./dist/svelte/index.cjs"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsup --config tsup.config.ts",
+    "dev": "tsup --config tsup.config.ts --watch",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "ticker",
+    "marquee",
+    "react",
+    "vue",
+    "svelte",
+    "vanilla-js",
+    "browser"
+  ],
+  "author": "Samuel Olvera (samline)",
+  "license": "MIT",
+  "homepage": "https://github.com/samline/ticker",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samline/ticker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/samline/ticker/issues"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.7",
+    "@types/react": "^19.1.0",
+    "prettier": "^3.0.0",
+    "react": "^19.1.0",
+    "svelte": "^5.38.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.2.2",
+    "vitest": "^2.1.8",
+    "vue": "^3.5.0"
+  },
+  "peerDependencies": {
+    "react": "^16.8 || ^17.0 || ^18.0 || ^19.0.0 || ^19.0.0-rc",
+    "svelte": "^4.2.0 || ^5.0.0",
+    "vue": "^3.4.0 || ^3.5.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    },
+    "svelte": {
+      "optional": true
+    }
+  }
+}
