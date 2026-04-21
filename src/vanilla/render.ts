@@ -289,7 +289,8 @@ export const createTicker = (options: TickerOptions = {}): { mount: () => void; 
 
   const createWrapper = (content: HTMLElement): HTMLElement => {
     const wrapper = document.createElement('div');
-    wrapper.classList.add('ticker-wrapper', className);
+    wrapper.classList.add('ticker-wrapper');
+    if (className) wrapper.classList.add(className);
     wrapper.setAttribute('data-ticker', '');
     wrapper.setAttribute('data-duration', String(duration));
     wrapper.setAttribute('data-direction', direction);
