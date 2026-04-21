@@ -4,6 +4,7 @@ export default defineConfig([
   {
     entry: {
       index: 'src/index.ts',
+      style: 'src/style.css',
       'core/index': 'src/core/index.ts',
       'vanilla/index': 'src/vanilla/index.ts',
       'react/index': 'src/react/index.ts',

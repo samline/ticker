@@ -1,6 +1,7 @@
 {
   "name": "@samline/ticker",
-  "version": "1.0.3",
+  "version": "1.0.4",
+  "packageManager": "bun@1.1.29",
   "description": "A universal ticker (marquee) package for React, Vue, Svelte, vanilla JS, and browser usage.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -49,6 +50,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsup --config tsup.config.ts",
+    "prepack": "bun run build",
     "dev": "tsup --config tsup.config.ts --watch",
     "format": "prettier --write .",
     "test": "vitest run",
