@@ -7,7 +7,7 @@ Use the browser entrypoint for plain HTML pages without build tools.
 ### Quick Start
 
 ```html
-<script src="https://unpkg.com/@samline/ticker1.0.0/dist/browser/global.global.js"></script>
+<script src="https://unpkg.com/@samline/ticker@1.0.0/dist/browser/index.global.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/@samline/ticker1.0.0/dist/style.css">
 
 <div class="ticker-content">
@@ -50,7 +50,7 @@ If you already have the full markup:
   </div>
 </div>
 
-<script src="https://unpkg.com/@samline/ticker1.0.0/dist/browser/global.global.js"></script>
+<script src="https://unpkg.com/@samline/ticker@1.0.0/dist/browser/index.global.js"></script>
 <script>
   Ticker.mount()
 </script>
@@ -61,13 +61,13 @@ If you already have the full markup:
 ### Unpkg
 
 ```html
-<script src="https://unpkg.com/@samline/ticker1.0.0/dist/browser/global.global.js"></script>
+<script src="https://unpkg.com/@samline/ticker@1.0.0/dist/browser/index.global.js"></script>
 ```
 
 ### JSDelivr
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@samline/ticker1.0.0/dist/browser/global.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@1.0.0/dist/browser/index.global.js"></script>
 ```
 
 ## Full Example
@@ -98,7 +98,7 @@ If you already have the full markup:
     </div>
   </div>
 
-  <script src="https://unpkg.com/@samline/ticker1.0.0/dist/browser/global.global.js"></script>
+  <script src="https://unpkg.com/@samline/ticker@1.0.0/dist/browser/index.global.js"></script>
   <script>
     Ticker.enhance('.ticker-content', {
       duration: 25,
@@ -116,7 +116,7 @@ You can also use ES modules:
 
 ```html
 <script type="module">
-  import { enhance } from 'https://unpkg.com/@samline/ticker1.0.0/dist/browser/global.global.js'
+  import { enhance } from 'https://unpkg.com/@samline/ticker@1.0.0/dist/browser/index.global.js'
 
   enhance('.ticker-content', { duration: 20 })
 </script>

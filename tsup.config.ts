@@ -20,7 +20,7 @@ export default defineConfig([
   },
   {
     entry: {
-      'browser/global': 'src/browser/index.ts'
+      'browser/index': 'src/browser/index.ts'
     },
     format: ['iife'],
     dts: true,
