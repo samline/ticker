@@ -50,4 +50,24 @@ describe('ticker vanilla', () => {
     expect(ticker.refresh).toBeDefined();
     expect(ticker.enhance).toBeDefined();
   });
+
+  it('enhances a ticker-content element without adding empty class tokens', async () => {
+    const { enhance } = await import('../src/vanilla/render');
+
+    document.body.innerHTML = `
+      <div class="ticker-content">
+        <span>First Item</span>
+        <span>Second Item</span>
+      </div>
+    `;
+
+    const wrapper = enhance('.ticker-content', { class: ' custom   accent ' });
+
+    expect(wrapper).toBeInstanceOf(HTMLElement);
+    expect(wrapper?.classList.contains('ticker-wrapper')).toBe(true);
+    expect(wrapper?.classList.contains('custom')).toBe(true);
+    expect(wrapper?.classList.contains('accent')).toBe(true);
+    expect(wrapper?.querySelectorAll('.ticker-content')).toHaveLength(1);
+    expect(wrapper?.querySelectorAll('span')).toHaveLength(2);
+  });
 });

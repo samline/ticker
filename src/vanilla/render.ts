@@ -44,6 +44,9 @@ const getTickerElements = (root: ParentNode): HTMLElement[] => {
   return elements;
 };
 
+const isTickerContentElement = (element: HTMLElement): boolean =>
+  element.matches('[data-ticker-content], .ticker-content');
+
 const makeCloneAccessible = (clone: Element): void => {
   clone.classList.add(TICKER_CLONE_CLASS);
   clone.setAttribute('aria-hidden', 'true');
@@ -286,11 +289,12 @@ export const refresh = (): void => refreshAll();
 
 export const createTicker = (options: TickerOptions = {}): { mount: () => void; unmount: () => void; refresh: () => void; enhance: (element: HTMLElement) => HTMLElement } => {
   const { duration = 20, direction = 'left', pauseOnHover = false, class: className = '' } = options;
+  const classNames = className.split(/\s+/).filter(Boolean);
 
-  const createWrapper = (content: HTMLElement): HTMLElement => {
+  const createWrapper = (): { wrapper: HTMLElement; track: HTMLElement } => {
     const wrapper = document.createElement('div');
     wrapper.classList.add('ticker-wrapper');
-    if (className) wrapper.classList.add(className);
+    if (classNames.length) wrapper.classList.add(...classNames);
     wrapper.setAttribute('data-ticker', '');
     wrapper.setAttribute('data-duration', String(duration));
     wrapper.setAttribute('data-direction', direction);
@@ -302,16 +306,9 @@ export const createTicker = (options: TickerOptions = {}): { mount: () => void; 
     track.classList.add('ticker-track');
     if (pauseOnHover) track.classList.add('ticker-pause-on-hover');
     track.setAttribute('data-ticker-track', '');
-
-    const tickerContent = document.createElement('div');
-    tickerContent.classList.add('ticker-content');
-    tickerContent.setAttribute('data-ticker-content', '');
-
-    tickerContent.appendChild(content);
-    track.appendChild(tickerContent);
     wrapper.appendChild(track);
 
-    return wrapper;
+    return { wrapper, track };
   };
 
   const enhanceElement = (element: HTMLElement): HTMLElement => {
@@ -320,8 +317,32 @@ export const createTicker = (options: TickerOptions = {}): { mount: () => void; 
       element.querySelector<HTMLElement>('.ticker-content') ||
       element;
 
-    const wrapper = createWrapper(content);
-    element.replaceWith(wrapper);
+    const parent = element.parentNode;
+    const nextSibling = element.nextSibling;
+    const { wrapper, track } = createWrapper();
+    const tickerContent = isTickerContentElement(content) ? content : document.createElement('div');
+
+    tickerContent.classList.add('ticker-content');
+    tickerContent.setAttribute('data-ticker-content', '');
+
+    if (tickerContent !== content) {
+      tickerContent.appendChild(content);
+    }
+
+    track.appendChild(tickerContent);
+
+    if (parent) {
+      if (nextSibling) {
+        parent.insertBefore(wrapper, nextSibling);
+      } else {
+        parent.appendChild(wrapper);
+      }
+    }
+
+    if (element !== content && element.isConnected) {
+      element.remove();
+    }
+
     initTicker(wrapper);
 
     return wrapper;
