@@ -1,6 +1,11 @@
-import { describe, it, expect } from 'vitest';
-import { TickerOptions, TickerDirection, createEmptyTickerState } from '../src/core/types';
-import { validateDuration, validateDirection, validatePauseOnHover } from '../src/core/state';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { TickerOptions, TickerDirection } from '../src/core/types';
+import { 
+  validateDuration, 
+  validateDirection, 
+  validatePauseOnHover,
+  createEmptyTickerState 
+} from '../src/core/state';
 
 describe('ticker core', () => {
   describe('validateDuration', () => {
