@@ -3,3 +3,4 @@ dist/
 .bunchee-build-*
 *.log
 .DS_Store
+features.md
