@@ -29,6 +29,7 @@ export function Root({
   duration = 20,
   direction = 'left',
   pauseOnHover = false,
+  interactiveClones = false,
   as: Component = 'div',
   ...props
 }: TickerRootProps) {
@@ -45,7 +46,7 @@ export function Root({
     setIsReady(true);
 
     return cleanup;
-  }, [duration, direction, pauseOnHover, className]);
+  }, [duration, direction, pauseOnHover, interactiveClones, className]);
 
   return (
     <Component
@@ -55,6 +56,7 @@ export function Root({
       data-duration={duration}
       data-direction={direction}
       data-pause-on-hover={pauseOnHover ? 'true' : 'false'}
+      data-interactive-clones={interactiveClones ? 'true' : 'false'}
       data-ready={isReady ? 'true' : 'false'}
       data-active="true"
       style={{ '--ticker-duration': `${duration}s` } as React.CSSProperties}

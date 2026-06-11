@@ -40,10 +40,13 @@ interface TickerProps {
   duration?: number           // Animation duration in seconds (default: 20)
   direction?: 'left' | 'right'  // Animation direction (default: 'left')
   pauseOnHover?: boolean      // Pause on hover (default: false)
+  interactiveClones?: boolean // Keep cloned controls interactive (default: false)
   class?: string             // Additional CSS class
   as?: string               // Wrapper element tag (default: 'div')
 }
 ```
+
+Cloned content is non-interactive by default. Set `:interactive-clones="true"` when cloned buttons, links, or form controls should stay interactive.
 
 ### Slots
 

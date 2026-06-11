@@ -21,6 +21,7 @@ All framework integrations share the same options:
 | `duration` | `number` | `20` | Animation duration in seconds |
 | `direction` | `'left' \| 'right'` | `'left'` | Animation direction |
 | `pauseOnHover` | `boolean` | `false` | Pause animation on hover |
+| `interactiveClones` | `boolean` | `false` | Keeps cloned buttons, links, and other interactive elements clickable and focusable |
 | `class` | `string` | `''` | Additional CSS class |
 
 ## Framework Quick Links
@@ -40,6 +41,7 @@ All entrypoints provide the same ticker functionality:
 - **Smooth animation**: CSS-based infinite marquee animation
 - **Resize handling**: Automatically recalculates on content changes
 - **Intersection observer**: Pauses when not visible for performance
+- **Interactive clones (opt-in)**: Cloned controls stay non-interactive by default unless `interactiveClones` is enabled
 - **Reduced motion**: Respects `prefers-reduced-motion` for accessibility
 
 ## DOM Structure

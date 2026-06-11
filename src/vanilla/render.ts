@@ -3,6 +3,7 @@ import {
   validateDuration,
   validateDirection,
   validatePauseOnHover,
+  validateInteractiveClones,
   createEmptyTickerState,
   createEmptyManagerState,
 } from '../core/state';
@@ -22,6 +23,21 @@ let reducedMotionMedia: ReducedMotionMedia | null = null;
 
 const canUseDOM = (): boolean =>
   typeof window !== 'undefined' && typeof document !== 'undefined';
+
+const requestFrame = (callback: FrameRequestCallback): number => {
+  if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+    return window.requestAnimationFrame(callback);
+  }
+
+  callback(0);
+  return 0;
+};
+
+const cancelFrame = (frameId: number): void => {
+  if (typeof window !== 'undefined' && typeof window.cancelAnimationFrame === 'function') {
+    window.cancelAnimationFrame(frameId);
+  }
+};
 
 const getReducedMotionMedia = (): ReducedMotionMedia | null => {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -44,9 +60,9 @@ const isSearchableRoot = (
   if (!value || typeof value !== 'object') return false;
   const node = value as { nodeType?: number };
   return (
-    node.nodeType === Node.ELEMENT_NODE ||
-    node.nodeType === Node.DOCUMENT_NODE ||
-    node.nodeType === Node.DOCUMENT_FRAGMENT_NODE
+    node.nodeType === 1 ||
+    node.nodeType === 9 ||
+    node.nodeType === 11
   );
 };
 
@@ -64,8 +80,11 @@ const getTickerElements = (root: ParentNode): HTMLElement[] => {
 const isTickerContentElement = (element: HTMLElement): boolean =>
   element.matches('[data-ticker-content], .ticker-content');
 
-const makeCloneAccessible = (clone: Element): void => {
+const makeCloneAccessible = (clone: Element, interactiveClones: boolean): void => {
   clone.classList.add(TICKER_CLONE_CLASS);
+
+  if (interactiveClones) return;
+
   clone.setAttribute('aria-hidden', 'true');
   clone.setAttribute('role', 'presentation');
 
@@ -89,9 +108,17 @@ const syncConfig = (state: TickerState): void => {
   const duration = validateDuration(wrapper.dataset.duration);
   const direction = validateDirection(wrapper.dataset.direction);
   const pauseOnHover = validatePauseOnHover(wrapper.dataset.pauseOnHover === 'true');
+  const interactiveClones = validateInteractiveClones(
+    wrapper.dataset.interactiveClones === 'true',
+  );
 
   if (wrapper.dataset.direction !== direction) {
     wrapper.dataset.direction = direction;
+  }
+
+  const newInteractiveClones = interactiveClones ? 'true' : 'false';
+  if (wrapper.dataset.interactiveClones !== newInteractiveClones) {
+    wrapper.dataset.interactiveClones = newInteractiveClones;
   }
 
   const newDuration = `${duration}s`;
@@ -131,12 +158,13 @@ const rebuildTicker = (state: TickerState): void => {
     return;
   }
 
+  const interactiveClones = wrapper.dataset.interactiveClones === 'true';
   const clonesNeeded = Math.max(1, Math.ceil(wrapperWidth / contentWidth));
   const fragment = document.createDocumentFragment();
 
   for (let index = 0; index < clonesNeeded; index += 1) {
     const clone = content.cloneNode(true) as HTMLElement;
-    makeCloneAccessible(clone);
+    makeCloneAccessible(clone, interactiveClones);
     state.clones.push(clone);
     fragment.appendChild(clone);
   }
@@ -148,9 +176,9 @@ const rebuildTicker = (state: TickerState): void => {
 
 const scheduleRebuild = (state: TickerState): void => {
   if (!state.track || !state.content) return;
-  if (state.frameId) cancelAnimationFrame(state.frameId);
+  if (state.frameId) cancelFrame(state.frameId);
 
-  state.frameId = requestAnimationFrame(() => {
+  state.frameId = requestFrame(() => {
     state.frameId = 0;
     rebuildTicker(state);
   });
@@ -187,7 +215,7 @@ const destroyTicker = (wrapper: HTMLElement): void => {
   const state = tickersState.get(wrapper);
   if (!state) return;
 
-  if (state.frameId) cancelAnimationFrame(state.frameId);
+  if (state.frameId) cancelFrame(state.frameId);
   if (state.resizeTimeout) clearTimeout(state.resizeTimeout);
 
   state.resizeObserver?.disconnect();
@@ -311,7 +339,13 @@ export const unmount = (): void => unmountManager();
 export const refresh = (): void => refreshAll();
 
 export const createTicker = (options: TickerOptions = {}): { mount: () => void; unmount: () => void; refresh: () => void; enhance: (element: HTMLElement) => HTMLElement } => {
-  const { duration = 20, direction = 'left', pauseOnHover = false, class: className = '' } = options;
+  const {
+    duration = 20,
+    direction = 'left',
+    pauseOnHover = false,
+    interactiveClones = false,
+    class: className = '',
+  } = options;
   const classNames = className.split(/\s+/).filter(Boolean);
 
   const createWrapper = (): { wrapper: HTMLElement; track: HTMLElement } => {
@@ -322,6 +356,7 @@ export const createTicker = (options: TickerOptions = {}): { mount: () => void; 
     wrapper.setAttribute('data-duration', String(duration));
     wrapper.setAttribute('data-direction', direction);
     wrapper.setAttribute('data-pause-on-hover', pauseOnHover ? 'true' : 'false');
+    wrapper.setAttribute('data-interactive-clones', interactiveClones ? 'true' : 'false');
     wrapper.setAttribute('data-ready', 'false');
     wrapper.style.setProperty('--ticker-duration', `${duration}s`);
 

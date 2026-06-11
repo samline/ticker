@@ -12,6 +12,7 @@ const props = withDefaults(defineProps<Props>(), {
   duration: 20,
   direction: 'left',
   pauseOnHover: false,
+  interactiveClones: false,
   class: '',
   as: 'div',
 });
@@ -43,6 +44,7 @@ onMounted(() => {
     duration: props.duration,
     direction: props.direction,
     pauseOnHover: props.pauseOnHover,
+    interactiveClones: props.interactiveClones,
     class: props.class,
   });
   tickerInstance.mount();
@@ -64,6 +66,7 @@ onBeforeUnmount(() => {
     :data-duration="props.duration"
     :data-direction="props.direction"
     :data-pause-on-hover="props.pauseOnHover ? 'true' : 'false'"
+    :data-interactive-clones="props.interactiveClones ? 'true' : 'false'"
     :data-ready="isReady ? 'true' : 'false'"
     data-active="true"
     :style="{ '--ticker-duration': `${props.duration}s` }"

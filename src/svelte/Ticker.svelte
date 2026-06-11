@@ -7,6 +7,7 @@
   export let duration: TickerOptions['duration'] = 20;
   export let direction: TickerOptions['direction'] = 'left';
   export let pauseOnHover: TickerOptions['pauseOnHover'] = false;
+  export let interactiveClones: TickerOptions['interactiveClones'] = false;
   export let className: string = '';
 
   let container: HTMLElement;
@@ -26,6 +27,7 @@
       duration,
       direction,
       pauseOnHover,
+      interactiveClones,
       class: className,
     });
     tickerInstance.mount();
@@ -45,6 +47,7 @@
   data-duration={String(duration)}
   data-direction={direction}
   data-pause-on-hover={pauseOnHover ? 'true' : 'false'}
+  data-interactive-clones={interactiveClones ? 'true' : 'false'}
   data-ready={isReady ? 'true' : 'false'}
   data-active="true"
   style="--ticker-duration: {duration}s"

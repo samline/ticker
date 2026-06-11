@@ -17,6 +17,7 @@ interface TickerOptions {
   duration?: number        // Animation duration in seconds (default: 20)
   direction?: TickerDirection  // Animation direction (default: 'left')
   pauseOnHover?: boolean  // Pause on hover (default: false)
+  interactiveClones?: boolean  // Keep cloned controls interactive (default: false)
   class?: string         // Additional CSS class
 }
 ```
@@ -125,6 +126,7 @@ interface TickerRootProps {
   duration?: number
   direction?: 'left' | 'right'
   pauseOnHover?: boolean
+  interactiveClones?: boolean
   className?: string
   as?: keyof JSX.IntrinsicElements
   children: React.ReactNode
@@ -155,6 +157,7 @@ interface TickerProps {
   duration?: number
   direction?: 'left' | 'right'
   pauseOnHover?: boolean
+  interactiveClones?: boolean
   class?: string
   as?: string
 }
@@ -177,6 +180,7 @@ interface TickerProps {
   duration?: number
   direction?: 'left' | 'right'
   pauseOnHover?: boolean
+  interactiveClones?: boolean
   className?: string
 }
 ```
@@ -218,6 +222,7 @@ Customize ticker appearance:
 | `data-duration` | Animation duration |
 | `data-direction` | Animation direction |
 | `data-pause-on-hover` | Pause on hover setting |
+| `data-interactive-clones` | Keeps clones interactive when `true` |
 | `data-ready` | Initialization state |
 | `data-active` | Visibility state |
 
@@ -233,7 +238,8 @@ Customize ticker appearance:
 
 ## Accessibility
 
-- Cloned content has `aria-hidden="true"`
-- Cloned content has `role="presentation"`
-- Focusable elements in clones have `tabindex="-1"`
+- By default, cloned content has `aria-hidden="true"`
+- By default, cloned content has `role="presentation"`
+- By default, focusable elements in clones have `tabindex="-1"`
+- Set `interactiveClones` or `data-interactive-clones="true"` to preserve cloned controls as interactive elements
 - Respects `prefers-reduced-motion` media query

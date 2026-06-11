@@ -20,6 +20,7 @@ describe('ticker vanilla', () => {
   });
 
   afterEach(() => {
+    vi.unstubAllGlobals();
     vi.resetModules();
   });
 
@@ -61,13 +62,85 @@ describe('ticker vanilla', () => {
       </div>
     `;
 
-    const wrapper = enhance('.ticker-content', { class: ' custom   accent ' });
+    const wrapper = enhance('.ticker-content', {
+      class: ' custom   accent ',
+      interactiveClones: true,
+    });
 
     expect(wrapper).toBeInstanceOf(HTMLElement);
     expect(wrapper?.classList.contains('ticker-wrapper')).toBe(true);
     expect(wrapper?.classList.contains('custom')).toBe(true);
     expect(wrapper?.classList.contains('accent')).toBe(true);
+    expect(wrapper?.dataset.interactiveClones).toBe('true');
     expect(wrapper?.querySelectorAll('.ticker-content')).toHaveLength(1);
     expect(wrapper?.querySelectorAll('span')).toHaveLength(2);
+  });
+
+  it('keeps clone interactions enabled when interactiveClones is true', async () => {
+    const { initTicker } = await import('../src/vanilla/render');
+
+    document.body.innerHTML = `
+      <div
+        class="ticker-wrapper"
+        data-ticker=""
+        data-duration="20"
+        data-direction="left"
+        data-pause-on-hover="false"
+        data-interactive-clones="true"
+      >
+        <div class="ticker-track" data-ticker-track="">
+          <div class="ticker-content" data-ticker-content="">
+            <button type="button">Buy now</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+      callback(0);
+      return 1;
+    });
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+
+    const wrapper = document.querySelector<HTMLElement>('[data-ticker]');
+    const content = wrapper?.querySelector<HTMLElement>('[data-ticker-content]');
+
+    Object.defineProperty(wrapper as HTMLElement, 'getBoundingClientRect', {
+      value: () => ({
+        width: 160,
+        height: 24,
+        top: 0,
+        left: 0,
+        right: 160,
+        bottom: 24,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }),
+    });
+
+    Object.defineProperty(content as HTMLElement, 'getBoundingClientRect', {
+      value: () => ({
+        width: 80,
+        height: 24,
+        top: 0,
+        left: 0,
+        right: 80,
+        bottom: 24,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }),
+    });
+
+    initTicker(wrapper as HTMLElement);
+
+    const clone = wrapper?.querySelector<HTMLElement>('.ticker-clone');
+    const cloneButton = clone?.querySelector<HTMLButtonElement>('button');
+
+    expect(clone).toBeInstanceOf(HTMLElement);
+    expect(clone?.getAttribute('aria-hidden')).toBeNull();
+    expect(clone?.getAttribute('role')).toBeNull();
+    expect(cloneButton?.getAttribute('tabindex')).toBeNull();
   });
 });

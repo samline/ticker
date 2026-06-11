@@ -20,10 +20,13 @@ Use the browser entrypoint for plain HTML pages without build tools.
   Ticker.enhance('.ticker-content', {
     duration: 20,
     direction: 'left',
-    pauseOnHover: true
+    pauseOnHover: true,
+    interactiveClones: true
   })
 </script>
 ```
+
+Set `interactiveClones: true` when cloned buttons, links, or form controls should behave like the original content.
 
 ## Global API
 

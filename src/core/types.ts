@@ -4,6 +4,7 @@ export interface TickerOptions {
   duration?: number;
   direction?: TickerDirection;
   pauseOnHover?: boolean;
+  interactiveClones?: boolean;
   class?: string;
 }
 
@@ -36,8 +37,9 @@ export type CreateTickerOptions = TickerOptions & {
   element?: HTMLElement | string;
 };
 
-export const DEFAULT_OPTIONS: Required<Pick<TickerOptions, 'duration' | 'direction' | 'pauseOnHover'>> = {
+export const DEFAULT_OPTIONS: Required<Pick<TickerOptions, 'duration' | 'direction' | 'pauseOnHover' | 'interactiveClones'>> = {
   duration: 20,
   direction: 'left',
   pauseOnHover: false,
+  interactiveClones: false,
 };

@@ -4,6 +4,7 @@ import {
   validateDuration, 
   validateDirection, 
   validatePauseOnHover,
+  validateInteractiveClones,
   createEmptyTickerState 
 } from '../src/core/state';
 
@@ -49,6 +50,19 @@ describe('ticker core', () => {
 
     it('returns true for true', () => {
       expect(validatePauseOnHover(true)).toBe(true);
+    });
+  });
+
+  describe('validateInteractiveClones', () => {
+    it('returns false for invalid input', () => {
+      expect(validateInteractiveClones(undefined)).toBe(false);
+      expect(validateInteractiveClones(null)).toBe(false);
+      expect(validateInteractiveClones(false)).toBe(false);
+      expect(validateInteractiveClones('true')).toBe(false);
+    });
+
+    it('returns true for true', () => {
+      expect(validateInteractiveClones(true)).toBe(true);
     });
   });
 

@@ -104,12 +104,14 @@ All entrypoints share the same options:
 | `duration` | `number` | `20` | Animation duration in seconds |
 | `direction` | `'left' \| 'right'` | `'left'` | Animation direction |
 | `pauseOnHover` | `boolean` | `false` | Pause animation on hover |
+| `interactiveClones` | `boolean` | `false` | Keeps cloned buttons, links, and other interactive elements clickable and focusable |
 | `class` | `string` | `''` | Additional CSS class |
 
 ## Notes
 
 - All entrypoints target the same ticker behavior with shared options.
 - The ticker clones content automatically to create seamless infinite scroll.
+- By default, clones are non-interactive for accessibility; set `interactiveClones` to `true` if you want cloned controls to stay clickable and focusable.
 - Respects `prefers-reduced-motion` for accessibility.
 - Automatically handles content resizing via ResizeObserver.
 

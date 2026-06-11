@@ -40,11 +40,14 @@ interface TickerRootProps {
   duration?: number        // Animation duration in seconds (default: 20)
   direction?: 'left' | 'right'  // Animation direction (default: 'left')
   pauseOnHover?: boolean   // Pause on hover (default: false)
+  interactiveClones?: boolean  // Keep cloned controls interactive (default: false)
   className?: string     // Additional CSS class
   as?: keyof JSX.IntrinsicElements  // Wrapper element type (default: 'div')
   children: React.ReactNode
 }
 ```
+
+Cloned content is non-interactive by default. Set `interactiveClones` if you want cloned buttons, links, or inputs to behave like the original content.
 
 ### `Ticker.Content` (optional)
 
@@ -84,6 +87,19 @@ function MarqueePaused() {
       <span>Item 1</span>
       <span>Item 2</span>
       <span>Item 3</span>
+    </Ticker.Root>
+  )
+}
+```
+
+### With Interactive Clones
+
+```tsx
+function InteractiveTicker() {
+  return (
+    <Ticker.Root duration={20} interactiveClones>
+      <button type="button">Shop now</button>
+      <a href="/new">New arrivals</a>
     </Ticker.Root>
   )
 }

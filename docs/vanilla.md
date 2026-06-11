@@ -62,6 +62,15 @@ const content = document.querySelector('#ticker-content')
 enhance(content, { duration: 30 })
 ```
 
+If your content includes buttons, links, or form controls and you want the clones to stay interactive, enable `interactiveClones`:
+
+```javascript
+enhance('.my-ticker-content', {
+  duration: 20,
+  interactiveClones: true
+})
+```
+
 ## Create Ticker Instance
 
 For isolated control, use `createTicker`:
@@ -74,6 +83,7 @@ const ticker = createTicker({
   duration: 25,
   direction: 'right',
   pauseOnHover: false,
+  interactiveClones: true,
   class: 'my-custom-ticker'
 })
 

@@ -29,3 +29,7 @@ export const validateDirection = (direction: unknown): TickerDirection => {
 export const validatePauseOnHover = (pauseOnHover: unknown): boolean => {
   return pauseOnHover === true;
 };
+
+export const validateInteractiveClones = (interactiveClones: unknown): boolean => {
+  return interactiveClones === true;
+};
