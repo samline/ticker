@@ -7,8 +7,8 @@ Use the browser entrypoint for plain HTML pages without build tools.
 ### Quick Start
 
 ```html
-<script src="https://unpkg.com/@samline/ticker@1.0.7/dist/browser/index.global.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@1.0.7/dist/style.css">
+<script src="https://unpkg.com/@samline/ticker@1.0.8/dist/browser/index.global.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@1.0.8/dist/style.css">
 
 <div class="ticker-content">
   <span>Your ticker content</span>
@@ -53,7 +53,7 @@ If you already have the full markup:
   </div>
 </div>
 
-<script src="https://unpkg.com/@samline/ticker@1.0.7/dist/browser/index.global.js"></script>
+<script src="https://unpkg.com/@samline/ticker@1.0.8/dist/browser/index.global.js"></script>
 <script>
   Ticker.mount()
 </script>
@@ -64,13 +64,13 @@ If you already have the full markup:
 ### Unpkg
 
 ```html
-<script src="https://unpkg.com/@samline/ticker@1.0.7/dist/browser/index.global.js"></script>
+<script src="https://unpkg.com/@samline/ticker@1.0.8/dist/browser/index.global.js"></script>
 ```
 
 ### JSDelivr
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@1.0.7/dist/browser/index.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@1.0.8/dist/browser/index.global.js"></script>
 ```
 
 ## Full Example
@@ -82,7 +82,7 @@ If you already have the full markup:
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ticker CDN Example</title>
-  <link rel="stylesheet" href="https://unpkg.com/@samline/ticker@1.0.7/dist/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@samline/ticker@1.0.8/dist/style.css">
   <style>
     body { margin: 0; font-family: system-ui; }
     .ticker-content span {
@@ -101,7 +101,7 @@ If you already have the full markup:
     </div>
   </div>
 
-  <script src="https://unpkg.com/@samline/ticker@1.0.7/dist/browser/index.global.js"></script>
+  <script src="https://unpkg.com/@samline/ticker@1.0.8/dist/browser/index.global.js"></script>
   <script>
     Ticker.enhance('.ticker-content', {
       duration: 25,
@@ -119,7 +119,7 @@ You can also use ES modules:
 
 ```html
 <script type="module">
-  import { enhance } from 'https://unpkg.com/@samline/ticker@1.0.7/dist/browser/index.global.js'
+  import { enhance } from 'https://unpkg.com/@samline/ticker@1.0.8/dist/browser/index.global.js'
 
   enhance('.ticker-content', { duration: 20 })
 </script>

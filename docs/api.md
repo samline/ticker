@@ -198,7 +198,7 @@ import '@samline/ticker/style.css'
 Or via CDN:
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@1.0.7/dist/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@1.0.8/dist/style.css">
 ```
 
 ### CSS Variables
