@@ -13,9 +13,26 @@ import {
   FOCUSABLE_SELECTOR,
 } from '../constants';
 
-const reducedMotionMedia = window.matchMedia(REDUCED_MOTION_QUERY) as MediaQueryList & {
+type ReducedMotionMedia = MediaQueryList & {
   addListener?: (listener: (e: MediaQueryListEvent) => void) => void;
   removeListener?: (listener: (e: MediaQueryListEvent) => void) => void;
+};
+
+let reducedMotionMedia: ReducedMotionMedia | null = null;
+
+const canUseDOM = (): boolean =>
+  typeof window !== 'undefined' && typeof document !== 'undefined';
+
+const getReducedMotionMedia = (): ReducedMotionMedia | null => {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+    return null;
+  }
+
+  if (!reducedMotionMedia) {
+    reducedMotionMedia = window.matchMedia(REDUCED_MOTION_QUERY) as ReducedMotionMedia;
+  }
+
+  return reducedMotionMedia;
 };
 
 const tickersState = new Map<HTMLElement, TickerState>();
@@ -108,7 +125,7 @@ const rebuildTicker = (state: TickerState): void => {
 
   if (!contentWidth || !wrapperWidth) return;
 
-  if (reducedMotionMedia.matches) {
+  if (getReducedMotionMedia()?.matches) {
     wrapper.style.setProperty('--ticker-distance', '0px');
     wrapper.dataset.ready = 'true';
     return;
@@ -240,6 +257,8 @@ const handleEventUpdate = (): void => {
 };
 
 export const mountManager = (): void => {
+  if (!canUseDOM()) return;
+
   managerState.isMounted = true;
 
   if (document.readyState === 'loading') {
@@ -257,14 +276,17 @@ export const mountManager = (): void => {
     window.addEventListener('resize', handleEventUpdate, { passive: true });
   }
 
-  if (typeof (reducedMotionMedia as MediaQueryList & { addEventListener?: unknown }).addEventListener === 'function') {
+  const reducedMotionMedia = getReducedMotionMedia();
+  if (typeof reducedMotionMedia?.addEventListener === 'function') {
     reducedMotionMedia.addEventListener('change', handleEventUpdate);
-  } else if (typeof reducedMotionMedia.addListener === 'function') {
+  } else if (typeof reducedMotionMedia?.addListener === 'function') {
     reducedMotionMedia.addListener(handleEventUpdate);
   }
 };
 
 export const unmountManager = (): void => {
+  if (!canUseDOM()) return;
+
   managerState.isMounted = false;
 
   document.removeEventListener('DOMContentLoaded', handleReady);
@@ -274,9 +296,10 @@ export const unmountManager = (): void => {
   managerState.mutationObserver?.disconnect();
   managerState.mutationObserver = null;
 
-  if (typeof (reducedMotionMedia as MediaQueryList & { removeEventListener?: unknown }).removeEventListener === 'function') {
+  const reducedMotionMedia = getReducedMotionMedia();
+  if (typeof reducedMotionMedia?.removeEventListener === 'function') {
     reducedMotionMedia.removeEventListener('change', handleEventUpdate);
-  } else if (typeof reducedMotionMedia.removeListener === 'function') {
+  } else if (typeof reducedMotionMedia?.removeListener === 'function') {
     reducedMotionMedia.removeListener(handleEventUpdate);
   }
 

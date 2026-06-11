@@ -1,6 +1,6 @@
 {
   "name": "@samline/ticker",
-  "version": "1.0.4",
+  "version": "1.0.7",
   "packageManager": "bun@1.1.29",
   "description": "A universal ticker (marquee) package for React, Vue, Svelte, vanilla JS, and browser usage.",
   "type": "module",
