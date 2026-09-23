@@ -1,29 +1,8 @@
-import {
-  mount,
-  unmount,
-  refresh,
-  createTicker,
-  enhance,
-  initTicker,
-  destroyTicker,
-  rebuildTicker,
-} from '../vanilla/render';
-import type { TickerOptions, TickerController } from '../core/types';
-
-const Ticker = {
-  mount,
-  unmount,
-  refresh,
-  createTicker,
-  enhance,
-  initTicker,
-  destroyTicker,
-  rebuildTicker,
-};
+import { Ticker, type TickerApi } from './registry';
 
 declare global {
   interface Window {
-    Ticker?: typeof Ticker;
+    Ticker?: TickerApi;
   }
 }
 
@@ -32,5 +11,15 @@ if (typeof window !== 'undefined') {
 }
 
 export default Ticker;
-export { mount, unmount, refresh, createTicker, enhance, initTicker, destroyTicker, rebuildTicker };
+export { browser, Ticker } from './registry';
+export {
+  createTicker,
+  enhance,
+  initTicker,
+  mount,
+  rebuildTicker,
+  refresh,
+  unmount,
+} from '../vanilla/render';
+export type { NewTickerInput, TickerApi, TickerAvailable } from './registry';
 export type { TickerOptions, TickerController } from '../core/types';

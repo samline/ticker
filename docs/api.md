@@ -7,18 +7,18 @@ Complete API documentation for all entrypoints.
 ### `TickerDirection`
 
 ```typescript
-type TickerDirection = 'left' | 'right'
+type TickerDirection = 'left' | 'right';
 ```
 
 ### `TickerOptions`
 
 ```typescript
 interface TickerOptions {
-  duration?: number        // Animation duration in seconds (default: 20)
-  direction?: TickerDirection  // Animation direction (default: 'left')
-  pauseOnHover?: boolean  // Pause on hover (default: false)
-  interactiveClones?: boolean  // Keep cloned controls interactive (default: false)
-  class?: string         // Additional CSS class
+  duration?: number; // Animation duration in seconds (default: 20)
+  direction?: TickerDirection; // Animation direction (default: 'left')
+  pauseOnHover?: boolean; // Pause on hover (default: false)
+  interactiveClones?: boolean; // Keep cloned controls interactive (default: false)
+  class?: string; // Additional CSS class
 }
 ```
 
@@ -26,10 +26,10 @@ interface TickerOptions {
 
 ```typescript
 interface TickerController {
-  mount: () => void
-  unmount: () => void
-  refresh: () => void
-  enhance?: (element: HTMLElement) => HTMLElement
+  mount: () => void;
+  unmount: () => void;
+  refresh: () => void;
+  enhance?: (element: HTMLElement) => HTMLElement;
 }
 ```
 
@@ -103,14 +103,18 @@ rebuildTicker(state: TickerState): void
 
 When using CDN/bundle build, these are available on `window.Ticker`:
 
+- `newTicker({ id, options })`, `getTicker(id)`, and `getTickers()` for named instances.
+- `destroyTicker(id | element)` and `destroyTickers()` for deterministic cleanup.
+- `available` as the shared live registry and `refreshAll` as the browser-friendly alias of `refresh`.
+
 ```javascript
-Ticker.mount()
-Ticker.unmount()
-Ticker.refresh()
-Ticker.createTicker({ duration: 20 })
-Ticker.enhance('.selector', { direction: 'right' })
-Ticker.initTicker(element)
-Ticker.destroyTicker(element)
+Ticker.mount();
+Ticker.unmount();
+Ticker.refresh();
+Ticker.createTicker({ duration: 20 });
+Ticker.enhance('.selector', { direction: 'right' });
+Ticker.initTicker(element);
+Ticker.destroyTicker(element);
 ```
 
 ## React API
@@ -123,13 +127,13 @@ Main ticker component.
 
 ```tsx
 interface TickerRootProps {
-  duration?: number
-  direction?: 'left' | 'right'
-  pauseOnHover?: boolean
-  interactiveClones?: boolean
-  className?: string
-  as?: keyof JSX.IntrinsicElements
-  children: React.ReactNode
+  duration?: number;
+  direction?: 'left' | 'right';
+  pauseOnHover?: boolean;
+  interactiveClones?: boolean;
+  className?: string;
+  as?: keyof JSX.IntrinsicElements;
+  children: React.ReactNode;
 }
 ```
 
@@ -139,8 +143,8 @@ Optional content wrapper.
 
 ```tsx
 interface TickerContentProps {
-  children: React.ReactNode
-  className?: string
+  children: React.ReactNode;
+  className?: string;
 }
 ```
 
@@ -154,12 +158,12 @@ Main ticker component.
 
 ```typescript
 interface TickerProps {
-  duration?: number
-  direction?: 'left' | 'right'
-  pauseOnHover?: boolean
-  interactiveClones?: boolean
-  class?: string
-  as?: string
+  duration?: number;
+  direction?: 'left' | 'right';
+  pauseOnHover?: boolean;
+  interactiveClones?: boolean;
+  class?: string;
+  as?: string;
 }
 ```
 
@@ -177,11 +181,11 @@ Main ticker component.
 
 ```typescript
 interface TickerProps {
-  duration?: number
-  direction?: 'left' | 'right'
-  pauseOnHover?: boolean
-  interactiveClones?: boolean
-  className?: string
+  duration?: number;
+  direction?: 'left' | 'right';
+  pauseOnHover?: boolean;
+  interactiveClones?: boolean;
+  className?: string;
 }
 ```
 
@@ -192,13 +196,16 @@ interface TickerProps {
 Import the shared stylesheet:
 
 ```javascript
-import '@samline/ticker/style.css'
+import '@samline/ticker/style.css';
 ```
 
 Or via CDN:
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@1.0.8/dist/style.css">
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/@samline/ticker@1.1.0/dist/style.css"
+/>
 ```
 
 ### CSS Variables
@@ -214,27 +221,27 @@ Customize ticker appearance:
 
 ### Data Attributes
 
-| Attribute | Description |
-|-----------|-------------|
-| `data-ticker` | Marks wrapper element |
-| `data-ticker-track` | Marks track element |
-| `data-ticker-content` | Marks content element |
-| `data-duration` | Animation duration |
-| `data-direction` | Animation direction |
-| `data-pause-on-hover` | Pause on hover setting |
+| Attribute                 | Description                          |
+| ------------------------- | ------------------------------------ |
+| `data-ticker`             | Marks wrapper element                |
+| `data-ticker-track`       | Marks track element                  |
+| `data-ticker-content`     | Marks content element                |
+| `data-duration`           | Animation duration                   |
+| `data-direction`          | Animation direction                  |
+| `data-pause-on-hover`     | Pause on hover setting               |
 | `data-interactive-clones` | Keeps clones interactive when `true` |
-| `data-ready` | Initialization state |
-| `data-active` | Visibility state |
+| `data-ready`              | Initialization state                 |
+| `data-active`             | Visibility state                     |
 
 ### Classes
 
-| Class | Description |
-|-------|-------------|
-| `.ticker-wrapper` | Main wrapper element |
-| `.ticker-track` | Track that animates |
-| `.ticker-content` | Content container |
-| `.ticker-clone` | Cloned content (internal) |
-| `.ticker-pause-on-hover` | Enables pause on hover |
+| Class                    | Description               |
+| ------------------------ | ------------------------- |
+| `.ticker-wrapper`        | Main wrapper element      |
+| `.ticker-track`          | Track that animates       |
+| `.ticker-content`        | Content container         |
+| `.ticker-clone`          | Cloned content (internal) |
+| `.ticker-pause-on-hover` | Enables pause on hover    |
 
 ## Accessibility
 
