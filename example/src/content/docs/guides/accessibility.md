@@ -1,6 +1,7 @@
 ---
 title: Accessibility and motion
 description: Understand clone semantics, keyboard behavior, interactive controls, and reduced-motion handling.
+template: doc
 ---
 
 An infinite ticker repeats content visually. Repeating links or buttons in the accessibility tree usually creates duplicate announcements and keyboard stops, so clones are non-interactive by default.

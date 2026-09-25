@@ -1,6 +1,7 @@
 ---
 title: Styling and DOM contract
 description: Generated markup, package-owned attributes, classes, CSS variables, animation behavior, and safe customization.
+template: doc
 ---
 
 ## Generated structure

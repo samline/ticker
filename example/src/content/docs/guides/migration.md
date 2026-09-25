@@ -1,6 +1,7 @@
 ---
 title: Migrate to 2.0
 description: Move from framework adapters and the previous enhance API to the element-scoped Vanilla controller.
+template: doc
 ---
 
 Version 2.0 makes the package a focused Vanilla JavaScript, CSS, and HTML runtime.

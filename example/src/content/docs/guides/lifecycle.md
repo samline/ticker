@@ -1,6 +1,7 @@
 ---
 title: Lifecycle and updates
 description: Understand controller ownership, normalized options, refresh behavior, declarative mounting, and cleanup.
+template: doc
 ---
 
 ## Controller lifecycle

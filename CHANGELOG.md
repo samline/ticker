@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.1] - 2026-09-24
+
+- Aligned the README and Starlight documentation with the `@samline/forms` documentation conventions.
+- Added an npm-bundled `docs/` reference for configuration, browser usage, styling, accessibility, TypeScript, and the public API.
+- Added `.npmignore` so source, tests, tooling, and the documentation site stay out of the published tarball.
+
 ## [2.0.0] - 2026-09-24
 
 - Replaced the ambiguous `createTicker()` / `enhance()` pair with `ticker(target, options)` and an element-scoped controller.

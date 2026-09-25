@@ -1,0 +1,57 @@
+---
+title: '@samline/ticker'
+description: 'Accessible, dependency-free tickers for Vanilla JavaScript, TypeScript, and plain HTML.'
+template: doc
+hero:
+  tagline: 'Build responsive, accessible marquees with element-scoped controllers or declarative HTML.'
+  actions:
+    - text: Get started
+      link: /ticker/getting-started
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: 'https://github.com/samline/ticker'
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components'
+
+`@samline/ticker` enhances existing DOM content, measures it responsively, creates accessible visual clones, and returns a small lifecycle controller. Use the main entrypoint, declarative page manager, browser module, or global IIFE without a framework runtime.
+
+## Why @samline/ticker?
+
+- **Vanilla-first** — Works with native HTML, static sites, CMS templates, and server-rendered applications.
+- **Multiple distribution surfaces** — Main ESM/CJS API, declarative manager, browser registry module, or `window.Ticker` IIFE.
+- **Accessible defaults** — Visual clones stay out of the accessibility tree and keyboard order unless explicitly enabled.
+- **Responsive lifecycle** — Resize, intersection, font, and reduced-motion changes trigger the appropriate rebuilds.
+- **Zero runtime dependencies** — Ships ESM, CJS, browser bundles, CSS, and TypeScript declarations.
+
+## Next steps
+
+<CardGrid>
+	<Card title="Getting started" icon="pencil-line">
+		Install the package, enhance existing markup, and control a first ticker.
+
+    	[Install @samline/ticker →](/ticker/getting-started)
+    </Card>
+
+    <Card title="API reference" icon="open-book">
+    	Controller, declarative manager, browser registry, options, and lifecycle behavior.
+
+    	[Browse the API →](/ticker/reference/api/)
+    </Card>
+
+    <Card title="Browser global" icon="seti:html">
+    	Use `window.Ticker` in WordPress, Shopify, or plain HTML without a bundler.
+
+    	[Browser reference →](/ticker/reference/browser/)
+    </Card>
+
+    <Card title="Examples" icon="puzzle">
+    	Common patterns for announcements, logos, dynamic content, and cleanup.
+
+    	[Browse examples →](/ticker/reference/examples/)
+    </Card>
+
+</CardGrid>

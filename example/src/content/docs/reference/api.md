@@ -1,6 +1,7 @@
 ---
 title: API
 description: Complete function, controller, manager, and registry API for @samline/ticker.
+template: doc
 ---
 
 ## `ticker(target, options?)`

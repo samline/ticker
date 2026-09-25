@@ -1,6 +1,7 @@
 ---
 title: Recipes
 description: Practical patterns for dynamic content, multiple tickers, declarative markup, updates, browser globals, and teardown.
+template: doc
 ---
 
 ## Dynamic content

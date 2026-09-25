@@ -1,6 +1,7 @@
 ---
 title: Entrypoints
 description: Choose the root, Vanilla, core, browser module, browser global, or stylesheet export.
+template: doc
 ---
 
 | Import                           | Purpose                                                               |

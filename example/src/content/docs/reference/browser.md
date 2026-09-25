@@ -1,6 +1,7 @@
 ---
 title: Browser reference
 description: Browser registry behavior, ESM/CJS imports, the standalone global, replacement semantics, and cleanup.
+template: doc
 ---
 
 ## Module singleton
@@ -19,7 +20,7 @@ Importing this module does not modify `globalThis`.
 ## Standalone global
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@2.0.0/dist/browser/global.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@2.0.1/dist/browser/global.global.js"></script>
 ```
 
 The IIFE assigns the same API to `window.Ticker`. CSS ships separately and must be loaded explicitly.

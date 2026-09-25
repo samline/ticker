@@ -1,6 +1,7 @@
 ---
 title: TypeScript reference
 description: Exported public types, controller shapes, runtime state, defaults, and browser API contracts.
+template: doc
 ---
 
 ## Primary types

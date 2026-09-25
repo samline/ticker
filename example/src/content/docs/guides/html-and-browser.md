@@ -1,19 +1,20 @@
 ---
 title: HTML and browser usage
 description: Use @samline/ticker directly from HTML through its dependency-free browser bundle.
+template: doc
 ---
 
 Load the stylesheet and version-pinned IIFE, then use `window.Ticker`.
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@samline/ticker@2.0.0/dist/style.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@samline/ticker@2.0.1/dist/style.css" />
 
 <div id="news">
   <a href="/one">First story</a>
   <a href="/two">Second story</a>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@2.0.0/dist/browser/global.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@2.0.1/dist/browser/global.global.js"></script>
 <script>
   const news = window.Ticker.newTicker({
     id: 'news',
