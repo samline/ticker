@@ -1,17 +1,45 @@
 # `destroy()`
 
-Release everything owned by one controller.
+Releases everything owned by one controller.
+
+## Signature
 
 ```ts
 instance.destroy(): void
 ```
 
-For enhanced ordinary content, destruction:
+## Returns
 
-- Cancels scheduled animation work and resize debounce timers.
-- Disconnects resize and intersection observers.
+`void`. The operation is idempotent; repeated calls are no-ops.
+
+## Behavior
+
+Destruction:
+
+- Cancels a pending animation frame and resize debounce timer.
+- Disconnects `ResizeObserver` and `IntersectionObserver`.
 - Removes generated clones.
-- Replaces the generated wrapper with the original source element.
+- Removes the wrapper from the shared runtime registry.
+- Replaces a controller-generated wrapper with the original source element.
+- Preserves an adopted `[data-ticker]` / `.ticker-wrapper` in the DOM.
 - Sets `instance.element` to `null`.
 
-For adopted declarative markup, the existing wrapper remains in the DOM while its runtime state and clones are removed. Repeated calls are safe no-ops.
+The stable `instance.source` reference and last normalized `instance.options` snapshot remain readable. `update()` and `refresh()` become safe chainable no-ops.
+
+## Example
+
+```ts
+const news = ticker('#news')
+
+window.addEventListener('pagehide', () => news?.destroy(), { once: true })
+```
+
+## Registry cleanup
+
+If the controller came from `newTicker()`, prefer `destroyTicker(id)`. Calling the controller's `destroy()` directly tears down the runtime but does not remove the registry's bookkeeping entry; the registry helper performs both operations.
+
+## Related
+
+- [`ticker()`](ticker.md)
+- [`unmount()`](unmount.md)
+- [Browser registry](browser-registry.md)

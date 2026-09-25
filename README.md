@@ -48,11 +48,11 @@ import '@samline/ticker/style.css'
 Use the browser build when you do not have a bundler and need to run the package directly in HTML, WordPress, Shopify, or a traditional server-rendered template.
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.0.1/dist/style.css" />
-<script src="https://unpkg.com/@samline/ticker@2.0.1/dist/browser/global.global.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.0.2/dist/style.css" />
+<script src="https://unpkg.com/@samline/ticker@2.0.2/dist/browser/global.global.js"></script>
 ```
 
-> Pin the version in production. Replace `2.0.1` with the version you ship.
+> Pin the version in production. Replace `2.0.2` with the version you ship.
 
 The browser bundle exposes a single global: `window.Ticker`.
 
@@ -141,6 +141,7 @@ What this does:
 | Declarative lifecycle | [`mount()`](docs/api/mount.md) · [`refresh()`](docs/api/refresh.md#declarative-page-refresh) · [`unmount()`](docs/api/unmount.md) |
 | Browser registry      | [`newTicker()` and registry helpers](docs/api/browser-registry.md)                                                                |
 | Configuration         | [`TickerOptions`](docs/options.md)                                                                                                |
+| Core utilities        | [Defaults, state factories, and validators](docs/core.md)                                                                         |
 | Types                 | [TypeScript reference](docs/typescript.md)                                                                                        |
 
 The controller exposes `element`, `source`, and an immutable options snapshot. `update()` and instance `refresh()` are chainable; `destroy()` owns teardown and restoration.
@@ -158,10 +159,13 @@ Full guides and the same reference are available at **[samline.github.io/ticker]
 | [docs/getting-started.md](docs/getting-started.md) | Installation, first ticker, ownership, and lifecycle.          |
 | [docs/options.md](docs/options.md)                 | Every option, default, normalization rule, and data attribute. |
 | [docs/browser.md](docs/browser.md)                 | Browser global and bundler-friendly registry usage.            |
+| [docs/entrypoints.md](docs/entrypoints.md)         | Root, Vanilla, core, browser, global, and CSS exports.         |
 | [docs/styling.md](docs/styling.md)                 | Required stylesheet, DOM contract, classes, and CSS variables. |
 | [docs/accessibility.md](docs/accessibility.md)     | Clone behavior, reduced motion, and interactive content.       |
+| [docs/core.md](docs/core.md)                       | Defaults, state factories, validators, and advanced contracts. |
 | [docs/typescript.md](docs/typescript.md)           | Exported TypeScript types and their roles.                     |
 | [docs/api/index.md](docs/api/index.md)             | Public functions and controller methods.                       |
+| [docs/recipes.md](docs/recipes.md)                 | Task-oriented integration and lifecycle recipes.               |
 
 ---
 

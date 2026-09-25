@@ -25,6 +25,16 @@ When `prefers-reduced-motion: reduce` matches, the runtime does not generate vis
 
 For linked headlines, buttons, or other controls, the default `false` is usually the correct choice: users encounter the actionable content once even though it repeats visually.
 
+Interactive clones can duplicate element ids, accessible names, analytics events, and tab stops. Audit all four when opting in.
+
 ## Pause on hover
 
 `pauseOnHover` is a pointer convenience, not the only accessibility mechanism. Pair continuously moving content with clear page-level controls when users need to stop or dismiss it, and avoid using a ticker for information that disappears before it can be read.
+
+## Content checklist
+
+- Keep meaningful controls in the original content sequence.
+- Give links and buttons useful accessible names.
+- Avoid ids inside cloned content unless your integration deliberately rewrites them.
+- Never rely on motion alone to convey status or urgency.
+- Test keyboard order, screen-reader output, and reduced-motion mode before release.

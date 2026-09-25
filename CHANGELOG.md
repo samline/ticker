@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.2] - 2026-09-25
+
+- Expanded the bundled and Starlight references to cover every public API, option, type, core utility, entrypoint, registry helper, and lifecycle edge case.
+- Added dedicated controller, core, entrypoint, and recipe documentation following the `@samline/forms` documentation structure.
+- Added explicit ownership, cleanup, server-rendering, accessibility, styling, and browser-registry guidance across both documentation surfaces.
+
 ## [2.0.1] - 2026-09-24
 
 - Aligned the README and Starlight documentation with the `@samline/forms` documentation conventions.

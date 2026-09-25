@@ -63,3 +63,5 @@ unmount()
 ```
 
 The manager is browser-safe to import during server rendering: calls become no-ops when `window` or `document` is unavailable.
+
+The page manager and controller factory share runtime tracking. Do not give both lifecycles ownership of the same wrapper. `unmount()` removes clones and observers but does not call a controller's restoration closure, so retain and explicitly `destroy()` application-created controllers when their generated wrapper must be replaced by the original source.

@@ -1,6 +1,6 @@
 {
   "name": "@samline/ticker",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "packageManager": "bun@1.3.14",
   "description": "An accessible, dependency-free ticker (marquee) for vanilla JavaScript, TypeScript, and plain HTML.",
   "type": "module",

@@ -24,6 +24,7 @@ export default defineSiteConfig({
         { slug: 'reference' },
         { slug: 'reference/configuration' },
         { slug: 'reference/api' },
+        { slug: 'reference/core' },
         { slug: 'reference/typescript' },
         { slug: 'reference/browser' },
         { slug: 'reference/entrypoints' },

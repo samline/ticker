@@ -1,10 +1,6 @@
----
-title: Entrypoints and module formats
-description: Choose the root, Vanilla, core, browser registry, standalone IIFE, or stylesheet export.
-template: doc
----
+# Entrypoints and Module Formats
 
-Choose one primary JavaScript surface per integration and always load the stylesheet explicitly.
+Choose one primary JavaScript surface per integration and load the stylesheet explicitly.
 
 ## Decision table
 
@@ -17,29 +13,27 @@ Choose one primary JavaScript surface per integration and always load the styles
 | No bundler/CDN              | `@samline/ticker/browser/global` | Installs `globalThis.Ticker`. | Self-contained IIFE registry.                   |
 | Runtime styles              | `@samline/ticker/style.css`      | CSS only.                     | Layout, motion, state, reduced motion.          |
 
-## Root entrypoint
+## Root
 
 ```ts
 import { browser, mount, refresh, ticker, Ticker, unmount, validateDuration } from '@samline/ticker'
 ```
 
-The root re-exports all public core and Vanilla symbols plus `browser`, `Ticker`, and registry types. It does not export the individual `newTicker`/`getTicker` helper functions; access them through `browser` or import the browser subpath.
-
-CommonJS consumers receive matching exports:
+The root re-exports all public core and Vanilla symbols plus `browser`, `Ticker`, and browser registry types. It does not export individual `newTicker` / `getTicker` helpers; use `browser.newTicker()` or the browser subpath.
 
 ```js
 const { ticker } = require('@samline/ticker')
 ```
 
-## Vanilla entrypoint
+## Vanilla
 
 ```ts
 import { mount, refresh, ticker, unmount } from '@samline/ticker/vanilla'
 ```
 
-It also exports `TickerInstance`, `TickerOptions`, `TickerTarget`, and `NormalizedTickerOptions` types.
+Also exports `TickerInstance`, `TickerOptions`, `TickerTarget`, and `NormalizedTickerOptions` types.
 
-## Core entrypoint
+## Core
 
 ```ts
 import {
@@ -50,36 +44,29 @@ import {
 } from '@samline/ticker/core'
 ```
 
-See [Core utilities](/ticker/reference/core/) for the full surface.
+See [Core](core.md) for every export.
 
-## Browser registry module
+## Browser module
 
 ```ts
 import BrowserTicker, { newTicker, destroyTicker } from '@samline/ticker/browser'
 ```
 
-Default and named registry exports share one module-level registry and do not assign a global.
+Default and named registry exports share one registry and do not assign a global.
 
-## Standalone IIFE
+## Global IIFE
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@2.0.2/dist/browser/global.global.js"></script>
+<script src="https://unpkg.com/@samline/ticker@2.0.2/dist/browser/global.global.js"></script>
 <script>
   const news = window.Ticker.newTicker({ id: 'news' })
 </script>
 ```
 
-The IIFE cannot be tree-shaken and must run before consumer code.
-
-## CSS is explicit
+## CSS
 
 ```ts
-import { ticker } from '@samline/ticker'
 import '@samline/ticker/style.css'
 ```
 
-JavaScript entrypoints never import CSS automatically. This keeps server imports and non-CSS build pipelines predictable.
-
-## Published formats
-
-Bundler entrypoints ship ESM, CommonJS, source maps, and `.d.ts` / `.d.cts` declarations. The global entrypoint ships a single IIFE. The package has no runtime or peer dependencies.
+JavaScript entrypoints never import CSS automatically. Bundler entrypoints ship ESM, CommonJS, source maps, and `.d.ts` / `.d.cts` declarations. The IIFE is self-contained. The package has no runtime or peer dependencies.

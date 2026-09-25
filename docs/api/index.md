@@ -1,24 +1,29 @@
 # API Reference
 
-The public API has three layers: an element-scoped controller, a declarative page manager, and an optional browser registry.
+This section documents every public runtime function and controller member exported by `@samline/ticker`.
 
 ## Controller
 
-| API                       | Purpose                                                         |
-| ------------------------- | --------------------------------------------------------------- |
-| [`ticker()`](ticker.md)   | Enhance a selector or element and return its controller.        |
-| [`update()`](update.md)   | Merge normalized options and rebuild the instance.              |
-| [`refresh()`](refresh.md) | Remeasure application-owned content.                            |
-| [`destroy()`](destroy.md) | Disconnect observers, remove clones, and restore source markup. |
+| API                               | Signature / result                                         | Purpose                                                         |
+| --------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------- |
+| [`ticker()`](ticker.md)           | `(TickerTarget, TickerOptions?) => TickerInstance \| null` | Enhance a selector or element.                                  |
+| [`TickerInstance`](controller.md) | `{ element, source, options, update, refresh, destroy }`   | Element-scoped controller and ownership contract.               |
+| [`update()`](update.md)           | `(TickerOptions?) => TickerInstance`                       | Merge normalized options and rebuild.                           |
+| [`refresh()`](refresh.md)         | `() => TickerInstance`                                     | Remeasure application-owned content.                            |
+| [`destroy()`](destroy.md)         | `() => void`                                               | Disconnect observers, remove clones, and restore source markup. |
 
 ## Declarative page manager
 
-| API                                                | Purpose                                                              |
-| -------------------------------------------------- | -------------------------------------------------------------------- |
-| [`mount()`](mount.md)                              | Discover declarative ticker markup and watch DOM additions/removals. |
-| [`refresh()`](refresh.md#declarative-page-refresh) | Schedule a rebuild for every managed ticker.                         |
-| [`unmount()`](unmount.md)                          | Stop discovery, remove listeners, and destroy managed ticker state.  |
+| API                                                | Signature    | Purpose                                                              |
+| -------------------------------------------------- | ------------ | -------------------------------------------------------------------- |
+| [`mount()`](mount.md)                              | `() => void` | Discover declarative ticker markup and watch DOM changes.            |
+| [`refresh()`](refresh.md#declarative-page-refresh) | `() => void` | Schedule a rebuild for every tracked ticker.                         |
+| [`unmount()`](unmount.md)                          | `() => void` | Stop discovery, remove listeners, and destroy tracked runtime state. |
 
 ## Browser registry
 
-[`newTicker()`, `getTicker()`, `getTickers()`, `destroyTicker()`, `destroyTickers()`, and `available`](browser-registry.md) provide id-based registration for global-script and bundler integrations.
+[`newTicker()`, `getTicker()`, `getTickers()`, `destroyTicker()`, `destroyTickers()`, `available`, `browser`, and `Ticker`](browser-registry.md) form the browser registry API.
+
+## Core utilities
+
+Defaults, state factories, and normalization helpers are public from the root and `@samline/ticker/core`. See the [Core reference](../core.md).
