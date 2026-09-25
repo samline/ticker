@@ -1,6 +1,8 @@
 # Ticker
 
-A universal ticker (marquee) package with one shared interaction runtime across React, Vue, Svelte, vanilla JS, and browser/CDN usage.
+> An accessible, dependency-free ticker for Vanilla JavaScript, TypeScript, and plain HTML.
+
+> Enhance existing markup, control each ticker through a small lifecycle API, or initialize declarative ticker markup at page level.
 
 ## Installation
 
@@ -9,111 +11,91 @@ npm install @samline/ticker
 ```
 
 ```bash
+pnpm add @samline/ticker
+```
+
+```bash
 bun add @samline/ticker
 ```
 
-## Quick Start
+Requires Node 20+ when bundling. Runtime target is ES2020.
 
-### Vanilla
+## Quick start
+
+```html
+<div id="news-ticker">
+  <a href="/one">First story</a>
+  <a href="/two">Second story</a>
+</div>
+```
 
 ```ts
+import { ticker } from '@samline/ticker'
 import '@samline/ticker/style.css'
-import { createTicker } from '@samline/ticker'
 
-const ticker = createTicker({
+const news = ticker('#news-ticker', {
   duration: 20,
   direction: 'left',
-  content: 'Your ticker content here'
+  pauseOnHover: true,
 })
 
-ticker.mount()
+news?.update({ duration: 30 })
+news?.destroy()
 ```
 
-### React
+## HTML / CDN
 
-```tsx
-import '@samline/ticker/style.css'
-import { Ticker } from '@samline/ticker/react'
+Pin the version in production:
 
-function App() {
-  return (
-    <Ticker.Root duration={20} direction="left">
-      <span>Your ticker content</span>
-      <span>More content</span>
-    </Ticker.Root>
-  )
-}
-```
-
-### Vue
-
-```vue
-<script setup>
-import { Ticker } from '@samline/ticker/vue'
-import '@samline/ticker/style.css'
-</script>
-
-<template>
-  <Ticker :duration="20" direction="left">
-    <span>Your ticker content</span>
-    <span>More content</span>
-  </Ticker>
-</template>
-```
-
-### Svelte
-
-```svelte
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@samline/ticker@2.0.0/dist/style.css" />
+<div id="news"><span>Your ticker content</span></div>
+<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@2.0.0/dist/browser/global.global.js"></script>
 <script>
-import { Ticker } from '@samline/ticker/svelte'
-import '@samline/ticker/style.css'
+  const news = window.Ticker.newTicker({ id: 'news' })
+  news.update({ duration: 30 })
 </script>
-
-<Ticker duration={20} direction="left">
-  <span>Your ticker content</span>
-  <span>More content</span>
-</Ticker>
 ```
 
 ## Entrypoints
 
-- `@samline/ticker`: vanilla API and shared runtime helpers
-- `@samline/ticker/react`: React component API
-- `@samline/ticker/vue`: Vue component API
-- `@samline/ticker/svelte`: Svelte component API
-- `@samline/ticker/browser`: browser global for CDN or plain HTML
-- `@samline/ticker/core`: controller and state contracts only
-- `@samline/ticker/style.css`: shared styles
+| Entrypoint                       | Purpose                                                              |
+| -------------------------------- | -------------------------------------------------------------------- |
+| `@samline/ticker`                | Main Vanilla API, types, validators, and browser registry singleton. |
+| `@samline/ticker/vanilla`        | `ticker()` plus page-level declarative lifecycle functions.          |
+| `@samline/ticker/browser`        | ESM/CJS browser registry without global side effects.                |
+| `@samline/ticker/browser/global` | Standalone IIFE that installs `window.Ticker`.                       |
+| `@samline/ticker/core`           | Types, defaults, state factories, and validation helpers.            |
+| `@samline/ticker/style.css`      | Required layout, animation, and reduced-motion styles.               |
 
-## Full Docs
+## API at a glance
 
-- [docs/README.md](docs/README.md) - Overview and options
-- [docs/api.md](docs/api.md) - Complete API reference
-- [docs/vanilla.md](docs/vanilla.md) - Vanilla JS guide
-- [docs/browser.md](docs/browser.md) - Browser/CDN guide
-- [docs/react.md](docs/react.md) - React guide
-- [docs/vue.md](docs/vue.md) - Vue guide
-- [docs/svelte.md](docs/svelte.md) - Svelte guide
+`ticker(target, options)` returns an element-scoped controller:
+
+| Member            | Purpose                                                |
+| ----------------- | ------------------------------------------------------ |
+| `element`         | Generated wrapper, or `null` after destruction.        |
+| `source`          | Original element passed to `ticker()`.                 |
+| `options`         | Read-only snapshot of normalized options.              |
+| `update(options)` | Merge options and rebuild the ticker.                  |
+| `refresh()`       | Remeasure content and regenerate clones.               |
+| `destroy()`       | Disconnect observers and restore the original element. |
+
+For server-rendered ticker markup, use `mount()`, `refresh()`, and `unmount()` from `@samline/ticker/vanilla`.
 
 ## Options
 
-All entrypoints share the same options:
+| Option              | Type                | Default  | Purpose                                         |
+| ------------------- | ------------------- | -------- | ----------------------------------------------- |
+| `duration`          | `number`            | `20`     | Seconds per animation cycle.                    |
+| `direction`         | `'left' \| 'right'` | `'left'` | Horizontal travel direction.                    |
+| `pauseOnHover`      | `boolean`           | `false`  | Pause while the pointer hovers the wrapper.     |
+| `interactiveClones` | `boolean`           | `false`  | Keep repeated controls exposed and interactive. |
+| `class`             | `string`            | `''`     | Space-separated classes added to the wrapper.   |
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `duration` | `number` | `20` | Animation duration in seconds |
-| `direction` | `'left' \| 'right'` | `'left'` | Animation direction |
-| `pauseOnHover` | `boolean` | `false` | Pause animation on hover |
-| `interactiveClones` | `boolean` | `false` | Keeps cloned buttons, links, and other interactive elements clickable and focusable |
-| `class` | `string` | `''` | Additional CSS class |
+## Documentation
 
-## Notes
-
-- All entrypoints target the same ticker behavior with shared options.
-- The ticker clones content automatically to create seamless infinite scroll.
-- By default, clones are non-interactive for accessibility; set `interactiveClones` to `true` if you want cloned controls to stay clickable and focusable.
-- Respects `prefers-reduced-motion` for accessibility.
-- Automatically handles content resizing via ResizeObserver.
+Full guides, browser setup, recipes, TypeScript reference, styling contracts, and API details are available at **[samline.github.io/ticker](https://samline.github.io/ticker/)**.
 
 ## License
 

@@ -1,4 +1,4 @@
-import { defineConfig } from 'tsup';
+import { defineConfig } from 'tsup'
 
 export default defineConfig([
   {
@@ -7,9 +7,7 @@ export default defineConfig([
       style: 'src/style.css',
       'core/index': 'src/core/index.ts',
       'vanilla/index': 'src/vanilla/index.ts',
-      'react/index': 'src/react/index.ts',
-      'vue/index': 'src/vue/index.ts',
-      'svelte/index': 'src/svelte/index.ts'
+      'browser/index': 'src/browser/index.ts',
     },
     format: ['esm', 'cjs'],
     dts: true,
@@ -17,11 +15,10 @@ export default defineConfig([
     clean: true,
     target: 'es2020',
     outDir: 'dist',
-    external: ['react', 'vue', 'svelte', 'svelte/store', 'svelte/svelte']
   },
   {
     entry: {
-      'browser/index': 'src/browser/index.ts'
+      'browser/global': 'src/browser/global.ts',
     },
     format: ['iife'],
     dts: true,
@@ -29,6 +26,6 @@ export default defineConfig([
     clean: false,
     target: 'es2020',
     outDir: 'dist',
-    globalName: 'Ticker'
-  }
-]);
+    globalName: 'TickerBundle',
+  },
+])

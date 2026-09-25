@@ -1,6 +1,6 @@
 node_modules/
 dist/
+coverage/
 .bunchee-build-*
 *.log
 .DS_Store
-features.md

@@ -1,0 +1,10 @@
+:root {
+  --sl-color-accent-low: #092a35;
+  --sl-color-accent: #12a9c7;
+  --sl-color-accent-high: #b7f2ff;
+  --sl-radius-medium: 0.5rem;
+}
+
+.hero .tagline {
+  max-width: 48rem;
+}

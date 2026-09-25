@@ -1,0 +1,6 @@
+coverage/
+dist/
+example/.astro/
+example/dist/
+example/node_modules/
+node_modules/

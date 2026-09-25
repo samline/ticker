@@ -18,8 +18,11 @@
 }
 
 .ticker-clone {
-  pointer-events: none;
   user-select: none;
+}
+
+.ticker-wrapper:not([data-interactive-clones='true']) .ticker-clone {
+  pointer-events: none;
 }
 
 .ticker-wrapper[data-ready='true'][data-active='true'] .ticker-track {

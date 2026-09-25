@@ -1,2 +1,7 @@
-export { mount, unmount, refresh, createTicker, enhance } from './render';
-export type { TickerOptions, TickerController } from '../core/types';
+export { mount, refresh, ticker, unmount } from './render'
+export type {
+  NormalizedTickerOptions,
+  TickerInstance,
+  TickerOptions,
+  TickerTarget,
+} from '../core/types'
