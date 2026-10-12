@@ -48,11 +48,11 @@ import '@samline/ticker/style.css'
 Use the browser build when you do not have a bundler and need to run the package directly in HTML, WordPress, Shopify, or a traditional server-rendered template.
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.0.3/dist/style.css" />
-<script src="https://unpkg.com/@samline/ticker@2.0.3/dist/browser/global.global.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.0.4/dist/style.css" />
+<script src="https://unpkg.com/@samline/ticker@2.0.4/dist/browser/global.global.js"></script>
 ```
 
-> Pin the version in production. Replace `2.0.3` with the version you ship.
+> Pin the version in production. Replace `2.0.4` with the version you ship.
 
 The browser bundle exposes a single global: `window.Ticker`.
 
@@ -116,9 +116,16 @@ What this does:
 
 - Enhances the existing element and returns an element-scoped controller.
 - Measures its content and creates enough visual clones to fill the viewport.
+- Preserves fractional widths and horizontal gaps so repeated content aligns at each loop reset.
 - Hides repeated content from assistive technology and keyboard navigation by default.
 - Reuses visual clones when responsive measurements are unchanged and pauses animation outside the viewport or while the document is hidden.
 - Restores the original source element when `destroy()` runs.
+
+---
+
+## Seamless Loops
+
+The runtime preserves fractional measurements in both directions. Match item spacing to the horizontal track gap and include any decorative separator at the end of the sequence. See [Styling: seamless loops](docs/styling.md#seamless-loops) for the CSS pattern.
 
 ---
 

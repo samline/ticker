@@ -10,6 +10,9 @@ vitest.config.ts
 # Examples and documentation site
 example/
 
+# Marketing landing site
+landing/
+
 # Tooling & lockfiles
 .agents/
 .github/

@@ -160,6 +160,31 @@ describe('ticker playback and measurement', () => {
     expect(wrapper.querySelectorAll('.ticker-clone')).toHaveLength(2)
   })
 
+  it.each(['left', 'right'] as const)(
+    'preserves the exact horizontal repeat distance for fractional sizes moving %s',
+    async direction => {
+      const { instance, wrapper, track, dimensions } = await createTicker()
+      dimensions.content = 80.25
+      track.style.gap = '10.5px'
+      instance.update({ direction })
+      vi.advanceTimersByTime(16)
+
+      expect(wrapper.dataset.direction).toBe(direction)
+      expect(wrapper.style.getPropertyValue('--ticker-distance')).toBe('90.75px')
+      expect(wrapper.querySelectorAll('.ticker-clone')).toHaveLength(2)
+
+      track.style.columnGap = '12.25px'
+      track.style.rowGap = '64px'
+      instance.refresh()
+      vi.advanceTimersByTime(16)
+      expect(wrapper.style.getPropertyValue('--ticker-distance')).toBe('92.5px')
+
+      dimensions.content = 80.375
+      resize()
+      expect(wrapper.style.getPropertyValue('--ticker-distance')).toBe('92.625px')
+    }
+  )
+
   it('forces same-width content refresh even when an intersection callback supersedes its frame', async () => {
     const { instance, wrapper, content } = await createTicker()
     const clone = wrapper.querySelector('.ticker-clone')

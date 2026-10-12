@@ -1,0 +1,12 @@
+{
+  "name": "ticker-landing",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tailwindcss -i assets/css/source.css -o assets/css/main.css --minify && node build.mjs"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.0",
+    "tailwindcss": "4.3.0"
+  }
+}

@@ -57,7 +57,7 @@ Default and named registry exports share one registry and do not assign a global
 ## Global IIFE
 
 ```html
-<script src="https://unpkg.com/@samline/ticker@2.0.3/dist/browser/global.global.js"></script>
+<script src="https://unpkg.com/@samline/ticker@2.0.4/dist/browser/global.global.js"></script>
 <script>
   const news = window.Ticker.newTicker({ id: 'news' })
 </script>

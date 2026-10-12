@@ -7,11 +7,11 @@ Use the browser build when a page does not have a bundler and needs to integrate
 ## Script tag
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.0.3/dist/style.css" />
-<script src="https://unpkg.com/@samline/ticker@2.0.3/dist/browser/global.global.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.0.4/dist/style.css" />
+<script src="https://unpkg.com/@samline/ticker@2.0.4/dist/browser/global.global.js"></script>
 ```
 
-> Pin the version in production. Replace `2.0.3` with the version you ship.
+> Pin the version in production. Replace `2.0.4` with the version you ship.
 
 The IIFE registers `window.Ticker` (also reachable through `globalThis.Ticker`).
 

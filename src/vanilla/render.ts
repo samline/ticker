@@ -191,9 +191,11 @@ const rebuildTickerState = (state: RuntimeTickerState, force: boolean): void => 
   const wrapperRect = wrapper.getBoundingClientRect()
 
   const trackStyles = window.getComputedStyle(track)
-  const gap = parseFloat(trackStyles.gap) || 0
+  const gap = parseFloat(trackStyles.columnGap || trackStyles.gap) || 0
 
-  const contentWidth = Math.ceil(contentRect.width + gap)
+  // The animation must travel exactly one content-and-gap period. Rounding
+  // fractional layout widths introduces a visible offset when the loop resets.
+  const contentWidth = contentRect.width + gap
   const wrapperWidth = Math.ceil(wrapperRect.width)
 
   const reducedMotion = getReducedMotionMedia()?.matches ?? false

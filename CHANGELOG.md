@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.4] - 2026-10-12
+
+- Preserve fractional animation distances and use the horizontal column gap so repeated content stays aligned when ticker loops restart.
+
 ## [2.0.3] - 2026-10-12
 
 - Start tickers paused until they intersect the viewport, without a preactivation margin.

@@ -1,0 +1,84 @@
+{
+  "package": "simple-icons",
+  "version": "16.0.0",
+  "icons": [
+    {
+      "title": "Vercel",
+      "slug": "vercel",
+      "hex": "000000",
+      "source": "https://vercel.com/geist/brands",
+      "guidelines": "https://vercel.com/geist/brands"
+    },
+    {
+      "title": "Linear",
+      "slug": "linear",
+      "hex": "5E6AD2",
+      "source": "https://linear.app"
+    },
+    {
+      "title": "Stripe",
+      "slug": "stripe",
+      "hex": "635BFF",
+      "source": "https://stripe.com/newsroom/information"
+    },
+    {
+      "title": "Shopify",
+      "slug": "shopify",
+      "hex": "7AB55C",
+      "source": "https://www.shopify.com/brand-assets",
+      "guidelines": "https://www.shopify.com/brand-assets"
+    },
+    {
+      "title": "Figma",
+      "slug": "figma",
+      "hex": "F24E1E",
+      "source": "https://www.figma.com/using-the-figma-brand/",
+      "guidelines": "https://www.figma.com/using-the-figma-brand/"
+    },
+    {
+      "title": "Notion",
+      "slug": "notion",
+      "hex": "000000",
+      "source": "https://www.notion.so"
+    },
+    {
+      "title": "GitHub",
+      "slug": "github",
+      "hex": "181717",
+      "source": "https://github.com/logos",
+      "guidelines": "https://github.com/logos"
+    },
+    {
+      "title": "Supabase",
+      "slug": "supabase",
+      "hex": "3FCF8E",
+      "source": "https://github.com/supabase/supabase/blob/4031a7549f5d46da7bc79c01d56be4177dc7c114/packages/common/assets/images/supabase-logo-wordmark--light.svg"
+    },
+    {
+      "title": "Raycast",
+      "slug": "raycast",
+      "hex": "FF6363",
+      "source": "https://www.raycast.com/press",
+      "guidelines": "https://www.raycast.com/press"
+    },
+    {
+      "title": "Astro",
+      "slug": "astro",
+      "hex": "BC52EE",
+      "source": "https://astro.build/press"
+    },
+    {
+      "title": "Vite",
+      "slug": "vite",
+      "hex": "646CFF",
+      "source": "https://vitejs.dev"
+    },
+    {
+      "title": "Cloudflare",
+      "slug": "cloudflare",
+      "hex": "F38020",
+      "source": "https://www.cloudflare.com/logo/",
+      "guidelines": "https://www.cloudflare.com/trademark/"
+    }
+  ]
+}

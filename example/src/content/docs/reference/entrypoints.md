@@ -63,7 +63,7 @@ Default and named registry exports share one module-level registry and do not as
 ## Standalone IIFE
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@2.0.3/dist/browser/global.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@2.0.4/dist/browser/global.global.js"></script>
 <script>
   const news = window.Ticker.newTicker({ id: 'news' })
 </script>

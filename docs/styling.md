@@ -28,7 +28,7 @@ Application styles should target the stable classes or data attributes. Treat cl
 | Variable            | Owner   | Purpose                                           |
 | ------------------- | ------- | ------------------------------------------------- |
 | `--ticker-duration` | Runtime | Normalized animation duration, for example `24s`. |
-| `--ticker-distance` | Runtime | Measured travel distance for one content copy.    |
+| `--ticker-distance` | Runtime | Exact content width plus horizontal track gap.    |
 
 ## Package-owned selectors
 
@@ -59,6 +59,7 @@ ticker('#partners', { class: 'partner-strip theme-muted' })
   color: white;
 }
 
+.partner-strip .ticker-track,
 .partner-strip .ticker-content {
   gap: 2rem;
 }
@@ -66,4 +67,25 @@ ticker('#partners', { class: 'partner-strip theme-muted' })
 
 When `update()` changes `class`, the controller removes classes from the previous option and applies the new normalized list.
 
-The runtime measures the track's computed `gap`, so gap can be themed safely. Avoid overriding track transforms, animation names, or runtime-owned data attributes unless you are intentionally replacing the motion model.
+The runtime measures the track's computed horizontal `column-gap` (falling back to `gap` when needed), so gap can be themed safely. Avoid overriding track transforms, animation names, or runtime-owned data attributes unless you are intentionally replacing the motion model.
+
+## Seamless loops
+
+The runtime keeps fractional content widths when calculating `--ticker-distance`. The animation travels exactly one sequence width plus the horizontal track gap, so the first clone aligns with the original when either direction restarts. Vertical `row-gap` does not affect the travel distance. Leave this runtime-owned variable unchanged.
+
+For an evenly spaced logo strip, use the same gap between items and between repeated sequences:
+
+```css
+.partner-strip {
+  --partner-gap: 18px;
+}
+
+.partner-strip .ticker-track,
+.partner-strip .ticker-content {
+  gap: var(--partner-gap);
+}
+```
+
+If your sequence alternates text and decorative separators, include a separator after the final item as well. The last-to-first join should follow the same pattern as every interior pair. Mismatched gaps or a missing final separator can look like a jump even when the animation distance is correct.
+
+Call the controller's `refresh()` after changing content or loading fonts when no automatic resize measurement occurs. Keep content copies free of transforms or unequal margins that change the repeat spacing independently of the track's gap.

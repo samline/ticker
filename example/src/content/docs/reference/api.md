@@ -64,7 +64,7 @@ Omitted fields stay unchanged. A new `class` removes only tokens owned by the pr
 
 ### `refresh()`
 
-Schedules measurement and clone regeneration for this controller, then returns it. The rebuild synchronizes config, measures content width plus computed track gap, clears prior clones, creates enough clones to cover the wrapper, and writes `--ticker-distance`. Reduced-motion mode creates no clones.
+Schedules measurement and clone regeneration for this controller, then returns it. The rebuild synchronizes config, measures exact content width plus computed horizontal track gap, clears prior clones, creates enough clones to cover the wrapper, and writes `--ticker-distance` without rounding fractional pixels. Reduced-motion mode creates no clones.
 
 Explicit refresh regenerates clones even when content width is unchanged. Automatic resize and intersection checks reuse clones when measurements and clone settings are unchanged. Multiple calls before the frame runs collapse to the latest scheduled rebuild; automatic checks preserve pending explicit refreshes. After destruction, it is a chainable no-op.
 

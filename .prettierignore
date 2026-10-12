@@ -4,3 +4,7 @@ example/.astro/
 example/dist/
 example/node_modules/
 node_modules/
+landing/assets/css/main.css
+landing/assets/vendor/
+landing/assets/brands/LICENSE.md
+landing/assets/brands/DISCLAIMER.md
