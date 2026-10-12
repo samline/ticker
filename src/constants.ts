@@ -6,4 +6,4 @@ export const FOCUSABLE_SELECTOR =
   'a[href], area[href], button, input, select, textarea, iframe, [tabindex], [contenteditable="true"]'
 
 export const RESIZE_DEBOUNCE_MS = 150
-export const INTERSECTION_ROOT_MARGIN = '120px 0px'
+export const INTERSECTION_ROOT_MARGIN = '0px'

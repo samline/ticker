@@ -105,12 +105,13 @@ Complete markup initialized through `mount()` or adopted through `ticker()` uses
 
 The runtime also owns these outputs:
 
-| Output              | Meaning                                                             |
-| ------------------- | ------------------------------------------------------------------- |
-| `data-ready`        | `false` while geometry is pending; `true` after a successful build. |
-| `data-active`       | Intersection state. `false` pauses animation.                       |
-| `--ticker-duration` | Normalized duration with an `s` unit.                               |
-| `--ticker-distance` | Measured content width plus computed track gap.                     |
+| Output              | Meaning                                                                       |
+| ------------------- | ----------------------------------------------------------------------------- |
+| `data-ready`        | `false` while geometry is pending; `true` after a successful build.           |
+| `data-active`       | Viewport intersection state, without an extra margin.                         |
+| `data-playing`      | Active, document visible, and reduced motion disabled; hover can still pause. |
+| `--ticker-duration` | Normalized duration with an `s` unit.                                         |
+| `--ticker-distance` | Measured content width plus computed track gap.                               |
 
 ## Defaults export
 

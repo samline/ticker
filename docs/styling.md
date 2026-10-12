@@ -13,7 +13,7 @@ import '@samline/ticker/style.css'
 Enhancing ordinary content produces this contract:
 
 ```html
-<div class="ticker-wrapper" data-ticker data-ready="true" data-active="true">
+<div class="ticker-wrapper" data-ticker data-ready="true" data-active="true" data-playing="true">
   <div class="ticker-track" data-ticker-track>
     <div class="ticker-content" data-ticker-content>...</div>
     <div class="ticker-content ticker-clone" data-ticker-content>...</div>
@@ -41,7 +41,9 @@ Application styles should target the stable classes or data attributes. Treat cl
 | `.ticker-clone`          | Generated visual copy; non-selectable.  |
 | `.ticker-pause-on-hover` | Track marker used by `pauseOnHover`.    |
 
-`data-ready="false"` suppresses animation while geometry is unresolved. `data-active="false"` pauses offscreen animation. In reduced-motion mode animation and transforms are disabled and clones are hidden.
+`data-ready="false"` suppresses animation while geometry is unresolved. `data-active` reports viewport intersection with no extra margin. With `IntersectionObserver`, tickers start paused until the first intersection result. Without it, they are treated as active.
+
+`data-playing="true"` allows animation only when the ticker is active, the document is visible, and reduced motion is disabled. `pauseOnHover` can still pause it. Playback changes preserve existing clones and animation progress when measurements are unchanged. In reduced-motion mode animation and transforms are disabled and clones are hidden.
 
 ## Custom classes
 

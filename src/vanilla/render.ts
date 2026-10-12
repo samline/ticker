@@ -59,8 +59,53 @@ const getReducedMotionMedia = (): ReducedMotionMedia | null => {
   return reducedMotionMedia
 }
 
-const tickersState = new Map<HTMLElement, TickerState>()
+interface RuntimeTickerState extends TickerState {
+  forceRebuild: boolean
+  measurement: {
+    contentWidth: number
+    wrapperWidth: number
+    interactiveClones: boolean
+    reducedMotion: boolean
+  } | null
+}
+
+const tickersState = new Map<HTMLElement, RuntimeTickerState>()
 let managerState: TickerManagerState = createEmptyManagerState()
+
+const syncPlayback = ({ wrapper }: TickerState): void => {
+  wrapper.dataset.playing = String(
+    wrapper.dataset.active === 'true' && !document.hidden && !getReducedMotionMedia()?.matches
+  )
+}
+
+const handleVisibilityChange = (): void => tickersState.forEach(syncPlayback)
+
+const handleMotionChange = (): void => {
+  tickersState.forEach(state => {
+    syncPlayback(state)
+    scheduleRebuild(state)
+  })
+}
+
+const addPlaybackListeners = (): void => {
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+  const media = getReducedMotionMedia()
+  if (typeof media?.addEventListener === 'function') {
+    media.addEventListener('change', handleMotionChange)
+  } else if (typeof media?.addListener === 'function') {
+    media.addListener(handleMotionChange)
+  }
+}
+
+const removePlaybackListeners = (): void => {
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
+  const media = getReducedMotionMedia()
+  if (typeof media?.removeEventListener === 'function') {
+    media.removeEventListener('change', handleMotionChange)
+  } else if (typeof media?.removeListener === 'function') {
+    media.removeListener(handleMotionChange)
+  }
+}
 
 const isSearchableRoot = (value: unknown): value is Element | Document | DocumentFragment => {
   if (!value || typeof value !== 'object') return false
@@ -137,14 +182,11 @@ const syncConfig = (state: TickerState): void => {
   }
 }
 
-const rebuildTickerState = (state: TickerState): void => {
+const rebuildTickerState = (state: RuntimeTickerState, force: boolean): void => {
   const { wrapper, track, content } = state
   if (!track || !content || !wrapper.isConnected) return
 
   syncConfig(state)
-  wrapper.dataset.ready = 'false'
-  removeClones(state)
-
   const contentRect = content.getBoundingClientRect()
   const wrapperRect = wrapper.getBoundingClientRect()
 
@@ -154,15 +196,34 @@ const rebuildTickerState = (state: TickerState): void => {
   const contentWidth = Math.ceil(contentRect.width + gap)
   const wrapperWidth = Math.ceil(wrapperRect.width)
 
+  const reducedMotion = getReducedMotionMedia()?.matches ?? false
+  const interactiveClones = wrapper.dataset.interactiveClones === 'true'
+  const previous = state.measurement
+
+  if (
+    !force &&
+    wrapper.dataset.ready === 'true' &&
+    previous?.contentWidth === contentWidth &&
+    previous.wrapperWidth === wrapperWidth &&
+    previous.interactiveClones === interactiveClones &&
+    previous.reducedMotion === reducedMotion
+  ) {
+    return
+  }
+
+  wrapper.dataset.ready = 'false'
+  removeClones(state)
+  state.measurement = null
   if (!contentWidth || !wrapperWidth) return
 
-  if (getReducedMotionMedia()?.matches) {
+  state.measurement = { contentWidth, wrapperWidth, interactiveClones, reducedMotion }
+
+  if (reducedMotion) {
     wrapper.style.setProperty('--ticker-distance', '0px')
     wrapper.dataset.ready = 'true'
     return
   }
 
-  const interactiveClones = wrapper.dataset.interactiveClones === 'true'
   const clonesNeeded = Math.max(1, Math.ceil(wrapperWidth / contentWidth))
   const fragment = document.createDocumentFragment()
 
@@ -178,20 +239,23 @@ const rebuildTickerState = (state: TickerState): void => {
   wrapper.dataset.ready = 'true'
 }
 
-const scheduleRebuild = (state: TickerState): void => {
+const scheduleRebuild = (state: RuntimeTickerState, force = false): void => {
   if (!state.track || !state.content) return
+  state.forceRebuild ||= force
   if (state.frameId) cancelFrame(state.frameId)
 
   state.frameId = requestFrame(() => {
     state.frameId = 0
-    rebuildTickerState(state)
+    const forceRebuild = state.forceRebuild
+    state.forceRebuild = false
+    rebuildTickerState(state, forceRebuild)
   })
 }
 
-const setupObservers = (state: TickerState): void => {
+const setupObservers = (state: RuntimeTickerState): void => {
   const { wrapper, content } = state
 
-  if ('ResizeObserver' in window) {
+  if (typeof window.ResizeObserver === 'function') {
     state.resizeObserver = new ResizeObserver(() => {
       if (state.resizeTimeout) clearTimeout(state.resizeTimeout)
       state.resizeTimeout = window.setTimeout(() => scheduleRebuild(state), RESIZE_DEBOUNCE_MS)
@@ -200,13 +264,14 @@ const setupObservers = (state: TickerState): void => {
     state.resizeObserver.observe(content)
   }
 
-  if ('IntersectionObserver' in window) {
+  if (typeof window.IntersectionObserver === 'function') {
     state.intersectionObserver = new IntersectionObserver(
       ([entry]) => {
         const isActive = entry?.isIntersecting ?? true
         if (wrapper.dataset.active !== String(isActive)) {
           wrapper.dataset.active = isActive ? 'true' : 'false'
         }
+        syncPlayback(state)
         if (isActive) scheduleRebuild(state)
       },
       { rootMargin: INTERSECTION_ROOT_MARGIN }
@@ -227,6 +292,10 @@ const destroyTicker = (wrapper: HTMLElement): void => {
   removeClones(state)
 
   tickersState.delete(wrapper)
+  wrapper.dataset.active = 'false'
+  wrapper.dataset.playing = 'false'
+  wrapper.dataset.ready = 'false'
+  if (!tickersState.size) removePlaybackListeners()
 }
 
 const initTicker = (wrapper: HTMLElement): void => {
@@ -241,17 +310,21 @@ const initTicker = (wrapper: HTMLElement): void => {
 
   if (!track || !content) return
 
-  const state: TickerState = {
+  const state: RuntimeTickerState = {
     wrapper,
     track,
     content,
     ...createEmptyTickerState(),
+    forceRebuild: false,
+    measurement: null,
   }
 
   tickersState.set(wrapper, state)
+  if (tickersState.size === 1) addPlaybackListeners()
 
   wrapper.dataset.ready = 'false'
-  wrapper.dataset.active = 'true'
+  wrapper.dataset.active = String(typeof window.IntersectionObserver !== 'function')
+  syncPlayback(state)
 
   syncConfig(state)
   setupObservers(state)
@@ -260,11 +333,11 @@ const initTicker = (wrapper: HTMLElement): void => {
 
 const initAll = (root: ParentNode): void => getTickerElements(root).forEach(initTicker)
 const destroyAll = (root: ParentNode): void => getTickerElements(root).forEach(destroyTicker)
-const refreshAll = (): void => tickersState.forEach(state => scheduleRebuild(state))
+const refreshAll = (): void => tickersState.forEach(state => scheduleRebuild(state, true))
 
 const refreshTicker = (wrapper: HTMLElement): void => {
   const state = tickersState.get(wrapper)
-  if (state) scheduleRebuild(state)
+  if (state) scheduleRebuild(state, true)
 }
 
 const handleMutations = (mutations: MutationRecord[]): void => {
@@ -293,6 +366,10 @@ const handleEventUpdate = (): void => {
   if (managerState.isMounted) refreshAll()
 }
 
+const handleWindowResize = (): void => {
+  if (managerState.isMounted) tickersState.forEach(state => scheduleRebuild(state))
+}
+
 export const mountManager = (): void => {
   if (!canUseDOM()) return
 
@@ -310,14 +387,7 @@ export const mountManager = (): void => {
 
   window.addEventListener('load', handleEventUpdate, { once: true })
   if (typeof window.ResizeObserver === 'undefined') {
-    window.addEventListener('resize', handleEventUpdate, { passive: true })
-  }
-
-  const reducedMotionMedia = getReducedMotionMedia()
-  if (typeof reducedMotionMedia?.addEventListener === 'function') {
-    reducedMotionMedia.addEventListener('change', handleEventUpdate)
-  } else if (typeof reducedMotionMedia?.addListener === 'function') {
-    reducedMotionMedia.addListener(handleEventUpdate)
+    window.addEventListener('resize', handleWindowResize, { passive: true })
   }
 }
 
@@ -328,17 +398,10 @@ export const unmountManager = (): void => {
 
   document.removeEventListener('DOMContentLoaded', handleReady)
   window.removeEventListener('load', handleEventUpdate)
-  window.removeEventListener('resize', handleEventUpdate)
+  window.removeEventListener('resize', handleWindowResize)
 
   managerState.mutationObserver?.disconnect()
   managerState.mutationObserver = null
-
-  const reducedMotionMedia = getReducedMotionMedia()
-  if (typeof reducedMotionMedia?.removeEventListener === 'function') {
-    reducedMotionMedia.removeEventListener('change', handleEventUpdate)
-  } else if (typeof reducedMotionMedia?.removeListener === 'function') {
-    reducedMotionMedia.removeListener(handleEventUpdate)
-  }
 
   Array.from(tickersState.keys()).forEach(destroyTicker)
 }

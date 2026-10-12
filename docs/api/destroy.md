@@ -18,6 +18,8 @@ Destruction:
 
 - Cancels a pending animation frame and resize debounce timer.
 - Disconnects `ResizeObserver` and `IntersectionObserver`.
+- Marks retained wrapper markup not ready and pauses playback.
+- Removes shared document-visibility and reduced-motion listeners when the last tracked ticker is destroyed.
 - Removes generated clones.
 - Removes the wrapper from the shared runtime registry.
 - Replaces a controller-generated wrapper with the original source element.

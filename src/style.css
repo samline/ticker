@@ -25,7 +25,7 @@
   pointer-events: none;
 }
 
-.ticker-wrapper[data-ready='true'][data-active='true'] .ticker-track {
+.ticker-wrapper[data-ready='true'][data-playing='true'] .ticker-track {
   will-change: transform;
 }
 
@@ -45,7 +45,8 @@
   animation-play-state: paused;
 }
 
-.ticker-wrapper[data-active='false'] .ticker-track {
+.ticker-wrapper[data-active='false'] .ticker-track,
+.ticker-wrapper:not([data-playing='true']) .ticker-track {
   animation-play-state: paused;
 }
 

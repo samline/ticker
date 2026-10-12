@@ -87,7 +87,7 @@ partners?.update({ direction: 'right' })
 | `data-pause-on-hover`     | Exact string `true`.                           | `false`  |
 | `data-interactive-clones` | Exact string `true`.                           | `false`  |
 
-The runtime owns `data-ready`, `data-active`, `--ticker-duration`, and `--ticker-distance`. See the [styling contract](/ticker/reference/styling/).
+The runtime owns `data-ready`, `data-active`, `data-playing`, `--ticker-duration`, and `--ticker-distance`. See the [styling contract](/ticker/reference/styling/).
 
 ## Defaults export
 

@@ -22,7 +22,9 @@ When a DOM is available, `mount()`:
 4. observes `document.body` for inserted and removed ticker roots;
 5. refreshes tracked tickers after `document.fonts.ready` and window `load`;
 6. installs a window `resize` fallback when `ResizeObserver` is unavailable;
-7. listens for reduced-motion preference changes.
+7. initializes shared document-visibility and reduced-motion listeners when the first ticker starts.
+
+These playback listeners also apply to standalone `ticker()` controllers and are removed when the last tracked ticker is destroyed.
 
 Calls return without side effects when `window` or `document` is unavailable.
 

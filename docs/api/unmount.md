@@ -17,7 +17,7 @@ unmount(): void
 - marks the manager unmounted;
 - removes pending document and window listeners;
 - disconnects the shared `MutationObserver`;
-- unregisters the reduced-motion listener;
+- unregisters shared document-visibility and reduced-motion listeners;
 - destroys every tracked ticker, disconnecting instance observers and removing clones.
 
 Declarative wrapper markup stays in the DOM. Controller-created wrappers are not restored by the page-level teardown because restoration belongs to their controller's `destroy()` method; retain and destroy application-created controllers explicitly.

@@ -23,7 +23,8 @@ describe('ticker vanilla', () => {
     document.body.innerHTML = ''
   })
 
-  afterEach(() => {
+  afterEach(async () => {
+    ;(await import('../src/vanilla/render')).unmount()
     vi.unstubAllGlobals()
     vi.resetModules()
     document.head.innerHTML = ''

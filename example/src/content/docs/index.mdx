@@ -24,7 +24,7 @@ import { Card, CardGrid } from '@astrojs/starlight/components'
 - **Vanilla-first** — Works with native HTML, static sites, CMS templates, and server-rendered applications.
 - **Multiple distribution surfaces** — Main ESM/CJS API, declarative manager, browser registry module, or `window.Ticker` IIFE.
 - **Accessible defaults** — Visual clones stay out of the accessibility tree and keyboard order unless explicitly enabled.
-- **Responsive lifecycle** — Resize, intersection, font, and reduced-motion changes trigger the appropriate rebuilds.
+- **Responsive lifecycle** — Automatic measurements reuse unchanged clones; animation pauses outside the viewport and in hidden documents.
 - **Zero runtime dependencies** — Ships ESM, CJS, browser bundles, CSS, and TypeScript declarations.
 
 ## Next steps

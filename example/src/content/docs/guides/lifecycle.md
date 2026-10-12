@@ -48,7 +48,9 @@ instance?.source.append(newPartnerLogo())
 instance?.refresh()
 ```
 
-ResizeObserver normally handles geometry changes. Explicit refresh is useful immediately after batched DOM work, visibility changes, or custom font transitions.
+ResizeObserver normally handles geometry changes. Automatic resize and intersection checks reuse clones when measurements and clone settings are unchanged. Explicit refresh always regenerates clones, even after content changes that preserve width, and cannot be superseded by an automatic check. It is useful immediately after batched DOM work, visibility changes, or custom font transitions.
+
+Both standalone controllers and declaratively mounted tickers pause outside the viewport and while the document is hidden. Shared visibility and motion-preference listeners are removed when the last ticker is destroyed.
 
 ## Declarative manager
 

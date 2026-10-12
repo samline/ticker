@@ -24,7 +24,7 @@ Interactive clones do not receive `aria-hidden`, presentation semantics, inert b
 
 ## Reduced motion
 
-When `prefers-reduced-motion: reduce` matches, animation stops, transforms reset, and clones are hidden. The page manager listens for preference changes and refreshes mounted tickers.
+When `prefers-reduced-motion: reduce` matches, animation stops, transforms reset, and clones are hidden. Shared runtime listeners respond to preference changes for standalone controllers and declaratively mounted tickers. They are removed when the last ticker is destroyed.
 
 ## Content guidance
 

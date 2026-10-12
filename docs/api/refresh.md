@@ -13,13 +13,15 @@ Schedules a rebuild for one controller and returns the same instance. Use it aft
 The scheduled rebuild:
 
 1. synchronizes data attributes and duration CSS;
-2. marks the wrapper not ready;
-3. removes old clones;
-4. measures content width, wrapper width, and computed track gap;
+2. measures content width, wrapper width, and computed track gap;
+3. marks the wrapper not ready;
+4. removes old clones;
 5. creates enough clones to cover the wrapper, unless reduced motion is active;
 6. writes `--ticker-distance` and marks the wrapper ready.
 
-Multiple refreshes before the frame runs cancel the prior frame and keep the latest scheduled rebuild. After destruction, instance `refresh()` is a chainable no-op.
+Explicit refresh always regenerates clones, even when content changes without changing width. Automatic resize and intersection checks reuse clones when measurements and clone settings are unchanged, preserving animation progress.
+
+Multiple refreshes before the frame runs cancel the prior frame and keep the latest scheduled rebuild. An automatic check cannot cancel a pending explicit rebuild. After destruction, instance `refresh()` is a chainable no-op.
 
 ## Declarative page refresh
 

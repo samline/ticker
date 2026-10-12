@@ -17,7 +17,7 @@ The original content remains available once in the accessibility tree and tab or
 
 ## Reduced motion
 
-When `prefers-reduced-motion: reduce` matches, the runtime does not generate visual clones and sets the travel distance to zero. It listens for preference changes and refreshes mounted tickers.
+When `prefers-reduced-motion: reduce` matches, the runtime does not generate visual clones and sets the travel distance to zero. Shared runtime listeners respond to preference changes for both standalone controllers and declaratively mounted tickers. They are removed when the last ticker is destroyed.
 
 ## Interactive clones
 

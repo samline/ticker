@@ -16,6 +16,7 @@ template: doc
   data-interactive-clones="false"
   data-ready="true"
   data-active="true"
+  data-playing="true"
 >
   <div class="ticker-track" data-ticker-track>
     <div class="ticker-content" data-ticker-content>...</div>
@@ -36,7 +37,9 @@ template: doc
 | `.ticker-clone`          | Generated repeated sequence.                           |
 | `.ticker-pause-on-hover` | Track state used by `pauseOnHover`.                    |
 
-`data-active="false"` pauses an offscreen ticker. `data-ready="false"` suppresses animation during measurement.
+`data-active` reports viewport intersection with no extra margin. With `IntersectionObserver`, tickers start paused until the first intersection result; without it, they are treated as active. `data-ready="false"` suppresses animation during measurement.
+
+`data-playing="true"` allows animation only when the ticker is active, the document is visible, and reduced motion is disabled. `pauseOnHover` can still pause it. Automatic checks preserve clones and animation progress when measurements are unchanged.
 
 ## Safe customization
 

@@ -48,11 +48,11 @@ import '@samline/ticker/style.css'
 Use the browser build when you do not have a bundler and need to run the package directly in HTML, WordPress, Shopify, or a traditional server-rendered template.
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.0.2/dist/style.css" />
-<script src="https://unpkg.com/@samline/ticker@2.0.2/dist/browser/global.global.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.0.3/dist/style.css" />
+<script src="https://unpkg.com/@samline/ticker@2.0.3/dist/browser/global.global.js"></script>
 ```
 
-> Pin the version in production. Replace `2.0.2` with the version you ship.
+> Pin the version in production. Replace `2.0.3` with the version you ship.
 
 The browser bundle exposes a single global: `window.Ticker`.
 
@@ -117,7 +117,7 @@ What this does:
 - Enhances the existing element and returns an element-scoped controller.
 - Measures its content and creates enough visual clones to fill the viewport.
 - Hides repeated content from assistive technology and keyboard navigation by default.
-- Rebuilds after responsive size changes and pauses work while off screen.
+- Reuses visual clones when responsive measurements are unchanged and pauses animation outside the viewport or while the document is hidden.
 - Restores the original source element when `destroy()` runs.
 
 ---

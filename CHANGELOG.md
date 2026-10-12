@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.3] - 2026-10-12
+
+- Start tickers paused until they intersect the viewport, without a preactivation margin.
+- Pause playback in hidden documents and share visibility and motion-preference listeners across standalone controllers and declarative tickers, with cleanup after the last ticker is destroyed.
+- Reuse clones on unchanged automatic measurements to preserve animation progress; keep explicit refresh and updates rebuilding content even when its width is unchanged.
+
 ## [2.0.2] - 2026-09-25
 
 - Expanded the bundled and Starlight references to cover every public API, option, type, core utility, entrypoint, registry helper, and lifecycle edge case.
