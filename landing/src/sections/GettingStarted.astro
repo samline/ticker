@@ -112,6 +112,7 @@ const headingId = `section-heading-${crypto.randomUUID()}`
     line-height: 1.7;
   }
   a {
+    transition: color var(--duration-ui) var(--ease-ui);
     justify-self: start;
     display: inline-flex;
     align-items: center;
@@ -120,11 +121,18 @@ const headingId = `section-heading-${crypto.randomUUID()}`
     text-decoration: underline;
     text-underline-offset: 0.1875rem;
   }
-  a:hover {
-    color: var(--color-text);
+  @media (hover: hover) {
+    a:hover {
+      color: var(--color-text);
+    }
   }
   a:focus-visible {
     outline: 0.125rem solid var(--color-accent);
     outline-offset: 0.25rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    a {
+      transition: none;
+    }
   }
 </style>

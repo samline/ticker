@@ -39,13 +39,4 @@ const t = getI18n(Astro).controls.copy
       font-size: 0.62rem;
     }
   }
-  :focus-visible {
-    outline: 0.125rem solid var(--color-accent);
-    outline-offset: 0.25rem;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    :where(a, button, summary) {
-      transition: none;
-    }
-  }
 </style>

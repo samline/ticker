@@ -173,16 +173,16 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
     background: var(--color-surface);
     cursor: pointer;
     transition:
-      color 0.2s ease,
-      background-color 0.2s ease,
-      border-color 0.2s ease;
+      color var(--duration-ui) var(--ease-ui),
+      background-color var(--duration-ui) var(--ease-ui),
+      border-color var(--duration-ui) var(--ease-ui);
   }
   @media (hover: hover) {
     .menu-toggle:hover,
     .mobile-menu :global(.menu-close:hover) {
       color: var(--color-accent);
       background: var(--color-accent-soft);
-      border-color: var(--color-accent);
+      border-color: var(--palette-border-hover);
     }
   }
   [hidden] {
@@ -241,10 +241,15 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
     color: var(--color-text);
     font-size: 1rem;
     overflow-wrap: anywhere;
+    transition:
+      color var(--duration-ui) var(--ease-ui),
+      background-color var(--duration-ui) var(--ease-ui);
   }
-  .menu-content a:hover {
-    background: var(--color-surface);
-    color: var(--color-accent);
+  @media (hover: hover) {
+    .menu-content a:hover {
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+    }
   }
   .menu-resources a {
     color: var(--color-text-muted);
@@ -294,6 +299,7 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
   }
   @media (prefers-reduced-motion: reduce) {
     .menu-toggle,
+    .menu-content a,
     .mobile-menu :global(.menu-close) {
       transition: none;
     }

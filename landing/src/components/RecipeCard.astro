@@ -60,6 +60,7 @@ const headingId = `recipe-${crypto.randomUUID()}`
     line-height: 1.75;
   }
   a {
+    transition: color var(--duration-ui) var(--ease-ui);
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -70,8 +71,10 @@ const headingId = `recipe-${crypto.randomUUID()}`
     text-decoration: underline;
     text-underline-offset: 0.1875rem;
   }
-  a:hover {
-    color: var(--color-text);
+  @media (hover: hover) {
+    a:hover {
+      color: var(--color-text);
+    }
   }
   a:focus-visible {
     outline: 0.125rem solid var(--color-accent);
@@ -89,6 +92,11 @@ const headingId = `recipe-${crypto.randomUUID()}`
     }
     h3 {
       font-size: 1.25rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    a {
+      transition: none;
     }
   }
 </style>

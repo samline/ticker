@@ -27,29 +27,22 @@ const { title, number } = Astro.props
 </Reveal>
 
 <style>
-  .card {
-    position: relative;
-    background: var(--color-surface);
-    border: 0.0625rem solid var(--color-border);
-    border-radius: 1.25rem;
-    transition:
-      border-color 0.3s ease,
-      background-color 0.3s ease;
-  }
-  .card:hover {
-    border-color: var(--palette-card-border-hover);
-    background: var(--color-surface-2);
-  }
   .feature-card {
-    border-color: var(--palette-feature-border);
+    position: relative;
+    border: 0.0625rem solid var(--palette-feature-border);
     background: var(--palette-feature-surface);
     border-radius: 1rem;
     padding: 1.6875rem;
     min-height: 13.875rem;
+    transition:
+      border-color var(--duration-ui) var(--ease-ui),
+      background-color var(--duration-ui) var(--ease-ui);
   }
-  .feature-card:hover {
-    background: var(--palette-feature-hover);
-    border-color: var(--palette-feature-border-hover);
+  @media (hover: hover) {
+    .feature-card:hover {
+      background: var(--palette-feature-hover);
+      border-color: var(--palette-border-hover);
+    }
   }
   .feature-card .feature-icon {
     background: transparent;
@@ -112,6 +105,11 @@ const { title, number } = Astro.props
     .feature-card p {
       max-width: 40ch;
       font-size: 0.82rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .feature-card {
+      transition: none;
     }
   }
 </style>

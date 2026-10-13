@@ -19,6 +19,9 @@
   --font-mono:
     'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
   --radius-pill: 624.9375rem;
+  --duration-ui: 180ms;
+  --duration-reveal: 600ms;
+  --ease-ui: cubic-bezier(0.2, 0, 0, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --shadow-glow:
     0 0 0 0.0625rem rgba(183, 174, 210, 0.3), 0 0.5rem 2rem -0.5rem rgba(183, 174, 210, 0.25);
@@ -58,8 +61,8 @@
   --theme-accent-glow: rgba(183, 174, 210, 0.28);
   --theme-danger: #d5aea5;
   --palette-on-accent: #0a0a0a;
-  --palette-border-hover: #3a3a3a;
-  --palette-card-border-hover: #333;
+  --palette-border-hover: #80708f;
+  --palette-card-border-hover: var(--palette-border-hover);
   --palette-elevated-top: #141414;
   --palette-elevated-bottom: #0e0e0e;
   --palette-code-text: #d4d4d4;
@@ -139,7 +142,7 @@
   --theme-danger: #a74337;
   --palette-on-accent: #ffffff;
   --palette-border-hover: #a99ab9;
-  --palette-card-border-hover: #b4a4c5;
+  --palette-card-border-hover: var(--palette-border-hover);
   --palette-elevated-top: #ffffff;
   --palette-elevated-bottom: #f2edf7;
   --palette-code-text: #43364f;

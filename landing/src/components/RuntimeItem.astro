@@ -8,7 +8,7 @@ const { label, entrypoint } = Astro.props
 ---
 
 <Reveal>
-  <article class:list={['card p-5']} data-reveal>
+  <article class:list={['card']} data-reveal>
     <p class:list={['font-mono text-[0.72rem] tracking-wider text-text-subtle uppercase']}>
       {label}
     </p>
@@ -21,27 +21,19 @@ const { label, entrypoint } = Astro.props
 
 <style>
   .card {
-    position: relative;
-    background: var(--color-surface);
-    border: 0.0625rem solid var(--color-border);
-    border-radius: 1.25rem;
-    transition:
-      border-color 0.3s ease,
-      background-color 0.3s ease;
-  }
-  .card:hover {
-    border-color: var(--palette-card-border-hover);
-    background: var(--color-surface-2);
-  }
-  .card {
     display: grid;
-    grid-template-columns: 5rem 1fr;
+    grid-template-columns: 5rem minmax(0, 1fr);
     column-gap: 0.75rem;
-    border: 0;
     border-top: 0.0625rem solid var(--color-border-soft);
-    border-radius: 0;
+    border-radius: 0.5rem;
     background: transparent;
-    padding: 1.4375rem 0;
+    padding: 1.4375rem 1rem;
+    transition: background-color var(--duration-ui) var(--ease-ui);
+  }
+  @media (hover: hover) {
+    .card:hover {
+      background: var(--color-accent-soft);
+    }
   }
   .card > p:first-child {
     padding-top: 0.1875rem;
@@ -78,6 +70,11 @@ const { label, entrypoint } = Astro.props
   @media (width < 30rem) {
     h3 {
       margin-top: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card {
+      transition: none;
     }
   }
 </style>

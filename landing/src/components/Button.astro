@@ -37,56 +37,49 @@ const variants = { primary: 'btn-primary', secondary: 'btn-secondary', ghost: 'b
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    height: 3.5rem;
-    padding: 0 1.5rem;
-    border-radius: var(--radius-pill);
+    height: 3.125rem;
+    padding: 0 1.4rem;
+    border-radius: 0.875rem;
     font-weight: 500;
-    font-size: 0.95rem;
+    font-size: 0.875rem;
     letter-spacing: -0.01em;
     transition:
-      transform 0.3s var(--ease-out-expo),
-      background-color 0.3s ease,
-      color 0.3s ease,
-      box-shadow 0.4s ease;
+      background-color var(--duration-ui) var(--ease-ui),
+      border-color var(--duration-ui) var(--ease-ui),
+      color var(--duration-ui) var(--ease-ui);
     cursor: pointer;
     white-space: nowrap;
   }
-
   .btn-primary {
     background: var(--color-accent);
     color: var(--palette-on-accent);
-    box-shadow:
-      0 0 0 0.0625rem rgba(0, 0, 0, 0.2),
-      0 0.5rem 1.5rem -0.625rem var(--color-accent-glow);
   }
-  .btn-primary:hover {
-    transform: translateY(-0.0625rem);
-    box-shadow:
-      0 0 0 0.0625rem rgba(0, 0, 0, 0.2),
-      0 0.75rem 1.75rem -0.5rem var(--color-accent-glow);
-  }
-
   .btn-secondary {
-    background: var(--color-bg-soft);
+    background: var(--palette-button-surface);
     color: var(--color-text);
-    border: 0.0625rem solid var(--color-border);
-    backdrop-filter: blur(0.5rem);
+    border: 0.0625rem solid var(--palette-button-border);
   }
-  .btn-secondary:hover {
-    background: var(--color-surface-2);
-    border-color: var(--palette-border-hover);
-  }
-
   .btn-ghost {
     height: 2.5rem;
-    padding: 0 1rem;
+    padding-inline: 1rem;
+    border-radius: var(--radius-pill);
     background: transparent;
     color: var(--color-text-muted);
     border: 0.0625rem solid var(--color-border);
   }
-  .btn-ghost:hover {
-    color: var(--color-text);
-    border-color: var(--palette-border-hover);
+  @media (hover: hover) {
+    .btn-primary:hover {
+      background: var(--palette-accent-hover);
+    }
+    .btn-secondary:hover {
+      background: var(--palette-button-hover);
+      border-color: var(--palette-border-hover);
+    }
+    .btn-ghost:hover {
+      color: var(--color-accent);
+      background: var(--color-accent-soft);
+      border-color: var(--palette-border-hover);
+    }
   }
   .btn.hidden {
     display: none;
@@ -100,37 +93,6 @@ const variants = { primary: 'btn-primary', secondary: 'btn-secondary', ghost: 'b
     .btn.sm\:inline-flex {
       display: inline-flex;
     }
-  }
-  @media (width < 37.5rem) {
-    .btn-primary[data-context='nav'] {
-      padding-inline: 0.875rem;
-      font-size: 0.825rem;
-    }
-  }
-  .btn {
-    height: 3.125rem;
-    padding-inline: 1.4rem;
-    font-size: 0.875rem;
-    border-radius: 0.875rem;
-  }
-  .btn-primary {
-    box-shadow: none;
-  }
-  .btn-primary:hover {
-    box-shadow: none;
-    background: var(--palette-accent-hover);
-  }
-  .btn-secondary {
-    background: var(--palette-button-surface);
-    border-color: var(--palette-button-border);
-    backdrop-filter: none;
-  }
-  .btn-secondary:hover {
-    background: var(--palette-button-hover);
-  }
-  .btn-ghost {
-    height: 2.5rem;
-    border-radius: 62.4375rem;
   }
   .btn[data-context='hero'] {
     min-width: 10.3125rem;
@@ -160,25 +122,39 @@ const variants = { primary: 'btn-primary', secondary: 'btn-secondary', ghost: 'b
     background: var(--palette-lavender);
     color: var(--palette-closing-on-accent);
   }
-  .btn-primary[data-context='closing']:hover {
-    background: var(--palette-accent-hover);
-  }
   .btn-secondary[data-context='closing'] {
     background: transparent;
     color: var(--palette-closing-secondary);
     border-color: var(--palette-closing-border);
+  }
+  @media (hover: hover) {
+    .btn[data-context='ticker']:hover {
+      color: var(--color-accent);
+      background: var(--color-accent-soft);
+      border-color: var(--palette-border-hover);
+    }
+    .btn-primary[data-context='closing']:hover {
+      background: var(--palette-accent-hover);
+    }
+    .btn-secondary[data-context='closing']:hover {
+      background: var(--color-accent-soft);
+      border-color: var(--palette-border-hover);
+    }
+  }
+  @media (width < 37.5rem) {
+    .btn-primary[data-context='nav'] {
+      padding-inline: 0.875rem;
+      font-size: 0.825rem;
+    }
   }
   @media (width < 30rem) {
     .btn[data-context='hero'] {
       min-width: 0;
       width: 100%;
       flex: none;
-      font-size: 0.875rem;
       padding-inline: 1rem;
       gap: 0.5rem;
     }
-  }
-  @media (width < 30rem) {
     .btn[data-context='hero']:first-child,
     .btn[data-context='hero']:last-child {
       border-radius: 0.875rem;
@@ -190,16 +166,16 @@ const variants = { primary: 'btn-primary', secondary: 'btn-secondary', ghost: 'b
       font-size: 0.72rem;
     }
   }
+  .btn[data-context='nav'] {
+    height: 2.5rem;
+  }
   :focus-visible {
     outline: 0.125rem solid var(--color-accent);
     outline-offset: 0.25rem;
   }
   @media (prefers-reduced-motion: reduce) {
-    :where(a, button, summary) {
+    .btn {
       transition: none;
     }
-  }
-  .btn[data-context='nav'] {
-    height: 2.5rem;
   }
 </style>

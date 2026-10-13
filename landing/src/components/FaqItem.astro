@@ -26,6 +26,12 @@
     font-size: 1.05rem;
     font-weight: 500;
     color: var(--color-text);
+    transition: color var(--duration-ui) var(--ease-ui);
+  }
+  @media (hover: hover) {
+    .faq-item summary:hover {
+      color: var(--color-accent);
+    }
   }
   .faq-item summary::-webkit-details-marker {
     display: none;
@@ -37,8 +43,8 @@
     position: relative;
     color: var(--color-text-subtle);
     transition:
-      transform 0.4s var(--ease-out-expo),
-      color 0.3s ease;
+      transform var(--duration-ui) var(--ease-ui),
+      color var(--duration-ui) var(--ease-ui);
   }
   .faq-item summary .plus::before {
     content: '';
@@ -95,7 +101,8 @@
     outline-offset: 0.25rem;
   }
   @media (prefers-reduced-motion: reduce) {
-    :where(a, button, summary) {
+    summary,
+    .plus {
       transition: none;
     }
   }

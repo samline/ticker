@@ -124,8 +124,14 @@ const instanceId = `tabs-${crypto.randomUUID()}`
     border: 0;
     cursor: pointer;
     transition:
-      color 0.2s ease,
-      background 0.2s ease;
+      color var(--duration-ui) var(--ease-ui),
+      background var(--duration-ui) var(--ease-ui);
+  }
+  @media (hover: hover) {
+    .tab:not([aria-selected='true']):hover {
+      color: var(--color-accent);
+      background: var(--color-accent-soft);
+    }
   }
   .tab[aria-selected='true'] {
     color: var(--color-bg);
@@ -185,5 +191,10 @@ const instanceId = `tabs-${crypto.randomUUID()}`
   .tab:focus-visible {
     outline: 0.125rem solid var(--color-accent);
     outline-offset: 0.25rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tab {
+      transition: none;
+    }
   }
 </style>

@@ -34,19 +34,21 @@
 </script>
 <style>
   ticker-reveal {
-    display: contents;
+    display: block;
+    min-width: 0;
+    transition:
+      opacity var(--duration-reveal) var(--ease-out-expo),
+      transform var(--duration-reveal) var(--ease-out-expo);
   }
   ticker-reveal > :global(*) {
-    transition:
-      opacity 0.9s var(--ease-out-expo),
-      transform 0.9s var(--ease-out-expo);
+    height: 100%;
   }
-  ticker-reveal[data-pending] > :global(*) {
+  ticker-reveal[data-pending] {
     opacity: 0;
-    transform: translateY(1.125rem);
+    transform: translateY(0.75rem);
   }
   @media (prefers-reduced-motion: reduce) {
-    ticker-reveal > :global(*) {
+    ticker-reveal {
       transition: none;
       opacity: 1;
       transform: none;

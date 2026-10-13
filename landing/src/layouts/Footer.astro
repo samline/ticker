@@ -19,19 +19,19 @@ const i18n = getI18n(Astro)
         href="https://github.com/samline/ticker"
         target="_blank"
         rel="noopener noreferrer"
-        class:list={['hover:text-text']}
+        class:list={['footer-link']}
       >
         {i18n.common.links.github}
         <span class:list={['sr-only']}>{i18n.common.externalLinkHint}</span>
       </a>
-      <a href={docsHref('overview')} class:list={['hover:text-text']}>
+      <a href={docsHref('overview')} class:list={['footer-link']}>
         {i18n.common.links.docs}
       </a>
       <a
         href="https://www.npmjs.com/package/@samline/ticker"
         target="_blank"
         rel="noopener noreferrer"
-        class:list={['hover:text-text']}
+        class:list={['footer-link']}
       >
         {i18n.common.links.npm}
         <span class:list={['sr-only']}>{i18n.common.externalLinkHint}</span>
@@ -40,7 +40,7 @@ const i18n = getI18n(Astro)
         href="https://github.com/samline/ticker/blob/main/LICENSE.md"
         target="_blank"
         rel="noopener noreferrer"
-        class:list={['hover:text-text']}
+        class:list={['footer-link']}
       >
         {i18n.common.links.license}
         <span class:list={['sr-only']}>{i18n.common.externalLinkHint}</span>
@@ -53,3 +53,19 @@ const i18n = getI18n(Astro)
     </p>
   </Box>
 </footer>
+
+<style>
+  .footer-link {
+    transition: color var(--duration-ui) var(--ease-ui);
+  }
+  @media (hover: hover) {
+    .footer-link:hover {
+      color: var(--color-accent);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .footer-link {
+      transition: none;
+    }
+  }
+</style>

@@ -19,9 +19,7 @@ const i18n = getI18n(Astro)
           {i18n.navigation.items.map(item => (
             <a
               href={'docsRoute' in item ? docsHref(item.docsRoute) : item.href}
-              class:list={[
-                'rounded-full px-3 py-1.5 text-sm text-text-muted transition-colors hover:text-text',
-              ]}
+              class:list={['nav-link rounded-full px-3 py-1.5 text-sm text-text-muted']}
             >
               {item.label}
             </a>
@@ -110,5 +108,21 @@ const i18n = getI18n(Astro)
     z-index: 30;
     background: var(--color-bg);
     border-bottom: 0.0625rem solid var(--color-border-soft);
+  }
+  .nav-link {
+    transition:
+      color var(--duration-ui) var(--ease-ui),
+      background-color var(--duration-ui) var(--ease-ui);
+  }
+  @media (hover: hover) {
+    .nav-link:hover {
+      color: var(--color-accent);
+      background: var(--color-accent-soft);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nav-link {
+      transition: none;
+    }
   }
 </style>
