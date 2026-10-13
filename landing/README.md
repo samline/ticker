@@ -30,11 +30,13 @@ The build command bundles the component scripts and scoped styles through Astro,
 - `src/styles/tailwind.css`: Tailwind entry, breakpoints, fonts and theme tokens.
 - `public/assets/`: licensed illustrative brand marks. Component CSS and client behavior live inside their owning `.astro` files.
 
+Hero uses narrow Boxes for its introduction and compatibility block, and a medium Box for the live demo. Box owns the gutters and maximum widths; the section owns vertical spacing. LiveDemo fills its parent container.
+
 The separation follows the supplied component/section screenshots. Dinkbit informed the CSS-first Tailwind configuration, `data-theme` variants and the Box/Section foundations. Its application, CMS and server configuration were not imported.
 
 ## Box and Section
 
-`Box` centralizes gutters and content widths. It accepts native div attributes, classes and a default slot. `size` is `default` (68rem), `wide` (85.375rem) or `narrow` (47.5rem). `liquid` removes the maximum width and `x2` expands it to 120rem. `padding="none"` removes gutters through an explicit prop.
+`Box` centralizes gutters and content widths. It accepts native div attributes, classes and a default slot. `size` is `default` (90rem), `wide` (85.375rem), `medium` (64rem) or `narrow` (50rem). `liquid` removes the maximum width and `x2` expands it to 120rem. `padding="none"` removes gutters through an explicit prop.
 
 `Section` creates the semantic section wrapper with native attributes and a slot. Its default vertical padding is `py-10 md:py-16 lg:py-20`; `spacing="none"` allows each complete landing block to keep its original rhythm. `theme="inherit"` follows the page, or use `light`/`dark` for a scoped theme. `main` adds top spacing and `disabled` omits the block. IDs are explicit; it never generates an undefined CMS identifier.
 

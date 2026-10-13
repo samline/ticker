@@ -14,47 +14,50 @@ const headingId = `section-heading-${crypto.randomUUID()}`
 ---
 
 <Section aria-labelledby={headingId} spacing="none" class:list={['hero-section']}>
-  <Box liquid padding="none">
-    <div class:list={['hero-intro']}>
-      <Eyebrow status> {t.kicker}</Eyebrow>
-      <Heading id={headingId} level={1}>
-        {t.title}
-        <br />
-        <span class:list={['serif']}>{t.titleAccent}</span>
-      </Heading>
-      <p class:list={['hero-description']}>
-        {t.description}
-        <br class:list={['desktop-break']} />
-        {t.descriptionContinuation}
-      </p>
-      <div class:list={['hero-actions']}>
-        <Button context="hero" href="#how" class:list={['']} variant="primary">
-          {i18n.common.buttons.getStarted}
-          {iconSeparator}
-          <span aria-hidden="true">↗</span>
-        </Button>
-        <Button context="hero" href="#demo" class:list={['']} variant="secondary">
-          {i18n.common.buttons.exploreDemo}
-          {iconSeparator}
-          <span aria-hidden="true">↓</span>
-        </Button>
-      </div>
-      <InstallCommand />
-      <p class:list={['hero-footnote']}>
-        {t.footnotes[0]} <span aria-hidden="true">·</span> {t.footnotes[1]}
-        <span aria-hidden="true">·</span> {t.footnotes[2]}
-      </p>
+  <Box size="narrow" class:list={['hero-intro']}>
+    <Eyebrow status> {t.kicker}</Eyebrow>
+    <Heading id={headingId} level={1}>
+      {t.title}
+      <br />
+      <span class:list={['serif']}>{t.titleAccent}</span>
+    </Heading>
+    <p class:list={['hero-description']}>
+      {t.description}
+      <br class:list={['desktop-break']} />
+      {t.descriptionContinuation}
+    </p>
+    <div class:list={['hero-actions']}>
+      <Button context="hero" href="#how" class:list={['']} variant="primary">
+        {i18n.common.buttons.getStarted}
+        {iconSeparator}
+        <span aria-hidden="true">↗</span>
+      </Button>
+      <Button context="hero" href="#demo" class:list={['']} variant="secondary">
+        {i18n.common.buttons.exploreDemo}
+        {iconSeparator}
+        <span aria-hidden="true">↓</span>
+      </Button>
     </div>
+    <InstallCommand />
+    <p class:list={['hero-footnote']}>
+      {t.footnotes[0]}
+      <span aria-hidden="true">·</span>
+      {t.footnotes[1]}
+      <span aria-hidden="true">·</span>
+      {t.footnotes[2]}
+    </p>
+  </Box>
+  <Box size="medium">
     <LiveDemo id="demo" />
-    <div class:list={['compatibility']}>
-      <p>{t.compatibilityLabel}</p>
-      <div>
-        {t.platforms.map(platform => (
-          <>
-            <span>{platform}</span>{' '}
-          </>
-        ))}
-      </div>
+  </Box>
+  <Box size="narrow" class:list={['compatibility']}>
+    <p>{t.compatibilityLabel}</p>
+    <div>
+      {t.platforms.map(platform => (
+        <>
+          <span>{platform}</span>{' '}
+        </>
+      ))}
     </div>
   </Box>
 </Section>
@@ -62,10 +65,9 @@ const headingId = `section-heading-${crypto.randomUUID()}`
 <style>
   .hero-section {
     position: relative;
-    padding: 3.5rem 1.5rem 0;
+    padding-top: 3.5rem;
   }
   .hero-intro {
-    max-width: 60rem;
     margin-inline: auto;
     text-align: center;
   }
@@ -77,7 +79,6 @@ const headingId = `section-heading-${crypto.randomUUID()}`
   }
   .hero-description {
     margin: 1.625rem auto 0;
-    max-width: 38.125rem;
     color: var(--color-text-muted);
     font-size: 1.05rem;
     line-height: 1.75;
@@ -98,7 +99,6 @@ const headingId = `section-heading-${crypto.randomUUID()}`
     font-size: 0.72rem;
   }
   .compatibility {
-    max-width: 60rem;
     margin: 3rem auto 0;
     text-align: center;
   }
@@ -127,7 +127,6 @@ const headingId = `section-heading-${crypto.randomUUID()}`
   @media (width < 48rem) {
     .hero-description {
       font-size: 0.9rem;
-      max-width: 36ch;
     }
   }
   @media (width < 48rem) {
@@ -148,7 +147,6 @@ const headingId = `section-heading-${crypto.randomUUID()}`
   }
   @media (width < 48rem) {
     .compatibility > p {
-      max-width: 28ch;
       margin-inline: auto;
     }
   }
@@ -156,7 +154,6 @@ const headingId = `section-heading-${crypto.randomUUID()}`
     .hero-actions {
       gap: 0.625rem;
       flex-direction: column;
-      max-width: 20rem;
       margin-inline: auto;
     }
   }
