@@ -9,6 +9,11 @@ export default {
     markup: 'Add markup',
     initialize: 'Initialize',
   },
+  docs: {
+    description:
+      'This is the minimal setup. Explore duration, direction and hover behavior before adapting the ticker to your design.',
+    label: 'Explore configuration options',
+  },
   markupDescription:
     'Write the content as you normally would. The library enhances it, never replaces it.',
   installLabel: 'Installation method',

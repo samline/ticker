@@ -1,5 +1,6 @@
 ---
 import RichText from '../components/RichText.astro'
+import { docsHref } from '../lib/docs'
 import { getI18n } from '../i18n/utils'
 import Section from '../components/Section.astro'
 import Box from '../components/Box.astro'
@@ -88,5 +89,42 @@ const headingId = `section-heading-${crypto.randomUUID()}`
         </Tabs>
       </StepCard>
     </div>
+    <div class:list={['setup-docs']}>
+      <p>{t.docs.description}</p>
+      <a href={docsHref('options')}>
+        {t.docs.label}
+        <span aria-hidden="true">↗</span>
+      </a>
+    </div>
   </Box>
 </Section>
+<style>
+  .setup-docs {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 0.0625rem solid var(--color-border);
+  }
+  p {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  a {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 0.1875rem;
+  }
+  a:hover {
+    color: var(--color-text);
+  }
+  a:focus-visible {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.25rem;
+  }
+</style>

@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node scripts/include-docs.mjs && node scripts/check-site.mjs",
+    "build": "astro build && node scripts/include-docs.mjs && node scripts/check-site.mjs && node scripts/check-doc-links.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "check": "node scripts/check-translations.mjs && astro check && npm run test",

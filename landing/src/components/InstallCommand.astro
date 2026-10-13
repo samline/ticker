@@ -1,67 +1,20 @@
 ---
+import CopyButton from './CopyButton.astro'
 import { getI18n } from '../i18n/utils'
-const i18n = getI18n(Astro)
-const t = i18n.controls.copy
+const t = getI18n(Astro).controls.copy
 ---
 
-<ticker-install
-  data-copied-label={t.copiedLabel}
-  data-success-message={t.success}
-  data-fallback-message={t.fallback}
-  class:list={['install-shortcut']}
->
+<div data-copy-source="" class:list={['install-shortcut']}>
   <code>{t.command}</code>
-  <button type="button" data-copy={t.command} aria-label={t.ariaLabel}>
-    {t.label} <span aria-hidden="true">⧉</span>
-  </button>
-  <span
-    class:list={['sr-only']}
-    role="status"
-    aria-live="polite"
-    aria-atomic="true"
-    data-copy-status=""
-  ></span>
-</ticker-install>
+  <CopyButton text={t.command} ariaLabel={t.ariaLabel} variant="command" />
+</div>
 
-<script>
-  class TickerInstall extends HTMLElement {
-    private lifecycle?: AbortController
-    connectedCallback() {
-      this.lifecycle?.abort()
-      this.lifecycle = new AbortController()
-      const button = this.querySelector<HTMLButtonElement>('[data-copy]')
-      const status = this.querySelector<HTMLElement>('[data-copy-status]')
-      const code = this.querySelector('code')
-      if (!button || !status || !code) return
-      button.addEventListener(
-        'click',
-        async () => {
-          try {
-            await navigator.clipboard.writeText(button.dataset.copy ?? code.textContent ?? '')
-            if (this.lifecycle?.signal.aborted) return
-            button.textContent = this.dataset.copiedLabel ?? ''
-            status.textContent = this.dataset.successMessage ?? ''
-          } catch {
-            const range = document.createRange()
-            range.selectNodeContents(code)
-            const selection = window.getSelection()
-            selection?.removeAllRanges()
-            selection?.addRange(range)
-            status.textContent = this.dataset.fallbackMessage ?? ''
-          }
-        },
-        { signal: this.lifecycle.signal }
-      )
-    }
-    disconnectedCallback() {
-      this.lifecycle?.abort()
-    }
-  }
-  if (!customElements.get('ticker-install')) customElements.define('ticker-install', TickerInstall)
-</script>
 <style>
   .install-shortcut {
     display: inline-flex;
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
     gap: 1.5rem;
     margin-top: 1.4375rem;
@@ -74,17 +27,6 @@ const t = i18n.controls.copy
     color: var(--palette-install-text);
     font-size: 0.72rem;
     font-family: var(--font-mono);
-  }
-  .install-shortcut button {
-    border-left: 0.0625rem solid var(--color-border);
-    padding: 0.125rem 0.4375rem 0.125rem 0.75rem;
-    color: var(--color-text-muted);
-    font-size: 0.7rem;
-    cursor: pointer;
-    min-height: 1.75rem;
-  }
-  .install-shortcut button:hover {
-    color: var(--color-accent);
   }
   @media (width < 30rem) {
     .install-shortcut {

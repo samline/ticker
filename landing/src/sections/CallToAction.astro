@@ -1,4 +1,5 @@
 ---
+import { docsHref } from '../lib/docs'
 import RichText from '../components/RichText.astro'
 import { getI18n } from '../i18n/utils'
 import Reveal from '../components/Reveal.astro'
@@ -53,6 +54,13 @@ const headingId = `section-heading-${crypto.randomUUID()}`
             {i18n.common.buttons.starGithub}
           </Button>
         </div>
+        <div class:list={['closing-docs']}>
+          <p>{t.docs.description}</p>
+          <a href={docsHref('overview')}>
+            {t.docs.label}
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
       </div>
     </Reveal>
   </Box>
@@ -77,5 +85,34 @@ const headingId = `section-heading-${crypto.randomUUID()}`
   .cta-card > p {
     color: var(--palette-closing-text);
     font-size: 0.9rem;
+  }
+</style>
+
+<style>
+  .closing-docs {
+    display: grid;
+    justify-items: center;
+    gap: 0.625rem;
+    margin-top: 2rem;
+  }
+  .closing-docs p {
+    color: var(--palette-closing-text);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+  .closing-docs a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--palette-closing-title);
+    text-decoration: underline;
+    text-underline-offset: 0.1875rem;
+  }
+  .closing-docs a:hover {
+    color: var(--palette-closing-secondary);
+  }
+  .closing-docs a:focus-visible {
+    outline: 0.125rem solid var(--palette-closing-title);
+    outline-offset: 0.25rem;
   }
 </style>

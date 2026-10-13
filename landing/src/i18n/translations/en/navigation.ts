@@ -8,6 +8,7 @@ export default {
     close: 'Close navigation menu',
   },
   items: [
+    { docsRoute: 'overview', label: 'Docs' },
     {
       href: '#features',
       label: 'Features',

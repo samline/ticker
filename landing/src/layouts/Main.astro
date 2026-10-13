@@ -57,7 +57,7 @@ const i18n = getI18n(Astro)
   }
 
   body {
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   ::selection {
@@ -90,7 +90,7 @@ const i18n = getI18n(Astro)
   }
 
   html {
-    scroll-padding-top: 2rem;
+    scroll-padding-top: var(--header-offset, 9rem);
   }
   body {
     background: var(--color-bg);

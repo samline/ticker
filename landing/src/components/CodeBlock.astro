@@ -1,4 +1,5 @@
 ---
+import CopyButton from './CopyButton.astro'
 import { getI18n } from '../i18n/utils'
 import { format } from '../i18n/format'
 interface Props {
@@ -13,9 +14,15 @@ const { filename, tokens, class: className } = Astro.props
 const i18n = getI18n(Astro)
 ---
 
-<div class:list={['code-block', className]}>
+<div data-copy-source="" class:list={['code-block', className]}>
   <header>
-    <span class:list={['dot']}></span> {filename}
+    <span class:list={['file-label']}>
+      <span class:list={['dot']} aria-hidden="true"></span> {filename}
+    </span>
+    <CopyButton
+      text={tokens.map(token => token.value).join('')}
+      ariaLabel={format(i18n.controls.code.copyLabel, { filename })}
+    />
   </header>
   <pre
     tabindex="0"
@@ -37,6 +44,8 @@ const i18n = getI18n(Astro)
   .code-block header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
     gap: 0.5rem;
     padding: 0.6rem 1rem;
     border-bottom: 0.0625rem solid var(--color-border-soft);
@@ -45,7 +54,15 @@ const i18n = getI18n(Astro)
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
+  .file-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
   .code-block header .dot {
+    flex-shrink: 0;
     width: 0.625rem;
     height: 0.625rem;
     border-radius: 624.9375rem;

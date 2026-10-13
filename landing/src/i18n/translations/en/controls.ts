@@ -1,12 +1,12 @@
 export default {
-  code: { label: 'Code example: {filename}' },
+  code: { label: 'Code example: {filename}', copyLabel: 'Copy code from {filename}' },
   copy: {
     command: 'npm install @samline/ticker',
     label: 'Copy',
     ariaLabel: 'Copy npm install command',
     copiedLabel: 'Copied!',
-    success: 'Install command copied to clipboard.',
-    fallback: 'Command selected. Press Control+C or Command+C to copy.',
+    success: 'Copied to clipboard.',
+    fallback: 'Code selected. Press Control+C or Command+C to copy.',
   },
   theme: {
     label: 'Dark theme',

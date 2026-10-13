@@ -17,7 +17,7 @@ export default {
             ' on the existing instance. Omitted settings keep their current values, so changing direction leaves the configured duration intact. The library schedules the refresh for you.',
         },
       ],
-      docsPath: 'reference/api/',
+      docsRoute: 'update',
       docsLabel: 'Read the update() reference',
       code: {
         filename: 'update.js',
@@ -42,7 +42,7 @@ export default {
             ', rather than the generated copies. Explicitly refresh after the edit: a resize check can reuse copies if the measured width stays unchanged.',
         },
       ],
-      docsPath: 'guides/lifecycle/#update-versus-refresh',
+      docsRoute: 'content',
       docsLabel: 'See how content refresh works',
       code: {
         filename: 'content.js',
@@ -76,7 +76,7 @@ export default {
             '. This removes the registry entry as well as the instance. Calling only the returned controller’s destroy() leaves registry bookkeeping behind.',
         },
       ],
-      docsPath: 'reference/browser/',
+      docsRoute: 'registry',
       docsLabel: 'Read the browser registry guide',
       code: {
         filename: 'cleanup.js',
