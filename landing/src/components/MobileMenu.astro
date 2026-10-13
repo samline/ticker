@@ -177,6 +177,18 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
     color: var(--color-text);
     background: var(--color-surface);
     cursor: pointer;
+    transition:
+      color 0.2s ease,
+      background-color 0.2s ease,
+      border-color 0.2s ease;
+  }
+  @media (hover: hover) {
+    .menu-toggle:hover,
+    .mobile-menu :global(.menu-close:hover) {
+      color: var(--color-accent);
+      background: var(--color-accent-soft);
+      border-color: var(--color-accent);
+    }
   }
   [hidden] {
     display: none !important;
@@ -286,6 +298,10 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
     }
   }
   @media (prefers-reduced-motion: reduce) {
+    .menu-toggle,
+    .mobile-menu :global(.menu-close) {
+      transition: none;
+    }
     .mobile-menu :global(.mobile-menu-panel),
     .mobile-menu :global(.mobile-menu-overlay) {
       animation: none !important;
