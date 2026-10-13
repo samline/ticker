@@ -1,6 +1,8 @@
 export default {
   label: 'Live demo content',
   title: 'THE LIBRARY, LIVE',
+  integrationNote:
+    'Ticker manages motion. Your integration should provide a pause control and keep the original content readable.',
   tabs: [
     {
       id: 'news',
