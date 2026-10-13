@@ -89,7 +89,7 @@ const i18n = getI18n(Astro)
         const rootSize = Number.parseFloat(getComputedStyle(root).fontSize)
         root.style.setProperty(
           '--header-offset',
-          `${this.getBoundingClientRect().height / rootSize + 0.75}rem`
+          `${this.getBoundingClientRect().height / rootSize + 2.5}rem`
         )
       })
       this.observer.observe(this)

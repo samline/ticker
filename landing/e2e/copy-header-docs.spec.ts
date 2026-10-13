@@ -99,7 +99,7 @@ test('sticky navigation keeps targets below the header across viewport and text 
             const target = document.querySelector('#how .section-heading')!.getBoundingClientRect()
             const gap = target.top - header.bottom
             const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
-            return gap >= 0 && gap <= rootSize + 1
+            return Math.abs(gap / rootSize - 2.5) < 0.1
           })
         )
         .toBe(true)
@@ -167,7 +167,7 @@ test('section anchors keep heading spacing compact without double-counting secti
               const rootSize = Number.parseFloat(
                 getComputedStyle(document.documentElement).fontSize
               )
-              return Math.abs((heading.top - header.bottom) / rootSize - 0.75)
+              return Math.abs((heading.top - header.bottom) / rootSize - 2.5)
             }, id)
           )
           .toBeLessThan(0.1)
