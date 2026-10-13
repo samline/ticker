@@ -67,3 +67,17 @@ unmount()
 The manager is browser-safe to import during server rendering: calls become no-ops when `window` or `document` is unavailable.
 
 The page manager and controller factory share runtime tracking. Do not give both lifecycles ownership of the same wrapper. `unmount()` removes clones and observers but does not call a controller's restoration closure, so retain and explicitly `destroy()` application-created controllers when their generated wrapper must be replaced by the original source.
+
+## Library and application responsibilities
+
+Ticker provides the runtime; the application owns the content, controls and integration lifecycle.
+
+| Concern            | Ticker handles                                            | Your application handles                                               |
+| ------------------ | --------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Frameworks         | A DOM-based API with no framework dependencies            | Initialize after mounting and clean up on unmount                      |
+| Visual copies      | Hides clones from assistive technology and keyboard focus | Keep the original content meaningful and accessible                    |
+| Playback           | Pauses off-screen and in hidden documents                 | Provide a pause control for continuous motion                          |
+| Reduced motion     | Respects the system preference                            | Keep static content readable and reachable                             |
+| Layout and content | Remeasures on resize                                      | Refresh after application-owned edits, even when width stays unchanged |
+| Distribution       | ESM, CommonJS and a browser global                        | Load the stylesheet alongside the selected API                         |
+| Licensing          | MIT-licensed runtime                                      | Retain the license when redistributing                                 |

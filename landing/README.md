@@ -23,8 +23,8 @@ The build command bundles the component scripts and scoped styles through Astro,
 
 ## Structure
 
-- `src/components/`: independent, reusable UI primitives (`Box`, `Section`, `Button`, `Eyebrow`, `SectionHeading`, `Heading`, `Logo`, `Tabs`, `CodeBlock`, `FeatureCard`, `RuntimeItem`, `StepCard`, `FaqItem`, `BrandLogo`, `TickerDemo`, `SpeedControl`, `InstallCommand`, `ThemeToggle`, `Theme`, `Reveal`, `MobileMenu`).
-- `src/sections/`: complete content blocks (`Hero`, `LiveDemo`, `Features`, `Runtimes`, `GettingStarted`, `Comparison`, `Faq`, `CallToAction`).
+- `src/components/`: independent, reusable UI primitives (`Box`, `Section`, `Button`, `Eyebrow`, `SectionHeading`, `Heading`, `Logo`, `Tabs`, `CodeBlock`, `FeatureCard`, `RuntimeItem`, `StepCard`, `FaqItem`, `BrandLogo`, `TickerDemo`, `SpeedControl`, `InstallCommand`, `ThemeToggle`, `Theme`, `Reveal`, `MobileMenu`, `RecipeCard`).
+- `src/sections/`: complete content blocks (`Hero`, `LiveDemo`, `Features`, `Runtimes`, `GettingStarted`, `Recipes`, `Faq`, `CallToAction`).
 - `src/layouts/`: document shell, header and footer.
 - `src/pages/index.astro`: composes the sections.
 - `src/styles/tailwind.css`: Tailwind entry, breakpoints, fonts and theme tokens.
@@ -117,3 +117,5 @@ npm --prefix landing run test:browser
 ```
 
 The browser suite serves the compiled site at its deployment base path. It also checks repeated menu instances, disconnect/reconnect cleanup, reduced motion, no-JavaScript navigation and automated accessibility checks while the menu is open.
+
+The Recipes section complements setup and features with three specific integration decisions: live option updates, editing the stable source and explicitly synchronizing copies, and registry-aware browser cleanup. Examples and explanatory text live in its locale catalog; API behavior is documented in the existing reference and lifecycle guide. The old #compare fragment remains an alias for #recipes.

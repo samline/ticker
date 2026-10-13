@@ -17,8 +17,8 @@ export default {
       label: 'Get started',
     },
     {
-      href: '#compare',
-      label: 'Compare',
+      href: '#recipes',
+      label: 'Recipes',
     },
     {
       href: '#faq',
