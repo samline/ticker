@@ -1,8 +1,10 @@
-# Ticker landing
+# Ticker landing: implementation and reuse guide
 
-Astro 7 marketing site for `@samline/ticker`, scaffolded with `npm create astro@latest -- --template minimal`. Tailwind 4 runs through `@tailwindcss/vite`. Requires Node.js 22.12 or newer.
+This is the Astro 7 and Tailwind 4 landing for `@samline/ticker`. It is also a reference for building package websites with reusable Astro components, scoped behavior, translation catalogs, executable examples and a shared landing/documentation deployment.
 
-## Development
+Use this README as the implementation playbook and [AGENTS.md](AGENTS.md) as the maintenance contract. Exact dependency versions belong to `package.json` and `package-lock.json`; the current Node.js requirement is 22.12 or newer. This project started with `npm create astro@latest -- --template minimal`. It does not need a client framework or an Astro Tailwind integration: Tailwind runs through `@tailwindcss/vite`.
+
+## Run and verify
 
 From the repository root:
 
@@ -11,111 +13,184 @@ npm ci --prefix landing
 npm run landing:dev
 ```
 
-Open `http://localhost:4321/ticker/`. TickerDemo imports the local library API directly from the repository source. Library changes appear in development without rebuilding or copying a browser bundle.
+Open `http://localhost:4321/ticker/`. The local package API is imported from repository source, so library changes reach the demo without copying a built JavaScript bundle.
 
 ```sh
 npm run landing:check
+npm --prefix landing run format:check
 npm run landing:build
 npm run landing:preview
 ```
 
-The build command bundles the component scripts and scoped styles through Astro, then generates the static site in `landing/dist/`. Deploy that output directory. Run `npm run site:build` to build both sites: the landing occupies `/ticker/` and the documentation is copied to `/ticker/docs/`. The GitHub Pages workflow publishes this combined output, with a shared sitemap index and redirects for previous documentation URLs.
+`landing:check` runs the interface-copy audit, Astro diagnostics and Node regression tests. `landing:build` creates `landing/dist/`, includes an existing documentation build when available and verifies production metadata, image dimensions, base paths and legacy redirects. An existing `example/dist/` may be stale; build both sites for a release:
 
-## Structure
+```sh
+npm ci --prefix example
+npm run site:build
+```
 
-- `src/components/`: independent, reusable UI primitives (`Box`, `Section`, `Button`, `Eyebrow`, `SectionHeading`, `Heading`, `Logo`, `Tabs`, `CodeBlock`, `FeatureCard`, `RuntimeItem`, `StepCard`, `FaqItem`, `BrandLogo`, `TickerDemo`, `SpeedControl`, `InstallCommand`, `ThemeToggle`, `Theme`, `Reveal`, `MobileMenu`, `RecipeCard`).
-- `src/sections/`: complete content blocks (`Hero`, `LiveDemo`, `Features`, `Runtimes`, `GettingStarted`, `Recipes`, `Faq`, `CallToAction`).
-- `src/layouts/`: document shell, header and footer.
-- `src/pages/index.astro`: composes the sections.
-- `src/styles/tailwind.css`: Tailwind entry, breakpoints, fonts and theme tokens.
-- `public/assets/`: licensed illustrative brand marks. Component CSS and client behavior live inside their owning `.astro` files.
+For browser checks, build first:
 
-Hero uses narrow Boxes for its introduction and compatibility block, and a medium Box for the live demo. Box owns the gutters and maximum widths; the section owns vertical spacing. LiveDemo fills its parent container.
+```sh
+npm exec --prefix landing -- playwright install chromium
+npm --prefix landing run test:browser
+```
 
-The separation follows the supplied component/section screenshots. Dinkbit informed the CSS-first Tailwind configuration, `data-theme` variants and the Box/Section foundations. Its application, CMS and server configuration were not imported.
+The Playwright suite uses an isolated preview on port 4324 with `--ignore-lock`, avoiding Astro's agent-detected background mode and existing preview locks. Its base URL is currently `/ticker/`. Browser tests cover both themes, viewport changes from 320 to 1440 and back, breakpoint boundaries, enlarged root text, every demo tab, keyboard navigation, modal focus, repeated menu instances, disconnect/reconnect cleanup, reduced motion and navigation without JavaScript. Axe checks supplement these tests; they do not establish complete accessibility conformance.
 
-## Box and Section
+CI runs the maintained landing's formatting, source checks, build and browser suite. Format authored files with `npm --prefix landing run format`. Generated output, npm lockfiles, licensed brand assets and installed third-party skills are excluded from formatting.
 
-`Box` centralizes gutters and content widths. It accepts native div attributes, classes and a default slot. `size` is `default` (90rem), `wide` (85.375rem), `medium` (64rem) or `narrow` (50rem). `liquid` removes the maximum width and `x2` expands it to 120rem. `padding="none"` removes gutters through an explicit prop.
+## Architecture and ownership
 
-`Section` creates the semantic section wrapper with native attributes and a slot. Its default vertical padding is `py-10 md:py-16 lg:py-20`; `spacing="none"` allows each complete landing block to keep its original rhythm. `theme="inherit"` follows the page, or use `light`/`dark` for a scoped theme. `main` adds top spacing and `disabled` omits the block. IDs are explicit; it never generates an undefined CMS identifier.
+| Location                  | Responsibility                                                                                                                                                         |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/components/`         | Individual reusable primitives, controls and integrations: Box, Section, Button, Heading, Tabs, CodeBlock, RichText, RecipeCard, TickerDemo, MobileMenu and related UI |
+| `src/sections/`           | Complete content blocks: Hero, LiveDemo, Features, Runtimes, GettingStarted, Recipes, Faq and CallToAction                                                             |
+| `src/layouts/`            | Main document, header and footer                                                                                                                                       |
+| `src/pages/`              | Section composition and generated robots/social-image endpoints                                                                                                        |
+| `src/styles/tailwind.css` | Tailwind entry, breakpoints, typography tokens and theme palettes                                                                                                      |
+| `src/i18n/`               | Locale resolution, typed interpolation and all editable interface copy                                                                                                 |
+| `src/lib/site.ts`         | Public URL validation, XML escaping and safe JSON-LD serialization                                                                                                     |
+| `scripts/`                | Copy audit, production-output checks and documentation packaging                                                                                                       |
+| `tests/`, `e2e/`          | Source/metadata regression tests and compiled-site browser checks                                                                                                      |
+| `public/assets/`          | Licensed example brand marks and their attribution                                                                                                                     |
+
+A component owns its plain scoped `<style>` and processed `<script>`. Shared Tailwind configuration is not a place for component selectors. The layout owns document styling; Theme owns the shared document color preference. Dinkbit informed the CSS-first tokens, breakpoints and Box/Section foundations, while easytrip informed navigation integration. Their CMS, backend and application setup were not imported.
+
+### Layout foundations
+
+Box owns horizontal gutters and content widths. Section owns semantic section boundaries, vertical spacing and optional local themes. Use different Boxes inside one section when its heading, demonstration and supporting content need different widths; do not add local maximum widths or duplicate section gutters to recreate Box.
+
+| Box size  | Maximum width                     |
+| --------- | --------------------------------- |
+| `default` | 90rem                             |
+| `wide`    | 85.375rem, the `2xl` screen token |
+| `medium`  | 64rem                             |
+| `narrow`  | 50rem                             |
+
+These values preserve the project's chosen sizes; size names do not imply a sorted order. `liquid` removes the maximum width, `x2` uses 120rem, and `padding="none"` removes gutters. Default gutters are `px-6 lg:px-10`. Native attributes, classes and Astro scope attributes are forwarded to the root element.
+
+Section supports `spacing="none"`, `theme="inherit" | "light" | "dark"`, `main`, `disabled` and native attributes. Its default vertical spacing is `py-10 md:py-16 lg:py-20`. Assign meaningful section IDs and connect each section to its heading with `aria-labelledby`.
+
+Hero uses narrow Boxes for its introduction and compatibility block and a medium Box for LiveDemo. LiveDemo fills the container it receives. A reusable section pattern keeps copy in the catalog:
 
 ```astro
 ---
+import { getI18n } from '../i18n/utils'
 import Box from '../components/Box.astro'
 import Section from '../components/Section.astro'
+const t = getI18n(Astro).sections.recipes
+const headingId = `section-heading-${crypto.randomUUID()}`
 ---
 
-<Section id="example" aria-labelledby="example-title">
-  <Box>
-    <h2 id="example-title">A reusable foundation</h2>
+<Section aria-labelledby={headingId} spacing="none">
+  <Box size="narrow">
+    <h2 id={headingId} class:list={['text-text']}>
+      {t.title}
+    </h2>
   </Box>
 </Section>
 ```
 
-## Tailwind conventions and themes
+### Styles, units and themes
 
-Breakpoints use rem units: `xs` 23.4375rem, `sm` 37.5rem, `md` 48rem, `lg` 64rem, `xl` 75rem, `2xl` 85.375rem and `3xl` 90rem. Use `max-*` variants for upper bounds rather than duplicating near-identical breakpoint definitions.
+Use `class:list={[...]}` for every Astro class attribute, including single-class elements. Fixed authored lengths use rem: gutters, widths, borders, radii, outlines, shadows and media thresholds. Fluid percentages/viewport expressions and unitless SVG drawing coordinates retain their proportional meaning. A Tailwind `px-*` class means horizontal padding, not pixel units. Browser measurement APIs and third-party internals can report pixels; normalize the integration boundary where required rather than rewriting the library API.
 
-Semantic utilities such as `bg-bg`, `text-text`, `text-text-muted`, `border-border` and `text-accent` resolve through `@theme inline`. Both theme palettes live in `tailwind.css`, including surface and syntax tokens; interface colors should be changed there. `dark:` and `light:` variants follow `data-theme`.
+Breakpoints are `xs` 23.4375rem, `sm` 37.5rem, `md` 48rem, `lg` 64rem, `xl` 75rem, `2xl` 85.375rem and `3xl` 90rem. Prefer `max-*` variants to duplicated upper-bound definitions. Tokens such as `bg-bg`, `text-text-muted`, `border-border` and `text-accent` resolve through `@theme inline`; syntax, surfaces and controls have semantic palette tokens for both themes.
 
-The first visit follows the system color scheme. The header toggle persists an explicit choice in `localStorage`; an inline head script applies it before rendering. System changes are followed until a manual choice is made. Storage restrictions do not break the toggle. Sections can override the theme locally.
+The first visit follows system preference. The inline head script prevents a theme flash, and an explicit choice is stored under `ticker-theme`. System changes are followed until that choice is made. Storage restrictions must not break the UI. Local Section themes use `data-theme`; changing the brand palette also requires reviewing the theme-color values in Theme and SEO.
 
-## Demos and accessibility
+### Behavior and library integration
 
-The original English content, dark/lavender identity, sample brands and illustrative prices are preserved. Tabs support arrow keys, Home and End. Each ticker has a pause toggle, pauses on hover/focus, respects reduced motion and refreshes after font loading. The duration slider updates the selected ticker. All content remains available without JavaScript, with horizontal scrolling for static ticker content. FAQ items use native details/summary; the page includes a skip link and visible focus indicators.
+Astro deduplicates processed scripts, so initialize every rendered instance. Interactive components use custom elements, local queries and state, AbortController listener cleanup and `disconnectedCallback`. Generate unique DOM/ARIA IDs for repeated tab groups and controls. Route custom events within the owning section; an unrelated instance must not receive its tab, speed or pause changes.
 
-Brand marks come from Simple Icons v16.0.0. Their sources, license and disclaimer are retained in `public/assets/brands/`. They are examples, not endorsements. The FAQ bundle size refers to the v2.0.4 browser build (about 4.3 KiB gzip plus 0.5 KiB CSS) and should be remeasured after library changes.
+For slots and library-generated DOM, anchor necessary `:global()` selectors beneath a component-owned root. Never target arbitrary `.btn`, `.tab` or `.card` elements throughout the document. Verify CSS isolation and removal/reinsertion as well as the first render.
 
-## Encapsulation
+Use library APIs before adding integration code. MobileMenu delegates creation, trigger handling, close-button rendering, Escape/backdrop dismissal and modal focus to `@samline/drawer/browser`. Its own script only adds link dismissal, desktop-breakpoint cleanup, `aria-expanded` synchronization and instance teardown. A native details menu remains available without JavaScript. It imports the original Drawer stylesheet with `?inline`, normalizes vendor pixel lengths to rem and wraps it in native CSS `@scope`; its regular Astro style block owns panel design and reduced-motion overrides. Do not duplicate Drawer animations or add a CSS parser for this boundary. Native `@scope` needs a compatible target browser; test that contract when changing supported browsers or porting the component.
 
-Each component owns its CSS in a plain `<style>` block, which Astro scopes automatically, and its client behavior in a processed `<script>`. Tailwind's shared entry file contains only framework configuration, fonts, breakpoints and theme tokens. The document shell styles its own HTML, body, texture and skip link.
+TickerDemo imports the local vanilla API and owns its controller, pause behavior and measurement observer. It contains a scoped adaptation of the package stylesheet, followed by component design overrides. The order matters: animation shorthands can reset pause state. Synchronize this adaptation when `src/style.css` changes. The library measures `--ticker-distance` in pixels; the component normalizes it to rem using the computed root font size and cleans its observer on disconnect. For another package, prefer its original stylesheet with an explicit scope when possible; do not turn this package-specific adaptation into a universal runtime.
 
-Interactive components use custom elements with instance-local queries (`this.querySelector`), AbortController cleanup in `disconnectedCallback`, and their own state. TickerDemo destroys its local controller on disconnect; Reveal disconnects its own observer. Theme owns the shared document preference, while each ThemeToggle binds its own button and observes theme changes.
+## Copy and content strategy
 
-Tabs owns both its triggers and panel slot. Its logical group name can repeat safely: trigger/panel IDs use a unique prefix per rendered instance. Ticker IDs and speed input/output associations are also unique. LiveDemo routes events only to the demos and controls inside that instance. Visual variants use explicit context props rather than selectors coupled to parent section classes.
+All UI copy lives in `src/i18n/translations/en/`, including navigation, headings, accessible names, meta descriptions, demo data, example code and client-side feedback. The active language remains English; catalogs do not by themselves add translated routes or a language selector.
 
-Scoped `:global()` descendants are used only under a component-owned selector where Astro slots or library clones require it. These selectors never target the whole document. Arbitrary `.btn`, `.tab` and `.card` classes outside the component receive no component styles.
+| Catalog         | Content                                                                          |
+| --------------- | -------------------------------------------------------------------------------- |
+| `common.ts`     | Shared links/actions and package name, version and author from the root manifest |
+| `navigation.ts` | Desktop/mobile navigation, skip link and footer credit                           |
+| `seo.ts`        | Metadata, keywords and sharing-image copy                                        |
+| `controls.ts`   | Copy feedback, theme, pause, duration and code-region labels                     |
+| `sections/`     | Each section's descriptions, items, samples and code tokens                      |
 
-Validation covered two simultaneous instances of demos, tabs, copy controls and theme toggles: independent tab selection, loop duration, pause state and copy feedback; unique DOM/ARIA IDs; synchronized document theme; CSS isolation from unrelated markup; and disconnect/reconnect cleanup. The full landing also passed dark/light responsive checks from 20rem to 90rem at the default root font size, keyboard tabs, reduced motion and JavaScript-disabled fallbacks.
+Use `getI18n(Astro)` with typed keys. `getLocale` normalizes supported regional tags and falls back safely. Additional dictionaries must satisfy `TranslationDictionary`; actual localized routes need matching canonical, sitemap and sharing metadata. Use complete messages with named placeholders through `format`, rather than concatenating fragments that a translator cannot reorder.
 
-All authored layout lengths use rem, including outlines, borders, shadows, icon viewports and responsive thresholds. SVG viewBox and stroke values are unitless drawing coordinates. Astro template classes use `class:list={[...]}`, including single-class elements; code examples render escaped tokens from their section catalog. Run `npm --prefix landing run format` to format all maintained landing files and `npm --prefix landing run format:check` to verify them. Generated output, the npm lockfile and third-party assets are excluded.
+RichText renders escaped text/code/emphasis/strong parts. CodeBlock renders escaped syntax tokens. Catalogs contain no executable HTML. Pass selected messages to custom elements through their own `data-*` attributes instead of shipping all dictionaries into client bundles. `set:html` is reserved here for safely serialized JSON-LD and the trusted scoped vendor stylesheet, not translated UI content.
 
-## Translation catalogs
+The source-copy audit detects literal UI text, human-facing attributes and direct client feedback. It is a guardrail, not a complete semantic audit of all possible JavaScript. Review newly added props and data objects as well; do not hide copy outside the catalogs to bypass it.
 
-All editable interface text lives in `src/i18n/translations/en/`. English remains the landing's current language. The organization follows dinkbit's domain dictionaries, with typed keys, named interpolation and a source-copy check:
+Each section should answer a different question: Hero introduces the package, LiveDemo lets people try it, Features explains benefits, Runtimes explains entrypoints, GettingStarted provides setup, Recipes addresses specific post-setup decisions, FAQ handles remaining questions and CallToAction offers the next step. Audit existing copy before adding a section. The former comparison table repeated benefits and confused responsibilities; it was moved to the documentation lifecycle guide. Recipes now demonstrates partial option updates, editing the stable source and synchronizing copies, and browser-registry cleanup. The old `#compare` fragment remains an alias for `#recipes`. A short demo note keeps integration responsibilities visible without another feature list.
 
-- `common.ts`: shared actions, link labels and package metadata. Name/version come from the root package manifest.
-- `navigation.ts`: navigation, skip link and footer credit.
-- `seo.ts`: document title, description, keywords, sharing metadata and image copy.
-- `controls.ts`: copy feedback, theme labels, ticker pause and loop-duration messages.
-- `sections/`: one catalog per complete section, including feature/FAQ items, demo content and code examples.
-- `index.ts`: composes the locale dictionary.
+## Accessibility and evidence
 
-Find a sentence directly with `rg 'Thoughtful by default' landing/src/i18n/translations`, then edit its catalog without changing the component. Components read `getI18n(Astro)` with typed property access. `getLocale` normalizes regional language tags and falls back to the default locale for unknown values. Future dictionaries must satisfy `TranslationDictionary`; adding translations does not by itself add routes or a language selector.
+Use semantic headings and section associations, an effective skip link, visible focus, stable accessible names and native controls where appropriate. Tabs support arrows, Home and End. Each ticker exposes pause, respects reduced motion, pauses on hover/focus and refreshes after fonts load. The library handles movement, but the integration owns meaningful source content, pause controls and readable static output. Keep this responsibility note visible even when reduced motion hides the duration footer.
 
-Rich copy stores text, code, strong and emphasis parts, allowing a translator to reorder the complete sentence while keeping presentation in `RichText.astro`. Code examples use escaped syntax tokens in `CodeBlock.astro`. Catalogs contain no executable HTML. Complete messages such as `Pause animation: {label}` use the typed `format` helper. Custom elements receive already selected messages through their own `data-*` attributes, retaining independent instance behavior and keeping server dictionaries out of client bundles.
+Do not let overflow clipping conceal broken layouts. Stack narrow hero actions, allow navigation/tab groups to wrap with enlarged text, and test the 320 viewport explicitly. Code examples and static tickers can intentionally scroll; those regions must remain keyboard reachable. Test menu focus, close-button hover, focus restoration, desktop transitions and no-JavaScript navigation in both themes.
 
-`npm run landing:check` runs an AST-based check for literal UI copy in Astro markup/accessibility attributes and direct client-side feedback, Astro type diagnostics, and regression tests for locale resolution, interpolation and the copy check. Run only the tests with `npm --prefix landing run test`. Structural values (IDs, roles, routes, SVG coordinates), decorative symbols and developer diagnostics remain in code.
+Execute published examples against the package, not just the renderer. The Recipes examples were verified for preserved options/wrapper identity, updated source/clones and complete registry cleanup. Recheck them when API contracts change. Brand marks are illustrative Simple Icons v16.0.0 assets with attribution; prices are sample data, not a market feed or endorsements. Bundle-size statements are measurements, not permanent promises: the FAQ currently cites the v2.0.4 browser build at roughly 4.3 KiB gzip plus 0.5 KiB CSS and must be remeasured after relevant changes.
 
 ## SEO and deployment
 
-The default public URL is `https://samline.github.io/ticker/`. Override `SITE_URL` using `.env` (see `.env.example`) for another deployment; its pathname also configures Astro’s base path. Canonical, Open Graph, Twitter cards, JSON-LD, robots.txt and the sitemap share this URL. Development uses noindex. The 1200×630 sharing image is generated from translated copy during the build. JSON-LD is serialized with escaped HTML-sensitive characters.
+`SITE_URL` defaults to `https://samline.github.io/ticker/`; `.env.example` documents the override. Its pathname becomes Astro's base path. Canonical, Open Graph, Twitter cards, WebSite/WebPage/SoftwareSourceCode JSON-LD, robots.txt, sitemap and the generated 1200×630 PNG share this public URL. Development is noindex. JSON-LD escapes HTML-sensitive characters; sharing-image text is XML-escaped. Only publish metadata and claims supported by the actual package.
 
-Metadata identifies the actual source package, repository, license and version. Sections have associated headings; controls have translated accessible names, keyboard focus indicators and instance-specific ARIA IDs. Horizontally scrolling code examples are keyboard focusable. Automated accessibility checks cover both themes, desktop/mobile and all demo tabs; manual checks also cover keyboard navigation, reduced motion and no-JavaScript fallback.
+The Pages artifact places the landing at `/ticker/` and documentation at `/ticker/docs/`. `include-docs.mjs` copies `example/dist/` and merges its sitemap entries. Config redirects preserve previous documentation paths. Asset and link construction must use `import.meta.env.BASE_URL` or configured URLs; hardcoded root-relative paths break repository deployments.
 
-## Mobile navigation and browser checks
+A URL/base-path change also requires updating `example/site.config.mjs`, documentation packaging/links/redirects, production assertions, Playwright config and the explicit URL in the no-JavaScript test. SITE_URL alone does not rewrite the documentation project's base. `.github/workflows/deploy.yml` builds both sites and publishes the combined landing artifact. A commit/merge is not a push or deployment.
 
-MobileMenu uses `@samline/drawer` 4.2.1 for its right-side modal panel below 64rem. It owns its controller and mount container, scopes runtime CSS beneath its own root, and destroys the controller on disconnect. Translated labels, Escape/backdrop/close-button dismissal, focus trapping and restoration, link dismissal and cleanup when switching to desktop are covered by browser tests. A native details menu keeps navigation available without JavaScript. The component imports the package stylesheet as a string, normalizes vendor lengths to rem and wraps it in native CSS @scope. This uses the original library animations without a parser or copied definitions. The normal Astro style block contains only panel design and reduced-motion overrides.
+## Replicate this in another package
 
-At widths below 30rem, hero actions stack with readable labels and full-width targets. Desktop navigation and tab groups wrap when enlarged text needs more room. Browser tests inspect visible buttons and text from 320 to 1440 and back, including both sides of breakpoints, both themes and every demo tab. Intentionally scrollable code and ticker viewports retain their scrolling behavior.
+1. Inspect the target package's manifest, exports, public API, stylesheet and docs. Establish verified claims and runnable examples before reusing this copy. Choose the public URL and whether documentation shares the artifact.
+2. Scaffold Astro with the minimal template and install a compatible Astro/Tailwind/Vite toolchain. Use the lockfile and current Node engine requirement rather than assuming `latest` reproduces these versions. Configure Tailwind 4 through its Vite plugin.
+3. Bring over the architectural pattern: components, sections, layouts, typed catalogs, Box/Section, theme handling and verification scripts. Choose that project's container widths, breakpoints and palettes; do not copy an entire reference application's stack.
+4. Replace package-specific imports, manifest-relative paths, controller options/events, scoped vendor CSS, storage keys, custom-element/event namespaces, samples, assets and licenses. Remove Ticker-specific integration code when the new API does not need it.
+5. Rewrite catalogs around the new package's distinct value, entrypoints, setup and useful recipes. Replace repository/npm/license links, versioned CDN examples, measured bundle claims and source-code schema fields. Keep sample data clearly labeled.
+6. Configure URL/base paths, metadata, sharing image and optional docs. If there is no sibling `example/` site, adapt/remove `include-docs.mjs`, docs links and legacy redirects rather than leaving a broken inherited deployment.
+7. Adapt browser selectors and expected names/routes to the new UI. Verify both themes, repeated components, keyboard navigation, reduced motion, JavaScript-disabled content, narrow layouts and the compiled base path. Execute code examples and resolve documentation links.
+8. Update this README and AGENTS.md with the target's real contracts. Commit only reviewed source and intended tooling artifacts; preserve unrelated user changes.
 
-```sh
-npm exec --prefix landing -- playwright install chromium
-npm run landing:build
-npm --prefix landing run test:browser
-```
+## Maintenance: update references with the change
 
-The browser suite serves the compiled site at its deployment base path. It also checks repeated menu instances, disconnect/reconnect cleanup, reduced motion, no-JavaScript navigation and automated accessibility checks while the menu is open.
+Treat the package, catalogs, docs, generated metadata and examples as one release surface. Update affected references in the same change; search both the old identifier/value and the new one.
 
-The Recipes section complements setup and features with three specific integration decisions: live option updates, editing the stable source and explicitly synchronizing copies, and registry-aware browser cleanup. Examples and explanatory text live in its locale catalog; API behavior is documented in the existing reference and lifecycle guide. The old #compare fragment remains an alias for #recipes.
+| Change                                               | Review and update                                                                                                                                                           |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Package name, author, version, license or repository | Root manifest; manifest-relative imports; common/SEO catalogs; hardcoded GitHub/npm/license URLs; footer; CDN URLs; FAQ version/bundle measurements; docs and sharing image |
+| API, options, entrypoints or lifecycle               | TickerDemo and its adapters; setup/recipes/FAQ/features catalogs; source snippets; package docs/reference; browser selectors and assertions; run the displayed examples     |
+| Package CSS, clone markup or measurement semantics   | Scoped TickerDemo adaptation, dynamic selectors, pause/animation order, rem conversion and cleanup; inspect repeated instances and both themes                              |
+| Drawer or other UI dependency                        | Use its native API and original CSS; review scope/browser support, close semantics and teardown; avoid copying new library internals into components                        |
+| Content, section name/order, heading or CTA          | Section/catalog exports, page composition, desktop/mobile navigation, fragment aliases, documentation references and tests; remove repetition                               |
+| Container widths, breakpoints, themes or typography  | Box/Section, Tailwind tokens, mobile media conditions, theme-color literals, controls, image design and responsive/contrast evidence                                        |
+| Domain/base path or docs layout                      | SITE_URL/default, Astro config, example site config, BASE_URL links/assets, redirects, packaging, sitemap/robots, output checks, workflows and browser URLs                 |
+| Dependencies/tooling or skills                       | Relevant lockfiles, Node/browser baseline, CI commands, formatting exclusions, installed skill provenance and the instructions below                                        |
+
+Use targeted checks first, then the required build and relevant browser checks for the affected behavior. For an actual release, rebuild the package if measurements/examples depend on built output, remeasure size claims and run `npm run site:build`. Keep attribution and source records intact. Document real remaining limitations instead of claiming that automated checks prove everything.
+
+## Installed project skills
+
+`npx autoskills` was run inside `landing/`. CLI v0.3.6 detected Astro, Tailwind CSS, TypeScript, Playwright, Vite and Node.js and installed ten skills under `.agents/skills/`. `skills-lock.json` records sources and computed hashes. Both are versioned so the learning aids can travel with this landing.
+
+| Skill                                              | Source                                         |
+| -------------------------------------------------- | ---------------------------------------------- |
+| accessibility, seo                                 | `addyosmani/web-quality-skills`                |
+| astro                                              | `astrolicious/agent-skills`                    |
+| frontend-design                                    | `anthropics/skills`                            |
+| tailwind-css-patterns                              | `giuseppe-trisciuoglio/developer-kit`          |
+| typescript-advanced-types, nodejs-backend-patterns | `wshobson/agents`                              |
+| nodejs-best-practices                              | `sickn33/antigravity-awesome-skills`           |
+| playwright-best-practices                          | `currents-dev/playwright-best-practices-skill` |
+| vite                                               | `antfu/skills`                                 |
+
+Read the relevant installed SKILL.md when its workflow applies. They are third-party guidance, not a mandate to add a backend, client framework or unnecessary dependencies. Follow the user's request and this project's actual version/contracts when generic examples differ. Do not reformat vendored skills or edit their hashes by hand.
+
+To rediscover skills for a copied project, run `npx autoskills` in that project's landing directory; `npx autoskills@0.3.6` selects the discovery-tool version used here. Review the resulting directory and lock diff. Tool-version pinning alone does not freeze upstream skill content. Keep local project instructions when refreshing installed guidance, and update these provenance notes if the selected skills or workflow change.
+
+The codebase-memory exploration workflow is supplied separately by the development environment; it is not one of the ten autoskills selections. Configure the target project’s exploration tools and adapt that instruction when reusing this playbook.

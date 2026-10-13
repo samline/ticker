@@ -8,3 +8,7 @@ landing/assets/css/main.css
 landing/assets/vendor/
 landing/assets/brands/LICENSE.md
 landing/assets/brands/DISCLAIMER.md
+
+# Vendored landing skills and generated provenance.
+landing/.agents/
+landing/skills-lock.json

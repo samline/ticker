@@ -1,23 +1,77 @@
-# Astro landing conventions
+# Landing implementation and maintenance contract
 
-- Keep component/section CSS and client behavior inside their owning `.astro` file, using plain scoped `<style>` and processed `<script>` tags. Do not reintroduce a global component stylesheet or a page-wide behavior script.
-- `src/styles/tailwind.css` is the shared Tailwind configuration and theme-token entry only. The layout owns document styles; Theme owns the shared document color preference.
-- Use instance-local custom elements for interactive UI. Query within `this`, keep state per instance, and clean listeners, observers and controllers on disconnect. Astro deduplicates component scripts; scripts must support every rendered instance.
-- Generate unique DOM/ARIA IDs per instance. Logical tab names may repeat. Prefer scoped events for communication between a section and its child controls.
-- Keep styles for slots/dynamic DOM anchored to a component-owned selector when `:global()` is necessary. Avoid unanchored global selectors and styling a reusable child through an unrelated parent's class. Use component props, CSS custom properties, or Tailwind utilities instead.
-- Verify reusable interactive components with multiple instances, unrelated matching class names, and disconnect/reconnect behavior. Run `npm run landing:check`, `npm run landing:build` and the landing formatting check after changes.
+These instructions apply to the maintained Astro landing. Read README.md for rationale, commands, project-specific integration details and the replication checklist. Preserve the user's choices and edits; adapt the architecture to another package rather than copying Ticker claims or application internals.
 
-- Author CSS lengths in `rem`, including borders, shadows, radii and media queries. Keep SVG viewBox/stroke coordinates unitless. Tailwind `px-*` utility names mean horizontal padding; use rem-based utilities/arbitrary values.
-- Use `class:list={[...]}` for Astro template classes, including single-class elements. Code examples are dictionary tokens rendered with escaped Astro expressions.
-- Format the entire landing with its Prettier script, including Astro frontmatter, styles, scripts, configuration and documentation.
+## Architecture and layout
 
-- Keep all authored interface copy in `src/i18n/translations/<locale>/`, organized into common, navigation, SEO, controls and per-section modules. Use `getI18n(Astro)` and descriptive semantic keys. This includes titles, accessible labels, sample/demo content, code examples and client-side feedback.
-- Keep messages as complete translated templates with named placeholders; use the typed `format` helper for server-side interpolation. Pass the resolved messages through the owning custom element's `data-*` attributes so client behavior stays scoped and does not bundle whole dictionaries.
-- Rich translations and highlighted code use typed parts/tokens rendered as escaped text. Do not put HTML strings in catalogs or use `set:html` to display translated content.
-- Every added locale must satisfy `TranslationDictionary` and be registered in `dictionaries`. The current landing keeps English; add locale routing/UI only when requested. Preserve structural IDs, routes, code syntax and named placeholders when translating.
-- `npm run landing:check` includes the source-copy audit, Astro diagnostics and translation regression tests. Do not silence the audit by disabling it or broadly excluding interface code. Structural identifiers, SVG paths, decorative symbols, comments and developer diagnostics are not interface copy.
+- Keep individual reusable UI in `src/components/`, complete blocks in `src/sections/`, document structure in `src/layouts/`, and page composition/endpoints in `src/pages/`.
+- Box owns horizontal gutters and maximum widths. Section owns section semantics, vertical spacing and optional themes. Compose several Boxes for different widths within a section; do not recreate Box with local max-width values or duplicate gutters on the section.
+- Preserve the chosen Box sizes: default 90rem, wide 85.375rem, medium 64rem and narrow 50rem. A new size must solve a reusable layout need. LiveDemo fills its parent's Box; Hero uses narrow/medium/narrow containers.
+- Forward native attributes and Astro scope attributes through reusable roots. Associate sections with their headings and generate unique IDs where instances may repeat.
+- Use `class:list={[...]}` for every Astro template class, even one class. Author fixed CSS lengths in rem, including borders, radii, shadows, outlines and media thresholds. Keep SVG drawing coordinates unitless; preserve proportional units for fluid expressions. Tailwind `px-*` names mean horizontal padding.
+- Keep Tailwind's shared entry limited to framework configuration, fonts, breakpoints and semantic theme tokens. Use the current CSS-first Tailwind 4/Vite integration; do not transplant older config conventions blindly.
 
-- Keep production metadata in SEO.astro and translated SEO copy in the locale catalog. Derive canonical, sitemap and sharing URLs from configured SITE_URL, never request/preview hosts. Keep development noindex. JSON-LD may use set:html only with serializeJsonLd escaping; it must never render translated HTML.
-- Verify deployment at its configured base path, including assets, documentation links and legacy documentation redirects. Run npm run site:build for the combined Pages artifact.
+## Encapsulation and behavior
 
-- MobileMenu imports Drawer’s original stylesheet with ?inline and wraps it in native CSS @scope. This vendor CSS is emitted inside the component’s inline style; keep the explicit ticker-mobile-menu scope. Do not copy or replace library animation definitions with hand-maintained keyframes. The remaining style block owns panel design and accessibility overrides.
+- Put component design CSS in its own plain scoped `<style>` and client behavior in its own processed `<script>`. Do not create a global component stylesheet or page-wide initialization script.
+- Astro deduplicates processed scripts. Use instance-local custom elements, local queries/state/events and explicit disconnect cleanup. Release listeners, observers, timers and package controllers. Test multiple instances and removal/reinsertion.
+- Anchor required `:global()` selectors beneath an owned root for slots or library-generated DOM. Never style unrelated matching classes throughout the page. Prefer props, tokens and utilities to a parent styling another component's internals.
+- Delegate behavior already provided by a dependency. Do not reimplement Drawer animations, focus trapping, Escape/backdrop handling, its trigger or close button. MobileMenu uses `browser.newDrawer`; only link dismissal, desktop transitions, accessible state and teardown belong to the integration.
+- MobileMenu imports the original vendor CSS with `?inline`, normalizes fixed pixel lengths to rem and emits it inside native `@scope (ticker-mobile-menu)`. Keep scope explicit and verify target-browser support. Its regular style owns panel appearance and accessibility overrides. Do not add a parser or hand-maintained animation copies for this boundary.
+- TickerDemo uses local package source and a scoped adaptation of `src/style.css`. When package CSS/markup changes, synchronize that adaptation and review rule order: animation shorthand may reset pause state. Preserve its measured-distance rem conversion and observer cleanup. Use the real dependency API instead of patching library internals.
+- Theme owns the intentional shared document preference and inline head initialization. Keep storage failure safe, system/manual behavior consistent and theme-color literals synchronized with palette changes. Namespace storage keys, custom elements and events appropriately when reusing the landing.
+
+## Copy, examples and information design
+
+- Put all editable UI text in `src/i18n/translations/<locale>/`: headings, navigation, descriptions, accessible names, metadata, sample/demo content, code tokens and client feedback. Use `getI18n(Astro)` and descriptive keys.
+- Use complete messages with named placeholders through `format`. Rich translations and code tokens render as escaped text; catalogs contain no executable HTML. Pass resolved client messages through instance-owned data attributes, not entire dictionaries.
+- Keep every locale compatible with `TranslationDictionary` and register it in `dictionaries`. English is the current language. Adding a catalog does not create locale routes or a language selector; add those only with a corresponding requirement and metadata plan.
+- Preserve structural identifiers, code syntax and placeholder names when translating. Do not move copy into arbitrary TypeScript objects to evade the AST source-copy audit; the audit is not exhaustive.
+- Audit the existing landing before adding content. Each section must answer a distinct question. Prefer concrete verified recipes over another list of benefits. The Recipes section adds partial updates, original-source edits/clone synchronization and registry cleanup; the former responsibility table belongs in docs.
+- Keep the demo's integration note visible with reduced motion: the library manages movement, while integrations must supply pause controls and meaningful readable originals.
+- Verify public API claims against package source and reference docs. Execute displayed snippets after relevant changes. Distinguish direct controller destruction from registry destruction; do not copy another package's method names or lifecycle contract.
+- Read package name/version/author from the manifest where implemented. Still search for hardcoded versions, CDN imports, repository/npm/license URLs and measured claims when metadata changes. A derived version label does not update every prose reference.
+- Keep illustrative prices, brand samples, asset attribution and license records clear. Rebuild/remeasure bundle-size claims when the package or selected entrypoint changes; do not preserve obsolete numbers as permanent marketing copy.
+
+## Accessibility and validation
+
+- Preserve semantic headings, section labels, skip-link behavior, visible focus and appropriate ARIA. Use native controls. Tabs support arrows/Home/End; modal menus retain focus, restore it on close and dismiss correctly on desktop transitions.
+- Support both light and dark themes, reduced motion, blocked storage and JavaScript-disabled content. Respect hover capability and reduced motion for button feedback. Keep static ticker content and intentional code scrolling keyboard reachable.
+- Check 320 through 1440 and back, both sides of breakpoints, all demo tabs and enlarged root text. Stack narrow actions and allow navigation/tabs to wrap. Do not use overflow clipping to conceal buttons or copy that do not fit.
+- Test repeated controls/menus, unique DOM/ARIA IDs, unrelated matching classes and disconnect/reconnect cleanup when behavior changes. Review contrast in both themes. Automated axe results are evidence, not a claim of complete conformance.
+- Run `npm run landing:check`, `npm --prefix landing run format:check` and `npm run landing:build` after maintained source changes. Build before `npm --prefix landing run test:browser`; run relevant browser checks for UI/behavior changes. The suite uses the compiled base path and an isolated foreground preview with `--ignore-lock`.
+- Use `npm run site:build` for the combined release artifact. A standalone landing build may include stale existing documentation output. Check links/fragments and execute examples against current package behavior.
+- Format authored landing files with its Prettier script. Leave `.agents/`, `skills-lock.json`, npm locks, generated output and third-party assets untouched by formatting. Keep root and landing ignore rules aligned.
+
+## SEO and publication contracts
+
+- Keep SEO metadata in SEO.astro and its copy in the catalog. Derive canonical, sharing, sitemap and robots URLs from validated SITE_URL, never request/preview hosts. Keep development noindex.
+- Escape JSON-LD through `serializeJsonLd`; escape generated-image text as XML. `set:html` may render this safe structured data and the trusted scoped vendor stylesheet, not translated interface HTML.
+- Preserve the generated social image, source-package schema, description, keywords, accessible image text and absolute sharing URLs. Only include factual supported claims; verify output after edits.
+- Repository deployments have a base path. Use BASE_URL for local links/assets. A domain/base change must update Astro/default SITE_URL, example site config, documentation paths, redirects, sitemap packaging, output assertions, browser config/test URLs and workflows together.
+- Current deployment: landing `/ticker/`, documentation `/ticker/docs/`. `include-docs.mjs` copies sibling `example/dist/` and merges sitemap entries. Adapt/remove this contract when replicating into a project without that docs site.
+- Preserve useful existing fragments and redirects during renames. Navigation now uses `#recipes`; `#compare` remains a compatibility alias.
+- A commit or local merge is not a push or publication. Preserve unrelated user work and follow the user's Git instruction. When working on a task branch, use the project's codex/ naming convention; merge/delete it when requested.
+
+## Keep references synchronized in the same change
+
+| Changed surface                       | Required review                                                                                                                             |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Package metadata/version/distribution | Root manifest, manifest imports, common/SEO catalogs, hardcoded URLs/CDN examples, FAQ measurements, docs and sharing image                 |
+| API/entrypoint/lifecycle              | Demo adapters, setup/recipe/FAQ/features copy, snippets, reference docs, browser expectations and runnable examples                         |
+| Package CSS or generated DOM          | Scoped style adaptation, anchored selectors, animation/pause order, measurement conversion, theme and repeated-instance checks              |
+| UI dependency                         | Native API/CSS integration, supported browser scope, close/focus/cleanup contracts and lockfile                                             |
+| Section/content/route                 | Catalog exports, page composition, desktop/mobile navigation, fragment aliases, relevant docs and tests; check for repetition               |
+| Widths/theme/breakpoints/fonts        | Box/Section, Tailwind tokens, menu media conditions, theme-color literals, controls, image and responsive/contrast evidence                 |
+| Public URL/docs layout                | SITE_URL, Astro/example config, BASE_URL links, redirects, docs packaging, sitemap/robots, output assertions, Playwright URLs and workflows |
+| Tooling/skills                        | Dependency/skill locks, Node/browser requirements, CI commands, formatting exclusions and this maintenance contract                         |
+
+Search for old identifiers/values as well as new ones. Update README.md and this file when conventions, paths, commands, supported behaviors or replication steps change. Record real limitations and required follow-ups instead of leaving inaccurate documentation.
+
+## Project skills and exploration
+
+- For structural codebase exploration, use the installed codebase-memory skill: graph first, check cited-path coverage, then read source for stale/partial/unusable coverage. Do not claim exhaustive coverage from a clean best-effort result.
+- `npx autoskills` installed ten third-party skills in `.agents/skills/`; `skills-lock.json` records their provenance/hashes. Keep these files versioned and preserve upstream content. README.md lists sources and the discovery-tool version.
+- Read a relevant SKILL.md when its workflow applies. Generic skill guidance does not override the user's requirements or the actual Astro 7/Tailwind 4/package contracts. Backend-oriented installed skills do not imply that this static landing needs a backend.
+- When refreshing skills, review the installation and lock diff, keep project instructions, and update provenance notes. Do not manually rewrite skill hashes or reformat vendored references. Pinning the discovery tool alone does not freeze upstream skill content.
+- For a new package, follow README.md's replication checklist and replace package-specific imports, examples, links, assets, namespaces, URLs, docs packaging and tests before considering the copy complete.

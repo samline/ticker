@@ -3,3 +3,7 @@ dist/
 .astro/
 package-lock.json
 public/assets/
+
+# Installed third-party guidance; preserve installer hashes and upstream formatting.
+.agents/
+skills-lock.json
