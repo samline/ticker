@@ -85,9 +85,9 @@ for (const theme of ['dark', 'light'] as const) {
     await page.setViewportSize({ width: 1440, height: 900 })
     await expect(trigger).toBeHidden()
     await expect(page.getByRole('dialog')).toHaveCount(0)
-    expect(
-      await page.locator('body').evaluate(element => getComputedStyle(element).overflow)
-    ).not.toBe('hidden')
+    await expect
+      .poll(() => page.locator('body').evaluate(element => getComputedStyle(element).overflow))
+      .not.toBe('hidden')
     await page.setViewportSize({ width: 320, height: 800 })
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await trigger.click()

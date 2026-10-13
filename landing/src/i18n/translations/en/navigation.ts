@@ -3,27 +3,33 @@ export default {
   skipContent: 'Skip to content',
   mobile: {
     title: 'Explore Ticker',
+    introduction: 'Find your starting point. Make it your own.',
+    resources: 'Around the project',
     label: 'Mobile navigation',
     open: 'Open navigation menu',
     close: 'Close navigation menu',
   },
   items: [
-    { docsRoute: 'overview', label: 'Docs' },
+    { docsRoute: 'overview', label: 'Docs', description: 'The complete guide and API reference.' },
     {
       href: '#features',
       label: 'Features',
+      description: 'What Ticker brings to your project.',
     },
     {
       href: '#how',
       label: 'Get started',
+      description: 'Install, initialize and start moving.',
     },
     {
       href: '#recipes',
       label: 'Recipes',
+      description: 'Practical patterns for real integrations.',
     },
     {
       href: '#faq',
       label: 'FAQ',
+      description: 'A few details before you build.',
     },
   ],
   footer: {
