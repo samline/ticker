@@ -27,6 +27,12 @@ export default {
     },
   ],
   footer: {
+    description: 'A small, framework-agnostic library for moving content across the open web.',
+    label: 'Footer navigation',
+    explore: 'Explore',
+    project: 'Project',
+    setup: 'Installation guide',
+    backToTop: 'Back to top',
     credit: 'Samuel Olvera · Made for the open web.',
   },
 } as const
