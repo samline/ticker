@@ -96,8 +96,10 @@ test('sticky navigation keeps targets below the header across viewport and text 
         .poll(() =>
           page.evaluate(() => {
             const header = document.querySelector('ticker-header')!.getBoundingClientRect()
-            const target = document.querySelector('#how')!.getBoundingClientRect()
-            return target.top >= header.bottom - 1
+            const target = document.querySelector('#how .section-heading')!.getBoundingClientRect()
+            const gap = target.top - header.bottom
+            const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
+            return gap >= 0 && gap <= rootSize + 1
           })
         )
         .toBe(true)
@@ -137,4 +139,39 @@ test('Docs is available in desktop and mobile navigation and CTAs point to their
   await expect(
     page.getByRole('dialog').getByRole('link', { name: 'Docs', exact: true })
   ).toHaveAttribute('href', '/ticker/docs/')
+})
+
+test('section anchors keep heading spacing compact without double-counting section padding', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('./')
+  await page.evaluate(() => document.fonts.ready)
+  for (const width of [320, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 })
+    for (const rootScale of [100, 125]) {
+      await page.evaluate(
+        value => (document.documentElement.style.fontSize = `${value}%`),
+        rootScale
+      )
+      for (const id of ['features', 'how', 'recipes', 'faq', 'compare']) {
+        await page
+          .locator(`#${id}`)
+          .evaluate(element => element.scrollIntoView({ behavior: 'instant', block: 'start' }))
+        await expect
+          .poll(() =>
+            page.evaluate(id => {
+              const section = document.getElementById(id)!.closest('section')!
+              const heading = section.querySelector('.section-heading')!.getBoundingClientRect()
+              const header = document.querySelector('ticker-header')!.getBoundingClientRect()
+              const rootSize = Number.parseFloat(
+                getComputedStyle(document.documentElement).fontSize
+              )
+              return Math.abs((heading.top - header.bottom) / rootSize - 0.75)
+            }, id)
+          )
+          .toBeLessThan(0.1)
+      }
+    }
+  }
 })

@@ -39,13 +39,18 @@ const {
 
 <style>
   .content-section {
+    --section-top-space: 6.25rem;
     max-width: 68rem;
-    padding-top: 6.25rem;
+    padding-top: var(--section-top-space);
     padding-bottom: 1.5rem;
   }
   [data-layout='faq'] {
+    --section-top-space: 6.75rem;
     max-width: 47.5rem;
-    padding-top: 6.75rem;
+    padding-top: var(--section-top-space);
+  }
+  .content-section[id] {
+    scroll-margin-top: calc(var(--header-offset, 9rem) - var(--section-top-space));
   }
   .closing-section {
     padding-bottom: 5rem;
@@ -53,12 +58,12 @@ const {
   }
   @media (width < 48rem) {
     .content-section {
-      padding-top: 4.5rem;
+      --section-top-space: 4.5rem;
     }
   }
   @media (width < 48rem) {
     [data-layout='faq'] {
-      padding-top: 4.5rem;
+      --section-top-space: 4.5rem;
     }
   }
   @media (width < 48rem) {
