@@ -1,0 +1,120 @@
+---
+import Section from '../components/Section.astro'
+import Box from '../components/Box.astro'
+import SectionHeading from '../components/SectionHeading.astro'
+import Tabs from '../components/Tabs.astro'
+import CodeBlock from '../components/CodeBlock.astro'
+import StepCard from '../components/StepCard.astro'
+---
+
+<Section spacing="none" id="how" class:list={['content-section']}>
+  <Box>
+    <SectionHeading
+      eyebrow="03 / From zero to rolling"
+      class:list={['mb-12 flex flex-col items-start gap-3']}
+    >
+      Three steps. <span class:list={['serif italic']}>No build step required.</span>
+    </SectionHeading>
+
+    <div class:list={['grid grid-cols-1 gap-6 lg:grid-cols-3']}>
+      <StepCard number={1} title="Install">
+        <Tabs
+          id="install"
+          label="Installation method"
+          class:list={['mt-4']}
+          items={[
+            { id: 'npm', label: 'npm' },
+            { id: 'pnpm', label: 'pnpm' },
+            { id: 'bun', label: 'bun' },
+            { id: 'cdn', label: 'CDN' },
+          ]}
+        >
+          <div data-panel-group="install" class:list={['mt-4']}>
+            <div data-panel="npm">
+              <CodeBlock filename="terminal" class:list={['']}>
+                <Fragment
+                  is:raw
+                ><span class="tok-key">npm</span> install <span class="tok-str">@samline/ticker</span></Fragment>
+              </CodeBlock>
+            </div>
+            <div data-panel="pnpm">
+              <CodeBlock filename="terminal" class:list={['']}>
+                <Fragment
+                  is:raw
+                ><span class="tok-key">pnpm</span> add <span class="tok-str">@samline/ticker</span></Fragment>
+              </CodeBlock>
+            </div>
+            <div data-panel="bun">
+              <CodeBlock filename="terminal" class:list={['']}>
+                <Fragment
+                  is:raw
+                ><span class="tok-key">bun</span> add <span class="tok-str">@samline/ticker</span></Fragment>
+              </CodeBlock>
+            </div>
+            <div data-panel="cdn">
+              <CodeBlock filename="index.html" class:list={['']}>
+                <Fragment
+                  is:raw
+                ><span class="tok-tag">&lt;link</span> <span class="tok-attr">rel</span>=<span class="tok-str">"stylesheet"</span> <span class="tok-attr">href</span>=<span class="tok-str">"https://unpkg.com/@samline/ticker@2.0.4/dist/style.css"</span><span class="tok-tag">&gt;</span>
+<span class="tok-tag">&lt;script</span> <span class="tok-attr">src</span>=<span class="tok-str">"https://unpkg.com/@samline/ticker@2.0.4/dist/browser/global.global.js"</span><span class="tok-tag">&gt;&lt;/script&gt;</span></Fragment>
+              </CodeBlock>
+            </div>
+          </div>
+        </Tabs>
+      </StepCard>
+
+      <StepCard number={2} title="Add markup">
+        <p class:list={['text-sm text-text-muted']}>
+          Write the content as you normally would. The library enhances it, never replaces it.
+        </p>
+        <CodeBlock filename="index.html" class:list={['mt-4']}>
+          <Fragment
+            is:raw
+          ><span class="tok-tag">&lt;div</span> <span class="tok-attr">id</span>=<span class="tok-str">"news"</span><span class="tok-tag">&gt;</span>
+  <span class="tok-tag">&lt;a</span> <span class="tok-attr">href</span>=<span class="tok-str">"/one"</span><span class="tok-tag">&gt;</span>First story<span class="tok-tag">&lt;/a&gt;</span>
+  <span class="tok-tag">&lt;a</span> <span class="tok-attr">href</span>=<span class="tok-str">"/two"</span><span class="tok-tag">&gt;</span>Second story<span class="tok-tag">&lt;/a&gt;</span>
+  <span class="tok-tag">&lt;a</span> <span class="tok-attr">href</span>=<span class="tok-str">"/three"</span><span class="tok-tag">&gt;</span>Third story<span class="tok-tag">&lt;/a&gt;</span>
+<span class="tok-tag">&lt;/div&gt;</span></Fragment>
+        </CodeBlock>
+      </StepCard>
+
+      <StepCard number={3} title="Initialize">
+        <Tabs
+          id="init"
+          label="Initialization method"
+          class:list={['mt-4']}
+          items={[
+            { id: 'vanilla', label: 'Vanilla' },
+            { id: 'global', label: 'Global' },
+          ]}
+        >
+          <div data-panel-group="init" class:list={['mt-4']}>
+            <div data-panel="vanilla">
+              <CodeBlock filename="main.ts" class:list={['']}>
+                <Fragment
+                  is:raw
+                ><span class="tok-key">import</span> { <span class="tok-fn">ticker</span> } <span class="tok-key">from</span> <span class="tok-str">'@samline/ticker'</span>
+<span class="tok-key">import</span> <span class="tok-str">'@samline/ticker/style.css'</span>
+
+<span class="tok-key">const</span> news = <span class="tok-fn">ticker</span>(<span class="tok-str">'#news'</span>, {
+  duration: <span class="tok-num">20</span>,
+  pauseOnHover: <span class="tok-key">true</span>,
+})</Fragment>
+              </CodeBlock>
+            </div>
+            <div data-panel="global">
+              <CodeBlock filename="inline script" class:list={['']}>
+                <Fragment
+                  is:raw
+                ><span class="tok-key">const</span> news = <span class="tok-attr">window</span>.<span class="tok-fn">Ticker</span>.<span class="tok-fn">newTicker</span>({
+  id: <span class="tok-str">'news'</span>,
+  options: { duration: <span class="tok-num">24</span>, pauseOnHover: <span class="tok-key">true</span> },
+})</Fragment>
+              </CodeBlock>
+            </div>
+          </div>
+        </Tabs>
+      </StepCard>
+    </div>
+  </Box>
+</Section>

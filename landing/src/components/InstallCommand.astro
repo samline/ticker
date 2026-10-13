@@ -1,0 +1,96 @@
+<ticker-install class:list={['install-shortcut']}>
+  <code>npm install @samline/ticker</code>
+  <button
+    type="button"
+    data-copy="npm install @samline/ticker"
+    aria-label="Copy npm install command"
+  >
+    Copy <span aria-hidden="true">⧉</span>
+  </button>
+  <span class:list={['sr-only']} role="status" data-copy-status=""></span>
+</ticker-install>
+
+<script>
+  class TickerInstall extends HTMLElement {
+    private lifecycle?: AbortController
+    connectedCallback() {
+      this.lifecycle?.abort()
+      this.lifecycle = new AbortController()
+      const button = this.querySelector<HTMLButtonElement>('[data-copy]')
+      const status = this.querySelector<HTMLElement>('[data-copy-status]')
+      const code = this.querySelector('code')
+      if (!button || !status || !code) return
+      button.addEventListener(
+        'click',
+        async () => {
+          try {
+            await navigator.clipboard.writeText(button.dataset.copy ?? code.textContent ?? '')
+            if (this.lifecycle?.signal.aborted) return
+            button.textContent = 'Copied!'
+            status.textContent = 'Install command copied to clipboard.'
+          } catch {
+            const range = document.createRange()
+            range.selectNodeContents(code)
+            const selection = window.getSelection()
+            selection?.removeAllRanges()
+            selection?.addRange(range)
+            status.textContent = 'Command selected. Press Control+C or Command+C to copy.'
+          }
+        },
+        { signal: this.lifecycle.signal }
+      )
+    }
+    disconnectedCallback() {
+      this.lifecycle?.abort()
+    }
+  }
+  if (!customElements.get('ticker-install')) customElements.define('ticker-install', TickerInstall)
+</script>
+<style>
+  .install-shortcut {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1.4375rem;
+    padding: 0.5rem 0.5rem 0.5rem 0.875rem;
+    border: 0.0625rem solid var(--color-border-soft);
+    border-radius: 0.5625rem;
+    background: var(--palette-install-surface);
+  }
+  .install-shortcut code {
+    color: var(--palette-install-text);
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+  }
+  .install-shortcut button {
+    border-left: 0.0625rem solid var(--color-border);
+    padding: 0.125rem 0.4375rem 0.125rem 0.75rem;
+    color: var(--color-text-muted);
+    font-size: 0.7rem;
+    cursor: pointer;
+    min-height: 1.75rem;
+  }
+  .install-shortcut button:hover {
+    color: var(--color-accent);
+  }
+  @media (width < 30rem) {
+    .install-shortcut {
+      gap: 0.75rem;
+      padding-left: 0.6875rem;
+    }
+  }
+  @media (width < 30rem) {
+    .install-shortcut code {
+      font-size: 0.62rem;
+    }
+  }
+  :focus-visible {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.25rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :where(a, button, summary) {
+      transition: none;
+    }
+  }
+</style>

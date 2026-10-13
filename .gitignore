@@ -4,3 +4,6 @@ coverage/
 .bunchee-build-*
 *.log
 .DS_Store
+
+# Astro generated files
+.astro/

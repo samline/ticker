@@ -1,0 +1,55 @@
+<ticker-reveal>
+  <slot />
+</ticker-reveal>
+<script>
+  class TickerReveal extends HTMLElement {
+    private observer?: IntersectionObserver
+    connectedCallback() {
+      const target = this.firstElementChild
+      if (
+        !target ||
+        !('IntersectionObserver' in window) ||
+        matchMedia('(prefers-reduced-motion: reduce)').matches ||
+        target.getBoundingClientRect().top < innerHeight
+      )
+        return
+      this.dataset.pending = 'true'
+      this.observer = new IntersectionObserver(
+        entries => {
+          if (entries.some(entry => entry.isIntersecting)) {
+            delete this.dataset.pending
+            this.observer?.disconnect()
+          }
+        },
+        { threshold: 0.05 }
+      )
+      this.observer.observe(target)
+    }
+    disconnectedCallback() {
+      this.observer?.disconnect()
+      delete this.dataset.pending
+    }
+  }
+  if (!customElements.get('ticker-reveal')) customElements.define('ticker-reveal', TickerReveal)
+</script>
+<style>
+  ticker-reveal {
+    display: contents;
+  }
+  ticker-reveal > :global(*) {
+    transition:
+      opacity 0.9s var(--ease-out-expo),
+      transform 0.9s var(--ease-out-expo);
+  }
+  ticker-reveal[data-pending] > :global(*) {
+    opacity: 0;
+    transform: translateY(1.125rem);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    ticker-reveal > :global(*) {
+      transition: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

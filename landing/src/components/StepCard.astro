@@ -1,0 +1,46 @@
+---
+import Reveal from './Reveal.astro'
+interface Props {
+  number: number
+  title: string
+}
+const { number, title } = Astro.props
+---
+
+<Reveal>
+  <article class:list={['card-elevated p-6 lg:p-7']} data-reveal>
+    <div class:list={['mb-4 flex items-center gap-3']}>
+      <span
+        class:list={[
+          'flex h-7 w-7 items-center justify-center rounded-full border-[0.0625rem] border-accent/40 bg-accent-soft font-mono text-[0.78rem] text-accent',
+        ]}
+      >
+        {number}
+      </span>
+      <p class:list={['font-mono text-[0.7rem] tracking-wider text-text-subtle uppercase']}>
+        {title}
+      </p>
+    </div>
+    <slot />
+  </article>
+</Reveal>
+
+<style>
+  .card-elevated {
+    background: linear-gradient(
+      180deg,
+      var(--palette-elevated-top) 0%,
+      var(--palette-elevated-bottom) 100%
+    );
+    border: 0.0625rem solid var(--color-border);
+    border-radius: 1.5rem;
+    box-shadow: 0 1.875rem 3.75rem -1.875rem rgba(0, 0, 0, 0.6);
+  }
+  .card-elevated {
+    background: var(--palette-step-surface);
+    border-color: var(--palette-step-border);
+    border-radius: 1rem;
+    box-shadow: none;
+    min-width: 0;
+  }
+</style>

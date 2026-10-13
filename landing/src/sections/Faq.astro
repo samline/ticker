@@ -1,0 +1,77 @@
+---
+import Reveal from '../components/Reveal.astro'
+import Section from '../components/Section.astro'
+import Box from '../components/Box.astro'
+import SectionHeading from '../components/SectionHeading.astro'
+import FaqItem from '../components/FaqItem.astro'
+---
+
+<Section layout="faq" spacing="none" id="faq" class:list={['content-section']}>
+  <Box size="narrow">
+    <SectionHeading context="faq" eyebrow="05 / Good questions" class:list={['mb-10 text-center']}>
+      Frequently asked <span class:list={['serif italic']}>questions</span>.
+    </SectionHeading>
+
+    <Reveal>
+      <div data-reveal="">
+        <FaqItem>
+          <Fragment slot="question">Why not just use a CSS animation?</Fragment>
+          CSS handles the animation, while JavaScript manages clones, visibility, and changing
+          measurements. This library provides that lifecycle. Call refresh() after updating content
+          or loading fonts, and provide a pause control for continuous motion.
+        </FaqItem>
+
+        <FaqItem>
+          <Fragment slot="question">Does it work without a framework?</Fragment>
+          Yes. The browser global is a single IIFE you can drop into any plain HTML page, WordPress
+          theme, or Shopify template. There is no build step, no peer dependency, and no{' '}
+          <code class:list={['font-mono text-text']}>window</code> pollution beyond the
+          <code class:list={['font-mono text-text']}>Ticker</code> namespace.
+        </FaqItem>
+
+        <FaqItem>
+          <Fragment slot="question">How does it handle accessibility?</Fragment>
+          Visual clones are marked
+          <code class:list={['font-mono text-text']}>aria-hidden="true"</code> and removed from the
+          tab order, so screen readers and keyboard users only see your original content. The
+          library also pauses animation when the document is hidden and when the user's system
+          reports a preference for reduced motion.
+        </FaqItem>
+
+        <FaqItem>
+          <Fragment slot="question">
+            Is the native <code class:list={['font-mono text-text']}>&lt;marquee&gt;</code> element
+            deprecated?
+          </Fragment>
+          Yes — both WHATWG and the HTML living standard list
+          <code class:list={['font-mono text-text']}>&lt;marquee&gt;</code> as obsolete. This
+          library gives you the behavior people still want from a marquee, on top of a normal
+          <code class:list={['font-mono text-text']}>&lt;div&gt;</code> you fully control.
+        </FaqItem>
+
+        <FaqItem>
+          <Fragment slot="question">Can I use it with React, Vue, or Svelte?</Fragment>
+          Yes. Pass a ref to a DOM element into the
+          <code class:list={['font-mono text-text']}>ticker()</code> factory and call
+          <code class:list={['font-mono text-text']}>destroy()</code> from your unmount handler.
+          There is no framework adapter to install and no peer dependency to ship.
+        </FaqItem>
+
+        <FaqItem>
+          <Fragment slot="question">Does it pause when the tab is hidden?</Fragment>
+          Yes. The library listens to the document visibility API and to the IntersectionObserver
+          for the ticker element itself, so the animation only runs when the user can actually see
+          it. This keeps CPU and battery usage in check on long-running pages.
+        </FaqItem>
+
+        <FaqItem>
+          <Fragment slot="question">How big is the bundle?</Fragment>
+          Size depends on the entrypoint and your bundler’s tree shaking. The locally built v2.0.4
+          browser bundle is approximately
+          <strong>4.3 KiB gzipped</strong>, plus <strong>0.5 KiB</strong>
+          for the required stylesheet. There are zero runtime dependencies.
+        </FaqItem>
+      </div>
+    </Reveal>
+  </Box>
+</Section>

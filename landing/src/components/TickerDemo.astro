@@ -1,0 +1,403 @@
+---
+import Button from './Button.astro'
+interface Props {
+  id?: string
+  kind: 'news' | 'logos' | 'prices'
+  label: string
+}
+const { id = 'ticker', kind, label } = Astro.props
+const instanceId = `${id}-${crypto.randomUUID()}`
+const defaults = {
+  news: { duration: 38, direction: 'left' },
+  logos: { duration: 48, direction: 'left' },
+  prices: { duration: 34, direction: 'right' },
+}
+---
+
+<ticker-demo
+  data-kind={kind}
+  data-duration={defaults[kind].duration}
+  data-direction={defaults[kind].direction}
+>
+  <div
+    class:list={['ticker-frame ticker-wrapper']}
+    id={instanceId}
+    data-ticker={kind}
+    role="marquee"
+    aria-label={label}
+  >
+    <div class:list={['ticker-track']}>
+      <div class:list={['ticker-content', { 'brand-content': kind === 'logos' }]}>
+        <slot />
+      </div>
+    </div>
+  </div>
+  <div class:list={['ticker-controls']} hidden>
+    <Button
+      variant="ghost"
+      context="ticker"
+      aria-controls={instanceId}
+      aria-label={`Pause animation: ${label}`}
+      aria-pressed="false"
+    >
+      Pause animation
+    </Button>
+  </div>
+</ticker-demo>
+
+<script>
+  import { ticker, type TickerInstance } from '../../../src/vanilla/index'
+  class TickerDemoElement extends HTMLElement {
+    private controller?: TickerInstance | null
+    private lifecycle?: AbortController
+    connectedCallback() {
+      this.lifecycle?.abort()
+      this.lifecycle = new AbortController()
+      const { signal } = this.lifecycle
+      const frame = this.querySelector<HTMLElement>('.ticker-frame')
+      const controls = this.querySelector<HTMLElement>('.ticker-controls')
+      const button = controls?.querySelector<HTMLButtonElement>('button')
+      if (!frame || !controls || !button) return
+      try {
+        this.controller = ticker(frame, {
+          duration: Number(this.dataset.duration),
+          direction: this.dataset.direction === 'right' ? 'right' : 'left',
+          pauseOnHover: true,
+        })
+        if (!this.controller) return
+        // DOM measurements are returned as pixels by the library. Keep this
+        // component's animation distance in rem without changing the library API.
+        const normalizeDistance = () => {
+          const distance = frame.style.getPropertyValue('--ticker-distance').trim()
+          if (!distance.endsWith('px')) return
+          const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
+          frame.style.setProperty(
+            '--ticker-distance',
+            `${Number.parseFloat(distance) / rootSize}rem`
+          )
+        }
+        const measurements = new MutationObserver(normalizeDistance)
+        measurements.observe(frame, { attributes: true, attributeFilter: ['style'] })
+        signal.addEventListener('abort', () => measurements.disconnect(), { once: true })
+        normalizeDistance()
+        controls.hidden = false
+        frame.dataset.userPaused = 'false'
+        button.setAttribute('aria-pressed', 'false')
+        button.addEventListener(
+          'click',
+          () => {
+            const paused = frame.dataset.userPaused !== 'true'
+            frame.dataset.userPaused = String(paused)
+            button.setAttribute('aria-pressed', String(paused))
+          },
+          { signal }
+        )
+        this.addEventListener(
+          'ticker:duration',
+          event => {
+            const duration = (event as CustomEvent<number>).detail
+            this.dataset.duration = String(duration)
+            this.controller?.update({ duration })
+          },
+          { signal }
+        )
+        this.addEventListener('ticker:refresh', () => this.controller?.refresh(), { signal })
+        document.fonts?.ready
+          .then(() => {
+            if (!signal.aborted) this.controller?.refresh()
+          })
+          .catch(() => {})
+        this.dataset.initialized = 'true'
+        this.dispatchEvent(new CustomEvent('ticker:ready', { bubbles: true }))
+      } catch (error) {
+        frame.dataset.static = 'true'
+        console.error('[ticker-demo] Failed to initialize', error)
+      }
+    }
+    disconnectedCallback() {
+      this.lifecycle?.abort()
+      this.controller?.destroy()
+      this.controller = undefined
+      delete this.dataset.initialized
+    }
+  }
+  if (!customElements.get('ticker-demo')) customElements.define('ticker-demo', TickerDemoElement)
+</script>
+<style>
+  .ticker-wrapper {
+    --ticker-distance: 0rem;
+    --ticker-duration: 20s;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .ticker-track {
+    display: flex;
+    width: max-content;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .ticker-track > * {
+    display: flex;
+    flex: 0 0 auto;
+    min-width: max-content;
+  }
+
+  .ticker-clone {
+    user-select: none;
+  }
+
+  .ticker-wrapper:not([data-interactive-clones='true']) .ticker-clone {
+    pointer-events: none;
+  }
+
+  .ticker-wrapper[data-ready='true'][data-playing='true'] .ticker-track {
+    will-change: transform;
+  }
+
+  .ticker-wrapper[data-ready='false'] .ticker-track {
+    animation: none !important;
+  }
+
+  .ticker-wrapper[data-direction='left'] .ticker-track {
+    animation: ticker-left var(--ticker-duration) linear infinite;
+  }
+
+  .ticker-wrapper[data-direction='right'] .ticker-track {
+    animation: ticker-right var(--ticker-duration) linear infinite;
+  }
+
+  .ticker-wrapper:hover .ticker-track.ticker-pause-on-hover {
+    animation-play-state: paused;
+  }
+
+  .ticker-wrapper[data-active='false'] .ticker-track,
+  .ticker-wrapper:not([data-playing='true']) .ticker-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes ticker-left {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(calc(-1 * var(--ticker-distance)), 0, 0);
+    }
+  }
+
+  @keyframes ticker-right {
+    0% {
+      transform: translate3d(calc(-1 * var(--ticker-distance)), 0, 0);
+    }
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-track {
+      animation: none !important;
+      transform: none !important;
+      will-change: auto !important;
+    }
+
+    .ticker-clone {
+      display: none;
+    }
+  }
+
+  .ticker-frame {
+    position: relative;
+    background: var(--color-surface);
+    border: 0.0625rem solid var(--color-border);
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+  .ticker-frame::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 4rem;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .ticker-frame::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 4rem;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .ticker-frame::before {
+    left: 0;
+    background: linear-gradient(to right, var(--color-surface) 0%, transparent 100%);
+  }
+  .ticker-frame::after {
+    right: 0;
+    background: linear-gradient(to left, var(--color-surface) 0%, transparent 100%);
+  }
+
+  .ticker-track {
+    --demo-item-gap: 2.5rem;
+    align-items: center;
+    gap: var(--demo-item-gap);
+    padding: 1rem 0;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    white-space: nowrap;
+  }
+
+  .ticker-content {
+    display: flex;
+    align-items: center;
+    gap: var(--demo-item-gap, 2.5rem);
+  }
+
+  .ticker-track :global(.sep) {
+    width: 0.25rem;
+    height: 0.25rem;
+    border-radius: 624.9375rem;
+    background: var(--color-text-subtle);
+    flex: none;
+  }
+
+  .ticker-track :global(a:hover) {
+    color: var(--color-accent);
+  }
+
+  .ticker-track :global(.price) {
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+  }
+  .ticker-track :global(.delta-up) {
+    color: var(--color-accent);
+  }
+  .ticker-track :global(.delta-down) {
+    color: var(--color-danger);
+  }
+
+  @media (max-width: 48rem) {
+    .ticker-frame::before {
+      width: 2rem;
+    }
+  }
+
+  @media (max-width: 48rem) {
+    .ticker-frame::after {
+      width: 2rem;
+    }
+  }
+  .ticker-frame:focus-within .ticker-track {
+    animation-play-state: paused;
+  }
+  .ticker-frame[data-user-paused='true'] .ticker-track {
+    animation-play-state: paused;
+  }
+  .ticker-frame:not([data-ready='true']) {
+    overflow-x: auto;
+  }
+  .ticker-frame[data-static='true'] {
+    overflow-x: auto;
+  }
+  .ticker-frame:not([data-ready='true'])::before {
+    display: none;
+  }
+  .ticker-frame:not([data-ready='true'])::after {
+    display: none;
+  }
+  .ticker-frame[data-static='true']::before {
+    display: none;
+  }
+  .ticker-frame[data-static='true']::after {
+    display: none;
+  }
+  .ticker-frame[data-static='true'] .ticker-track {
+    animation: none;
+  }
+  .ticker-controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.75rem;
+  }
+  .ticker-controls button {
+    min-height: 2.75rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-frame {
+      overflow-x: auto;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-frame::before {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-frame::after {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-controls {
+      display: none;
+    }
+  }
+  .ticker-frame {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+  }
+  .ticker-track {
+    color: var(--palette-ticker-text);
+    padding: 1.0625rem 0;
+    font-size: 1.03rem;
+  }
+  .ticker-frame::before {
+    background: linear-gradient(to right, var(--palette-specimen-surface), transparent);
+    width: 1.5rem;
+  }
+  .ticker-frame::after {
+    background: linear-gradient(to left, var(--palette-specimen-surface), transparent);
+    width: 1.5rem;
+  }
+  .ticker-track :global(.sep) {
+    background: var(--palette-separator);
+  }
+  .ticker-track :global(a:hover) {
+    color: var(--palette-lavender);
+  }
+  .ticker-track :global(.price) {
+    color: var(--palette-price-text);
+  }
+  .ticker-track :global(.delta-up) {
+    color: var(--palette-price-up);
+  }
+  .ticker-track :global(.delta-down) {
+    color: var(--palette-price-down);
+  }
+  .ticker-controls {
+    margin-top: 0.625rem;
+  }
+  @media (width < 48rem) {
+    .ticker-track {
+      font-size: 0.9rem;
+    }
+  }
+  .ticker-wrapper[data-ticker='logos'] .ticker-track {
+    --demo-item-gap: 1.125rem;
+    padding-block: 0.1875rem;
+  }
+  ticker-demo {
+    display: block;
+  }
+  .ticker-controls[hidden] {
+    display: none;
+  }
+  .ticker-content :global(a:focus-visible) {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.25rem;
+  }
+</style>

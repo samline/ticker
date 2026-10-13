@@ -1,0 +1,83 @@
+---
+import Reveal from './Reveal.astro'
+interface Props {
+  label: string
+  entrypoint: string
+}
+const { label, entrypoint } = Astro.props
+---
+
+<Reveal>
+  <article class:list={['card p-5']} data-reveal>
+    <p class:list={['font-mono text-[0.72rem] tracking-wider text-text-subtle uppercase']}>
+      {label}
+    </p>
+    <h3 class:list={['mt-1 font-mono text-[0.95rem] text-text']}>{entrypoint}</h3>
+    <p class:list={['mt-3 text-sm text-text-muted']}>
+      <slot />
+    </p>
+  </article>
+</Reveal>
+
+<style>
+  .card {
+    position: relative;
+    background: var(--color-surface);
+    border: 0.0625rem solid var(--color-border);
+    border-radius: 1.25rem;
+    transition:
+      border-color 0.3s ease,
+      background-color 0.3s ease;
+  }
+  .card:hover {
+    border-color: var(--palette-card-border-hover);
+    background: var(--color-surface-2);
+  }
+  .card {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    column-gap: 0.75rem;
+    border: 0;
+    border-top: 0.0625rem solid var(--color-border-soft);
+    border-radius: 0;
+    background: transparent;
+    padding: 1.4375rem 0;
+  }
+  .card > p:first-child {
+    padding-top: 0.1875rem;
+    font-size: 0.6rem;
+    color: var(--color-text-subtle);
+  }
+  h3 {
+    margin-top: 0;
+    overflow-wrap: anywhere;
+    font-size: 0.78rem;
+  }
+  .card > p:last-child {
+    grid-column: 2;
+    font-size: 0.825rem;
+    line-height: 1.75;
+    margin-top: 0.5625rem;
+  }
+  @media (width < 48rem) {
+    .card {
+      display: block;
+    }
+  }
+  @media (width < 48rem) {
+    h3 {
+      margin-top: 0.5625rem;
+    }
+  }
+  @media (width < 30rem) {
+    .card {
+      display: grid;
+      grid-template-columns: 4.0625rem 1fr;
+    }
+  }
+  @media (width < 30rem) {
+    h3 {
+      margin-top: 0;
+    }
+  }
+</style>

@@ -1,0 +1,74 @@
+---
+import Reveal from '../components/Reveal.astro'
+import Eyebrow from '../components/Eyebrow.astro'
+import Heading from '../components/Heading.astro'
+import Section from '../components/Section.astro'
+import Box from '../components/Box.astro'
+import Button from '../components/Button.astro'
+---
+
+<Section spacing="none" class:list={['content-section closing-section']}>
+  <Box>
+    <Reveal>
+      <div class:list={['cta-card p-10 text-center sm:p-14 section-heading']} data-reveal="">
+        <Eyebrow context="closing">LET YOUR CONTENT GO PLACES</Eyebrow>
+        <Heading context="closing" class:list={['mx-auto mt-5 max-w-xl']}>
+          Ready to <span class:list={['serif italic']}>get moving?</span>
+        </Heading>
+        <p class:list={['mx-auto mt-4 max-w-md text-text-muted']}>
+          One small library. A whole new way to bring your content to life.
+        </p>
+        <div class:list={['mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row']}>
+          <Button context="closing" href="#how" class:list={['w-full sm:w-auto']} variant="primary">
+            Get started
+            <svg
+              aria-hidden="true"
+              width="0.875rem"
+              height="0.875rem"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="0.125rem"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M5 12h14M13 5l7 7-7 7"></path>
+            </svg>
+          </Button>
+          <Button
+            context="closing"
+            href="https://github.com/samline/ticker"
+            target="_blank"
+            rel="noreferrer"
+            class:list={['w-full sm:w-auto']}
+            variant="secondary"
+          >
+            Star on GitHub
+          </Button>
+        </div>
+      </div>
+    </Reveal>
+  </Box>
+</Section>
+
+<style>
+  .cta-card {
+    position: relative;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(183, 174, 210, 0.12), transparent 60%),
+      var(--color-surface);
+    border: 0.0625rem solid var(--color-border);
+    border-radius: 1.75rem;
+    overflow: hidden;
+  }
+  .cta-card {
+    background: var(--palette-closing-surface);
+    border: 0;
+    border-radius: 1.25rem;
+    padding: 4rem 1.5rem;
+  }
+  .cta-card > p {
+    color: var(--palette-closing-text);
+    font-size: 0.9rem;
+  }
+</style>

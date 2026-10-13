@@ -1,0 +1,54 @@
+---
+import Box from '../components/Box.astro'
+import Logo from '../components/Logo.astro'
+---
+
+<footer class:list={['relative z-10 border-t-[0.0625rem] border-border-soft']}>
+  <Box
+    class:list={[
+      'flex flex-col items-start justify-between gap-6 py-10 sm:flex-row sm:items-center',
+    ]}
+  >
+    <Logo license="MIT" />
+
+    <div class:list={['flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-text-muted']}>
+      <a
+        href="https://github.com/samline/ticker"
+        target="_blank"
+        rel="noreferrer"
+        class:list={['hover:text-text']}
+      >
+        GitHub
+      </a>
+      <a
+        href="https://samline.github.io/ticker/"
+        target="_blank"
+        rel="noreferrer"
+        class:list={['hover:text-text']}
+      >
+        Docs
+      </a>
+      <a
+        href="https://www.npmjs.com/package/@samline/ticker"
+        target="_blank"
+        rel="noreferrer"
+        class:list={['hover:text-text']}
+      >
+        npm
+      </a>
+      <a
+        href="https://github.com/samline/ticker/blob/main/LICENSE.md"
+        target="_blank"
+        rel="noreferrer"
+        class:list={['hover:text-text']}
+      >
+        License
+      </a>
+    </div>
+  </Box>
+  <Box class:list={['pb-10']}>
+    <p class:list={['text-xs text-text-subtle']}>
+      © <span id="year">{new Date().getFullYear()}</span> Samuel Olvera · Made for the open web.
+    </p>
+  </Box>
+</footer>

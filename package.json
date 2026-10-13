@@ -63,8 +63,10 @@
     "docs:build": "npm --prefix example run build",
     "docs:check": "npm --prefix example run check",
     "prepublishOnly": "bun run clean && bun run build && bun run typecheck && bun run test:coverage && bun run test:package && npm pack --dry-run",
-    "landing:build": "npm run build && npm --prefix landing run build",
-    "landing:dev": "vite landing --host 127.0.0.1"
+    "landing:build": "npm --prefix landing run build",
+    "landing:dev": "npm --prefix landing run dev -- --host 127.0.0.1",
+    "landing:check": "npm --prefix landing run check",
+    "landing:preview": "npm --prefix landing run preview -- --host 127.0.0.1"
   },
   "keywords": [
     "ticker",

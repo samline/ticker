@@ -1,55 +1,80 @@
 # Ticker landing
 
-Static marketing page and interactive demos for `@samline/ticker`. Keep the existing English copy and dark/lavender visual identity.
+Astro 7 marketing site for `@samline/ticker`, scaffolded with `npm create astro@latest -- --template minimal`. Tailwind 4 runs through `@tailwindcss/vite`. Requires Node.js 22.12 or newer.
 
-## Local preview
+## Development
 
 From the repository root:
 
 ```sh
+npm ci --prefix landing
 npm run landing:dev
 ```
 
-The committed HTML, CSS, JavaScript, and vendor assets can also be served by any static HTTP server. Fonts have system fallbacks if Bunny Fonts is unavailable.
-
-## Rebuild
+Open `http://localhost:4321`. TickerDemo imports the local library API directly from the repository source. Library changes appear in development without rebuilding or copying a browser bundle.
 
 ```sh
-npm ci --prefix landing
+npm run landing:check
 npm run landing:build
+npm run landing:preview
 ```
 
-The root command first builds the library. The landing build then compiles `assets/css/source.css` into `assets/css/main.css` and copies the browser bundle, stylesheet, and MIT license into `assets/vendor/`. Deploy the contents of `landing/` without `node_modules/`; no client-side Tailwind compiler or package CDN is needed. Edit the CSS source and rebuild; the output stylesheet and vendor assets are generated.
+The build command bundles the component scripts and scoped styles through Astro, then generates the static site in `landing/dist/`. Deploy that output directory. The documentation site in `example/` and its GitHub Pages workflow remain separate.
 
-## Audit fixes
+## Structure
 
-- Removed the animation override that defeated reduced motion and reset playback state.
-- Added a pause toggle to each demo and paused interactive content while it has keyboard focus.
-- Kept demo content horizontally scrollable when motion is reduced or initialization is unavailable.
-- Added keyboard tab navigation, associated panels, visible focus, a skip link, and readable secondary text.
-- Kept all examples and page content available before JavaScript enhancement.
-- Refreshed actual controller instances after fonts load; the public registry contains DOM elements.
-- Fixed mobile navigation overflow and responsive button visibility.
-- Replaced empty links, implied customer endorsements, unsupported competitor comparisons, and inaccurate bundle claims. Prices and brands are explicitly illustrative.
+- `src/components/`: independent, reusable UI primitives (`Box`, `Section`, `Button`, `Eyebrow`, `SectionHeading`, `Heading`, `Logo`, `Tabs`, `CodeBlock`, `FeatureCard`, `RuntimeItem`, `StepCard`, `FaqItem`, `BrandLogo`, `TickerDemo`, `SpeedControl`, `InstallCommand`, `ThemeToggle`, `Theme`, `Reveal`).
+- `src/sections/`: complete content blocks (`Hero`, `LiveDemo`, `Features`, `Runtimes`, `GettingStarted`, `Comparison`, `Faq`, `CallToAction`).
+- `src/layouts/`: document shell, header and footer.
+- `src/pages/index.astro`: composes the sections.
+- `src/styles/tailwind.css`: Tailwind entry, breakpoints, fonts and theme tokens.
+- `public/assets/`: licensed illustrative brand marks. Component CSS and client behavior live inside their owning `.astro` files.
 
-The bundle size in the FAQ refers to the local v2.0.4 browser build and CSS, measured with gzip. Remeasure it when updating the library. Landing tooling has its own pinned dependencies and lockfile and stays outside the published npm package.
+The separation follows the supplied component/section screenshots. Dinkbit informed the CSS-first Tailwind configuration, `data-theme` variants and the Box/Section foundations. Its application, CMS and server configuration were not imported.
 
-## Visual direction
+## Box and Section
 
-The refined design takes the quiet dark surfaces, restrained cards, short copy, and paired actions of [Statements](https://statements.now/) as a reference. The soft lavender accent and Instrument Serif remain part of Ticker’s identity. The page adds editorial headings, a softly elevated dark demo surface, a compact runtime list, and a dark closing panel.
+`Box` centralizes gutters and content widths. It accepts native div attributes, classes and a default slot. `size` is `default` (68rem), `wide` (85.375rem) or `narrow` (47.5rem). `liquid` removes the maximum width and `x2` expands it to 120rem. `padding="none"` removes gutters through an explicit prop.
 
-The live demo switches between announcements, sample brands, and illustrative prices. Its keyboard-accessible tabs preserve each demo’s loop duration; the slider updates the active controller. The install shortcut copies the command, with selection as a fallback. Demo content stays available without JavaScript, and reduced motion preserves the static content.
+`Section` creates the semantic section wrapper with native attributes and a slot. Its default vertical padding is `py-10 md:py-16 lg:py-20`; `spacing="none"` allows each complete landing block to keep its original rhythm. `theme="inherit"` follows the page, or use `light`/`dark` for a scoped theme. `main` adds top spacing and `disabled` omits the block. IDs are explicit; it never generates an undefined CMS identifier.
 
-Related inspiration: [Webflow’s 2026 design trends](https://webflow.com/blog/web-design-trends-2026) and [Framer’s expressive typography](https://www.framer.com/blog/framer-typography-components/).
+```astro
+---
+import Box from '../components/Box.astro'
+import Section from '../components/Section.astro'
+---
 
-Brand demo images are local SVG marks from [Simple Icons v16.0.0](https://github.com/simple-icons/simple-icons/tree/16.0.0), displayed in the demo’s soft lavender palette. Each image has an accessible brand name and explicit dimensions. Upstream sources, brand metadata, license, and disclaimer are retained in `assets/brands/`.
+<Section id="example" aria-labelledby="example-title">
+  <Box>
+    <h2 id="example-title">A reusable foundation</h2>
+  </Box>
+</Section>
+```
 
-The palette uses charcoal with a slight violet tint, layered dark demo surfaces, warm off-white text, and muted lavender accents. Demo panels and the closing section stay dark to avoid large brightness jumps.
+## Tailwind conventions and themes
 
-## Loop continuity
+Breakpoints use rem units: `xs` 23.4375rem, `sm` 37.5rem, `md` 48rem, `lg` 64rem, `xl` 75rem, `2xl` 85.375rem and `3xl` 90rem. Use `max-*` variants for upper bounds rather than duplicating near-identical breakpoint definitions.
 
-The demo needs a uniform join between the source content and the first clone. Both `.ticker-track` and `.ticker-content` use `--demo-item-gap`; the brand track sets it to `18px`. Announcements and prices include an ending separator so their last-to-first join follows the same pattern as the interior items.
+Semantic utilities such as `bg-bg`, `text-text`, `text-text-muted`, `border-border` and `text-accent` resolve through `@theme inline`. Both theme palettes live in `tailwind.css`, including surface and syntax tokens; interface colors should be changed there. `dark:` and `light:` variants follow `data-theme`.
 
-The local package build also preserves fractional content widths and reads the horizontal column gap. Rounding the repeat distance upward caused a small positional jump at each animation reset. Browser measurements before the correction showed a `40px` brand join versus `18px` interior spacing, and approximately `0.58px` of reset error in announcements. After the correction, the measured reset mismatch is below `0.001px` in all three desktop demos. Exact values depend on fonts and viewport size.
+The first visit follows the system color scheme. The header toggle persists an explicit choice in `localStorage`; an inline head script applies it before rendering. System changes are followed until a manual choice is made. Storage restrictions do not break the toggle. Sections can override the theme locally.
 
-The package fix is included in the **2.0.4** release in the root changelog. This landing consumes the rebuilt local bundle; its CDN examples point to 2.0.4 and become available once that version is published to npm.
+## Demos and accessibility
+
+The original English content, dark/lavender identity, sample brands and illustrative prices are preserved. Tabs support arrow keys, Home and End. Each ticker has a pause toggle, pauses on hover/focus, respects reduced motion and refreshes after font loading. The duration slider updates the selected ticker. All content remains available without JavaScript, with horizontal scrolling for static ticker content. FAQ items use native details/summary; the page includes a skip link and visible focus indicators.
+
+Brand marks come from Simple Icons v16.0.0. Their sources, license and disclaimer are retained in `public/assets/brands/`. They are examples, not endorsements. The FAQ bundle size refers to the v2.0.4 browser build (about 4.3 KiB gzip plus 0.5 KiB CSS) and should be remeasured after library changes.
+
+## Encapsulation
+
+Each component owns its CSS in a plain `<style>` block, which Astro scopes automatically, and its client behavior in a processed `<script>`. Tailwind's shared entry file contains only framework configuration, fonts, breakpoints and theme tokens. The document shell styles its own HTML, body, texture and skip link.
+
+Interactive components use custom elements with instance-local queries (`this.querySelector`), AbortController cleanup in `disconnectedCallback`, and their own state. TickerDemo destroys its local controller on disconnect; Reveal disconnects its own observer. Theme owns the shared document preference, while each ThemeToggle binds its own button and observes theme changes.
+
+Tabs owns both its triggers and panel slot. Its logical group name can repeat safely: trigger/panel IDs use a unique prefix per rendered instance. Ticker IDs and speed input/output associations are also unique. LiveDemo routes events only to the demos and controls inside that instance. Visual variants use explicit context props rather than selectors coupled to parent section classes.
+
+Scoped `:global()` descendants are used only under a component-owned selector where Astro slots, rendered syntax spans or library clones require it. These selectors never target the whole document. Arbitrary `.btn`, `.tab` and `.card` classes outside the component receive no component styles.
+
+Validation covered two simultaneous instances of demos, tabs, copy controls and theme toggles: independent tab selection, loop duration, pause state and copy feedback; unique DOM/ARIA IDs; synchronized document theme; CSS isolation from unrelated markup; and disconnect/reconnect cleanup. The full landing also passed dark/light responsive checks from 20rem to 90rem at the default root font size, keyboard tabs, reduced motion and JavaScript-disabled fallbacks.
+
+All authored layout lengths use rem, including outlines, borders, shadows, icon viewports and responsive thresholds. SVG viewBox and stroke values are unitless drawing coordinates. Astro template classes use `class:list={[...]}`, including single-class elements; raw HTML examples remain literal HTML. Run `npm --prefix landing run format` to format all maintained landing files and `npm --prefix landing run format:check` to verify them. Generated output, the npm lockfile and third-party assets are excluded.

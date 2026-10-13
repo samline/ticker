@@ -1,0 +1,188 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+type Props = (HTMLAttributes<'a'> | HTMLAttributes<'button'>) & {
+  variant?: 'primary' | 'secondary' | 'ghost'
+  context?: 'default' | 'hero' | 'closing' | 'nav' | 'ticker'
+  href?: string
+}
+const {
+  href,
+  class: className,
+  variant = 'primary',
+  context = 'default',
+  ...attributes
+} = Astro.props
+const Tag = href ? 'a' : 'button'
+const variants = { primary: 'btn-primary', secondary: 'btn-secondary', ghost: 'btn-ghost' }
+---
+
+<Tag
+  {...attributes}
+  data-context={context}
+  href={href}
+  type={href ? undefined : ((attributes as HTMLAttributes<'button'>).type ?? 'button')}
+  class:list={['btn', variants[variant], className]}
+>
+  <slot />
+</Tag>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 3.5rem;
+    padding: 0 1.5rem;
+    border-radius: var(--radius-pill);
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: -0.01em;
+    transition:
+      transform 0.3s var(--ease-out-expo),
+      background-color 0.3s ease,
+      color 0.3s ease,
+      box-shadow 0.4s ease;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: var(--color-accent);
+    color: var(--palette-on-accent);
+    box-shadow:
+      0 0 0 0.0625rem rgba(0, 0, 0, 0.2),
+      0 0.5rem 1.5rem -0.625rem var(--color-accent-glow);
+  }
+  .btn-primary:hover {
+    transform: translateY(-0.0625rem);
+    box-shadow:
+      0 0 0 0.0625rem rgba(0, 0, 0, 0.2),
+      0 0.75rem 1.75rem -0.5rem var(--color-accent-glow);
+  }
+
+  .btn-secondary {
+    background: var(--color-bg-soft);
+    color: var(--color-text);
+    border: 0.0625rem solid var(--color-border);
+    backdrop-filter: blur(0.5rem);
+  }
+  .btn-secondary:hover {
+    background: var(--color-surface-2);
+    border-color: var(--palette-border-hover);
+  }
+
+  .btn-ghost {
+    height: 2.5rem;
+    padding: 0 1rem;
+    background: transparent;
+    color: var(--color-text-muted);
+    border: 0.0625rem solid var(--color-border);
+  }
+  .btn-ghost:hover {
+    color: var(--color-text);
+    border-color: var(--palette-border-hover);
+  }
+  .btn.hidden {
+    display: none;
+  }
+  @media (width >= 37.5rem) {
+    .btn.sm\:inline-flex {
+      display: inline-flex;
+    }
+  }
+  @media (width < 37.5rem) {
+    .btn-primary[data-context='nav'] {
+      padding-inline: 0.875rem;
+      font-size: 0.825rem;
+    }
+  }
+  .btn {
+    height: 3.125rem;
+    padding-inline: 1.4rem;
+    font-size: 0.875rem;
+    border-radius: 0.875rem;
+  }
+  .btn-primary {
+    box-shadow: none;
+  }
+  .btn-primary:hover {
+    box-shadow: none;
+    background: var(--palette-accent-hover);
+  }
+  .btn-secondary {
+    background: var(--palette-button-surface);
+    border-color: var(--palette-button-border);
+    backdrop-filter: none;
+  }
+  .btn-secondary:hover {
+    background: var(--palette-button-hover);
+  }
+  .btn-ghost {
+    height: 2.5rem;
+    border-radius: 62.4375rem;
+  }
+  .btn[data-context='hero'] {
+    min-width: 10.3125rem;
+    justify-content: space-between;
+    gap: 1.25rem;
+  }
+  .btn[data-context='hero']:first-child {
+    border-radius: 1.5rem 0.5rem 0.5rem 1.5rem;
+  }
+  .btn[data-context='hero']:last-child {
+    border-radius: 0.5rem 1.5rem 1.5rem 0.5rem;
+  }
+  .btn[data-context='hero'] :global(span) {
+    font-size: 1.2rem;
+    font-weight: 400;
+  }
+  .btn[data-context='ticker'] {
+    color: var(--palette-control-text);
+    border-color: var(--palette-control-border);
+    background: transparent;
+    height: 2rem;
+    min-height: 2rem;
+    padding-inline: 0.75rem;
+    font-size: 0.65rem;
+  }
+  .btn-primary[data-context='closing'] {
+    background: var(--palette-lavender);
+    color: var(--palette-closing-on-accent);
+  }
+  .btn-primary[data-context='closing']:hover {
+    background: var(--palette-accent-hover);
+  }
+  .btn-secondary[data-context='closing'] {
+    background: transparent;
+    color: var(--palette-closing-secondary);
+    border-color: var(--palette-closing-border);
+  }
+  @media (width < 30rem) {
+    .btn[data-context='hero'] {
+      min-width: 0;
+      flex: 1;
+      font-size: 0.74rem;
+      padding-inline: 1rem;
+      gap: 0.5rem;
+    }
+  }
+  @media (width < 23.4375rem) {
+    .btn-primary[data-context='nav'] {
+      padding-inline: 0.75rem;
+      font-size: 0.72rem;
+    }
+  }
+  :focus-visible {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.25rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :where(a, button, summary) {
+      transition: none;
+    }
+  }
+  .btn[data-context='nav'] {
+    height: 2.5rem;
+  }
+</style>

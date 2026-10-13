@@ -1,0 +1,66 @@
+---
+import Section from '../components/Section.astro'
+import Box from '../components/Box.astro'
+import SectionHeading from '../components/SectionHeading.astro'
+import RuntimeItem from '../components/RuntimeItem.astro'
+---
+
+<Section spacing="none" class:list={['content-section runtime-section']}>
+  <Box>
+    <SectionHeading
+      context="runtime"
+      eyebrow="02 / Choose your entrypoint"
+      class:list={['mb-10 flex flex-col items-start gap-3']}
+    >
+      Built for every <span class:list={['serif italic']}>runtime</span>.
+      <Fragment slot="description">
+        Import the API your stack already uses. No polyfill, no configuration step, no global state
+        you did not ask for.
+      </Fragment>
+    </SectionHeading>
+
+    <div class:list={['grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 runtime-grid']}>
+      <RuntimeItem label="Main" entrypoint="@samline/ticker">
+        Full API plus defaults, the browser singleton, and the registry.
+      </RuntimeItem>
+      <RuntimeItem label="Vanilla" entrypoint="@samline/ticker/vanilla">
+        Element-scoped controller plus the declarative page manager. Auto-discovers tickers as the
+        DOM changes.
+      </RuntimeItem>
+      <RuntimeItem label="Browser" entrypoint="@samline/ticker/browser">
+        ESM/CJS browser registry without installing a window global. Tree-shakable for modern
+        bundles.
+      </RuntimeItem>
+      <RuntimeItem label="Global" entrypoint="/browser/global">
+        A single IIFE for plain HTML, WordPress, Shopify, and any server-rendered template. Just one
+        script tag.
+      </RuntimeItem>
+      <RuntimeItem label="Core" entrypoint="@samline/ticker/core">
+        Types, defaults, state factories, and validation helpers for advanced integrations and
+        custom builds.
+      </RuntimeItem>
+      <RuntimeItem label="Style" entrypoint="/style.css">
+        Required layout, animation, and reduced-motion styles. One import, no CSS framework
+        required.
+      </RuntimeItem>
+    </div>
+  </Box>
+</Section>
+
+<style>
+  .runtime-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 2.25rem;
+    row-gap: 0;
+  }
+  @media (width < 48rem) {
+    .runtime-grid {
+      column-gap: 1.5rem;
+    }
+  }
+  @media (width < 30rem) {
+    .runtime-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

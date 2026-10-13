@@ -1,0 +1,78 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+interface Props extends HTMLAttributes<'section'> {
+  layout?: 'default' | 'faq'
+  theme?: 'inherit' | 'light' | 'dark'
+  spacing?: 'default' | 'none'
+  main?: boolean
+  disabled?: boolean
+}
+const {
+  class: className,
+  theme = 'inherit',
+  layout = 'default',
+  spacing = 'default',
+  main = false,
+  disabled = false,
+  ...attributes
+} = Astro.props
+---
+
+{!disabled && (
+  <section
+    {...attributes}
+    data-layout={layout}
+    data-theme={theme === 'inherit' ? undefined : theme}
+    class:list={[
+      'group/section relative z-10',
+      {
+        'bg-bg text-text': theme !== 'inherit',
+        'py-10 md:py-16 lg:py-20': spacing === 'default',
+        'pt-24 lg:pt-32': main,
+      },
+      className,
+    ]}
+  >
+    <slot />
+  </section>
+)}
+
+<style>
+  .content-section {
+    max-width: 68rem;
+    padding-top: 6.25rem;
+    padding-bottom: 1.5rem;
+  }
+  [data-layout='faq'] {
+    max-width: 47.5rem;
+    padding-top: 6.75rem;
+  }
+  .closing-section {
+    padding-bottom: 5rem;
+    max-width: 68rem;
+  }
+  @media (width < 48rem) {
+    .content-section {
+      padding-top: 4.5rem;
+    }
+  }
+  @media (width < 48rem) {
+    [data-layout='faq'] {
+      padding-top: 4.5rem;
+    }
+  }
+  @media (width < 48rem) {
+    .closing-section {
+      padding-bottom: 3rem;
+    }
+  }
+  .content-section {
+    max-width: none;
+  }
+  [data-layout='faq'] {
+    max-width: none;
+  }
+  .closing-section {
+    max-width: none;
+  }
+</style>

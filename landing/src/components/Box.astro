@@ -1,0 +1,30 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+interface Props extends HTMLAttributes<'div'> {
+  padding?: 'default' | 'none'
+  liquid?: boolean
+  x2?: boolean
+  size?: 'default' | 'wide' | 'narrow'
+}
+const {
+  class: className,
+  liquid = false,
+  padding = 'default',
+  x2 = false,
+  size = 'default',
+  ...attributes
+} = Astro.props
+const widths = { default: 'max-w-[68rem]', wide: 'max-w-screen-2xl', narrow: 'max-w-[47.5rem]' }
+---
+
+<div
+  {...attributes}
+  class:list={[
+    'box mx-auto w-full',
+    { 'px-6 lg:px-10': padding === 'default' },
+    liquid ? 'max-w-none' : x2 ? 'max-w-[120rem]' : widths[size],
+    className,
+  ]}
+>
+  <slot />
+</div>

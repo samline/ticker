@@ -1,0 +1,121 @@
+---
+import '../styles/tailwind.css'
+import Theme from '../components/Theme.astro'
+import Header from './Header.astro'
+import Footer from './Footer.astro'
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@samline/ticker — Accessible, dependency-free marquees for the web</title>
+    <meta
+      name="description"
+      content="A tiny, accessible, dependency-free ticker (marquee) for Vanilla JavaScript, TypeScript, and plain HTML. Ships ESM, CJS, browser bundle, and CSS."
+    />
+    <meta name="theme-color" content="#1d1c23" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231d1c23'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23b7aed2'/%3E%3C/svg%3E"
+    />
+
+    <link rel="preconnect" href="https://fonts.bunny.net" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.bunny.net/css?family=inter:400,500,600,700|instrument-serif:400i|jetbrains-mono:400,500&amp;display=swap"
+    />
+    <Theme />
+  </head>
+  <body class:list={['bg-bg text-text antialiased']}>
+    <a class:list={['skip-link']} href="#top">
+      Skip to content
+    </a>
+    <div class:list={['grain']} aria-hidden="true"></div>
+    <Header />
+    <main id="top" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  html {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-feature-settings: 'ss01', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-feature-settings: 'ss01', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.04;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  .skip-link {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 100;
+    padding: 0.75rem 1rem;
+    background: var(--color-accent);
+    color: var(--color-bg);
+    border-radius: 0.5rem;
+    transform: translateY(-200%);
+  }
+  .skip-link:focus {
+    transform: none;
+  }
+
+  html {
+    scroll-padding-top: 2rem;
+  }
+  body {
+    background: var(--color-bg);
+  }
+  .grain {
+    opacity: 0.008;
+    position: absolute;
+  }
+
+  main:focus {
+    outline: none;
+  }
+  :focus-visible {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.25rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :where(a, button, summary) {
+      transition: none;
+    }
+  }
+</style>
