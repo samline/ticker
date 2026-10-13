@@ -21,17 +21,34 @@ const { label, entrypoint } = Astro.props
 
 <style>
   .card {
+    position: relative;
+    isolation: isolate;
     display: grid;
     grid-template-columns: 5rem minmax(0, 1fr);
     column-gap: 0.75rem;
-    border-top: 0.0625rem solid var(--color-border-soft);
+    padding: 1.4375rem 1rem;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    inset-inline: 1rem;
+    height: 0.0625rem;
+    background: var(--color-border-soft);
+    pointer-events: none;
+  }
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0.5rem 0;
+    z-index: -1;
     border-radius: 0.5rem;
     background: transparent;
-    padding: 1.4375rem 1rem;
+    pointer-events: none;
     transition: background-color var(--duration-ui) var(--ease-ui);
   }
   @media (hover: hover) {
-    .card:hover {
+    .card:hover::after {
       background: var(--color-accent-soft);
     }
   }
@@ -73,7 +90,7 @@ const { label, entrypoint } = Astro.props
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .card {
+    .card::after {
       transition: none;
     }
   }
