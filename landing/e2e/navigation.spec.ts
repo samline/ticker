@@ -153,3 +153,72 @@ test('repeated menu instances have separate controllers and clean up on reconnec
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog')).toHaveCount(0)
 })
+
+test('mobile menu highlights the visible section on each opening and puts Docs last', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 800 })
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('./')
+  await page.evaluate(() => document.fonts.ready)
+  const trigger = page.locator('[data-menu-trigger]')
+  const dialog = page.getByRole('dialog')
+  const close = async () => {
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.mobile-menu-panel')).toHaveCount(0)
+  }
+  await trigger.click()
+  await expect(dialog.locator('[aria-current]')).toHaveCount(0)
+  await expect(dialog.locator('.menu-link').last()).toHaveAccessibleName('Docs')
+  await close()
+  for (const id of ['features', 'how', 'recipes', 'faq', 'how']) {
+    await page
+      .locator(`#${id}`)
+      .evaluate(element => element.scrollIntoView({ behavior: 'instant', block: 'start' }))
+    await trigger.click()
+    await expect(dialog.locator('[aria-current="location"]')).toHaveCount(1)
+    await expect(dialog.locator(`[href="#${id}"]`)).toHaveAttribute('aria-current', 'location')
+    await close()
+  }
+  await trigger.click()
+  await dialog.locator('[href="#recipes"]').click()
+  await expect(page.locator('.mobile-menu-panel')).toHaveCount(0)
+  await trigger.click()
+  await expect(dialog.locator('[href="#recipes"]')).toHaveAttribute('aria-current', 'location')
+  await close()
+  await page
+    .locator('main > section')
+    .nth(2)
+    .evaluate(element => element.scrollIntoView({ behavior: 'instant', block: 'start' }))
+  await trigger.click()
+  await expect(dialog.locator('[aria-current]')).toHaveCount(0)
+})
+
+test('opening and dismissing the mobile drawer preserves page scroll', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 800 })
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('./')
+  await page.evaluate(() => document.fonts.ready)
+  const trigger = page.locator('[data-menu-trigger]')
+  const dialog = page.getByRole('dialog')
+  for (const id of ['features', 'recipes', 'faq']) {
+    await page
+      .locator(`#${id}`)
+      .evaluate(element => element.scrollIntoView({ behavior: 'instant', block: 'start' }))
+    for (const dismiss of ['close', 'escape', 'backdrop']) {
+      const before = await page.evaluate(() => scrollY)
+      await trigger.click()
+      await expect(dialog).toBeVisible()
+      expect(await page.evaluate(() => scrollY)).toBeCloseTo(before, 0)
+      if (dismiss === 'close') await dialog.locator('[data-drawer-close]').click()
+      else if (dismiss === 'escape') await page.keyboard.press('Escape')
+      else await page.locator('.mobile-menu-overlay').click({ position: { x: 5, y: 100 } })
+      await expect(page.locator('.mobile-menu-panel')).toHaveCount(0)
+      await expect(trigger).toBeFocused()
+      await expect
+        .poll(() => page.locator('body').evaluate(element => getComputedStyle(element).overflow))
+        .not.toBe('hidden')
+      expect(await page.evaluate(() => scrollY)).toBeCloseTo(before, 0)
+    }
+  }
+})

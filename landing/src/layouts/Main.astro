@@ -89,8 +89,9 @@ const i18n = getI18n(Astro)
     transform: none;
   }
 
-  html {
-    scroll-padding-top: var(--header-offset, 9rem);
+  main,
+  main :global([id]) {
+    scroll-margin-top: var(--header-offset, 9rem);
   }
   body {
     background: var(--color-bg);

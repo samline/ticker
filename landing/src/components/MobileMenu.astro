@@ -72,7 +72,7 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
               <a
                 href={'docsRoute' in item ? docsHref(item.docsRoute) : item.href}
                 aria-label={item.label}
-                class:list={['menu-link', { 'menu-start': 'href' in item && item.href === '#how' }]}
+                class:list={['menu-link']}
               >
                 <span class:list={['menu-index']} aria-hidden="true">
                   {String(index + 1).padStart(2, '0')}
@@ -135,6 +135,23 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
       if (!trigger || !fallback || !content || !id) return
       this.lifecycle = new AbortController()
       const { signal } = this.lifecycle
+      const syncCurrentSection = () => {
+        const headerBottom =
+          document.querySelector('ticker-header')?.getBoundingClientRect().bottom ?? 0
+        const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
+        const readingPosition = Math.min(headerBottom + rootSize * 1.5, innerHeight - 1)
+        const section = Array.from(document.querySelectorAll<HTMLElement>('main > section')).find(
+          element => {
+            const bounds = element.getBoundingClientRect()
+            return bounds.top <= readingPosition && bounds.bottom > readingPosition
+          }
+        )
+        for (const link of this.querySelectorAll<HTMLAnchorElement>('.menu-link')) {
+          if (section?.id && link.getAttribute('href') === `#${section.id}`)
+            link.setAttribute('aria-current', 'location')
+          else link.removeAttribute('aria-current')
+        }
+      }
       this.drawer = browser.newDrawer({
         id,
         html: content.outerHTML,
@@ -147,7 +164,13 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
           contentClassName: 'mobile-menu-panel',
           overlayClassName: 'mobile-menu-overlay',
           closeButton: { className: 'menu-close', icon: '×', ariaLabel: this.dataset.closeLabel },
-          onOpenChange: open => trigger.setAttribute('aria-expanded', String(open)),
+          onOpenChange: open => {
+            trigger.setAttribute('aria-expanded', String(open))
+            if (open)
+              queueMicrotask(() => {
+                if (!signal.aborted) syncCurrentSection()
+              })
+          },
         },
       })
       this.addEventListener(
@@ -334,13 +357,13 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
     color: var(--color-accent);
     font-size: 1.25rem;
   }
-  .menu-content .menu-start {
+  .menu-content .menu-link[aria-current='location'] {
     color: var(--palette-on-accent);
     background: var(--color-accent);
   }
-  .menu-start .menu-index,
-  .menu-start .menu-link-description,
-  .menu-start .menu-arrow {
+  .menu-link[aria-current='location'] .menu-index,
+  .menu-link[aria-current='location'] .menu-link-description,
+  .menu-link[aria-current='location'] .menu-arrow {
     color: inherit;
   }
   .menu-project {
@@ -391,7 +414,7 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
       color: var(--color-accent);
       border-color: var(--palette-border-hover);
     }
-    .menu-content .menu-start:hover {
+    .menu-content .menu-link[aria-current='location']:hover {
       color: var(--palette-on-accent);
       background: var(--palette-accent-hover);
       border-color: transparent;

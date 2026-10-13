@@ -10,7 +10,6 @@ export default {
     close: 'Close navigation menu',
   },
   items: [
-    { docsRoute: 'overview', label: 'Docs', description: 'The complete guide and API reference.' },
     {
       href: '#features',
       label: 'Features',
@@ -31,6 +30,7 @@ export default {
       label: 'FAQ',
       description: 'A few details before you build.',
     },
+    { docsRoute: 'overview', label: 'Docs', description: 'The complete guide and API reference.' },
   ],
   footer: {
     description: 'A small, framework-agnostic library for moving content across the open web.',
