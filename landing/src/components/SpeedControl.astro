@@ -1,6 +1,13 @@
-<ticker-speed>
+---
+import { format } from '../i18n/format'
+import { getI18n } from '../i18n/utils'
+const i18n = getI18n(Astro)
+const t = i18n.controls.speed
+---
+
+<ticker-speed data-display-template={t.display} data-description-template={t.description}>
   <label class:list={['speed-control']}>
-    Loop duration
+    {t.label}
     <input
       type="range"
       min="14"
@@ -9,9 +16,11 @@
       step="1"
       data-speed=""
       disabled=""
-      aria-label="Demo loop duration in seconds"
+      aria-label={t.ariaLabel}
     />
-    <output data-speed-output="">38s</output>
+    <output aria-live="off" data-speed-output="">
+      {format(t.display, { seconds: 38 })}
+    </output>
   </label>
 </ticker-speed>
 
@@ -28,8 +37,11 @@
       input.id ||= `speed-${crypto.randomUUID()}`
       output.htmlFor = input.id
       const display = () => {
-        output.value = `${input.value}s`
-        input.setAttribute('aria-valuetext', `${input.value} seconds per loop`)
+        output.value = (this.dataset.displayTemplate ?? '').replace('{seconds}', input.value)
+        input.setAttribute(
+          'aria-valuetext',
+          (this.dataset.descriptionTemplate ?? '').replace('{seconds}', input.value)
+        )
       }
       this.addEventListener(
         'speed:set',

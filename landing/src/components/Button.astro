@@ -1,4 +1,5 @@
 ---
+import { getI18n } from '../i18n/utils'
 import type { HTMLAttributes } from 'astro/types'
 type Props = (HTMLAttributes<'a'> | HTMLAttributes<'button'>) & {
   variant?: 'primary' | 'secondary' | 'ghost'
@@ -12,6 +13,8 @@ const {
   context = 'default',
   ...attributes
 } = Astro.props
+const i18n = getI18n(Astro)
+const opensNewTab = !!href && (attributes as HTMLAttributes<'a'>).target === '_blank'
 const Tag = href ? 'a' : 'button'
 const variants = { primary: 'btn-primary', secondary: 'btn-secondary', ghost: 'btn-ghost' }
 ---
@@ -19,11 +22,13 @@ const variants = { primary: 'btn-primary', secondary: 'btn-secondary', ghost: 'b
 <Tag
   {...attributes}
   data-context={context}
+  rel={opensNewTab ? 'noopener noreferrer' : (attributes as HTMLAttributes<'a'>).rel}
   href={href}
   type={href ? undefined : ((attributes as HTMLAttributes<'button'>).type ?? 'button')}
   class:list={['btn', variants[variant], className]}
 >
   <slot />
+  {opensNewTab && <span class:list={['sr-only']}>{i18n.common.externalLinkHint}</span>}
 </Tag>
 
 <style>

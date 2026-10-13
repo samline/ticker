@@ -1,4 +1,4 @@
-name: Deploy docs to GitHub Pages
+name: Deploy landing and docs to GitHub Pages
 
 on:
   push:
@@ -19,9 +19,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: landing/package-lock.json
+      - name: Build documentation
+        run: npm ci --prefix example && npm --prefix example run build
       - uses: withastro/action@3eafd002e65cc31b4f0eae0bb05450d521562247
         with:
-          path: example
+          path: landing
           node-version: 22
   deploy:
     needs: build

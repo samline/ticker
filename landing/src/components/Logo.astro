@@ -1,26 +1,29 @@
 ---
+import { format } from '../i18n/format'
+import { getI18n } from '../i18n/utils'
 interface Props {
   version?: string
   license?: string
   href?: string
 }
 const { version, license, href = '#top' } = Astro.props
+const i18n = getI18n(Astro)
 ---
 
 <a
   href={href}
   class:list={['flex items-center gap-2.5 text-sm font-medium tracking-tight']}
-  aria-label="@samline/ticker home"
+  aria-label={format(i18n.common.brandHome, { name: i18n.common.packageName })}
 >
   <span class:list={['dot-mark']} aria-hidden="true"></span>
-  <span class:list={['logo-name font-mono text-[0.95rem]']}>@samline/ticker</span>
+  <span class:list={['logo-name font-mono text-[0.95rem]']}>{i18n.common.packageName}</span>
   {version && (
     <span
       class:list={[
         'ml-1 hidden rounded-full border-[0.0625rem] border-border bg-surface px-2 py-0.5 font-mono text-[0.65rem] text-text-muted sm:inline-block',
       ]}
     >
-      v{version}
+      {format(i18n.common.versionLabel, { version })}
     </span>
   )}
   {license && (

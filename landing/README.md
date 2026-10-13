@@ -11,7 +11,7 @@ npm ci --prefix landing
 npm run landing:dev
 ```
 
-Open `http://localhost:4321`. TickerDemo imports the local library API directly from the repository source. Library changes appear in development without rebuilding or copying a browser bundle.
+Open `http://localhost:4321/ticker/`. TickerDemo imports the local library API directly from the repository source. Library changes appear in development without rebuilding or copying a browser bundle.
 
 ```sh
 npm run landing:check
@@ -19,7 +19,7 @@ npm run landing:build
 npm run landing:preview
 ```
 
-The build command bundles the component scripts and scoped styles through Astro, then generates the static site in `landing/dist/`. Deploy that output directory. The documentation site in `example/` and its GitHub Pages workflow remain separate.
+The build command bundles the component scripts and scoped styles through Astro, then generates the static site in `landing/dist/`. Deploy that output directory. Run `npm run site:build` to build both sites: the landing occupies `/ticker/` and the documentation is copied to `/ticker/docs/`. The GitHub Pages workflow publishes this combined output, with a shared sitemap index and redirects for previous documentation URLs.
 
 ## Structure
 
@@ -73,8 +73,31 @@ Interactive components use custom elements with instance-local queries (`this.qu
 
 Tabs owns both its triggers and panel slot. Its logical group name can repeat safely: trigger/panel IDs use a unique prefix per rendered instance. Ticker IDs and speed input/output associations are also unique. LiveDemo routes events only to the demos and controls inside that instance. Visual variants use explicit context props rather than selectors coupled to parent section classes.
 
-Scoped `:global()` descendants are used only under a component-owned selector where Astro slots, rendered syntax spans or library clones require it. These selectors never target the whole document. Arbitrary `.btn`, `.tab` and `.card` classes outside the component receive no component styles.
+Scoped `:global()` descendants are used only under a component-owned selector where Astro slots or library clones require it. These selectors never target the whole document. Arbitrary `.btn`, `.tab` and `.card` classes outside the component receive no component styles.
 
 Validation covered two simultaneous instances of demos, tabs, copy controls and theme toggles: independent tab selection, loop duration, pause state and copy feedback; unique DOM/ARIA IDs; synchronized document theme; CSS isolation from unrelated markup; and disconnect/reconnect cleanup. The full landing also passed dark/light responsive checks from 20rem to 90rem at the default root font size, keyboard tabs, reduced motion and JavaScript-disabled fallbacks.
 
-All authored layout lengths use rem, including outlines, borders, shadows, icon viewports and responsive thresholds. SVG viewBox and stroke values are unitless drawing coordinates. Astro template classes use `class:list={[...]}`, including single-class elements; raw HTML examples remain literal HTML. Run `npm --prefix landing run format` to format all maintained landing files and `npm --prefix landing run format:check` to verify them. Generated output, the npm lockfile and third-party assets are excluded.
+All authored layout lengths use rem, including outlines, borders, shadows, icon viewports and responsive thresholds. SVG viewBox and stroke values are unitless drawing coordinates. Astro template classes use `class:list={[...]}`, including single-class elements; code examples render escaped tokens from their section catalog. Run `npm --prefix landing run format` to format all maintained landing files and `npm --prefix landing run format:check` to verify them. Generated output, the npm lockfile and third-party assets are excluded.
+
+## Translation catalogs
+
+All editable interface text lives in `src/i18n/translations/en/`. English remains the landing's current language. The organization follows dinkbit's domain dictionaries, with typed keys, named interpolation and a source-copy check:
+
+- `common.ts`: shared actions, link labels and package metadata. Name/version come from the root package manifest.
+- `navigation.ts`: navigation, skip link and footer credit.
+- `seo.ts`: document title, description, keywords, sharing metadata and image copy.
+- `controls.ts`: copy feedback, theme labels, ticker pause and loop-duration messages.
+- `sections/`: one catalog per complete section, including feature/FAQ items, demo content and code examples.
+- `index.ts`: composes the locale dictionary.
+
+Find a sentence directly with `rg 'Thoughtful by default' landing/src/i18n/translations`, then edit its catalog without changing the component. Components read `getI18n(Astro)` with typed property access. `getLocale` normalizes regional language tags and falls back to the default locale for unknown values. Future dictionaries must satisfy `TranslationDictionary`; adding translations does not by itself add routes or a language selector.
+
+Rich copy stores text, code, strong and emphasis parts, allowing a translator to reorder the complete sentence while keeping presentation in `RichText.astro`. Code examples use escaped syntax tokens in `CodeBlock.astro`. Catalogs contain no executable HTML. Complete messages such as `Pause animation: {label}` use the typed `format` helper. Custom elements receive already selected messages through their own `data-*` attributes, retaining independent instance behavior and keeping server dictionaries out of client bundles.
+
+`npm run landing:check` runs an AST-based check for literal UI copy in Astro markup/accessibility attributes and direct client-side feedback, Astro type diagnostics, and regression tests for locale resolution, interpolation and the copy check. Run only the tests with `npm --prefix landing run test`. Structural values (IDs, roles, routes, SVG coordinates), decorative symbols and developer diagnostics remain in code.
+
+## SEO and deployment
+
+The default public URL is `https://samline.github.io/ticker/`. Override `SITE_URL` using `.env` (see `.env.example`) for another deployment; its pathname also configures Astro’s base path. Canonical, Open Graph, Twitter cards, JSON-LD, robots.txt and the sitemap share this URL. Development uses noindex. The 1200×630 sharing image is generated from translated copy during the build. JSON-LD is serialized with escaped HTML-sensitive characters.
+
+Metadata identifies the actual source package, repository, license and version. Sections have associated headings; controls have translated accessible names, keyboard focus indicators and instance-specific ARIA IDs. Horizontally scrolling code examples are keyboard focusable. Automated accessibility checks cover both themes, desktop/mobile and all demo tabs; manual checks also cover keyboard navigation, reduced motion and no-JavaScript fallback.

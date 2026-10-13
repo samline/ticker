@@ -1,15 +1,18 @@
 ---
+import { getI18n } from '../i18n/utils'
 import Button from './Button.astro'
+const i18n = getI18n(Astro)
+const t = i18n.controls.theme
 ---
 
-<ticker-theme>
+<ticker-theme data-toggle-label={t.label} data-light-label={t.toLight} data-dark-label={t.toDark}>
   <Button
     variant="ghost"
     class:list={['theme-toggle']}
     data-theme-toggle
-    aria-label="Switch to light theme"
+    aria-label={t.label}
     aria-pressed="false"
-    title="Switch color theme"
+    title={t.title}
   >
     <svg
       data-icon="sun"
@@ -49,7 +52,11 @@ import Button from './Button.astro'
         const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
         this.dataset.theme = theme
         button.setAttribute('aria-pressed', String(theme === 'dark'))
-        button.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`)
+        button.setAttribute('aria-label', this.dataset.toggleLabel ?? '')
+        button.setAttribute(
+          'title',
+          (theme === 'dark' ? this.dataset.lightLabel : this.dataset.darkLabel) ?? ''
+        )
       }
       button.addEventListener(
         'click',

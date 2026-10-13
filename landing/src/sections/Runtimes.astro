@@ -1,47 +1,49 @@
 ---
+import RichText from '../components/RichText.astro'
+import { getI18n } from '../i18n/utils'
 import Section from '../components/Section.astro'
 import Box from '../components/Box.astro'
 import SectionHeading from '../components/SectionHeading.astro'
 import RuntimeItem from '../components/RuntimeItem.astro'
+const i18n = getI18n(Astro)
+const t = i18n.sections.runtimes
+const headingId = `section-heading-${crypto.randomUUID()}`
 ---
 
-<Section spacing="none" class:list={['content-section runtime-section']}>
+<Section
+  aria-labelledby={headingId}
+  spacing="none"
+  class:list={['content-section runtime-section']}
+>
   <Box>
     <SectionHeading
+      headingId={headingId}
       context="runtime"
-      eyebrow="02 / Choose your entrypoint"
+      eyebrow={t.eyebrow}
       class:list={['mb-10 flex flex-col items-start gap-3']}
     >
-      Built for every <span class:list={['serif italic']}>runtime</span>.
-      <Fragment slot="description">
-        Import the API your stack already uses. No polyfill, no configuration step, no global state
-        you did not ask for.
-      </Fragment>
+      <RichText parts={t.heading} />
+      <Fragment slot="description">{t.description}</Fragment>
     </SectionHeading>
 
     <div class:list={['grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 runtime-grid']}>
-      <RuntimeItem label="Main" entrypoint="@samline/ticker">
-        Full API plus defaults, the browser singleton, and the registry.
+      <RuntimeItem label={t.items.main.label} entrypoint={t.items.main.entrypoint}>
+        {t.items.main.description}
       </RuntimeItem>
-      <RuntimeItem label="Vanilla" entrypoint="@samline/ticker/vanilla">
-        Element-scoped controller plus the declarative page manager. Auto-discovers tickers as the
-        DOM changes.
+      <RuntimeItem label={t.items.vanilla.label} entrypoint={t.items.vanilla.entrypoint}>
+        {t.items.vanilla.description}
       </RuntimeItem>
-      <RuntimeItem label="Browser" entrypoint="@samline/ticker/browser">
-        ESM/CJS browser registry without installing a window global. Tree-shakable for modern
-        bundles.
+      <RuntimeItem label={t.items.browser.label} entrypoint={t.items.browser.entrypoint}>
+        {t.items.browser.description}
       </RuntimeItem>
-      <RuntimeItem label="Global" entrypoint="/browser/global">
-        A single IIFE for plain HTML, WordPress, Shopify, and any server-rendered template. Just one
-        script tag.
+      <RuntimeItem label={t.items.global.label} entrypoint={t.items.global.entrypoint}>
+        {t.items.global.description}
       </RuntimeItem>
-      <RuntimeItem label="Core" entrypoint="@samline/ticker/core">
-        Types, defaults, state factories, and validation helpers for advanced integrations and
-        custom builds.
+      <RuntimeItem label={t.items.core.label} entrypoint={t.items.core.entrypoint}>
+        {t.items.core.description}
       </RuntimeItem>
-      <RuntimeItem label="Style" entrypoint="/style.css">
-        Required layout, animation, and reduced-motion styles. One import, no CSS framework
-        required.
+      <RuntimeItem label={t.items.style.label} entrypoint={t.items.style.entrypoint}>
+        {t.items.style.description}
       </RuntimeItem>
     </div>
   </Box>

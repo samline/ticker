@@ -1,13 +1,26 @@
-<ticker-install class:list={['install-shortcut']}>
-  <code>npm install @samline/ticker</code>
-  <button
-    type="button"
-    data-copy="npm install @samline/ticker"
-    aria-label="Copy npm install command"
-  >
-    Copy <span aria-hidden="true">⧉</span>
+---
+import { getI18n } from '../i18n/utils'
+const i18n = getI18n(Astro)
+const t = i18n.controls.copy
+---
+
+<ticker-install
+  data-copied-label={t.copiedLabel}
+  data-success-message={t.success}
+  data-fallback-message={t.fallback}
+  class:list={['install-shortcut']}
+>
+  <code>{t.command}</code>
+  <button type="button" data-copy={t.command} aria-label={t.ariaLabel}>
+    {t.label} <span aria-hidden="true">⧉</span>
   </button>
-  <span class:list={['sr-only']} role="status" data-copy-status=""></span>
+  <span
+    class:list={['sr-only']}
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    data-copy-status=""
+  ></span>
 </ticker-install>
 
 <script>
@@ -26,15 +39,15 @@
           try {
             await navigator.clipboard.writeText(button.dataset.copy ?? code.textContent ?? '')
             if (this.lifecycle?.signal.aborted) return
-            button.textContent = 'Copied!'
-            status.textContent = 'Install command copied to clipboard.'
+            button.textContent = this.dataset.copiedLabel ?? ''
+            status.textContent = this.dataset.successMessage ?? ''
           } catch {
             const range = document.createRange()
             range.selectNodeContents(code)
             const selection = window.getSelection()
             selection?.removeAllRanges()
             selection?.addRange(range)
-            status.textContent = 'Command selected. Press Control+C or Command+C to copy.'
+            status.textContent = this.dataset.fallbackMessage ?? ''
           }
         },
         { signal: this.lifecycle.signal }

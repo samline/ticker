@@ -66,7 +66,8 @@
     "landing:build": "npm --prefix landing run build",
     "landing:dev": "npm --prefix landing run dev -- --host 127.0.0.1",
     "landing:check": "npm --prefix landing run check",
-    "landing:preview": "npm --prefix landing run preview -- --host 127.0.0.1"
+    "landing:preview": "npm --prefix landing run preview -- --host 127.0.0.1",
+    "site:build": "npm run docs:build && npm run landing:build && node landing/scripts/check-site.mjs --docs"
   },
   "keywords": [
     "ticker",

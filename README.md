@@ -159,7 +159,7 @@ See the complete reference in [`docs/api/`](docs/api/index.md).
 
 ## Documentation
 
-Full guides and the same reference are available at **[samline.github.io/ticker](https://samline.github.io/ticker/)**.
+Full guides and the same reference are available at **[samline.github.io/ticker/docs](https://samline.github.io/ticker/docs/)**.
 
 | Doc                                                | Purpose                                                        |
 | -------------------------------------------------- | -------------------------------------------------------------- |

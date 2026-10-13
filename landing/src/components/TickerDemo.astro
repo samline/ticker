@@ -1,4 +1,6 @@
 ---
+import { format } from '../i18n/format'
+import { getI18n } from '../i18n/utils'
 import Button from './Button.astro'
 interface Props {
   id?: string
@@ -12,6 +14,7 @@ const defaults = {
   logos: { duration: 48, direction: 'left' },
   prices: { duration: 34, direction: 'right' },
 }
+const i18n = getI18n(Astro)
 ---
 
 <ticker-demo
@@ -23,7 +26,9 @@ const defaults = {
     class:list={['ticker-frame ticker-wrapper']}
     id={instanceId}
     data-ticker={kind}
-    role="marquee"
+    role="region"
+    aria-live="off"
+    tabindex="0"
     aria-label={label}
   >
     <div class:list={['ticker-track']}>
@@ -37,10 +42,10 @@ const defaults = {
       variant="ghost"
       context="ticker"
       aria-controls={instanceId}
-      aria-label={`Pause animation: ${label}`}
+      aria-label={format(i18n.controls.ticker.pauseLabel, { label })}
       aria-pressed="false"
     >
-      Pause animation
+      {i18n.controls.ticker.pause}
     </Button>
   </div>
 </ticker-demo>

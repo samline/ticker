@@ -1,17 +1,27 @@
 ---
+import { getI18n } from '../i18n/utils'
+import { format } from '../i18n/format'
 interface Props {
+  tokens: readonly {
+    readonly kind: 'plain' | 'com' | 'key' | 'str' | 'fn' | 'num' | 'tag' | 'attr' | 'pun'
+    readonly value: string
+  }[]
   filename: string
   class?: string
 }
-const { filename, class: className } = Astro.props
-const content = (await Astro.slots.render('default')).trim()
+const { filename, tokens, class: className } = Astro.props
+const i18n = getI18n(Astro)
 ---
 
 <div class:list={['code-block', className]}>
   <header>
     <span class:list={['dot']}></span> {filename}
   </header>
-  <pre><code set:html={content} /></pre>
+  <pre
+    tabindex="0"
+    role="region"
+    aria-label={format(i18n.controls.code.label, { filename })}
+  ><code>{tokens.map(token => token.kind === 'plain' ? token.value : <span class:list={[`tok-${token.kind}`]}>{token.value}</span>)}</code></pre>
 </div>
 
 <style>
@@ -51,29 +61,29 @@ const content = (await Astro.slots.render('default')).trim()
     font-family: inherit;
   }
 
-  .code-block :global(.tok-com) {
+  .code-block .tok-com {
     color: var(--palette-syntax-muted);
     font-style: italic;
   }
-  .code-block :global(.tok-key) {
+  .code-block .tok-key {
     color: var(--palette-lavender);
   }
-  .code-block :global(.tok-str) {
+  .code-block .tok-str {
     color: var(--palette-syntax-string);
   }
-  .code-block :global(.tok-fn) {
+  .code-block .tok-fn {
     color: var(--palette-syntax-tag);
   }
-  .code-block :global(.tok-num) {
+  .code-block .tok-num {
     color: var(--palette-syntax-attribute);
   }
-  .code-block :global(.tok-tag) {
+  .code-block .tok-tag {
     color: var(--palette-syntax-number);
   }
-  .code-block :global(.tok-attr) {
+  .code-block .tok-attr {
     color: var(--palette-syntax-function);
   }
-  .code-block :global(.tok-pun) {
+  .code-block .tok-pun {
     color: var(--palette-syntax-muted);
   }
   .code-block {
@@ -88,5 +98,9 @@ const content = (await Astro.slots.render('default')).trim()
   }
   .code-block pre {
     padding: 1rem;
+  }
+  pre:focus-visible {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: -0.125rem;
   }
 </style>

@@ -1,0 +1,97 @@
+---
+import { getI18n, getLocale } from '../i18n/utils'
+import { serializeJsonLd } from '../lib/site'
+import packageInfo from '../../../package.json'
+
+const i18n = getI18n(Astro)
+const locale = getLocale(Astro.currentLocale)
+const canonical = Astro.site?.href
+const indexable = import.meta.env.PROD && !!canonical
+const image = canonical ? new URL('social.png', canonical).href : undefined
+const icon = `${import.meta.env.BASE_URL}favicon.svg`
+const repository = packageInfo.repository.url.replace(/^git\+/, '').replace(/\.git$/, '')
+const software = {
+  '@type': 'SoftwareSourceCode',
+  '@id': canonical ? `${canonical}#software` : undefined,
+  name: i18n.common.packageName,
+  description: i18n.seo.description,
+  version: i18n.common.version,
+  codeRepository: repository,
+  programmingLanguage: i18n.seo.software.languages,
+  runtimePlatform: i18n.seo.software.platform,
+  license: `${repository}/blob/main/LICENSE.md`,
+  author: { '@type': 'Person', name: i18n.common.author },
+  url: canonical,
+  inLanguage: locale,
+}
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': canonical ? `${canonical}#website` : undefined,
+      name: i18n.common.packageName,
+      url: canonical,
+      inLanguage: locale,
+    },
+    {
+      '@type': 'WebPage',
+      '@id': canonical ? `${canonical}#webpage` : undefined,
+      url: canonical,
+      name: i18n.seo.title,
+      description: i18n.seo.description,
+      inLanguage: locale,
+      isPartOf: canonical ? { '@id': `${canonical}#website` } : undefined,
+      mainEntity: canonical ? { '@id': `${canonical}#software` } : software,
+      primaryImageOfPage: image
+        ? { '@type': 'ImageObject', url: image, width: 1200, height: 630 }
+        : undefined,
+    },
+    software,
+  ],
+}
+---
+
+<title>{i18n.seo.title}</title>
+<meta name="description" content={i18n.seo.description} />
+<meta name="keywords" content={i18n.seo.keywords.join(', ')} />
+<meta name="author" content={i18n.common.author} />
+<meta
+  name="robots"
+  content={
+    indexable
+      ? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+      : 'noindex, follow'
+  }
+/>
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="color-scheme" content="light dark" />
+<meta name="theme-color" content="#1d1c23" />
+{canonical && <link rel="canonical" href={canonical} />}
+<link rel="icon" type="image/svg+xml" href={icon} />
+<meta property="og:type" content="website" />
+<meta property="og:title" content={i18n.seo.title} />
+<meta property="og:description" content={i18n.seo.description} />
+<meta property="og:site_name" content={i18n.common.packageName} />
+<meta property="og:locale" content={i18n.seo.social.locale} />
+{canonical && <meta property="og:url" content={canonical} />}
+{image && (
+  <>
+    <meta property="og:image" content={image} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={i18n.seo.social.imageAlt} />
+    {image.startsWith('https:') && <meta property="og:image:secure_url" content={image} />}
+  </>
+)}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={i18n.seo.title} />
+<meta name="twitter:description" content={i18n.seo.description} />
+{image && (
+  <>
+    <meta name="twitter:image" content={image} />
+    <meta name="twitter:image:alt" content={i18n.seo.social.imageAlt} />
+  </>
+)}
+<script type="application/ld+json" is:inline set:html={serializeJsonLd(schema)} />

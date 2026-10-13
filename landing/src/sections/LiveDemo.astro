@@ -1,4 +1,6 @@
 ---
+import { getI18n } from '../i18n/utils'
+import { format } from '../i18n/format'
 import Tabs from '../components/Tabs.astro'
 import SpeedControl from '../components/SpeedControl.astro'
 import TickerDemo from '../components/TickerDemo.astro'
@@ -8,117 +10,73 @@ interface Props {
   id?: string
 }
 const { id = `demo-${crypto.randomUUID()}` } = Astro.props
+const i18n = getI18n(Astro)
+const t = i18n.sections.liveDemo
 ---
 
-<ticker-live-demo class:list={['demo-studio']} id={id}>
-  <Tabs
-    id="demo"
-    variant="demo"
-    label="Live demo content"
-    class:list={['demo-tabs']}
-    items={[
-      { id: 'news', label: 'Announcements' },
-      { id: 'logos', label: 'Brands' },
-      { id: 'prices', label: 'Prices' },
-    ]}
-  >
+<ticker-live-demo role="region" aria-label={t.label} class:list={['demo-studio']} id={id}>
+  <Tabs id="demo" variant="demo" label={t.label} class:list={['demo-tabs']} items={t.tabs}>
     <div slot="heading" class:list={['studio-title']}>
       <span class:list={['status-dot']} aria-hidden="true"></span>
-      <span>THE LIBRARY, LIVE</span>
+      <span>{t.title}</span>
     </div>
 
     <div class:list={['studio-panels']} data-panel-group="demo">
       <div class:list={['studio-panel']} data-panel="news">
         <div class:list={['specimen-heading']}>
-          <span>01 / ANNOUNCEMENTS</span>
-          <span>GOOD NEWS TRAVELS.</span>
+          <span>{t.panels.news.eyebrow}</span>
+          <span>{t.panels.news.tagline}</span>
         </div>
         <div class:list={['specimen']} data-slot="news">
-          <TickerDemo id="ticker-news" kind="news" label="Latest announcements">
-            <a href="#how" class:list={['font-medium']}>
-              Release notes for v2.0.4
-            </a>
-            <span class:list={['sep']} aria-hidden="true"></span>
-            <a href="#features">Built-in reduced-motion support</a>
-            <span class:list={['sep']} aria-hidden="true"></span>
-            <a href={`#${id}`} data-open-demo="prices">
-              Try a sample price ticker
-            </a>
-            <span class:list={['sep']} aria-hidden="true"></span>
-            <a href="#how">Get started with plain HTML</a>
-            <span class:list={['sep']} aria-hidden="true"></span>
-            <a href="https://github.com/samline/ticker">Explore the source on GitHub</a>
-            <span class:list={['sep']} aria-hidden="true"></span>
-            <a href="#faq">Read the accessibility FAQ</a>
-            <span class:list={['sep']} aria-hidden="true"></span>
+          <TickerDemo id="ticker-news" kind="news" label={t.panels.news.label}>
+            {t.news.map((item, index) => (
+              <>
+                <a
+                  href={item.openPrices ? `#${id}` : item.href}
+                  data-open-demo={item.openPrices ? 'prices' : undefined}
+                  class:list={[{ 'font-medium': index === 0 }]}
+                >
+                  {format(item.label, { version: i18n.common.version })}
+                </a>
+                <span class:list={['sep']} aria-hidden="true"></span>
+              </>
+            ))}
           </TickerDemo>
         </div>
       </div>
       <div class:list={['studio-panel']} data-panel="logos">
         <div class:list={['specimen-heading']}>
-          <span>02 / BRAND STRIP</span>
-          <span>SAMPLE LOGOS, NO ENDORSEMENTS.</span>
+          <span>{t.panels.logos.eyebrow}</span>
+          <span>{t.panels.logos.tagline}</span>
         </div>
         <div class:list={['specimen']} data-slot="logos">
-          <TickerDemo
-            id="ticker-logos"
-            kind="logos"
-            label="Sample brand logos; illustrative content, not endorsements"
-          >
-            <BrandLogo src="/assets/brands/vercel.svg" name="Vercel" />
-            <BrandLogo src="/assets/brands/linear.svg" name="Linear" />
-            <BrandLogo src="/assets/brands/stripe.svg" name="Stripe" />
-            <BrandLogo src="/assets/brands/shopify.svg" name="Shopify" />
-            <BrandLogo src="/assets/brands/figma.svg" name="Figma" />
-            <BrandLogo src="/assets/brands/notion.svg" name="Notion" />
-            <BrandLogo src="/assets/brands/github.svg" name="GitHub" />
-            <BrandLogo src="/assets/brands/supabase.svg" name="Supabase" />
-            <BrandLogo src="/assets/brands/raycast.svg" name="Raycast" />
-            <BrandLogo src="/assets/brands/astro.svg" name="Astro" />
-            <BrandLogo src="/assets/brands/vite.svg" name="Vite" />
-            <BrandLogo src="/assets/brands/cloudflare.svg" name="Cloudflare" />
+          <TickerDemo id="ticker-logos" kind="logos" label={t.panels.logos.label}>
+            {t.brands.map(brand => (
+              <BrandLogo
+                src={`${import.meta.env.BASE_URL}${brand.src.replace(/^\//, '')}`}
+                name={brand.name}
+              />
+            ))}
           </TickerDemo>
         </div>
       </div>
       <div class:list={['studio-panel']} data-panel="prices">
         <div class:list={['specimen-heading']}>
-          <span>03 / MARKET TAPE</span>
-          <span>ILLUSTRATIVE DATA.</span>
+          <span>{t.panels.prices.eyebrow}</span>
+          <span>{t.panels.prices.tagline}</span>
         </div>
         <div class:list={['specimen']} data-slot="prices">
-          <TickerDemo id="ticker-prices" kind="prices" label="Sample market data">
-            <span class:list={['font-semibold']}>BTC</span>
-            <span class:list={['price']}>$94,210.40</span>
-            <span class:list={['delta-up']}>+2.31%</span>
-            <span class:list={['sep']} aria-hidden="true"></span>
-            <span class:list={['font-semibold']}>ETH</span>
-            <span class:list={['price']}>$3,540.18</span>
-            <span class:list={['delta-up']}>+1.84%</span>
-            <span class:list={['sep']} aria-hidden="true"></span>
-            <span class:list={['font-semibold']}>SOL</span>
-            <span class:list={['price']}>$182.07</span>
-            <span class:list={['delta-down']}>−0.42%</span>
-            <span class:list={['sep']} aria-hidden="true"></span>
-            <span class:list={['font-semibold']}>AAPL</span>
-            <span class:list={['price']}>$228.10</span>
-            <span class:list={['delta-up']}>+0.62%</span>
-            <span class:list={['sep']} aria-hidden="true"></span>
-            <span class:list={['font-semibold']}>TSLA</span>
-            <span class:list={['price']}>$341.92</span>
-            <span class:list={['delta-down']}>−1.18%</span>
-            <span class:list={['sep']} aria-hidden="true"></span>
-            <span class:list={['font-semibold']}>NVDA</span>
-            <span class:list={['price']}>$138.55</span>
-            <span class:list={['delta-up']}>+3.07%</span>
-            <span class:list={['sep']} aria-hidden="true"></span>
-            <span class:list={['font-semibold']}>SPY</span>
-            <span class:list={['price']}>$592.40</span>
-            <span class:list={['delta-up']}>+0.22%</span>
-            <span class:list={['sep']} aria-hidden="true"></span>
-            <span class:list={['font-semibold']}>META</span>
-            <span class:list={['price']}>$612.83</span>
-            <span class:list={['delta-up']}>+0.91%</span>
-            <span class:list={['sep']} aria-hidden="true"></span>
+          <TickerDemo id="ticker-prices" kind="prices" label={t.panels.prices.label}>
+            {t.prices.map(item => (
+              <>
+                <span class:list={['font-semibold']}>{item.symbol}</span>
+                <span class:list={['price']}>{item.price}</span>
+                <span class:list={[item.direction === 'up' ? 'delta-up' : 'delta-down']}>
+                  {item.change}
+                </span>
+                <span class:list={['sep']} aria-hidden="true"></span>
+              </>
+            ))}
           </TickerDemo>
         </div>
       </div>
@@ -126,7 +84,7 @@ const { id = `demo-${crypto.randomUUID()}` } = Astro.props
   </Tabs>
   <div class:list={['studio-footer']}>
     <p>
-      Hover to pause. <span>Make it your pace.</span>
+      {t.hoverHint} <span>{t.paceHint}</span>
     </p>
     <SpeedControl />
   </div>

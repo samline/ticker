@@ -1,26 +1,33 @@
 ---
+import RichText from '../components/RichText.astro'
+import { getI18n } from '../i18n/utils'
 import Reveal from '../components/Reveal.astro'
 import Eyebrow from '../components/Eyebrow.astro'
 import Heading from '../components/Heading.astro'
 import Section from '../components/Section.astro'
 import Box from '../components/Box.astro'
 import Button from '../components/Button.astro'
+const i18n = getI18n(Astro)
+const t = i18n.sections.callToAction
+const headingId = `section-heading-${crypto.randomUUID()}`
 ---
 
-<Section spacing="none" class:list={['content-section closing-section']}>
+<Section
+  aria-labelledby={headingId}
+  spacing="none"
+  class:list={['content-section closing-section']}
+>
   <Box>
     <Reveal>
       <div class:list={['cta-card p-10 text-center sm:p-14 section-heading']} data-reveal="">
-        <Eyebrow context="closing">LET YOUR CONTENT GO PLACES</Eyebrow>
-        <Heading context="closing" class:list={['mx-auto mt-5 max-w-xl']}>
-          Ready to <span class:list={['serif italic']}>get moving?</span>
+        <Eyebrow context="closing">{t.eyebrow}</Eyebrow>
+        <Heading id={headingId} context="closing" class:list={['mx-auto mt-5 max-w-xl']}>
+          <RichText parts={t.heading} />
         </Heading>
-        <p class:list={['mx-auto mt-4 max-w-md text-text-muted']}>
-          One small library. A whole new way to bring your content to life.
-        </p>
+        <p class:list={['mx-auto mt-4 max-w-md text-text-muted']}>{t.description}</p>
         <div class:list={['mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row']}>
           <Button context="closing" href="#how" class:list={['w-full sm:w-auto']} variant="primary">
-            Get started
+            {i18n.common.buttons.getStarted}
             <svg
               aria-hidden="true"
               width="0.875rem"
@@ -43,7 +50,7 @@ import Button from '../components/Button.astro'
             class:list={['w-full sm:w-auto']}
             variant="secondary"
           >
-            Star on GitHub
+            {i18n.common.buttons.starGithub}
           </Button>
         </div>
       </div>

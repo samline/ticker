@@ -1,0 +1,8 @@
+export { default as hero } from './hero'
+export { default as features } from './features'
+export { default as runtimes } from './runtimes'
+export { default as gettingStarted } from './gettingStarted'
+export { default as comparison } from './comparison'
+export { default as faq } from './faq'
+export { default as callToAction } from './callToAction'
+export { default as liveDemo } from './liveDemo'

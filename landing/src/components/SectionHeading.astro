@@ -5,9 +5,16 @@ import type { HTMLAttributes } from 'astro/types'
 import Eyebrow from './Eyebrow.astro'
 interface Props extends HTMLAttributes<'div'> {
   context?: 'default' | 'features' | 'runtime' | 'faq'
+  headingId?: string
   eyebrow: string
 }
-const { eyebrow, context = 'default', class: className, ...attributes } = Astro.props
+const {
+  eyebrow,
+  headingId = `heading-${crypto.randomUUID()}`,
+  context = 'default',
+  class: className,
+  ...attributes
+} = Astro.props
 ---
 
 <Reveal>
@@ -18,7 +25,7 @@ const { eyebrow, context = 'default', class: className, ...attributes } = Astro.
     data-reveal
   >
     <Eyebrow>{eyebrow}</Eyebrow>
-    <Heading context={context === 'faq' ? 'faq' : 'default'}>
+    <Heading id={headingId} context={context === 'faq' ? 'faq' : 'default'}>
       <slot />
     </Heading>
     {Astro.slots.has('description') && (

@@ -1,22 +1,25 @@
 ---
+import { getI18n } from '../i18n/utils'
 import Reveal from '../components/Reveal.astro'
 import Section from '../components/Section.astro'
 import Box from '../components/Box.astro'
 import SectionHeading from '../components/SectionHeading.astro'
+const i18n = getI18n(Astro)
+const t = i18n.sections.comparison
+const headingId = `section-heading-${crypto.randomUUID()}`
 ---
 
-<Section spacing="none" id="compare" class:list={['content-section']}>
+<Section aria-labelledby={headingId} spacing="none" id="compare" class:list={['content-section']}>
   <Box>
     <SectionHeading
-      eyebrow="04 / The details that matter"
+      headingId={headingId}
+      eyebrow={t.eyebrow}
       class:list={['mb-10 flex flex-col items-start gap-3']}
     >
-      Small footprint.
+      {t.title}
       <br />
-      <span class:list={['serif italic']}>A considered foundation.</span>
-      <Fragment slot="description">
-        See what the library handles and what your integration controls.
-      </Fragment>
+      <span class:list={['serif italic']}>{t.titleAccent}</span>
+      <Fragment slot="description">{t.description}</Fragment>
     </SectionHeading>
 
     <Reveal>
@@ -25,57 +28,27 @@ import SectionHeading from '../components/SectionHeading.astro'
         data-reveal=""
         tabindex="0"
         role="region"
-        aria-label="Ticker capabilities table"
+        aria-label={t.ariaLabel}
       >
         <table class:list={['compare']}>
-          <caption class:list={['sr-only']}>
-            Ticker capabilities and integration responsibilities
-          </caption>
+          <caption class:list={['sr-only']}>{t.caption}</caption>
           <thead>
             <tr>
-              <th scope="col">Capability</th>
+              <th scope="col">{t.headers.capability}</th>
               <th scope="col" class:list={['here']}>
-                @samline/ticker
+                {i18n.common.packageName}
               </th>
-              <th scope="col">Your integration</th>
+              <th scope="col">{t.headers.integration}</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <th scope="row">Framework dependencies</th>
-              <td class:list={['center']}>None</td>
-              <td>Use the DOM API from your framework lifecycle.</td>
-            </tr>
-            <tr>
-              <th scope="row">Visual clones</th>
-              <td class:list={['center']}>Hidden from assistive technology and keyboard focus</td>
-              <td>Keep the original content meaningful and accessible.</td>
-            </tr>
-            <tr>
-              <th scope="row">Playback</th>
-              <td class:list={['center']}>Pauses off-screen and in hidden documents</td>
-              <td>Offer a pause control for continuous motion.</td>
-            </tr>
-            <tr>
-              <th scope="row">Reduced motion</th>
-              <td class:list={['center']}>Respects the system preference</td>
-              <td>Keep static content readable and reachable.</td>
-            </tr>
-            <tr>
-              <th scope="row">Layout changes</th>
-              <td class:list={['center']}>Remeasures on resize</td>
-              <td>Call refresh() after editing content or loading fonts.</td>
-            </tr>
-            <tr>
-              <th scope="row">Distribution</th>
-              <td class:list={['center']}>ESM, CommonJS, browser global, and CSS</td>
-              <td>Load the stylesheet alongside the API.</td>
-            </tr>
-            <tr>
-              <th scope="row">Licensing</th>
-              <td class:list={['center']}>MIT</td>
-              <td>Retain the license when redistributing.</td>
-            </tr>
+            {Object.values(t.rows).map(row => (
+              <tr>
+                <th scope="row">{row.capability}</th>
+                <td class:list={['center']}>{row.library}</td>
+                <td>{row.integration}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

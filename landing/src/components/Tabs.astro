@@ -2,7 +2,7 @@
 interface Props {
   id: string
   label: string
-  items: { id: string; label: string }[]
+  items: readonly { readonly id: string; readonly label: string }[]
   variant?: 'default' | 'demo'
   class?: string
 }

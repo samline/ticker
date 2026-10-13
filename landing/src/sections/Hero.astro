@@ -1,4 +1,5 @@
 ---
+import { getI18n } from '../i18n/utils'
 import Heading from '../components/Heading.astro'
 import Section from '../components/Section.astro'
 import Box from '../components/Box.astro'
@@ -6,47 +7,53 @@ import Button from '../components/Button.astro'
 import InstallCommand from '../components/InstallCommand.astro'
 import Eyebrow from '../components/Eyebrow.astro'
 import LiveDemo from './LiveDemo.astro'
+const i18n = getI18n(Astro)
+const t = i18n.sections.hero
+const iconSeparator = ' '
+const headingId = `section-heading-${crypto.randomUUID()}`
 ---
 
-<Section spacing="none" class:list={['hero-section']}>
+<Section aria-labelledby={headingId} spacing="none" class:list={['hero-section']}>
   <Box liquid padding="none">
     <div class:list={['hero-intro']}>
-      <Eyebrow status> SMALL LIBRARY. ENDLESS POSSIBILITIES.</Eyebrow>
-      <Heading level={1}>
-        A little motion.
+      <Eyebrow status> {t.kicker}</Eyebrow>
+      <Heading id={headingId} level={1}>
+        {t.title}
         <br />
-        <span class:list={['serif']}>A lot of possibility.</span>
+        <span class:list={['serif']}>{t.titleAccent}</span>
       </Heading>
       <p class:list={['hero-description']}>
-        Accessible ticker tapes for the open web.
+        {t.description}
         <br class:list={['desktop-break']} />
-        Announcements, logos, and prices. Just your content, in motion.
+        {t.descriptionContinuation}
       </p>
       <div class:list={['hero-actions']}>
         <Button context="hero" href="#how" class:list={['']} variant="primary">
-          Get started <span aria-hidden="true">↗</span>
+          {i18n.common.buttons.getStarted}
+          {iconSeparator}
+          <span aria-hidden="true">↗</span>
         </Button>
         <Button context="hero" href="#demo" class:list={['']} variant="secondary">
-          Explore the demo <span aria-hidden="true">↓</span>
+          {i18n.common.buttons.exploreDemo}
+          {iconSeparator}
+          <span aria-hidden="true">↓</span>
         </Button>
       </div>
       <InstallCommand />
       <p class:list={['hero-footnote']}>
-        Zero dependencies <span aria-hidden="true">·</span> TypeScript ready
-        <span aria-hidden="true">·</span> MIT licensed
+        {t.footnotes[0]} <span aria-hidden="true">·</span> {t.footnotes[1]}
+        <span aria-hidden="true">·</span> {t.footnotes[2]}
       </p>
     </div>
     <LiveDemo id="demo" />
     <div class:list={['compatibility']}>
-      <p>ONE SMALL SCRIPT. RIGHT AT HOME IN YOUR STACK.</p>
+      <p>{t.compatibilityLabel}</p>
       <div>
-        <span>JavaScript</span>
-        <span>TypeScript</span>
-        <span>React</span>
-        <span>Vue</span>
-        <span>Svelte</span>
-        <span>Astro</span>
-        <span>WordPress</span>
+        {t.platforms.map(platform => (
+          <>
+            <span>{platform}</span>{' '}
+          </>
+        ))}
       </div>
     </div>
   </Box>
