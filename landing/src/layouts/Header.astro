@@ -3,6 +3,7 @@ import { getI18n } from '../i18n/utils'
 import Logo from '../components/Logo.astro'
 import Box from '../components/Box.astro'
 import Button from '../components/Button.astro'
+import MobileMenu from '../components/MobileMenu.astro'
 import ThemeToggle from '../components/ThemeToggle.astro'
 const i18n = getI18n(Astro)
 ---
@@ -12,7 +13,7 @@ const i18n = getI18n(Astro)
     <Box size="wide" class:list={['flex items-center justify-between gap-3']}>
       <Logo version={i18n.common.version} />
 
-      <div class:list={['hidden items-center gap-1 lg:flex']}>
+      <div class:list={['hidden min-w-0 flex-wrap items-center gap-1 lg:flex']}>
         {i18n.navigation.items.map(item => (
           <a
             href={item.href}
@@ -27,12 +28,13 @@ const i18n = getI18n(Astro)
 
       <div class:list={['flex items-center gap-2']}>
         <ThemeToggle />
+        <MobileMenu />
         <Button
           context="nav"
           href="https://github.com/samline/ticker"
           target="_blank"
           rel="noreferrer"
-          class:list={['hidden sm:inline-flex']}
+          class:list={['hidden lg:inline-flex']}
           variant="ghost"
         >
           <svg
@@ -50,7 +52,7 @@ const i18n = getI18n(Astro)
           </svg>
           {i18n.common.links.github}
         </Button>
-        <Button context="nav" href="#how" class:list={['']} variant="primary">
+        <Button context="nav" href="#how" class:list={['hidden lg:inline-flex']} variant="primary">
           {i18n.common.buttons.getStarted}
           <svg
             aria-hidden="true"

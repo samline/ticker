@@ -1,0 +1,295 @@
+---
+import drawerCss from '@samline/drawer/styles.css?inline'
+import { getI18n } from '../i18n/utils'
+// Keep vendor lengths in rem; native CSS scope isolates the imported stylesheet.
+const drawerStyles = drawerCss.replace(
+  /(\d*\.?\d+)px\b/g,
+  (_, length) => `${Number(length) / 16}rem`
+)
+const i18n = getI18n(Astro)
+const t = i18n.navigation.mobile
+const instanceId = `mobile-menu-${crypto.randomUUID()}`
+---
+
+<ticker-mobile-menu
+  class:list={['mobile-menu']}
+  data-instance-id={instanceId}
+  data-dialog-label={t.title}
+  data-close-label={t.close}
+>
+  <button
+    type="button"
+    class:list={['menu-toggle']}
+    data-menu-trigger=""
+    hidden
+    aria-label={t.open}
+    aria-expanded="false"
+    aria-haspopup="dialog"
+  >
+    <svg
+      aria-hidden="true"
+      width="1.25rem"
+      height="1.25rem"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"
+    >
+      <path d="M4 6h16M4 12h16M4 18h16"></path>
+    </svg>
+  </button>
+  <details class:list={['menu-fallback']}>
+    <summary class:list={['menu-toggle']} aria-label={t.open}>
+      <svg
+        aria-hidden="true"
+        width="1.25rem"
+        height="1.25rem"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+      >
+        <path d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </summary>
+    <div class:list={['menu-content']} data-menu-content="" data-drawer-no-drag="">
+      <div class:list={['menu-heading']}>
+        <h2>{t.title}</h2>
+      </div>
+      <nav aria-label={t.label}>
+        <ul class:list={['menu-links']}>
+          {i18n.navigation.items.map(item => (
+            <li>
+              <a href={item.href}>
+                {item.label}
+                <span aria-hidden="true">↗</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <ul class:list={['menu-resources']}>
+          <li>
+            <a href={`${import.meta.env.BASE_URL}docs/`}>
+              {i18n.common.links.docs}
+              <span aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com/samline/ticker" target="_blank" rel="noopener noreferrer">
+              {i18n.common.links.github}
+              <span aria-hidden="true">↗</span>
+              <span class:list={['sr-only']}>{i18n.common.externalLinkHint}</span>
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://www.npmjs.com/package/@samline/ticker"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {i18n.common.links.npm}
+              <span aria-hidden="true">↗</span>
+              <span class:list={['sr-only']}>{i18n.common.externalLinkHint}</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </details>
+</ticker-mobile-menu>
+
+<script>
+  import { browser } from '@samline/drawer/browser'
+
+  class TickerMobileMenu extends HTMLElement {
+    private lifecycle?: AbortController
+    private drawer?: ReturnType<typeof browser.newDrawer>
+    connectedCallback() {
+      const trigger = this.querySelector<HTMLButtonElement>('[data-menu-trigger]')
+      const fallback = this.querySelector<HTMLDetailsElement>('details')
+      const content = this.querySelector<HTMLElement>('[data-menu-content]')
+      const id = this.dataset.instanceId
+      if (!trigger || !fallback || !content || !id) return
+      this.lifecycle = new AbortController()
+      const { signal } = this.lifecycle
+      this.drawer = browser.newDrawer({
+        id,
+        html: content.outerHTML,
+        options: {
+          container: this,
+          triggerElement: trigger,
+          direction: 'right',
+          autoFocus: true,
+          ariaLabel: this.dataset.dialogLabel,
+          contentClassName: 'mobile-menu-panel',
+          overlayClassName: 'mobile-menu-overlay',
+          closeButton: { className: 'menu-close', icon: '×', ariaLabel: this.dataset.closeLabel },
+          onOpenChange: open => trigger.setAttribute('aria-expanded', String(open)),
+        },
+      })
+      this.addEventListener(
+        'click',
+        event => {
+          if (event.target instanceof Element && event.target.closest('.mobile-menu-panel a[href]'))
+            this.drawer?.setOpen(false)
+        },
+        { signal }
+      )
+      matchMedia('(width >= 64rem)').addEventListener(
+        'change',
+        event => {
+          if (event.matches) this.drawer?.setOpen(false)
+        },
+        { signal }
+      )
+      fallback.hidden = true
+      trigger.hidden = false
+    }
+    disconnectedCallback() {
+      this.lifecycle?.abort()
+      if (this.dataset.instanceId) browser.destroyDrawer(this.dataset.instanceId)
+      this.drawer = undefined
+    }
+  }
+  if (!customElements.get('ticker-mobile-menu'))
+    customElements.define('ticker-mobile-menu', TickerMobileMenu)
+</script>
+
+<style is:inline set:html={`@scope (ticker-mobile-menu) { ${drawerStyles} }`} />
+
+<style>
+  .mobile-menu {
+    display: block;
+    flex-shrink: 0;
+  }
+  .menu-toggle,
+  .mobile-menu :global(.menu-close) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex-shrink: 0;
+    border: 0.0625rem solid var(--color-border);
+    border-radius: 0.75rem;
+    color: var(--color-text);
+    background: var(--color-surface);
+    cursor: pointer;
+  }
+  [hidden] {
+    display: none !important;
+  }
+  summary {
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  .menu-fallback {
+    position: relative;
+  }
+  .menu-fallback > .menu-content {
+    position: absolute;
+    top: 3.5rem;
+    right: 0;
+    width: min(20rem, calc(100vw - 3rem));
+    padding: 1.25rem;
+    border: 0.0625rem solid var(--color-border);
+    border-radius: 1rem;
+    background: var(--color-bg);
+    box-shadow: 0 1rem 3rem rgb(0 0 0 / 0.2);
+  }
+  .menu-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-right: 3rem;
+  }
+  .menu-heading h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  .menu-links,
+  .menu-resources {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .menu-resources {
+    border-top: 0.0625rem solid var(--color-border);
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+  }
+  .menu-content a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 2.75rem;
+    padding: 0.75rem;
+    border-radius: 0.625rem;
+    color: var(--color-text);
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+  }
+  .menu-content a:hover {
+    background: var(--color-surface);
+    color: var(--color-accent);
+  }
+  .menu-resources a {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+  }
+  :focus-visible {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.1875rem;
+  }
+  .mobile-menu :global(.menu-close) {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    font-size: 1.5rem;
+  }
+  .mobile-menu :global(.menu-close:focus-visible) {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.1875rem;
+  }
+  /* Only the panel design lives here; runtime animation rules come from the package. */
+  .mobile-menu :global(.mobile-menu-overlay) {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgb(0 0 0 / 0.5);
+  }
+  .mobile-menu :global(.mobile-menu-panel) {
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: 101;
+    width: min(22rem, calc(100% - 1rem));
+    height: 100dvh;
+    padding: 1.5rem;
+    padding-top: max(1.5rem, env(safe-area-inset-top));
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--color-bg);
+    color: var(--color-text);
+    border-left: 0.0625rem solid var(--color-border);
+    box-shadow: -1rem 0 3rem rgb(0 0 0 / 0.2);
+  }
+  @media (width >= 64rem) {
+    .mobile-menu {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-menu :global(.mobile-menu-panel),
+    .mobile-menu :global(.mobile-menu-overlay) {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>

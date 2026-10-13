@@ -1,6 +1,12 @@
 export default {
   mainLabel: 'Main navigation',
   skipContent: 'Skip to content',
+  mobile: {
+    title: 'Explore Ticker',
+    label: 'Mobile navigation',
+    open: 'Open navigation menu',
+    close: 'Close navigation menu',
+  },
   items: [
     {
       href: '#features',

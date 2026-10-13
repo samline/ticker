@@ -54,3 +54,5 @@ jobs:
       - run: npm run landing:check
       - run: npm --prefix landing run format:check
       - run: npm run landing:build
+      - run: npm exec --prefix landing -- playwright install --with-deps chromium
+      - run: npm --prefix landing run test:browser

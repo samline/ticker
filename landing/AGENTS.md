@@ -19,3 +19,5 @@
 
 - Keep production metadata in SEO.astro and translated SEO copy in the locale catalog. Derive canonical, sitemap and sharing URLs from configured SITE_URL, never request/preview hosts. Keep development noindex. JSON-LD may use set:html only with serializeJsonLd escaping; it must never render translated HTML.
 - Verify deployment at its configured base path, including assets, documentation links and legacy documentation redirects. Run npm run site:build for the combined Pages artifact.
+
+- MobileMenu imports Drawer’s original stylesheet with ?inline and wraps it in native CSS @scope. This vendor CSS is emitted inside the component’s inline style; keep the explicit ticker-mobile-menu scope. Do not copy or replace library animation definitions with hand-maintained keyframes. The remaining style block owns panel design and accessibility overrides.

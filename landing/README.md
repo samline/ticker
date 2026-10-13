@@ -23,7 +23,7 @@ The build command bundles the component scripts and scoped styles through Astro,
 
 ## Structure
 
-- `src/components/`: independent, reusable UI primitives (`Box`, `Section`, `Button`, `Eyebrow`, `SectionHeading`, `Heading`, `Logo`, `Tabs`, `CodeBlock`, `FeatureCard`, `RuntimeItem`, `StepCard`, `FaqItem`, `BrandLogo`, `TickerDemo`, `SpeedControl`, `InstallCommand`, `ThemeToggle`, `Theme`, `Reveal`).
+- `src/components/`: independent, reusable UI primitives (`Box`, `Section`, `Button`, `Eyebrow`, `SectionHeading`, `Heading`, `Logo`, `Tabs`, `CodeBlock`, `FeatureCard`, `RuntimeItem`, `StepCard`, `FaqItem`, `BrandLogo`, `TickerDemo`, `SpeedControl`, `InstallCommand`, `ThemeToggle`, `Theme`, `Reveal`, `MobileMenu`).
 - `src/sections/`: complete content blocks (`Hero`, `LiveDemo`, `Features`, `Runtimes`, `GettingStarted`, `Comparison`, `Faq`, `CallToAction`).
 - `src/layouts/`: document shell, header and footer.
 - `src/pages/index.astro`: composes the sections.
@@ -101,3 +101,17 @@ Rich copy stores text, code, strong and emphasis parts, allowing a translator to
 The default public URL is `https://samline.github.io/ticker/`. Override `SITE_URL` using `.env` (see `.env.example`) for another deployment; its pathname also configures Astro’s base path. Canonical, Open Graph, Twitter cards, JSON-LD, robots.txt and the sitemap share this URL. Development uses noindex. The 1200×630 sharing image is generated from translated copy during the build. JSON-LD is serialized with escaped HTML-sensitive characters.
 
 Metadata identifies the actual source package, repository, license and version. Sections have associated headings; controls have translated accessible names, keyboard focus indicators and instance-specific ARIA IDs. Horizontally scrolling code examples are keyboard focusable. Automated accessibility checks cover both themes, desktop/mobile and all demo tabs; manual checks also cover keyboard navigation, reduced motion and no-JavaScript fallback.
+
+## Mobile navigation and browser checks
+
+MobileMenu uses `@samline/drawer` 4.2.1 for its right-side modal panel below 64rem. It owns its controller and mount container, scopes runtime CSS beneath its own root, and destroys the controller on disconnect. Translated labels, Escape/backdrop/close-button dismissal, focus trapping and restoration, link dismissal and cleanup when switching to desktop are covered by browser tests. A native details menu keeps navigation available without JavaScript. The component imports the package stylesheet as a string, normalizes vendor lengths to rem and wraps it in native CSS @scope. This uses the original library animations without a parser or copied definitions. The normal Astro style block contains only panel design and reduced-motion overrides.
+
+At widths below 30rem, hero actions stack with readable labels and full-width targets. Desktop navigation and tab groups wrap when enlarged text needs more room. Browser tests inspect visible buttons and text from 320 to 1440 and back, including both sides of breakpoints, both themes and every demo tab. Intentionally scrollable code and ticker viewports retain their scrolling behavior.
+
+```sh
+npm exec --prefix landing -- playwright install chromium
+npm run landing:build
+npm --prefix landing run test:browser
+```
+
+The browser suite serves the compiled site at its deployment base path. It also checks repeated menu instances, disconnect/reconnect cleanup, reduced motion, no-JavaScript navigation and automated accessibility checks while the menu is open.
