@@ -1,6 +1,6 @@
 import { access, cp, rm, readFile, writeFile } from 'node:fs/promises'
 
-const source = new URL('../../example/dist/', import.meta.url)
+const source = new URL('../../docs/dist/', import.meta.url)
 const destination = new URL('../dist/docs/', import.meta.url)
 try {
   await access(source)

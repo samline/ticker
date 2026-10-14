@@ -1,8 +1,8 @@
 coverage/
 dist/
-example/.astro/
-example/dist/
-example/node_modules/
+docs/.astro/
+docs/dist/
+docs/node_modules/
 node_modules/
 landing/assets/css/main.css
 landing/assets/vendor/

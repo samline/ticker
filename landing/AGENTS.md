@@ -48,23 +48,23 @@ These instructions apply to the maintained Astro landing. Read README.md for rat
 - Keep SEO metadata in SEO.astro and its copy in the catalog. Derive canonical, sharing, sitemap and robots URLs from validated SITE_URL, never request/preview hosts. Keep development noindex.
 - Escape JSON-LD through `serializeJsonLd`; escape generated-image text as XML. `set:html` may render this safe structured data and the trusted scoped vendor stylesheet, not translated interface HTML.
 - Preserve the generated social image, source-package schema, description, keywords, accessible image text and absolute sharing URLs. Only include factual supported claims; verify output after edits.
-- Repository deployments have a base path. Use BASE_URL for local links/assets. A domain/base change must update Astro/default SITE_URL, example site config, documentation paths, redirects, sitemap packaging, output assertions, browser config/test URLs and workflows together.
-- Current deployment: landing `/ticker/`, documentation `/ticker/docs/`. `include-docs.mjs` copies sibling `example/dist/` and merges sitemap entries. Adapt/remove this contract when replicating into a project without that docs site.
+- Repository deployments have a base path. Use BASE_URL for local links/assets. A domain/base change must update Astro/default SITE_URL, docs Astro config, documentation paths, redirects, sitemap packaging, output assertions, browser config/test URLs and workflows together.
+- Current deployment: landing `/ticker/`, documentation `/ticker/docs/`. `include-docs.mjs` copies sibling `docs/dist/` and merges sitemap entries. Adapt/remove this contract when replicating into a project without that docs site.
 - Preserve useful existing fragments and redirects during renames. Navigation now uses `#recipes`; `#compare` remains a compatibility alias.
 - A commit or local merge is not a push or publication. Preserve unrelated user work and follow the user's Git instruction. When working on a task branch, use the project's codex/ naming convention; merge/delete it when requested.
 
 ## Keep references synchronized in the same change
 
-| Changed surface                       | Required review                                                                                                                             |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Package metadata/version/distribution | Root manifest, manifest imports, common/SEO catalogs, hardcoded URLs/CDN examples, FAQ measurements, docs and sharing image                 |
-| API/entrypoint/lifecycle              | Demo adapters, setup/recipe/FAQ/features copy, snippets, reference docs, browser expectations and runnable examples                         |
-| Package CSS or generated DOM          | Scoped style adaptation, anchored selectors, animation/pause order, measurement conversion, theme and repeated-instance checks              |
-| UI dependency                         | Native API/CSS integration, supported browser scope, close/focus/cleanup contracts and lockfile                                             |
-| Section/content/route                 | Catalog exports, page composition, desktop/mobile navigation, fragment aliases, relevant docs and tests; check for repetition               |
-| Widths/theme/breakpoints/fonts        | Box/Section, Tailwind tokens, menu media conditions, theme-color literals, controls, image and responsive/contrast evidence                 |
-| Public URL/docs layout                | SITE_URL, Astro/example config, BASE_URL links, redirects, docs packaging, sitemap/robots, output assertions, Playwright URLs and workflows |
-| Tooling/skills                        | Dependency/skill locks, Node/browser requirements, CI commands, formatting exclusions and this maintenance contract                         |
+| Changed surface                       | Required review                                                                                                                          |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Package metadata/version/distribution | Root manifest, manifest imports, common/SEO catalogs, hardcoded URLs/CDN examples, FAQ measurements, docs and sharing image              |
+| API/entrypoint/lifecycle              | Demo adapters, setup/recipe/FAQ/features copy, snippets, reference docs, browser expectations and runnable examples                      |
+| Package CSS or generated DOM          | Scoped style adaptation, anchored selectors, animation/pause order, measurement conversion, theme and repeated-instance checks           |
+| UI dependency                         | Native API/CSS integration, supported browser scope, close/focus/cleanup contracts and lockfile                                          |
+| Section/content/route                 | Catalog exports, page composition, desktop/mobile navigation, fragment aliases, relevant docs and tests; check for repetition            |
+| Widths/theme/breakpoints/fonts        | Box/Section, Tailwind tokens, menu media conditions, theme-color literals, controls, image and responsive/contrast evidence              |
+| Public URL/docs layout                | SITE_URL, Astro/docs config, BASE_URL links, redirects, docs packaging, sitemap/robots, output assertions, Playwright URLs and workflows |
+| Tooling/skills                        | Dependency/skill locks, Node/browser requirements, CI commands, formatting exclusions and this maintenance contract                      |
 
 Search for old identifiers/values as well as new ones. Update README.md and this file when conventions, paths, commands, supported behaviors or replication steps change. Record real limitations and required follow-ups instead of leaving inaccurate documentation.
 
@@ -102,3 +102,5 @@ Keep the header offset on main/content destinations via scroll-margin-top, not g
 Section anchors compensate for the section's existing top padding in scroll-margin-top, using the same section-top-space token as the padding. This leaves the heading/eyebrow 2.5rem below the measured sticky header without changing spacing between sections. Main's default scroll margin still applies to destinations already inside section content (including the legacy compare alias). Keep this contract synchronized across mobile/desktop/FAQ spacing and verify heading bounds, not the padded section's outer edge.
 
 HeroBackdrop owns the decorative lavender halo in a clipped, pointer-transparent layer behind Hero content. Hero creates its own stacking context so the negative backdrop layer stays inside its section. The background uses theme palette tokens and one 4.8-second entrance that settles; reduced motion shows the final static halo immediately. It adds no client script or layout height. To compare/revert the visual treatment, set `<Hero background="none" />` in page composition; default is `halo`. Keep glow clipping local to the decorative layer so focus and content remain visible. Check both themes, narrow layouts, reduced motion and pointer interaction when changing it.
+
+The sibling docs now use custom Astro components and Pagefind rather than Starlight. Both sites import `shared/styles/theme.css`; the docs also reuse the landing’s Box, Theme, ThemeToggle and CopyButton. Validate both sites after changing those shared surfaces. See `../docs/README.md` and `../docs/AGENTS.md` for content coverage and search maintenance.

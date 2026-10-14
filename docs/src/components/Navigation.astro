@@ -1,0 +1,80 @@
+---
+import { t } from '../i18n/en'
+import { href } from '../lib/routes'
+interface Props {
+  current: string
+}
+const { current } = Astro.props
+---
+
+<nav class:list={['navigation']} aria-label={t.navigation}>
+  {t.groups.map((group) => (
+    <div class:list={['group']}>
+      <p>{group.label}</p>
+      <ul>
+        {group.pages.map(([id, label]) => (
+          <li>
+            <a href={href(id)} aria-current={id === current ? 'page' : undefined}>
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
+</nav>
+<style>
+  .navigation {
+    display: grid;
+    gap: 1.75rem;
+    font-size: 0.8125rem;
+  }
+  p {
+    margin: 0 0 0.5rem;
+    padding-inline: 0.75rem;
+    color: var(--color-text);
+    font-size: 0.6875rem;
+    font-weight: 650;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.125rem;
+  }
+  a {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.4375rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    transition:
+      background-color var(--duration-ui) var(--ease-ui),
+      color var(--duration-ui) var(--ease-ui);
+  }
+  a[aria-current='page'] {
+    color: var(--color-accent);
+    background: var(--color-accent-soft);
+    font-weight: 600;
+  }
+  a:focus-visible {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.125rem;
+  }
+  @media (hover: hover) {
+    a:hover {
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    a {
+      transition: none;
+    }
+  }
+</style>

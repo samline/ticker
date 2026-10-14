@@ -1,0 +1,482 @@
+---
+import Navigation from '../components/Navigation.astro'
+import MobileNavigation from '../components/MobileNavigation.astro'
+import Search from '../components/Search.astro'
+import TableOfContents from '../components/TableOfContents.astro'
+import Article from '../components/Article.astro'
+import Theme from '../../../landing/src/components/Theme.astro'
+import ThemeToggle from '../../../landing/src/components/ThemeToggle.astro'
+import Box from '../../../landing/src/components/Box.astro'
+import '../styles/theme.css'
+import { t } from '../i18n/en'
+import { href } from '../lib/routes'
+import manifest from '../../../package.json'
+import { serializeJsonLd } from '../../../landing/src/lib/site'
+import type { MarkdownHeading } from 'astro'
+interface Props {
+  title: string
+  description: string
+  current: string
+  headings: MarkdownHeading[]
+}
+const { title, description, current, headings } = Astro.props
+const canonical = new URL(href(current), Astro.site).href
+const pages = t.groups.flatMap((group) => group.pages)
+const index = pages.findIndex(([id]) => id === current)
+const previous = pages[index - 1],
+  next = pages[index + 1]
+const section =
+  t.groups.find((group) => group.pages.some(([id]) => id === current))?.label ?? t.docs
+const landingUrl = new URL('../', new URL(import.meta.env.BASE_URL, Astro.site))
+const socialImage = new URL('social.png', landingUrl).href
+const repository = manifest.repository.url.replace(/^git\+/, '').replace(/\.git$/, '')
+const schema = serializeJsonLd({
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: title,
+  description,
+  url: canonical,
+  inLanguage: 'en',
+  about: { '@type': 'SoftwareSourceCode', name: manifest.name, version: manifest.version },
+})
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{`${title} · ${t.titleSuffix}`}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={manifest.author} />
+    <meta name="keywords" content={[...manifest.keywords, ...t.metaKeywords].join(', ')} />
+    <meta name="theme-color" content="#1d1c23" />
+    <meta name="robots" content={import.meta.env.DEV ? 'noindex, nofollow' : 'index, follow'} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} type="image/svg+xml" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content={`${title} · ${t.titleSuffix}`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={t.name} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:alt" content={t.name} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${title} · ${t.titleSuffix}`} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
+    <meta name="twitter:image:alt" content={t.name} />
+    <script type="application/ld+json" set:html={schema} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;650;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <Theme />
+  </head>
+  <body>
+    <a class:list={['skip']} href="#content">
+      {t.skip}
+    </a>
+    <ticker-docs-header class:list={['header']}>
+      <Box class:list={['header-inner']}>
+        <div class:list={['brand-group']}>
+          <MobileNavigation current={current} />
+          <a class:list={['brand']} href={landingUrl.pathname} aria-label={t.home}>
+            <span aria-hidden="true"></span>
+            {t.name}
+          </a>
+          <a class:list={['docs-label']} href={href('index')}>
+            {t.docs}
+          </a>
+        </div>
+        <div class:list={['header-tools']}>
+          <Search />
+          <a class:list={['github']} href={repository}>
+            {t.github}
+            <span aria-hidden="true"> ↗</span>
+          </a>
+          <ThemeToggle />
+        </div>
+      </Box>
+    </ticker-docs-header>
+    <Box class:list={['shell']}>
+      <aside class:list={['sidebar']} data-pagefind-ignore>
+        <p class:list={['version']}>
+          <span>{t.docs}</span>
+          <span aria-label={t.version}>v{manifest.version}</span>
+        </p>
+        <Navigation current={current} />
+      </aside>
+      <main id="content" tabindex="-1" data-pagefind-body>
+        <div class:list={['breadcrumb']} data-pagefind-ignore>
+          <a href={href('index')}>{t.breadcrumb}</a>
+          <span aria-hidden="true">/</span>
+          <span>{section}</span>
+        </div>
+        <header class:list={['article-heading']}>
+          <p class:list={['eyebrow']}>
+            {current.startsWith('reference') ? t.apiReading : t.reading}
+          </p>
+          <h1 data-pagefind-meta="title">{title}</h1>
+          <p class:list={['description']}>{description}</p>
+        </header>
+        <div class:list={['mobile-toc']} data-pagefind-ignore>
+          <TableOfContents headings={headings} collapsed />
+        </div>
+        <Article>
+          <slot />
+        </Article>
+        <footer class:list={['article-footer']} data-pagefind-ignore>
+          <a
+            class:list={['edit']}
+            href={`${repository}/edit/main/docs/src/content/docs/${current}.md`}
+          >
+            {t.edit} <span aria-hidden="true">↗</span>
+          </a>
+          <nav class:list={['pagination']} aria-label={t.navigation}>
+            {previous && (
+              <a href={href(previous[0])}>
+                <span>{t.previous}</span>
+                <strong>← {previous[1]}</strong>
+              </a>
+            )}
+            {next && (
+              <a href={href(next[0])}>
+                <span>{t.next}</span>
+                <strong>{next[1]} →</strong>
+              </a>
+            )}
+          </nav>
+          <div class:list={['credits']}>
+            <span>{t.footer}</span>
+            <span>
+              {t.license} · v{manifest.version}
+            </span>
+          </div>
+        </footer>
+      </main>
+      <div class:list={['desktop-toc']} data-pagefind-ignore>
+        <TableOfContents headings={headings} />
+      </div>
+    </Box>
+  </body>
+</html>
+<script>
+  class DocsHeader extends HTMLElement {
+    private observer?: ResizeObserver
+    connectedCallback() {
+      this.observer?.disconnect()
+      this.observer = new ResizeObserver(() =>
+        document.documentElement.style.setProperty(
+          '--docs-header-height',
+          `${this.getBoundingClientRect().height / parseFloat(getComputedStyle(document.documentElement).fontSize)}rem`
+        )
+      )
+      this.observer.observe(this)
+    }
+    disconnectedCallback() {
+      this.observer?.disconnect()
+    }
+  }
+  if (!customElements.get('ticker-docs-header'))
+    customElements.define('ticker-docs-header', DocsHeader)
+</script>
+<style>
+  :global(html) {
+    font-family: var(--font-sans);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-synthesis: none;
+  }
+  :global(body) {
+    margin: 0;
+    min-width: 0;
+  }
+  :global(button),
+  :global(input) {
+    font-family: inherit;
+  }
+  :global([hidden]) {
+    display: none !important;
+  }
+  :global(.sr-only) {
+    position: absolute;
+    width: 0.0625rem;
+    height: 0.0625rem;
+    padding: 0;
+    margin: -0.0625rem;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .skip {
+    position: fixed;
+    left: 1rem;
+    top: 1rem;
+    z-index: 200;
+    padding: 0.75rem 1rem;
+    transform: translateY(-200%);
+    background: var(--color-accent);
+    color: var(--palette-on-accent);
+    border-radius: 0.5rem;
+  }
+  .skip:focus {
+    transform: none;
+  }
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: block;
+    background: var(--color-bg);
+    border-bottom: 0.0625rem solid var(--color-border-soft);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 4.5rem;
+    padding-block: 0.75rem;
+  }
+  .brand-group,
+  .header-tools {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    min-width: 0;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .brand > span {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--color-accent);
+    flex: none;
+  }
+  .docs-label {
+    padding-left: 1.25rem;
+    border-left: 0.0625rem solid var(--color-border);
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+  .github {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .shell {
+    display: grid;
+    grid-template-columns: 13.5rem minmax(0, 1fr);
+    gap: 3rem;
+    align-items: start;
+  }
+  .sidebar {
+    position: sticky;
+    top: var(--docs-header-height, 4.5rem);
+    height: calc(100dvh - var(--docs-header-height, 4.5rem));
+    overflow-y: auto;
+    padding: 2rem 0.5rem 2rem 0;
+    scrollbar-width: thin;
+  }
+  .version {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 0 0.75rem 2rem;
+    font-size: 0.6875rem;
+    color: var(--color-text-subtle);
+  }
+  .version > span:last-child {
+    font-family: var(--font-mono);
+    border: 0.0625rem solid var(--color-border-soft);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-pill);
+  }
+  main {
+    min-width: 0;
+    padding: 2.5rem 0 0;
+    scroll-margin-top: calc(var(--docs-header-height, 4.5rem) + 2.5rem);
+  }
+  .breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+    font-size: 0.6875rem;
+    color: var(--color-text-subtle);
+    margin-bottom: 2.5rem;
+  }
+  .breadcrumb a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+    font-size: 0.625rem;
+    margin: 0 0 0.875rem;
+  }
+  h1 {
+    font-size: clamp(2.25rem, 4vw, 3.25rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.055em;
+    overflow-wrap: anywhere;
+    margin: 0 0 1rem;
+  }
+  .description {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--color-text-muted);
+    margin: 0 0 2.5rem;
+  }
+  .desktop-toc {
+    display: none;
+    position: sticky;
+    top: calc(var(--docs-header-height, 4.5rem) + 2.5rem);
+    max-height: calc(100dvh - var(--docs-header-height, 4.5rem) - 5rem);
+    overflow: auto;
+    scrollbar-width: thin;
+  }
+  .mobile-toc {
+    margin-bottom: 2rem;
+  }
+  .article-footer {
+    margin-top: 4rem;
+    border-top: 0.0625rem solid var(--color-border-soft);
+    padding-top: 1.5rem;
+  }
+  .edit {
+    color: var(--color-text-subtle);
+    font-size: 0.75rem;
+    text-decoration: none;
+  }
+  .pagination {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  .pagination a {
+    display: grid;
+    gap: 0.5rem;
+    padding: 1rem;
+    border: 0.0625rem solid var(--color-border-soft);
+    border-radius: 0.75rem;
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: 0.8125rem;
+    overflow-wrap: anywhere;
+  }
+  .pagination span {
+    font-size: 0.6875rem;
+    color: var(--color-text-subtle);
+  }
+  .pagination strong {
+    font-weight: 500;
+  }
+  .credits {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.5rem 0;
+    font-size: 0.625rem;
+    color: var(--color-text-subtle);
+    border-top: 0.0625rem solid var(--color-border-soft);
+  }
+  :focus-visible {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.1875rem;
+  }
+  @media (hover: hover) {
+    .github:hover,
+    .edit:hover,
+    .docs-label:hover {
+      color: var(--color-accent);
+    }
+    .pagination a:hover {
+      background: var(--color-accent-soft);
+      border-color: var(--color-border);
+    }
+  }
+  @media (width >= 80rem) {
+    .shell {
+      grid-template-columns: 13.5rem minmax(0, 1fr) 11rem;
+      gap: 3rem;
+    }
+    .desktop-toc {
+      display: block;
+    }
+    .mobile-toc {
+      display: none;
+    }
+  }
+  @media (width < 64rem) {
+    .shell {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .sidebar {
+      display: none;
+    }
+    main {
+      padding-top: 2rem;
+    }
+    .docs-label {
+      display: none;
+    }
+    .header-inner {
+      gap: 1rem;
+    }
+    .brand-group,
+    .header-tools {
+      gap: 0.75rem;
+    }
+    .github {
+      display: none;
+    }
+  }
+  @media (width < 37.5rem) {
+    .header-inner {
+      padding-inline: 1.25rem;
+      gap: 0.5rem;
+    }
+    .brand {
+      font-size: 0.6875rem;
+      gap: 0.375rem;
+    }
+    .brand-group,
+    .header-tools {
+      gap: 0.5rem;
+    }
+    .brand > span {
+      display: none;
+    }
+    .shell {
+      padding-inline: 1.25rem;
+    }
+    .pagination {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

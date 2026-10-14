@@ -1,0 +1,179 @@
+{
+  "description": "Every original documentation source has a maintained destination. Review contracts, not only this inventory, when changing public APIs.",
+  "sources": [
+    {
+      "source": "example/src/content/docs/getting-started.mdx",
+      "sha256": "0147187cd97b15e86829383175653885cdddb6f300baaaa2a6532de13a5d2ada",
+      "destination": "docs/src/content/docs/getting-started.md"
+    },
+    {
+      "source": "example/src/content/docs/guides/accessibility.md",
+      "sha256": "cc33c188ca087fa95e6b564ef8299109ee87b6106adb3323e79452f51bba10c3",
+      "destination": "docs/src/content/docs/guides/accessibility.md"
+    },
+    {
+      "source": "example/src/content/docs/guides/html-and-browser.md",
+      "sha256": "b5f78f56f52177ed770702a614b096d2e40c29f9d3bef5a7c48ff8511f76a4bb",
+      "destination": "docs/src/content/docs/guides/html-and-browser.md"
+    },
+    {
+      "source": "example/src/content/docs/guides/lifecycle.md",
+      "sha256": "89f0257bfcccf0067016d05bce203c1c9a1ae0e421fd3ec1425043a87b7eba07",
+      "destination": "docs/src/content/docs/guides/lifecycle.md"
+    },
+    {
+      "source": "example/src/content/docs/guides/migration.md",
+      "sha256": "124e02fef4469bfeb8accd5718b377499e033819b01379c5ff8210ff0e09f29f",
+      "destination": "docs/src/content/docs/guides/migration.md"
+    },
+    {
+      "source": "example/src/content/docs/index.mdx",
+      "sha256": "9a25bd466455897a47d30f5609f4b065fc357dc6212b9461dc35e3c22ae07a05",
+      "destination": "docs/src/content/docs/index.md"
+    },
+    {
+      "source": "example/src/content/docs/reference/api.md",
+      "sha256": "d64a72f92ae391cdf1b30f01e1a8f191759fa4ded46f50d5360951ade32ceb0b",
+      "destination": "docs/src/content/docs/reference/api.md"
+    },
+    {
+      "source": "example/src/content/docs/reference/browser.md",
+      "sha256": "a747a26a9df33dcc9c82adfaa0ba4c0c5f0843126ddedde24cdae439cf196df5",
+      "destination": "docs/src/content/docs/reference/browser.md"
+    },
+    {
+      "source": "example/src/content/docs/reference/configuration.md",
+      "sha256": "6aea3510be19fcd9bed5a14c78bddf9ef8e188302fad9742915cfc2818a6b86c",
+      "destination": "docs/src/content/docs/reference/configuration.md"
+    },
+    {
+      "source": "example/src/content/docs/reference/core.md",
+      "sha256": "79d7aae1ee667bbcb05c82cae0fafb9170ff532fb930033202dadaacc944eaf3",
+      "destination": "docs/src/content/docs/reference/core.md"
+    },
+    {
+      "source": "example/src/content/docs/reference/entrypoints.md",
+      "sha256": "6f1b2cc039bde9ec02b8a112d35d6598a344d25170427b026ff48a1b82663632",
+      "destination": "docs/src/content/docs/reference/entrypoints.md"
+    },
+    {
+      "source": "example/src/content/docs/reference/examples.md",
+      "sha256": "5988e675628c46fa19b4b942e8face51d31cd06868b43cd032f196c0d9f04cf1",
+      "destination": "docs/src/content/docs/reference/examples.md"
+    },
+    {
+      "source": "example/src/content/docs/reference/index.md",
+      "sha256": "c85d6236cf267616cfa02379d8fba9e10e83b55e8969ce18af831a5491d3a667",
+      "destination": "docs/src/content/docs/reference/index.md"
+    },
+    {
+      "source": "example/src/content/docs/reference/styling.md",
+      "sha256": "eed8329109b7ada6712ae123479843ae20947dbb82bdbdc29ff34029eb31a1ad",
+      "destination": "docs/src/content/docs/reference/styling.md"
+    },
+    {
+      "source": "example/src/content/docs/reference/typescript.md",
+      "sha256": "e69d9438708a9448ad56d3595122b54b2f1631cbe20a5506dfbdbd11758c838c",
+      "destination": "docs/src/content/docs/reference/typescript.md"
+    },
+    {
+      "source": "docs/api/browser-registry.md",
+      "sha256": "6d49ca7b0ea07e84b67806c5a6761d2b976ebccdfca8c425552f57f0ebb2fc1b",
+      "destination": "docs/src/content/docs/reference/api/browser-registry.md"
+    },
+    {
+      "source": "docs/api/controller.md",
+      "sha256": "6fec0dcd96e37f61e0c578d214b185d5cfcb767930bc23e142099e1f7bf78622",
+      "destination": "docs/src/content/docs/reference/api/controller.md"
+    },
+    {
+      "source": "docs/api/destroy.md",
+      "sha256": "dada08e40ddafd4650e5d92c37f0809b7217c17399ef6d9b373492512f24c63f",
+      "destination": "docs/src/content/docs/reference/api/destroy.md"
+    },
+    {
+      "source": "docs/api/index.md",
+      "sha256": "6da85a5992cc762f816fb1bb0154b00af871e67572760301abe08af9cd4e2476",
+      "destination": "docs/src/content/docs/reference/api.md"
+    },
+    {
+      "source": "docs/api/mount.md",
+      "sha256": "dfadaa6e1464ab817d9b6b638b1b40eb616f9b6f16a285cf492ef54a4be4f8df",
+      "destination": "docs/src/content/docs/reference/api/mount.md"
+    },
+    {
+      "source": "docs/api/refresh.md",
+      "sha256": "f14e621bdc393453fa72187a966a86775b686530b4803d458b8ea42ed77a62e1",
+      "destination": "docs/src/content/docs/reference/api/refresh.md"
+    },
+    {
+      "source": "docs/api/ticker.md",
+      "sha256": "bb0fdfec0ea1f6af001e24d4eb70c293d3d1df29ad99fd32ef70d4694663f59d",
+      "destination": "docs/src/content/docs/reference/api/ticker.md"
+    },
+    {
+      "source": "docs/api/unmount.md",
+      "sha256": "eb36275cc514714bd15e876b0b6df7aeb0fe276ac096b6415ac332bfa1e7fb18",
+      "destination": "docs/src/content/docs/reference/api/unmount.md"
+    },
+    {
+      "source": "docs/api/update.md",
+      "sha256": "149ba39bd45b9847effa65c305830915436d177c3d7ebcaee1e222f30b02d4ca",
+      "destination": "docs/src/content/docs/reference/api/update.md"
+    },
+    {
+      "source": "docs/accessibility.md",
+      "sha256": "76aad5089befa6576018caa21ed108729813461399cd2f81234eb2baa46ffe94",
+      "destination": "docs/src/content/docs/guides/accessibility.md",
+      "review": "Consolidated into published guide; overlapping instructions have a single canonical home."
+    },
+    {
+      "source": "docs/browser.md",
+      "sha256": "d85307486486c06f3cd15be376cbc80acf43bb1432cfd03757b2b94dc0edd0e3",
+      "destination": "docs/src/content/docs/reference/browser.md",
+      "review": "Consolidated into published guide; overlapping instructions have a single canonical home."
+    },
+    {
+      "source": "docs/core.md",
+      "sha256": "085b2b9b35966161c8df2177376a290009a17d5bf2dba26e78b91accf3999b4e",
+      "destination": "docs/src/content/docs/reference/core.md",
+      "review": "Consolidated into published guide; overlapping instructions have a single canonical home."
+    },
+    {
+      "source": "docs/entrypoints.md",
+      "sha256": "f24104111e1478d160a6bd30a71eaae513a721a491eea1b0c0ee490431b03f30",
+      "destination": "docs/src/content/docs/reference/entrypoints.md",
+      "review": "Consolidated into published guide; overlapping instructions have a single canonical home."
+    },
+    {
+      "source": "docs/getting-started.md",
+      "sha256": "775906190985079b27e083d4e897ad6882a0ac5b2619a3ae4931d7c4dc62770e",
+      "destination": "docs/src/content/docs/getting-started.md",
+      "review": "Consolidated into published guide; overlapping instructions have a single canonical home."
+    },
+    {
+      "source": "docs/options.md",
+      "sha256": "94f3075b86aae34794adce7c945d5c4142273e89da902632168f5235f83bde44",
+      "destination": "docs/src/content/docs/reference/configuration.md",
+      "review": "Consolidated into published guide; overlapping instructions have a single canonical home."
+    },
+    {
+      "source": "docs/recipes.md",
+      "sha256": "bd77d7099282abcf8518d50b4d217f8100cd47d44f5c7378c3c665e85ab647cc",
+      "destination": "docs/src/content/docs/reference/examples.md",
+      "review": "Consolidated into published guide; overlapping instructions have a single canonical home."
+    },
+    {
+      "source": "docs/styling.md",
+      "sha256": "4d171dd6da45c605f0c827fbf4f403e662e644b2c8a4710737f27e7b120d1697",
+      "destination": "docs/src/content/docs/reference/styling.md",
+      "review": "Consolidated into published guide; overlapping instructions have a single canonical home."
+    },
+    {
+      "source": "docs/typescript.md",
+      "sha256": "c632d98098cd0d9b3de0a2419955563a8fc7c5c3c9beb89223a851f3c3f282ce",
+      "destination": "docs/src/content/docs/reference/typescript.md",
+      "review": "Consolidated into published guide; overlapping instructions have a single canonical home."
+    }
+  ]
+}

@@ -22,10 +22,10 @@ npm run landing:build
 npm run landing:preview
 ```
 
-`landing:check` runs the interface-copy audit, Astro diagnostics and Node regression tests. `landing:build` creates `landing/dist/`, includes an existing documentation build when available and verifies production metadata, image dimensions, base paths and legacy redirects. An existing `example/dist/` may be stale; build both sites for a release:
+`landing:check` runs the interface-copy audit, Astro diagnostics and Node regression tests. `landing:build` creates `landing/dist/`, includes an existing documentation build when available and verifies production metadata, image dimensions, base paths and legacy redirects. An existing `docs/dist/` may be stale; build both sites for a release:
 
 ```sh
-npm ci --prefix example
+npm ci --prefix docs
 npm run site:build
 ```
 
@@ -142,9 +142,9 @@ Execute published examples against the package, not just the renderer. The Recip
 
 `SITE_URL` defaults to `https://samline.github.io/ticker/`; `.env.example` documents the override. Its pathname becomes Astro's base path. Canonical, Open Graph, Twitter cards, WebSite/WebPage/SoftwareSourceCode JSON-LD, robots.txt, sitemap and the generated 1200×630 PNG share this public URL. Development is noindex. JSON-LD escapes HTML-sensitive characters; sharing-image text is XML-escaped. Only publish metadata and claims supported by the actual package.
 
-The Pages artifact places the landing at `/ticker/` and documentation at `/ticker/docs/`. `include-docs.mjs` copies `example/dist/` and merges its sitemap entries. Config redirects preserve previous documentation paths. Asset and link construction must use `import.meta.env.BASE_URL` or configured URLs; hardcoded root-relative paths break repository deployments.
+The Pages artifact places the landing at `/ticker/` and documentation at `/ticker/docs/`. `include-docs.mjs` copies `docs/dist/` and merges its sitemap entries. Config redirects preserve previous documentation paths. Asset and link construction must use `import.meta.env.BASE_URL` or configured URLs; hardcoded root-relative paths break repository deployments.
 
-A URL/base-path change also requires updating `example/site.config.mjs`, documentation packaging/links/redirects, production assertions, Playwright config and the explicit URL in the no-JavaScript test. SITE_URL alone does not rewrite the documentation project's base. `.github/workflows/deploy.yml` builds both sites and publishes the combined landing artifact. A commit/merge is not a push or deployment.
+A URL/base-path change also requires updating `docs/astro.config.mjs`, documentation packaging/links/redirects, production assertions, Playwright config and the explicit URL in the no-JavaScript test. SITE_URL alone does not rewrite the documentation project's base. `.github/workflows/deploy.yml` builds both sites and publishes the combined landing artifact. A commit/merge is not a push or deployment.
 
 ## Replicate this in another package
 
@@ -153,7 +153,7 @@ A URL/base-path change also requires updating `example/site.config.mjs`, documen
 3. Bring over the architectural pattern: components, sections, layouts, typed catalogs, Box/Section, theme handling and verification scripts. Choose that project's container widths, breakpoints and palettes; do not copy an entire reference application's stack.
 4. Replace package-specific imports, manifest-relative paths, controller options/events, scoped vendor CSS, storage keys, custom-element/event namespaces, samples, assets and licenses. Remove Ticker-specific integration code when the new API does not need it.
 5. Rewrite catalogs around the new package's distinct value, entrypoints, setup and useful recipes. Replace repository/npm/license links, versioned CDN examples, measured bundle claims and source-code schema fields. Keep sample data clearly labeled.
-6. Configure URL/base paths, metadata, sharing image and optional docs. If there is no sibling `example/` site, adapt/remove `include-docs.mjs`, docs links and legacy redirects rather than leaving a broken inherited deployment.
+6. Configure URL/base paths, metadata, sharing image and optional docs. If there is no sibling `docs/` site, adapt/remove `include-docs.mjs`, docs links and legacy redirects rather than leaving a broken inherited deployment.
 7. Adapt browser selectors and expected names/routes to the new UI. Verify both themes, repeated components, keyboard navigation, reduced motion, JavaScript-disabled content, narrow layouts and the compiled base path. Execute code examples and resolve documentation links.
 8. Update this README and AGENTS.md with the target's real contracts. Commit only reviewed source and intended tooling artifacts; preserve unrelated user changes.
 
@@ -169,7 +169,7 @@ Treat the package, catalogs, docs, generated metadata and examples as one releas
 | Drawer or other UI dependency                        | Use its native API and original CSS; review scope/browser support, close semantics and teardown; avoid copying new library internals into components                        |
 | Content, section name/order, heading or CTA          | Section/catalog exports, page composition, desktop/mobile navigation, fragment aliases, documentation references and tests; remove repetition                               |
 | Container widths, breakpoints, themes or typography  | Box/Section, Tailwind tokens, mobile media conditions, theme-color literals, controls, image design and responsive/contrast evidence                                        |
-| Domain/base path or docs layout                      | SITE_URL/default, Astro config, example site config, BASE_URL links/assets, redirects, packaging, sitemap/robots, output checks, workflows and browser URLs                 |
+| Domain/base path or docs layout                      | SITE_URL/default, Astro config, docs Astro config, BASE_URL links/assets, redirects, packaging, sitemap/robots, output checks, workflows and browser URLs                   |
 | Dependencies/tooling or skills                       | Relevant lockfiles, Node/browser baseline, CI commands, formatting exclusions, installed skill provenance and the instructions below                                        |
 
 Use targeted checks first, then the required build and relevant browser checks for the affected behavior. For an actual release, rebuild the package if measurements/examples depend on built output, remeasure size claims and run `npm run site:build`. Keep attribution and source records intact. Document real remaining limitations instead of claiming that automated checks prove everything.
@@ -225,3 +225,5 @@ Keep the header offset on main/content destinations via scroll-margin-top, not g
 Section anchors compensate for the section's existing top padding in scroll-margin-top, using the same section-top-space token as the padding. This leaves the heading/eyebrow 2.5rem below the measured sticky header without changing spacing between sections. Main's default scroll margin still applies to destinations already inside section content (including the legacy compare alias). Keep this contract synchronized across mobile/desktop/FAQ spacing and verify heading bounds, not the padded section's outer edge.
 
 HeroBackdrop owns the decorative lavender halo in a clipped, pointer-transparent layer behind Hero content. Hero creates its own stacking context so the negative backdrop layer stays inside its section. The background uses theme palette tokens and one 4.8-second entrance that settles; reduced motion shows the final static halo immediately. It adds no client script or layout height. To compare/revert the visual treatment, set `<Hero background="none" />` in page composition; default is `halo`. Keep glow clipping local to the decorative layer so focus and content remain visible. Check both themes, narrow layouts, reduced motion and pointer interaction when changing it.
+
+The sibling docs now use custom Astro components and Pagefind rather than Starlight. Both sites import `shared/styles/theme.css`; the docs also reuse the landing’s Box, Theme, ThemeToggle and CopyButton. Validate both sites after changing those shared surfaces. See `../docs/README.md` and `../docs/AGENTS.md` for content coverage and search maintenance.

@@ -69,7 +69,7 @@ The browser bundle exposes a single global: `window.Ticker`.
 </script>
 ```
 
-The browser surface keeps a registry under `Ticker.available`, keyed by the id passed to `newTicker()`. See [docs/browser.md](docs/browser.md) for the complete browser API.
+The browser surface keeps a registry under `Ticker.available`, keyed by the id passed to `newTicker()`. See [Browser integration](docs/src/content/docs/reference/browser.md) for the complete browser API.
 
 ---
 
@@ -84,7 +84,7 @@ The browser surface keeps a registry under `Ticker.available`, keyed by the id p
 | `@samline/ticker/core`           | Types, defaults, state factories, and validation helpers.     |
 | `@samline/ticker/style.css`      | Required layout, animation, and reduced-motion styles.        |
 
-The main entrypoint also exports `browser`, the same registry singleton used by the browser module, without installing `window.Ticker`. See [docs/browser.md](docs/browser.md#using-the-registry-from-a-bundler).
+The main entrypoint also exports `browser`, the same registry singleton used by the browser module, without installing `window.Ticker`. See [Browser integration](docs/src/content/docs/reference/browser.md#module-singleton).
 
 ---
 
@@ -125,7 +125,7 @@ What this does:
 
 ## Seamless Loops
 
-The runtime preserves fractional measurements in both directions. Match item spacing to the horizontal track gap and include any decorative separator at the end of the sequence. See [Styling: seamless loops](docs/styling.md#seamless-loops) for the CSS pattern.
+The runtime preserves fractional measurements in both directions. Match item spacing to the horizontal track gap and include any decorative separator at the end of the sequence. See [Styling: seamless loops](docs/src/content/docs/reference/styling.md#seamless-loops) for the CSS pattern.
 
 ---
 
@@ -141,19 +141,19 @@ The runtime preserves fractional measurements in both directions. Match item spa
 
 ## API at a Glance
 
-| Group                 | API                                                                                                                               |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Controller factory    | [`ticker()`](docs/api/ticker.md)                                                                                                  |
-| Controller lifecycle  | [`update()`](docs/api/update.md) · [`refresh()`](docs/api/refresh.md) · [`destroy()`](docs/api/destroy.md)                        |
-| Declarative lifecycle | [`mount()`](docs/api/mount.md) · [`refresh()`](docs/api/refresh.md#declarative-page-refresh) · [`unmount()`](docs/api/unmount.md) |
-| Browser registry      | [`newTicker()` and registry helpers](docs/api/browser-registry.md)                                                                |
-| Configuration         | [`TickerOptions`](docs/options.md)                                                                                                |
-| Core utilities        | [Defaults, state factories, and validators](docs/core.md)                                                                         |
-| Types                 | [TypeScript reference](docs/typescript.md)                                                                                        |
+| Group                 | API                                                                                                                                                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Controller factory    | [`ticker()`](docs/src/content/docs/reference/api/ticker.md)                                                                                                                                                        |
+| Controller lifecycle  | [`update()`](docs/src/content/docs/reference/api/update.md) · [`refresh()`](docs/src/content/docs/reference/api/refresh.md) · [`destroy()`](docs/src/content/docs/reference/api/destroy.md)                        |
+| Declarative lifecycle | [`mount()`](docs/src/content/docs/reference/api/mount.md) · [`refresh()`](docs/src/content/docs/reference/api/refresh.md#declarative-page-refresh) · [`unmount()`](docs/src/content/docs/reference/api/unmount.md) |
+| Browser registry      | [`newTicker()` and registry helpers](docs/src/content/docs/reference/api/browser-registry.md)                                                                                                                      |
+| Configuration         | [`TickerOptions`](docs/src/content/docs/reference/configuration.md)                                                                                                                                                |
+| Core utilities        | [Defaults, state factories, and validators](docs/src/content/docs/reference/core.md)                                                                                                                               |
+| Types                 | [TypeScript reference](docs/src/content/docs/reference/typescript.md)                                                                                                                                              |
 
 The controller exposes `element`, `source`, and an immutable options snapshot. `update()` and instance `refresh()` are chainable; `destroy()` owns teardown and restoration.
 
-See the complete reference in [`docs/api/`](docs/api/index.md).
+See the complete reference in [the complete API](docs/src/content/docs/reference/api.md).
 
 ---
 
@@ -161,21 +161,36 @@ See the complete reference in [`docs/api/`](docs/api/index.md).
 
 Full guides and the same reference are available at **[samline.github.io/ticker/docs](https://samline.github.io/ticker/docs/)**.
 
-| Doc                                                | Purpose                                                        |
-| -------------------------------------------------- | -------------------------------------------------------------- |
-| [docs/getting-started.md](docs/getting-started.md) | Installation, first ticker, ownership, and lifecycle.          |
-| [docs/options.md](docs/options.md)                 | Every option, default, normalization rule, and data attribute. |
-| [docs/browser.md](docs/browser.md)                 | Browser global and bundler-friendly registry usage.            |
-| [docs/entrypoints.md](docs/entrypoints.md)         | Root, Vanilla, core, browser, global, and CSS exports.         |
-| [docs/styling.md](docs/styling.md)                 | Required stylesheet, DOM contract, classes, and CSS variables. |
-| [docs/accessibility.md](docs/accessibility.md)     | Clone behavior, reduced motion, and interactive content.       |
-| [docs/core.md](docs/core.md)                       | Defaults, state factories, validators, and advanced contracts. |
-| [docs/typescript.md](docs/typescript.md)           | Exported TypeScript types and their roles.                     |
-| [docs/api/index.md](docs/api/index.md)             | Public functions and controller methods.                       |
-| [docs/recipes.md](docs/recipes.md)                 | Task-oriented integration and lifecycle recipes.               |
+| Doc                                                               | Purpose                                                        |
+| ----------------------------------------------------------------- | -------------------------------------------------------------- |
+| [Installation](docs/src/content/docs/getting-started.md)          | Installation, first ticker, ownership, and lifecycle.          |
+| [Configuration](docs/src/content/docs/reference/configuration.md) | Every option, default, normalization rule, and data attribute. |
+| [Browser integration](docs/src/content/docs/reference/browser.md) | Browser global and bundler-friendly registry usage.            |
+| [Entrypoints](docs/src/content/docs/reference/entrypoints.md)     | Root, Vanilla, core, browser, global, and CSS exports.         |
+| [Styling](docs/src/content/docs/reference/styling.md)             | Required stylesheet, DOM contract, classes, and CSS variables. |
+| [Accessibility](docs/src/content/docs/guides/accessibility.md)    | Clone behavior, reduced motion, and interactive content.       |
+| [Core utilities](docs/src/content/docs/reference/core.md)         | Defaults, state factories, validators, and advanced contracts. |
+| [TypeScript](docs/src/content/docs/reference/typescript.md)       | Exported TypeScript types and their roles.                     |
+| [API reference](docs/src/content/docs/reference/api.md)           | Public functions and controller methods.                       |
+| [Recipes](docs/src/content/docs/reference/examples.md)            | Task-oriented integration and lifecycle recipes.               |
 
 ---
 
 ## License
 
 MIT
+
+## Documentation site
+
+The custom Astro 7 documentation lives in `docs/`; the landing lives in `landing/`. They share theme tokens and reusable controls, and deploy together at `/ticker/` and `/ticker/docs/` as one GitHub Pages artifact. Starlight has been replaced.
+
+```sh
+npm ci --prefix docs
+npm run docs:dev
+npm run docs:check
+npm run site:build
+npm run docs:test:browser
+npm run site:test:browser
+```
+
+See [the docs maintenance guide](docs/README.md) and [implementation contract](docs/AGENTS.md). Update public API references, examples, navigation, search, source links and coverage checks together whenever the package changes. Only maintained Markdown content is included in the npm package; site dependencies and generated assets are excluded.

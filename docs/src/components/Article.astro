@@ -1,0 +1,200 @@
+---
+import CopyButton from '../../../landing/src/components/CopyButton.astro'
+import { t } from '../i18n/en'
+---
+
+<ticker-docs-article class:list={['article']}>
+  <slot />
+  <template>
+    <CopyButton text="" ariaLabel={t.copy.aria} />
+  </template>
+</ticker-docs-article>
+<script>
+  class DocsArticle extends HTMLElement {
+    connectedCallback() {
+      const template = this.querySelector('template')
+      if (!template) return
+      for (const pre of this.querySelectorAll('pre')) {
+        if (pre.parentElement?.hasAttribute('data-copy-source')) continue
+        const code = pre.querySelector('code')
+        if (!code) continue
+        const frame = document.createElement('div')
+        frame.className = 'code-frame'
+        frame.setAttribute('data-copy-source', '')
+        const toolbar = document.createElement('div')
+        toolbar.className = 'code-toolbar'
+        toolbar.setAttribute('data-pagefind-ignore', '')
+        toolbar.append(template.content.cloneNode(true))
+        const copy = toolbar.querySelector<HTMLElement>('ticker-copy')
+        if (copy) copy.dataset.copyText = code.textContent ?? ''
+        pre.before(frame)
+        frame.append(toolbar, pre)
+      }
+    }
+  }
+  if (!customElements.get('ticker-docs-article'))
+    customElements.define('ticker-docs-article', DocsArticle)
+</script>
+<style>
+  .article {
+    display: block;
+    min-width: 0;
+    color: var(--color-text-muted);
+    font-size: 0.9375rem;
+    line-height: 1.85;
+    overflow-wrap: anywhere;
+  }
+  .article :global(p),
+  .article :global(ul),
+  .article :global(ol) {
+    margin: 1.125rem 0;
+  }
+  .article :global(ul),
+  .article :global(ol) {
+    padding-left: 1.5rem;
+  }
+  .article :global(ul) {
+    list-style: disc;
+  }
+  .article :global(ol) {
+    list-style: decimal;
+  }
+  .article :global(li) {
+    margin: 0.4rem 0;
+  }
+  .article :global(h2),
+  .article :global(h3),
+  .article :global(h4) {
+    color: var(--color-text);
+    line-height: 1.35;
+    letter-spacing: -0.025em;
+    font-weight: 600;
+    scroll-margin-top: calc(var(--docs-header-height, 4.5rem) + 2.5rem);
+  }
+  .article :global(h2) {
+    margin: 3rem 0 1rem;
+    font-size: 1.625rem;
+  }
+  .article :global(h3) {
+    margin: 2rem 0 0.75rem;
+    font-size: 1.125rem;
+  }
+  .article :global(h4) {
+    margin: 1.5rem 0 0.5rem;
+    font-size: 1rem;
+  }
+  .article :global(a) {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-color: var(--color-border);
+  }
+  .article :global(strong) {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+  .article :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    color: var(--color-text);
+    background: var(--color-accent-soft);
+    padding: 0.15em 0.35em;
+    border-radius: 0.25rem;
+  }
+  .article :global(pre) {
+    max-width: 100%;
+    margin: 1.5rem 0;
+    padding: 1.25rem;
+    overflow-x: auto;
+    border: 0.0625rem solid var(--color-border-soft);
+    border-radius: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.75;
+    background: var(--palette-code-surface) !important;
+  }
+  .article :global(pre code) {
+    padding: 0;
+    background: none;
+    font-size: inherit;
+    overflow-wrap: normal;
+  }
+  .article :global(.code-frame) {
+    margin: 1.5rem 0;
+    border: 0.0625rem solid var(--color-border-soft);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: var(--palette-code-surface);
+  }
+  .article :global(.code-toolbar) {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.5rem 0.625rem;
+    border-bottom: 0.0625rem solid var(--color-border-soft);
+  }
+  .article :global(.code-frame pre) {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+  }
+  .article :global(table) {
+    display: block;
+    overflow-x: auto;
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.8125rem;
+    line-height: 1.7;
+  }
+  .article :global(th),
+  .article :global(td) {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 0.0625rem solid var(--color-border-soft);
+    min-width: 7rem;
+    vertical-align: top;
+  }
+  .article :global(th) {
+    color: var(--color-text);
+    font-weight: 600;
+    background: var(--color-bg-soft);
+  }
+  .article :global(blockquote) {
+    margin: 1.5rem 0;
+    padding: 0.25rem 1.25rem;
+    border-left: 0.1875rem solid var(--color-accent);
+    border-radius: 0 0.5rem 0.5rem 0;
+    background: var(--color-accent-soft);
+  }
+  .article :global(hr) {
+    border: 0;
+    border-top: 0.0625rem solid var(--color-border-soft);
+    margin: 2rem 0;
+  }
+  .article :global(:focus-visible) {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.1875rem;
+  }
+  .article :global(pre:focus-visible) {
+    outline-offset: -0.1875rem;
+  }
+  .article :global(img) {
+    max-width: 100%;
+    height: auto;
+  }
+  @media (prefers-color-scheme: dark) {
+    .article :global(.astro-code),
+    .article :global(.astro-code span) {
+      color: var(--shiki-dark) !important;
+    }
+  }
+  :global([data-theme='light']) .article :global(.astro-code),
+  :global([data-theme='light']) .article :global(.astro-code span) {
+    color: var(--shiki-light) !important;
+  }
+  :global([data-theme='dark']) .article :global(.astro-code),
+  :global([data-theme='dark']) .article :global(.astro-code span) {
+    color: var(--shiki-dark) !important;
+  }
+</style>
