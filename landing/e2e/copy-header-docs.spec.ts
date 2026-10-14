@@ -154,6 +154,19 @@ test('section anchors keep heading spacing compact without double-counting secti
         value => (document.documentElement.style.fontSize = `${value}%`),
         rootScale
       )
+      await expect
+        .poll(() =>
+          page.evaluate(() => {
+            const root = document.documentElement
+            const rootSize = Number.parseFloat(getComputedStyle(root).fontSize)
+            const offset = Number.parseFloat(root.style.getPropertyValue('--header-offset'))
+            const headerSize = document
+              .querySelector('ticker-header')!
+              .getBoundingClientRect().height
+            return Math.abs(offset - headerSize / rootSize - 2.5)
+          })
+        )
+        .toBeLessThan(0.01)
       for (const id of ['features', 'how', 'recipes', 'faq', 'compare']) {
         await page
           .locator(`#${id}`)

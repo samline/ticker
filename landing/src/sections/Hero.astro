@@ -1,5 +1,6 @@
 ---
 import { getI18n } from '../i18n/utils'
+import HeroBackdrop from '../components/HeroBackdrop.astro'
 import Heading from '../components/Heading.astro'
 import Section from '../components/Section.astro'
 import Box from '../components/Box.astro'
@@ -7,6 +8,10 @@ import Button from '../components/Button.astro'
 import InstallCommand from '../components/InstallCommand.astro'
 import Eyebrow from '../components/Eyebrow.astro'
 import LiveDemo from './LiveDemo.astro'
+interface Props {
+  background?: 'halo' | 'none'
+}
+const { background = 'halo' } = Astro.props
 const i18n = getI18n(Astro)
 const t = i18n.sections.hero
 const iconSeparator = ' '
@@ -14,6 +19,7 @@ const headingId = `section-heading-${crypto.randomUUID()}`
 ---
 
 <Section aria-labelledby={headingId} spacing="none" class:list={['hero-section']}>
+  <HeroBackdrop variant={background} />
   <Box size="narrow" class:list={['hero-intro']}>
     <Eyebrow status> {t.kicker}</Eyebrow>
     <Heading id={headingId} level={1}>
@@ -64,6 +70,7 @@ const headingId = `section-heading-${crypto.randomUUID()}`
 
 <style>
   .hero-section {
+    isolation: isolate;
     position: relative;
     padding-top: 3.5rem;
   }
