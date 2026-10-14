@@ -1,0 +1,24 @@
+---
+import LinkCard from './LinkCard.astro'
+---
+
+<template data-result-template>
+  <LinkCard href="" data-result-link>
+    <strong data-result-title></strong>
+    <span data-result-excerpt></span>
+  </LinkCard>
+</template>
+<style>
+  strong {
+    font-weight: 600;
+  }
+  span {
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    color: var(--color-text-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

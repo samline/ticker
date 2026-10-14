@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: api
+  order: 3
 title: 'update(options?)'
 description: 'Detailed Ticker API contract: update(options?)'
 ---

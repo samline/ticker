@@ -1,5 +1,8 @@
 ---
-import { t } from '../i18n/en'
+import { getI18n } from '../i18n/utils'
+const t = getI18n(Astro)
+import { getNavigation } from '../lib/navigation'
+const groups = await getNavigation(Astro.currentLocale)
 import { href } from '../lib/routes'
 interface Props {
   current: string
@@ -8,7 +11,7 @@ const { current } = Astro.props
 ---
 
 <nav class:list={['navigation']} aria-label={t.navigation}>
-  {t.groups.map((group) => (
+  {groups.map((group) => (
     <div class:list={['group']}>
       <p>{group.label}</p>
       <ul>

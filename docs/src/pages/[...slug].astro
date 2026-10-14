@@ -1,8 +1,9 @@
 ---
 import { getCollection, render } from 'astro:content'
+import { defaultLocale } from '../i18n/utils'
 import DocsLayout from '../layouts/DocsLayout.astro'
 export async function getStaticPaths() {
-  const pages = await getCollection('docs')
+  const pages = await getCollection('docs', (entry) => entry.data.locale === defaultLocale)
   return pages.map((entry) => ({
     params: { slug: entry.id.replace(/(^|\/)index$/, '$1').replace(/\/$/, '') || undefined },
     props: { entry },

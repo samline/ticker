@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: start
+  order: 1
 title: '@samline/ticker'
 description: 'Accessible, dependency-free tickers for Vanilla JavaScript, TypeScript, and plain HTML.'
 ---

@@ -12,3 +12,6 @@ landing/assets/brands/DISCLAIMER.md
 # Vendored landing skills and generated provenance.
 landing/.agents/
 landing/skills-lock.json
+
+docs/.agents/
+docs/skills-lock.json

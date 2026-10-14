@@ -1,7 +1,21 @@
 ---
+locale: en
+sidebar:
+  group: reference
+  order: 6
 title: 'Styling and DOM contract'
 description: 'Generated markup, package-owned attributes, classes, CSS variables, animation behavior, and safe customization.'
 ---
+
+## Load the stylesheet
+
+Import the package CSS once alongside the JavaScript entrypoint. It owns layout, animation, direction, hover pause, measurement visibility, and reduced-motion behavior.
+
+```ts
+import '@samline/ticker/style.css'
+```
+
+Application styles should use stable classes or data attributes. Clone count and inline measurement variables belong to the runtime.
 
 ## Generated structure
 
@@ -31,9 +45,10 @@ description: 'Generated markup, package-owned attributes, classes, CSS variables
 | `--ticker-duration`      | Normalized animation duration.                 |
 | `--ticker-distance`      | Exact content width plus horizontal track gap. |
 | `.ticker-wrapper`        | Clipping container.                            |
-| `.ticker-track`          | Animated flex row.                             |
+| `.ticker-track`          | Animated `width: max-content` flex row.        |
+| `.ticker-track > *`      | Non-shrinking content sequences.               |
 | `.ticker-content`        | Original content sequence.                     |
-| `.ticker-clone`          | Generated repeated sequence.                   |
+| `.ticker-clone`          | Non-selectable generated visual copy.          |
 | `.ticker-pause-on-hover` | Track state used by `pauseOnHover`.            |
 
 `data-active` reports viewport intersection with no extra margin. With `IntersectionObserver`, tickers start paused until the first intersection result; without it, they are treated as active. `data-ready="false"` suppresses animation during measurement.

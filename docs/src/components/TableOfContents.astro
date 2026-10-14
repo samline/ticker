@@ -1,6 +1,7 @@
 ---
 import type { MarkdownHeading } from 'astro'
-import { t } from '../i18n/en'
+import { getI18n } from '../i18n/utils'
+const t = getI18n(Astro)
 interface Props {
   headings: MarkdownHeading[]
   collapsed?: boolean

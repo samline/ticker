@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: api
+  order: 5
 title: 'destroy()'
 description: 'Detailed Ticker API contract: destroy()'
 ---

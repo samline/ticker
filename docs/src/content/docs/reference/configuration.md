@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: reference
+  order: 2
 title: 'Configuration'
 description: 'Every TickerOptions field, default, normalization rule, data attribute, and runtime effect.'
 ---

@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: reference
+  order: 7
 title: 'TypeScript reference'
 description: 'Every exported public type, controller shape, runtime state, and browser API contract.'
 ---

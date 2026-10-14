@@ -1,0 +1,77 @@
+---
+import { getI18n } from '../i18n/utils'
+const t = getI18n(Astro)
+import { getNavigation } from '../lib/navigation'
+import { href } from '../lib/routes'
+interface Props {
+  title: string
+  description: string
+  current: string
+}
+const { title, description, current } = Astro.props
+const groups = await getNavigation(Astro.currentLocale)
+const section = groups.find((group) => group.pages.some(([id]) => id === current))?.label ?? t.docs
+---
+
+<div class:list={['breadcrumb']} data-pagefind-ignore>
+  <a href={href('index')}>{t.breadcrumb}</a>
+  <span aria-hidden="true">/</span>
+  <span>{section}</span>
+</div>
+<header class:list={['article-heading']}>
+  <p class:list={['eyebrow']}>{current.startsWith('reference') ? t.apiReading : t.reading}</p>
+  <h1 data-pagefind-meta="title">{title}</h1>
+  <p class:list={['description']}>{description}</p>
+</header>
+
+<style>
+  .breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+    font-size: 0.6875rem;
+    color: var(--color-text-subtle);
+    margin-bottom: 2.5rem;
+  }
+  .breadcrumb a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+    font-size: 0.625rem;
+    margin: 0 0 0.875rem;
+  }
+  h1 {
+    font-size: clamp(2.25rem, 4vw, 3.25rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.055em;
+    overflow-wrap: anywhere;
+    margin: 0 0 1rem;
+  }
+  .description {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--color-text-muted);
+    margin: 0 0 2.5rem;
+  }
+  :focus-visible {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.1875rem;
+  }
+  a {
+    transition:
+      color var(--duration-ui) var(--ease-ui),
+      background-color var(--duration-ui) var(--ease-ui),
+      border-color var(--duration-ui) var(--ease-ui);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    a {
+      transition: none;
+    }
+  }
+</style>

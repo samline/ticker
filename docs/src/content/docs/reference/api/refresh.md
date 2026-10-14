@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: api
+  order: 4
 title: 'refresh()'
 description: 'Detailed Ticker API contract: refresh()'
 ---

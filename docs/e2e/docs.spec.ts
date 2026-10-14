@@ -107,11 +107,93 @@ test('no JavaScript retains readable docs, code and mobile navigation', async ({
   await page.goto('http://127.0.0.1:4327/ticker/docs/getting-started/')
   await expect(page.locator('h1')).toHaveText('Getting started')
   await expect(page.locator('pre').first()).toContainText('npm install @samline/ticker')
-  await expect(page.locator('ticker-docs-search button.open')).not.toBeVisible()
+  await expect(page.locator('ticker-docs-search button[data-search-trigger]')).not.toBeVisible()
   await page.locator('ticker-docs-menu summary').click()
   await expect(page.locator('ticker-docs-menu details nav')).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
     true
   )
   await context.close()
+})
+
+test('search Drawer opens from the top, stays inside the viewport and restores focus and scroll', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('reference/configuration/')
+  const trigger = page.getByRole('button', { name: 'Search documentation', exact: true })
+  for (const width of [320, 375, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 800 })
+    await page.evaluate(() => scrollTo(0, 500))
+    const before = await page.evaluate(() => scrollY)
+    await trigger.click()
+    const panel = page.getByRole('dialog', { name: 'Search documentation' })
+    await expect(panel).toBeVisible()
+    await expect.poll(async () => Math.abs((await panel.boundingBox())!.y)).toBeLessThan(1)
+    const bounds = (await panel.boundingBox())!
+    expect(bounds.x).toBeGreaterThanOrEqual(0)
+    expect(bounds.width).toBeLessThanOrEqual(width + 1)
+    await panel.getByRole('searchbox').fill('direction')
+    await expect(panel.locator('li a').first()).toBeVisible()
+    expect(await panel.evaluate((e) => e.scrollWidth <= e.clientWidth + 1)).toBe(true)
+    await panel.getByRole('button', { name: 'Close search' }).click()
+    await expect(panel).not.toBeVisible()
+    await expect(trigger).toBeFocused()
+    await expect.poll(() => page.evaluate(() => scrollY)).toBeCloseTo(before, 0)
+  }
+  await page.setViewportSize({ width: 320, height: 800 })
+  await page.evaluate(() => (document.documentElement.style.fontSize = '24px'))
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
+    true
+  )
+  await trigger.click()
+  await expect(page.getByRole('dialog', { name: 'Search documentation' })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(trigger).toBeFocused()
+})
+
+test('collection index IDs select the matching navigation page', async ({ page }) => {
+  await page.goto('./')
+  await expect(page.locator('.sidebar a[aria-current=page]')).toHaveText('Overview')
+  await page.goto('reference/')
+  await expect(page.locator('.sidebar a[aria-current=page]')).toHaveText('Reference overview')
+  await expect(page.locator('.article-footer .edit')).toHaveAttribute(
+    'href',
+    /reference\/index\.md$/
+  )
+})
+
+test('search components retain native input focus and accessible results in both themes', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.setViewportSize({ width: 375, height: 800 })
+  await page.goto('getting-started/')
+  await page.addScriptTag({
+    content: await readFile(
+      new URL('../node_modules/axe-core/axe.min.js', import.meta.url),
+      'utf8'
+    ),
+  })
+  for (const theme of ['light', 'dark']) {
+    await page.evaluate((theme) => (document.documentElement.dataset.theme = theme), theme)
+    await page.keyboard.press('Control+k')
+    const panel = page.getByRole('dialog', { name: 'Search documentation' }),
+      input = panel.getByRole('searchbox')
+    await expect(input).toBeFocused()
+    await input.fill('direction')
+    await expect(panel.locator('li a').first()).toBeVisible()
+    const violations = await page.evaluate(async () => {
+      const result = await (window as any).axe.run(document, {
+        runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa'] },
+      })
+      return result.violations.map((v: any) => ({
+        id: v.id,
+        targets: v.nodes.map((node: any) => node.target),
+      }))
+    })
+    expect(violations).toEqual([])
+    await page.keyboard.press('Escape')
+    await expect(panel).not.toBeVisible()
+  }
 })

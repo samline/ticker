@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: api
+  order: 6
 title: 'mount()'
 description: 'Detailed Ticker API contract: mount()'
 ---

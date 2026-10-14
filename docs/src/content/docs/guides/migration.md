@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: guides
+  order: 5
 title: 'Migrate to 2.0'
 description: 'Move from framework adapters and the previous enhance API to the element-scoped Vanilla controller.'
 ---

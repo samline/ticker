@@ -1,0 +1,102 @@
+---
+import LinkCard from '../components/LinkCard.astro'
+import { getI18n } from '../i18n/utils'
+const t = getI18n(Astro)
+import { getNavigation } from '../lib/navigation'
+import { href } from '../lib/routes'
+import manifest from '../../../package.json'
+interface Props {
+  current: string
+}
+const { current } = Astro.props
+const groups = await getNavigation(Astro.currentLocale)
+const pages = groups.flatMap((group) => group.pages)
+const index = pages.findIndex(([id]) => id === current)
+const previous = pages[index - 1],
+  next = pages[index + 1]
+const repository = manifest.repository.url.replace(/^git\+/, '').replace(/\.git$/, '')
+---
+
+<footer class:list={['article-footer']} data-pagefind-ignore>
+  <a class:list={['edit']} href={`${repository}/edit/main/docs/src/content/docs/${current}.md`}>
+    {t.edit} <span aria-hidden="true">↗</span>
+  </a>
+  <nav class:list={['pagination']} aria-label={t.paginationLabel}>
+    {previous && (
+      <LinkCard href={href(previous[0])} variant="compact">
+        <span>{t.previous}</span>
+        <strong>← {previous[1]}</strong>
+      </LinkCard>
+    )}
+    {next && (
+      <LinkCard href={href(next[0])} variant="compact">
+        <span>{t.next}</span>
+        <strong>{next[1]} →</strong>
+      </LinkCard>
+    )}
+  </nav>
+  <div class:list={['credits']}>
+    <span>{t.footer}</span>
+    <span>
+      {t.license} · v{manifest.version}
+    </span>
+  </div>
+</footer>
+
+<style>
+  .article-footer {
+    margin-top: 4rem;
+    border-top: 0.0625rem solid var(--color-border-soft);
+    padding-top: 1.5rem;
+  }
+  .edit {
+    color: var(--color-text-subtle);
+    font-size: 0.75rem;
+    text-decoration: none;
+  }
+  .pagination {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  .pagination span {
+    font-size: 0.6875rem;
+    color: var(--color-text-subtle);
+  }
+  .pagination strong {
+    font-weight: 500;
+  }
+  .credits {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.5rem 0;
+    font-size: 0.625rem;
+    color: var(--color-text-subtle);
+    border-top: 0.0625rem solid var(--color-border-soft);
+  }
+  @media (hover: hover) {
+    .edit:hover {
+      color: var(--color-accent);
+    }
+  }
+  @media (width < 37.5rem) {
+    .pagination {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  :focus-visible {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.1875rem;
+  }
+  .edit {
+    transition: color var(--duration-ui) var(--ease-ui);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .edit {
+      transition: none;
+    }
+  }
+</style>

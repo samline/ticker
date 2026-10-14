@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: guides
+  order: 4
 title: 'Recipes'
 description: 'Practical patterns for dynamic content, multiple tickers, declarative markup, updates, browser globals, and teardown.'
 ---

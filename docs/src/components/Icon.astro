@@ -1,0 +1,28 @@
+---
+interface Props {
+  name: 'search' | 'menu' | 'close' | 'external'
+  size?: string
+}
+const { name, size = '1.125rem' } = Astro.props
+const paths = {
+  search: 'm16 16 4 4',
+  menu: 'M4 6h16M4 12h16M4 18h16',
+  close: 'm6 6 12 12M6 18 18 6',
+  external: 'M7 17 17 7M7 7h10v10',
+}
+---
+
+<svg
+  aria-hidden="true"
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.6"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  {name === 'search' && <circle cx="10.5" cy="10.5" r="6.5" />}
+  <path d={paths[name]} />
+</svg>

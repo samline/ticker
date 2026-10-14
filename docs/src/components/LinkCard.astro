@@ -1,0 +1,53 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+interface Props extends HTMLAttributes<'a'> {
+  href: string
+  variant?: 'default' | 'compact'
+}
+const { href, variant = 'default', class: className, ...attributes } = Astro.props
+---
+
+<a
+  {...attributes}
+  href={href}
+  class:list={['link-card', { compact: variant === 'compact' }, className]}
+>
+  <slot />
+</a>
+<style>
+  .link-card {
+    display: grid;
+    gap: 0.5rem;
+    padding: 1rem 1.125rem;
+    border: 0.0625rem solid var(--color-border-soft);
+    border-radius: 0.875rem;
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    transition:
+      color var(--duration-ui) var(--ease-ui),
+      background-color var(--duration-ui) var(--ease-ui),
+      border-color var(--duration-ui) var(--ease-ui);
+  }
+  .compact {
+    font-size: 0.8125rem;
+  }
+  .link-card:focus-visible {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.1875rem;
+  }
+  @media (hover: hover) {
+    .link-card:hover {
+      color: var(--color-accent);
+      background: var(--color-accent-soft);
+      border-color: var(--palette-border-hover);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .link-card {
+      transition: none;
+    }
+  }
+</style>

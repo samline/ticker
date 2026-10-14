@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: api
+  order: 8
 title: 'Browser Registry'
 description: 'Detailed Ticker API contract: Browser Registry'
 ---

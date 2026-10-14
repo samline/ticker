@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: start
+  order: 2
 title: 'Getting started'
 description: 'Install @samline/ticker, enhance existing HTML, and manage one ticker through its controller.'
 ---

@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: api
+  order: 2
 title: 'TickerInstance'
 description: 'Detailed Ticker API contract: TickerInstance'
 ---

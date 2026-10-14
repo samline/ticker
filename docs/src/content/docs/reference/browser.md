@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: reference
+  order: 4
 title: 'Browser reference'
 description: 'Browser registry imports, complete helper behavior, standalone global setup, replacement semantics, and cleanup.'
 ---

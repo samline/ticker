@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: api
+  order: 7
 title: 'unmount()'
 description: 'Detailed Ticker API contract: unmount()'
 ---

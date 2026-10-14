@@ -1,0 +1,136 @@
+---
+import { getI18n } from '../i18n/utils'
+import { href } from '../lib/routes'
+import Box from '../../../landing/src/components/Box.astro'
+import Logo from '../../../landing/src/components/Logo.astro'
+import Button from '../../../landing/src/components/Button.astro'
+import ThemeToggle from '../../../landing/src/components/ThemeToggle.astro'
+import MobileNavigation from '../components/MobileNavigation.astro'
+import Search from '../components/Search.astro'
+import manifest from '../../../package.json'
+interface Props {
+  current: string
+}
+const { current } = Astro.props
+const t = getI18n(Astro)
+const landingUrl = new URL('../', new URL(import.meta.env.BASE_URL, Astro.site))
+const repository = manifest.repository.url.replace(/^git\+/, '').replace(/\.git$/, '')
+---
+
+<ticker-docs-header class:list={['header']}>
+  <header>
+    <nav aria-label={t.mainLabel}>
+      <Box size="wide" class:list={['header-inner']}>
+        <div class:list={['brand-group']}>
+          <Logo href={landingUrl.pathname} version={manifest.version} />
+          <a class:list={['docs-label']} href={href('index')}>
+            {t.docs}
+          </a>
+        </div>
+        <div class:list={['header-tools']}>
+          <Search />
+          <ThemeToggle />
+          <MobileNavigation current={current} />
+          <Button href={repository} variant="ghost" class:list={['github']} context="nav">
+            {t.github}
+            <span aria-hidden="true">↗</span>
+          </Button>
+        </div>
+      </Box>
+    </nav>
+  </header>
+</ticker-docs-header>
+<script>
+  class DocsHeader extends HTMLElement {
+    private observer?: ResizeObserver
+    connectedCallback() {
+      this.observer?.disconnect()
+      this.observer = new ResizeObserver(() =>
+        document.documentElement.style.setProperty(
+          '--docs-header-height',
+          `${this.getBoundingClientRect().height / parseFloat(getComputedStyle(document.documentElement).fontSize)}rem`
+        )
+      )
+      this.observer.observe(this)
+    }
+    disconnectedCallback() {
+      this.observer?.disconnect()
+    }
+  }
+  if (!customElements.get('ticker-docs-header'))
+    customElements.define('ticker-docs-header', DocsHeader)
+</script>
+<style>
+  .header {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--color-bg);
+    border-bottom: 0.0625rem solid var(--color-border-soft);
+  }
+  .header-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-height: 5rem;
+    padding-block: 1.25rem;
+  }
+  .brand-group,
+  .header-tools {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .docs-label {
+    display: none;
+    color: var(--color-text-muted);
+    border-left: 0.0625rem solid var(--color-border);
+    padding-left: 1rem;
+    margin-left: 0.5rem;
+    font-size: 0.8125rem;
+    text-decoration: none;
+  }
+  .github {
+    display: none;
+  }
+  :focus-visible {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.1875rem;
+  }
+  @media (width>=64rem) {
+    .docs-label {
+      display: block;
+    }
+    .github {
+      display: inline-flex;
+    }
+    .header-inner {
+      gap: 1.5rem;
+    }
+  }
+  @media (width<23.4375rem) {
+    .header-inner {
+      gap: 0.375rem;
+    }
+    .header-tools {
+      gap: 0.25rem;
+    }
+  }
+  @media (hover: hover) {
+    .docs-label:hover {
+      color: var(--color-accent);
+    }
+  }
+  .docs-label {
+    transition: color var(--duration-ui) var(--ease-ui);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .docs-label {
+      transition: none;
+    }
+  }
+</style>

@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: reference
+  order: 5
 title: 'Entrypoints and module formats'
 description: 'Choose the root, Vanilla, core, browser registry, standalone IIFE, or stylesheet export.'
 ---

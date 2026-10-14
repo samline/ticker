@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: guides
+  order: 2
 title: 'HTML and browser usage'
 description: 'Use @samline/ticker directly from HTML through its dependency-free browser bundle.'
 ---

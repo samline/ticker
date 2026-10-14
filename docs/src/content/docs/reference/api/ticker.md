@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: api
+  order: 1
 title: 'ticker(target, options?)'
 description: 'Detailed Ticker API contract: ticker(target, options?)'
 ---

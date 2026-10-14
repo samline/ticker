@@ -8,6 +8,7 @@ export default defineConfig({
   base: '/ticker/docs',
   trailingSlash: 'always',
   output: 'static',
+  i18n: { defaultLocale: 'en', locales: ['en'], routing: { prefixDefaultLocale: false } },
   integrations: [sitemap()],
   vite: { plugins: [tailwindcss()] },
   markdown: {

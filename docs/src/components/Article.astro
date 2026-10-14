@@ -1,6 +1,7 @@
 ---
 import CopyButton from '../../../landing/src/components/CopyButton.astro'
-import { t } from '../i18n/en'
+import { getI18n } from '../i18n/utils'
+const t = getI18n(Astro)
 ---
 
 <ticker-docs-article class:list={['article']}>

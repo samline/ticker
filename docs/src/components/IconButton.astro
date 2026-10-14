@@ -1,0 +1,21 @@
+---
+import Button from '../../../landing/src/components/Button.astro'
+import type { HTMLAttributes } from 'astro/types'
+interface Props extends HTMLAttributes<'button'> {
+  label: string
+}
+const { label, class: className, ...attributes } = Astro.props
+---
+
+<Button {...attributes} variant="ghost" aria-label={label} class:list={['icon-button', className]}>
+  <slot />
+</Button>
+<style>
+  .icon-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    flex: none;
+    border-radius: 0.75rem;
+  }
+</style>

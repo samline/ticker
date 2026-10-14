@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: reference
+  order: 1
 title: 'Reference'
 description: 'Authoritative reference for every public @samline/ticker API, option, core utility, type, entrypoint, browser helper, and styling contract.'
 ---

@@ -1,4 +1,8 @@
 ---
+locale: en
+sidebar:
+  group: reference
+  order: 3
 title: 'API'
 description: 'Every public factory, controller member, page-manager function, and browser-registry operation.'
 ---
