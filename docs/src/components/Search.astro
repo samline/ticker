@@ -259,7 +259,7 @@ const id = `docs-search-${crypto.randomUUID()}`
     min-width: 0;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    min-height: 0;
     padding-block: 2rem 3rem;
   }
   .search-intro {
@@ -269,11 +269,18 @@ const id = `docs-search-${crypto.randomUUID()}`
   }
   .search-results {
     min-height: 0;
-    flex: 1;
+    flex: 0 1 auto;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding-block: 0.25rem 1.5rem;
     scrollbar-width: thin;
+  }
+  .search-content:has(.search-status:empty) .search-results {
+    display: none;
+  }
+  .search-content:has(.search-status:empty) .search-intro {
+    padding-bottom: 0;
+    border-bottom: 0;
   }
   .search-heading {
     padding-right: 3rem;
@@ -311,7 +318,9 @@ const id = `docs-search-${crypto.randomUUID()}`
     inset: 0 0 auto;
     z-index: 101;
     width: 100%;
-    height: min(44rem, calc(100dvh - 1rem));
+    display: flex;
+    flex-direction: column;
+    max-height: min(44rem, calc(100dvh - 1rem));
     overflow: hidden;
     overscroll-behavior: contain;
     background: linear-gradient(135deg, var(--palette-feature-surface), var(--color-bg) 65%);
@@ -322,7 +331,8 @@ const id = `docs-search-${crypto.randomUUID()}`
   }
   .search :global([data-drawer-body]),
   .search :global([data-drawer-body] > div) {
-    height: 100%;
+    display: flex;
+    flex-direction: column;
     min-height: 0;
   }
   .search :global(.docs-search-handle) {
@@ -401,25 +411,6 @@ const id = `docs-search-${crypto.randomUUID()}`
       transition: none;
     }
     .search :global(.docs-search-panel),
-    .search :global([data-drawer-body]),
-    .search :global([data-drawer-body] > div) {
-      height: 100%;
-      min-height: 0;
-    }
-    .search :global(.docs-search-handle) {
-      position: absolute;
-      bottom: 1.125rem;
-      left: 50%;
-      transform: translateX(-50%);
-      margin: 0;
-      width: 3rem;
-      height: 0.3125rem;
-      background: var(--color-accent);
-    }
-    .search :global(.docs-search-handle:focus-visible) {
-      outline: 0.125rem solid var(--color-accent);
-      outline-offset: 0.375rem;
-    }
     .search :global(.docs-search-overlay) {
       animation: none !important;
       transition: none !important;

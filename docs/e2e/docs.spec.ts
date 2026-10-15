@@ -232,3 +232,34 @@ test('search keeps close visible after result scrolling and supports native upwa
   await expect(panel).not.toBeVisible()
   await expect(trigger).toBeFocused()
 })
+
+test('search grows with results and shrinks again when cleared in both motion preferences', async ({
+  page,
+}) => {
+  await page.goto('getting-started/')
+  for (const reducedMotion of ['no-preference', 'reduce'] as const) {
+    await page.emulateMedia({ reducedMotion })
+    for (const width of [320, 1440]) {
+      await page.setViewportSize({ width, height: 800 })
+      await page.getByRole('button', { name: 'Search documentation', exact: true }).click()
+      const panel = page.getByRole('dialog', { name: 'Search documentation' })
+      const input = panel.getByRole('searchbox')
+      await expect(input).toBeFocused()
+      const compact = (await panel.boundingBox())!.height
+      expect(compact).toBeLessThan(400)
+      await input.fill('direction')
+      await expect(panel.locator('li a').first()).toBeVisible()
+      await expect
+        .poll(async () => (await panel.boundingBox())!.height)
+        .toBeGreaterThan(compact + 50)
+      expect(Math.round((await panel.boundingBox())!.height)).toBeLessThanOrEqual(704)
+      await input.fill('zzzznosuchwordzzzz')
+      await expect(panel.getByRole('status')).toHaveText('No results. Try another term.')
+      await expect.poll(async () => (await panel.boundingBox())!.height).toBeLessThan(compact + 100)
+      await input.fill('')
+      await expect.poll(async () => (await panel.boundingBox())!.height).toBeCloseTo(compact, 0)
+      await panel.getByRole('button', { name: 'Close search', exact: true }).click()
+      await expect(panel).not.toBeVisible()
+    }
+  }
+})

@@ -51,7 +51,6 @@ const { current } = Astro.props
   }
   a {
     display: block;
-    border-left: 0.125rem solid transparent;
     padding: 0.5rem 0.75rem;
     border-radius: 0.4375rem;
     color: var(--color-text-muted);
@@ -63,10 +62,7 @@ const { current } = Astro.props
       color var(--duration-ui) var(--ease-ui);
   }
   a[aria-current='page'] {
-    border-left-color: var(--color-accent);
-    color: var(--color-accent);
     background: var(--color-accent-soft);
-    font-weight: 600;
   }
   a:focus-visible {
     outline: 0.125rem solid var(--color-accent);
