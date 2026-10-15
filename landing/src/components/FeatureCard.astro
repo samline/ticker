@@ -1,4 +1,5 @@
 ---
+import Surface from '../../../shared/components/Surface.astro'
 import Reveal from './Reveal.astro'
 interface Props {
   title: string
@@ -8,62 +9,51 @@ const { title, number } = Astro.props
 ---
 
 <Reveal>
-  <article class:list={['card p-6 feature-card']} data-reveal>
-    <div
-      class:list={[
-        'mb-5 flex h-10 w-10 items-center justify-center rounded-lg border-[0.0625rem] border-border bg-bg-soft text-accent feature-icon',
-      ]}
-    >
+  <Surface as="article" interactive class:list={['feature-card']} data-reveal>
+    <div class:list={['feature-icon']}>
       <slot name="icon" />
     </div>
-    <h3 class:list={['text-base font-semibold text-text']}>{title}</h3>
-    <p class:list={['mt-2 text-sm text-text-muted']}>
+    <h3>{title}</h3>
+    <p>
       <slot />
     </p>
     <span class:list={['feature-number']} aria-hidden="true">
       {number}
     </span>
-  </article>
+  </Surface>
 </Reveal>
 
 <style>
   .feature-card {
+    --card-padding: var(--space-lg);
     position: relative;
-    border: 0.0625rem solid var(--palette-feature-border);
-    background: var(--palette-feature-surface);
-    border-radius: 1rem;
-    padding: 1.6875rem;
+    padding: var(--card-padding);
     min-height: 13.875rem;
-    transition:
-      border-color var(--duration-ui) var(--ease-ui),
-      background-color var(--duration-ui) var(--ease-ui);
   }
-  @media (hover: hover) {
-    .feature-card:hover {
-      background: var(--palette-feature-hover);
-      border-color: var(--palette-border-hover);
-    }
+  .feature-icon {
+    display: flex;
+    align-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-bottom: 1.25rem;
+    color: var(--color-accent);
   }
-  .feature-card .feature-icon {
-    background: transparent;
-    border: 0;
-    width: 1.6875rem;
-    height: 1.6875rem;
-    margin-bottom: 1.375rem;
-    justify-content: flex-start;
-  }
-  .feature-card .feature-icon :global(svg) {
+  .feature-icon :global(svg) {
     width: 1.5rem;
     height: 1.5rem;
     stroke-width: 1.3;
   }
-  .feature-card h3 {
-    font-size: 0.94rem;
+  h3 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 0.9375rem;
     font-weight: 500;
     letter-spacing: -0.02em;
   }
-  .feature-card p {
-    font-size: 0.85rem;
+  p {
+    margin: var(--space-xs) 0 0;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
     line-height: 1.7;
     max-width: 30ch;
   }
@@ -72,44 +62,28 @@ const { title, number } = Astro.props
   }
   .feature-number {
     position: absolute;
-    top: 1.75rem;
-    right: 1.6875rem;
+    top: var(--card-padding);
+    right: var(--card-padding);
     font-family: var(--font-mono);
-    font-size: 0.58rem;
+    font-size: 0.625rem;
     color: var(--palette-feature-number);
   }
   @media (width < 48rem) {
     .feature-card {
-      padding: 1.375rem;
+      --card-padding: 1.25rem;
       min-height: 14.6875rem;
     }
-  }
-  @media (width < 48rem) {
-    .feature-number {
-      right: 1.375rem;
-      top: 1.5625rem;
-    }
-  }
-  @media (width < 48rem) {
-    .feature-card p {
-      font-size: 0.76rem;
+    p {
+      font-size: var(--text-small);
     }
   }
   @media (width < 30rem) {
     .feature-card {
+      --card-padding: var(--space-lg);
       min-height: 0;
-      padding: 1.625rem;
     }
-  }
-  @media (width < 30rem) {
-    .feature-card p {
+    p {
       max-width: 40ch;
-      font-size: 0.82rem;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .feature-card {
-      transition: none;
     }
   }
 </style>

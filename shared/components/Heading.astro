@@ -23,13 +23,6 @@ const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
     font-weight: 400;
     letter-spacing: -0.01em;
   }
-  .section-title {
-    font-size: clamp(1.875rem, 3.6vw, 2.75rem);
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1.05;
-    color: var(--color-text);
-  }
   h1 {
     margin: 1.5625rem 0 0;
     font-size: clamp(2.75rem, 6.2vw, 5rem);
@@ -49,6 +42,7 @@ const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
     font-weight: 500;
     letter-spacing: -0.045em;
     text-wrap: balance;
+    color: var(--color-text);
   }
   .section-title :global(.serif) {
     color: var(--palette-heading-accent);

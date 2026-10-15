@@ -1,18 +1,20 @@
 ---
+import type { HTMLAttributes } from 'astro/types'
 import { format } from '../i18n/format'
 import { getI18n } from '../i18n/utils'
-interface Props {
+interface Props extends HTMLAttributes<'a'> {
   version?: string
   license?: string
   href?: string
 }
-const { version, license, href = '#top' } = Astro.props
+const { version, license, href = '#top', class: className, ...attributes } = Astro.props
 const i18n = getI18n(Astro)
 ---
 
 <a
+  {...attributes}
   href={href}
-  class:list={['flex items-center gap-2.5 text-sm font-medium tracking-tight']}
+  class:list={['flex items-center gap-2.5 text-sm font-medium tracking-tight', className]}
   aria-label={format(i18n.common.brandHome, { name: i18n.common.packageName })}
 >
   <span class:list={['dot-mark']} aria-hidden="true"></span>
@@ -38,31 +40,17 @@ const i18n = getI18n(Astro)
 
 <style>
   .dot-mark {
-    width: 0.875rem;
-    height: 0.875rem;
-    border-radius: 624.9375rem;
-    background: var(--color-accent);
     display: inline-block;
-    box-shadow:
-      0 0 0 0.25rem rgba(183, 174, 210, 0.18),
-      0 0 1rem var(--color-accent-glow);
+    flex: none;
+    width: 0.6875rem;
+    height: 0.6875rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
   }
   @media (width < 37.5rem) {
     .logo-name {
       font-size: 0.8rem;
     }
-  }
-
-  .dot-mark {
-    width: 0.6875rem;
-    height: 0.6875rem;
-    box-shadow: none;
-  }
-
-  .dot-mark {
-    width: 0.6875rem;
-    height: 0.6875rem;
-    box-shadow: none;
   }
   @media (width < 23.4375rem) {
     .logo-name {

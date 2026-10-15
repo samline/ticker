@@ -3,9 +3,9 @@ import { z } from 'astro/zod'
 import { glob } from 'astro/loaders'
 const docs = defineCollection({
   loader: glob({
-    pattern: '**/*.md',
+    pattern: '**/*.{md,mdx}',
     base: './src/content/docs',
-    generateId: ({ entry }) => entry.replace(/\.md$/, ''),
+    generateId: ({ entry }) => entry.replace(/\.mdx?$/, ''),
   }),
   schema: z.object({
     title: z.string().trim().min(1),

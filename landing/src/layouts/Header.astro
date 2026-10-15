@@ -1,11 +1,12 @@
 ---
+import NavLink from '../../../shared/components/NavLink.astro'
 import { docsHref } from '../lib/docs'
 import { getI18n } from '../i18n/utils'
-import Logo from '../components/Logo.astro'
-import Box from '../components/Box.astro'
-import Button from '../components/Button.astro'
+import Logo from '../../../shared/components/Logo.astro'
+import Box from '../../../shared/components/Box.astro'
+import Button from '../../../shared/components/Button.astro'
 import MobileMenu from '../components/MobileMenu.astro'
-import ThemeToggle from '../components/ThemeToggle.astro'
+import ThemeToggle from '../../../shared/components/ThemeToggle.astro'
 const i18n = getI18n(Astro)
 ---
 
@@ -17,12 +18,9 @@ const i18n = getI18n(Astro)
 
         <div class:list={['hidden min-w-0 flex-wrap items-center gap-1 lg:flex']}>
           {i18n.navigation.items.map(item => (
-            <a
-              href={'docsRoute' in item ? docsHref(item.docsRoute) : item.href}
-              class:list={['nav-link rounded-full px-3 py-1.5 text-sm text-text-muted']}
-            >
+            <NavLink inline href={'docsRoute' in item ? docsHref(item.docsRoute) : item.href}>
               {item.label}
-            </a>
+            </NavLink>
           ))}
         </div>
 
@@ -108,21 +106,5 @@ const i18n = getI18n(Astro)
     z-index: 30;
     background: var(--color-bg);
     border-bottom: 0.0625rem solid var(--color-border-soft);
-  }
-  .nav-link {
-    transition:
-      color var(--duration-ui) var(--ease-ui),
-      background-color var(--duration-ui) var(--ease-ui);
-  }
-  @media (hover: hover) {
-    .nav-link:hover {
-      color: var(--color-accent);
-      background: var(--color-accent-soft);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .nav-link {
-      transition: none;
-    }
   }
 </style>

@@ -6,8 +6,8 @@ import ArticleFooter from '../sections/ArticleFooter.astro'
 import SEO from '../components/SEO.astro'
 import TableOfContents from '../components/TableOfContents.astro'
 import Article from '../components/Article.astro'
-import Theme from '../../../landing/src/components/Theme.astro'
-import Box from '../../../landing/src/components/Box.astro'
+import Theme from '../../../shared/components/Theme.astro'
+import Box from '../../../shared/components/Box.astro'
 import '../styles/theme.css'
 import { getI18n, getLocale } from '../i18n/utils'
 import type { MarkdownHeading } from 'astro'
@@ -16,8 +16,9 @@ interface Props {
   description: string
   current: string
   headings: MarkdownHeading[]
+  sourcePath?: string
 }
-const { title, description, current, headings } = Astro.props
+const { title, description, current, headings, sourcePath } = Astro.props
 const t = getI18n(Astro)
 ---
 
@@ -49,7 +50,7 @@ const t = getI18n(Astro)
           <slot />
         </Article>
 
-        <ArticleFooter current={current} />
+        <ArticleFooter current={current} sourcePath={sourcePath} />
       </main>
       <div class:list={['desktop-toc']} data-pagefind-ignore>
         <TableOfContents headings={headings} />
@@ -104,7 +105,7 @@ const t = getI18n(Astro)
   .shell {
     display: grid;
     grid-template-columns: 13.5rem minmax(0, 1fr);
-    gap: 3rem;
+    gap: 2.5rem;
     align-items: start;
   }
   main {
@@ -126,7 +127,7 @@ const t = getI18n(Astro)
   @media (width >= 80rem) {
     .shell {
       grid-template-columns: 13.5rem minmax(0, 1fr) 11rem;
-      gap: 3rem;
+      gap: 2.5rem;
     }
     .desktop-toc {
       display: block;

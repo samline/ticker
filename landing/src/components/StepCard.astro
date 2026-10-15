@@ -1,4 +1,5 @@
 ---
+import Surface from '../../../shared/components/Surface.astro'
 import Reveal from './Reveal.astro'
 interface Props {
   number: number
@@ -8,7 +9,7 @@ const { number, title } = Astro.props
 ---
 
 <Reveal>
-  <article class:list={['card-elevated p-6 lg:p-7']} data-reveal>
+  <Surface as="article" tone="step" class:list={['card-elevated p-6 lg:p-7']} data-reveal>
     <div class:list={['mb-4 flex items-center gap-3']}>
       <span
         class:list={[
@@ -22,14 +23,11 @@ const { number, title } = Astro.props
       </p>
     </div>
     <slot />
-  </article>
+  </Surface>
 </Reveal>
 
 <style>
   .card-elevated {
-    background: var(--palette-step-surface);
-    border-color: var(--palette-step-border);
-    border-radius: 1rem;
     box-shadow: none;
     min-width: 0;
   }

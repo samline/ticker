@@ -20,7 +20,7 @@ Read README.md before changing the docs. This site replaces Starlight; `src/cont
 
 ## Companion-site contracts
 
-- Header must reuse the landing Logo, Box, Button and ThemeToggle. Keep actions aligned in both themes and at 320–1440, with wrapping for enlarged text. Use SVG control icons, not font glyphs whose weight/metrics vary. No duplicate version badge in the sidebar.
+- Header must reuse the shared Logo, Box, Button and ThemeToggle. Keep actions aligned in both themes and at 320–1440, with wrapping for enlarged text. Use SVG control icons, not font glyphs whose weight/metrics vary. No duplicate version badge in the sidebar.
 - Complete article heading/sidebar/footer blocks belong in `src/sections/`; Header owns its sticky measurement in `src/layouts/Header.astro`; SEO owns head metadata. DocsLayout should remain composition rather than accumulating unrelated component styles/scripts.
 - Search uses `browser.newDrawer({ direction: 'top' })`. Delegate animations, locking, focus, dismissal and native trigger state to Drawer. Only Pagefind loading/query/results, shortcut toggling and lifecycle cleanup belong to Search. Keep generated controls/styles under its root and preserve exact result/base paths. No custom dialog or duplicate focus trap.
 - Use `getI18n(Astro)` and typed locale catalogs as in the landing. UI messages belong in common/navigation/controls/SEO catalogs. Do not put translated route strings in prose dictionaries; page IDs remain keys. English is currently the only published language; adding one requires actual translated collection content and routing/search/metadata work.
@@ -30,14 +30,14 @@ Read README.md before changing the docs. This site replaces Starlight; `src/cont
 
 - Reuse Icon, IconButton, TextField and LinkCard for controls/fields/cards. SearchResultCard owns the result template; Search fills it rather than constructing another card design in JavaScript. Pagination composes LinkCard. Keep scope/native attributes forwarded through composed components. DrawerStyles owns the shared vendor CSS adaptation; native package close controls remain package-owned.
 
-## Shared code presentation and search continuity
+## Shared site and reading contracts
 
-The landing `CodeFrame` owns the filename/language toolbar, code surface, border, overflow and shared CopyButton. `CodeBlock` supplies the landing tokens; docs `Article` clones a frame template around rendered Markdown without changing code text. Preserve the landing `.code-block` hook. Do not fork clipboard feedback or frame styles. Shiki's Ticker theme maps syntax scopes directly to the shared semantic palette, so both color modes follow the same brand tokens. Check both sites after changing this shared component.
-
-Docs reuse the landing eyebrow and font families, with serif article titles, Inter reading text and mono interface labels. Use existing feature/code surfaces for hierarchy rather than introducing another palette or animation system.
+Read and follow [shared/AGENTS.md](../shared/AGENTS.md) and [shared/README.md](../shared/README.md). Shared components/catalogs/helpers/tokens live there; app-specific content and integrations stay here. Install shared tooling before app dependencies. Both app checks/formatters include shared source and use the root Prettier config; keep setup and CI synchronized.
 
 Search uses a content-sized square top Drawer, capped at 44rem or the viewport minus 1rem, with a fixed intro/input/close control and an independently scrolling results region. Keep the empty state compact and let CSS grow/shrink the panel with results; do not add JavaScript height measurement. Drawer 4.2.1 uses percentage transforms and reads current geometry at gesture start. Reduced-motion rules must only disable motion, not change sizing. The native handle closes upward (`showHandle` and `handleOnly`); input/results opt out of dragging. Drawer still owns gestures, animations, focus trapping and restoration. Search only assigns initial field focus after native mounting. Keep close, Escape and backdrop available as alternatives to dragging. Test deep result scrolling, upward dragging, focus restoration and unchanged background scroll together.
 
 Search waits 300ms after the last input before querying. Keep previous results during typing and asynchronous loading, replacing the list only when the latest response is ready. Clearing the field resets immediately; stale requests must never overwrite newer input.
 
 The table of contents marks exactly one current heading per instance with `aria-current="location"` and the shared active background. Follow document geometry at the sticky header plus 2.5rem anchor offset, including nested headings, initial fragments, scrolling upward and the document end. Preserve native anchor behavior, synchronize desktop/mobile instances, and clean up frame/listener/resize observation on disconnect. Do not rewrite the URL or move focus during scroll tracking.
+
+Use shared Tabs/TabPanel, CardGrid/LinkCard and Callout for component-rich MDX articles; do not duplicate UI in a rehype transform. Preserve no-JavaScript alternatives, keyboard selection, exact copying and old panel fragments. Keep steps/API comparisons visible. Article prose styles must exclude data-ui subtrees. Include both .md and .mdx in the loader, coverage, actual edit URLs, inventory and npm documentation packaging.

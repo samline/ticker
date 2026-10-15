@@ -35,7 +35,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: docs/package-lock.json
+          cache-dependency-path: |
+            docs/package-lock.json
+            shared/package-lock.json
+      - run: npm ci --prefix ../shared
       - run: npm ci
       - run: npm run check
       - run: npm run format:check
@@ -52,7 +55,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: landing/package-lock.json
+          cache-dependency-path: |
+            landing/package-lock.json
+            shared/package-lock.json
+      - run: npm ci --prefix shared
       - run: npm ci --prefix landing
       - run: npm run landing:check
       - run: npm --prefix landing run format:check

@@ -1,11 +1,20 @@
 ---
+import type { HTMLAttributes } from 'astro/types'
+interface Props extends HTMLAttributes<'div'> {}
+const { class: className, ...attributes } = Astro.props
 import { getI18n } from '../i18n/utils'
 import Button from './Button.astro'
 const i18n = getI18n(Astro)
 const t = i18n.controls.theme
 ---
 
-<ticker-theme data-toggle-label={t.label} data-light-label={t.toLight} data-dark-label={t.toDark}>
+<ticker-theme
+  {...attributes}
+  class:list={[className]}
+  data-toggle-label={t.label}
+  data-light-label={t.toLight}
+  data-dark-label={t.toDark}
+>
   <Button
     variant="ghost"
     class:list={['theme-toggle']}

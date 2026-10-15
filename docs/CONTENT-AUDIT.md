@@ -20,3 +20,9 @@ Reviewed on 2026-10-14 against the 33 documentation sources at commit `241fd34`,
 The site still has 23 maintained pages. Consolidating duplicate descriptions does not mean maintaining a hidden second copy of the docs. No source page was dropped from the migration inventory. UI changes in this review add validated collection metadata, catalog lookup and component boundaries without replacing article bodies.
 
 Run `docs:check`, `site:build` and the relevant browser tests after content/API changes. The coverage gate checks public names/imports/version pins; it cannot assess every sentence's meaning. Continue reviewing code and prose together, and add new behavior to the appropriate guide/reference/recipe instead of relying on this historical audit.
+
+## Component composition review — 2026-10-15
+
+The original-source inventory still contains all 33 records. Overview, installation and entrypoint articles now use MDX to consume shared Astro UI. Package-manager commands, stylesheet loading, source markup, controller updates/refreshes, cleanup and declarative lifecycle notes remain present. Installation now includes version-pinned CDN assets and a corresponding browser-global controller example. ESM/CommonJS alternatives share tabs; comparisons and ordered instructions remain visible. Former installation and next-step fragments are preserved on tab panels/cards, and source edit links use the actual file extension.
+
+Shared Tabs/TabPanel, CardGrid/LinkCard, Callout/Surface, Disclosure, code/copy, header controls and theme primitives are reused across the site. Browser checks cover all 23 articles in narrow/desktop light/dark layouts, old fragments, exact copying, keyboard selection and no-JavaScript alternatives. Re-run the semantic API/content review when behavior changes; UI composition tests are not proof of runtime documentation completeness.

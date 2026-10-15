@@ -6,22 +6,22 @@ const root = new URL('../dist/', import.meta.url),
 async function files(dir) {
   return (
     await Promise.all(
-      (await readdir(dir, { withFileTypes: true })).map((item) =>
+      (await readdir(dir, { withFileTypes: true })).map(item =>
         item.isDirectory() ? files(new URL(`${item.name}/`, dir)) : [new URL(item.name, dir)]
       )
     )
   ).flat()
 }
-const pages = (await files(root)).filter((url) => url.pathname.endsWith('.html'))
+const pages = (await files(root)).filter(url => url.pathname.endsWith('.html'))
 const parsed = new Map(),
   errors = []
 for (const page of pages) {
   const html = await readFile(page, 'utf8')
-  const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1])
+  const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1])
   assert.equal(new Set(ids).size, ids.length, `Duplicate DOM ID in ${page.pathname}`)
   parsed.set(fileURLToPath(page), {
     html,
-    ids: new Set([...html.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1])),
+    ids: new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1])),
   })
   assert.match(html, /<h1\b/)
   assert.match(html, /<link rel="canonical" href="https:\/\/samline.github.io\/ticker\/docs\//)

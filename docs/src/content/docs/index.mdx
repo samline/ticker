@@ -7,6 +7,9 @@ title: '@samline/ticker'
 description: 'Accessible, dependency-free tickers for Vanilla JavaScript, TypeScript, and plain HTML.'
 ---
 
+import CardGrid from '../../../../shared/components/CardGrid.astro'
+import LinkCard from '../../../../shared/components/LinkCard.astro'
+
 `@samline/ticker` enhances existing DOM content, measures it responsively, creates accessible visual clones, and returns a small lifecycle controller. Use the main entrypoint, declarative page manager, browser module, or global IIFE without a framework runtime.
 
 ## Why @samline/ticker?
@@ -19,26 +22,30 @@ description: 'Accessible, dependency-free tickers for Vanilla JavaScript, TypeSc
 
 ## Next steps
 
-### Getting started
+<CardGrid>
+
+<LinkCard id="getting-started" title="Getting started" href="/ticker/docs/getting-started">
 
 Install the package, enhance existing markup, and control a first ticker.
 
-[Install @samline/ticker →](/ticker/docs/getting-started)
+</LinkCard>
 
-### API reference
+<LinkCard id="api-reference" title="API reference" href="/ticker/docs/reference/api/">
 
 Controller, declarative manager, browser registry, options, and lifecycle behavior.
 
-[Browse the API →](/ticker/docs/reference/api/)
+</LinkCard>
 
-### Browser global
+<LinkCard id="browser-global" title="Browser global" href="/ticker/docs/reference/browser/">
 
 Use `window.Ticker` in WordPress, Shopify, or plain HTML without a bundler.
 
-[Browser reference →](/ticker/docs/reference/browser/)
+</LinkCard>
 
-### Examples
+<LinkCard id="examples" title="Examples" href="/ticker/docs/reference/examples/">
 
 Common patterns for announcements, logos, dynamic content, and cleanup.
 
-[Browse examples →](/ticker/docs/reference/examples/)
+</LinkCard>
+
+</CardGrid>

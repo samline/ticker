@@ -1,21 +1,25 @@
 ---
-interface Props {
+import type { HTMLAttributes } from 'astro/types'
+interface Props extends HTMLAttributes<'div'> {
   id: string
   label: string
   items: readonly { readonly id: string; readonly label: string }[]
   variant?: 'default' | 'demo'
   class?: string
 }
-const { id, label, items, variant = 'default', class: className } = Astro.props
+const { id, label, items, variant = 'default', class: className, ...attributes } = Astro.props
 const instanceId = `tabs-${crypto.randomUUID()}`
 ---
 
-<ticker-tabs data-group={id}>
+<ticker-tabs {...attributes} data-group={id}>
   <div class:list={[{ 'studio-header': variant === 'demo' }]}>
     <slot name="heading" />
     <div
       class:list={['tabs', { 'demo-tabs': variant === 'demo' }, className]}
       data-tabs={id}
+      data-ui
+      data-pagefind-ignore
+      hidden
       aria-label={label}
     >
       {items.map(item => (
@@ -48,6 +52,7 @@ const instanceId = `tabs-${crypto.randomUUID()}`
       )
       if (!group || !tabs.length || !panels.length) return
       group.setAttribute('role', 'tablist')
+      group.hidden = false
       const select = (selected: HTMLButtonElement, focus = false) => {
         tabs.forEach(tab => {
           const active = tab === selected
@@ -68,11 +73,12 @@ const instanceId = `tabs-${crypto.randomUUID()}`
       tabs.forEach((tab, index) => {
         const panel = panels.find(panel => panel.dataset.panel === tab.dataset.tab)
         if (!panel) return
-        panel.id = `${tab.id}-panel`
+        panel.id ||= `${tab.id}-panel`
         tab.setAttribute('role', 'tab')
         tab.setAttribute('aria-controls', panel.id)
         panel.setAttribute('role', 'tabpanel')
         panel.setAttribute('aria-labelledby', tab.id)
+        panel.removeAttribute('aria-label')
         panel.tabIndex = 0
         tab.addEventListener('click', () => select(tab), { signal })
         tab.addEventListener(
@@ -96,6 +102,23 @@ const instanceId = `tabs-${crypto.randomUUID()}`
         )
       })
       select(tabs[0])
+      const selectFromHash = () => {
+        let target: HTMLElement | null
+        try {
+          target = document.getElementById(decodeURIComponent(location.hash.slice(1)))
+        } catch {
+          return
+        }
+        if (!target) return
+        const panel = panels.find(panel => panel.contains(target))
+        const tab = tabs.find(tab => tab.dataset.tab === panel?.dataset.panel)
+        if (!panel || !tab) return
+        const wasHidden = panel.hidden
+        select(tab)
+        if (wasHidden) target.scrollIntoView({ block: 'start' })
+      }
+      selectFromHash()
+      window.addEventListener('hashchange', selectFromHash, { signal })
     }
     disconnectedCallback() {
       this.lifecycle?.abort()
@@ -105,6 +128,9 @@ const instanceId = `tabs-${crypto.randomUUID()}`
 </script>
 
 <style>
+  [hidden] {
+    display: none !important;
+  }
   .tabs {
     display: inline-flex;
     flex-wrap: wrap;
@@ -116,7 +142,7 @@ const instanceId = `tabs-${crypto.randomUUID()}`
     gap: 0.125rem;
   }
   .tab {
-    padding: 0.4rem 0.9rem;
+    padding: 0.4rem 0.625rem;
     border-radius: 624.9375rem;
     font-size: 0.8rem;
     color: var(--color-text-muted);

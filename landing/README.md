@@ -9,6 +9,7 @@ Use this README as the implementation playbook and [AGENTS.md](AGENTS.md) as the
 From the repository root:
 
 ```sh
+npm ci --prefix shared
 npm ci --prefix landing
 npm run landing:dev
 ```
@@ -42,18 +43,18 @@ CI runs the maintained landing's formatting, source checks, build and browser su
 
 ## Architecture and ownership
 
-| Location                  | Responsibility                                                                                                                                                         |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/components/`         | Individual reusable primitives, controls and integrations: Box, Section, Button, Heading, Tabs, CodeBlock, RichText, RecipeCard, TickerDemo, MobileMenu and related UI |
-| `src/sections/`           | Complete content blocks: Hero, LiveDemo, Features, Runtimes, GettingStarted, Recipes, Faq and CallToAction                                                             |
-| `src/layouts/`            | Main document, header and footer                                                                                                                                       |
-| `src/pages/`              | Section composition and generated robots/social-image endpoints                                                                                                        |
-| `src/styles/tailwind.css` | Tailwind entry, breakpoints, typography tokens and theme palettes                                                                                                      |
-| `src/i18n/`               | Locale resolution, typed interpolation and all editable interface copy                                                                                                 |
-| `src/lib/site.ts`         | Public URL validation, XML escaping and safe JSON-LD serialization                                                                                                     |
-| `scripts/`                | Copy audit, production-output checks and documentation packaging                                                                                                       |
-| `tests/`, `e2e/`          | Source/metadata regression tests and compiled-site browser checks                                                                                                      |
-| `public/assets/`          | Licensed example brand marks and their attribution                                                                                                                     |
+| Location                  | Responsibility                                                                                                                                                                |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/components/`         | App-specific composition and integrations: Section, CodeBlock, RichText, RecipeCard, TickerDemo, MobileMenu and related UI; shared primitives live in `../shared/components/` |
+| `src/sections/`           | Complete content blocks: Hero, LiveDemo, Features, Runtimes, GettingStarted, Recipes, Faq and CallToAction                                                                    |
+| `src/layouts/`            | Main document, header and footer                                                                                                                                              |
+| `src/pages/`              | Section composition and generated robots/social-image endpoints                                                                                                               |
+| `src/styles/tailwind.css` | Tailwind entry, breakpoints, typography tokens and theme palettes                                                                                                             |
+| `src/i18n/`               | Locale resolution, typed interpolation and all editable interface copy                                                                                                        |
+| `src/lib/site.ts`         | Public URL validation, XML escaping and safe JSON-LD serialization                                                                                                            |
+| `scripts/`                | Copy audit, production-output checks and documentation packaging                                                                                                              |
+| `tests/`, `e2e/`          | Source/metadata regression tests and compiled-site browser checks                                                                                                             |
+| `public/assets/`          | Licensed example brand marks and their attribution                                                                                                                            |
 
 A component owns its plain scoped `<style>` and processed `<script>`. Shared Tailwind configuration is not a place for component selectors. The layout owns document styling; Theme owns the shared document color preference. Dinkbit informed the CSS-first tokens, breakpoints and Box/Section foundations, while easytrip informed navigation integration. Their CMS, backend and application setup were not imported.
 
@@ -77,7 +78,7 @@ Hero uses narrow Boxes for its introduction and compatibility block and a medium
 ```astro
 ---
 import { getI18n } from '../i18n/utils'
-import Box from '../components/Box.astro'
+import Box from '../../../shared/components/Box.astro'
 import Section from '../components/Section.astro'
 const t = getI18n(Astro).sections.recipes
 const headingId = `section-heading-${crypto.randomUUID()}`
@@ -226,12 +227,10 @@ Section anchors compensate for the section's existing top padding in scroll-marg
 
 HeroBackdrop owns the decorative lavender halo in a clipped, pointer-transparent layer behind Hero content. Hero creates its own stacking context so the negative backdrop layer stays inside its section. The background uses theme palette tokens and one 4.8-second entrance that settles; reduced motion shows the final static halo immediately. It adds no client script or layout height. To compare/revert the visual treatment, set `<Hero background="none" />` in page composition; default is `halo`. Keep glow clipping local to the decorative layer so focus and content remain visible. Check both themes, narrow layouts, reduced motion and pointer interaction when changing it.
 
-The sibling docs now use custom Astro components and Pagefind rather than Starlight. Both sites import `shared/styles/theme.css`; the docs also reuse the landing’s Box, Theme, ThemeToggle and CopyButton. Validate both sites after changing those shared surfaces. See `../docs/README.md` and `../docs/AGENTS.md` for content coverage and search maintenance.
+The sibling docs now use custom Astro components and Pagefind rather than Starlight. Both sites import `shared/styles/theme.css` and the same Box, Theme, ThemeToggle, CopyButton and other primitives from `shared/components/`. Validate both sites after changing those shared surfaces. See `../docs/README.md` and `../docs/AGENTS.md` for content coverage and search maintenance.
 
-## Shared code presentation and search continuity
+## Shared site foundations
 
-The landing `CodeFrame` owns the filename/language toolbar, code surface, border, overflow and shared CopyButton. `CodeBlock` supplies the landing tokens; docs `Article` clones a frame template around rendered Markdown without changing code text. Preserve the landing `.code-block` hook. Do not fork clipboard feedback or frame styles. Shiki's Ticker theme maps syntax scopes directly to the shared semantic palette, so both color modes follow the same brand tokens. Check both sites after changing this shared component.
+Read and follow [the shared UI contract](../shared/AGENTS.md) and [ownership/setup guide](../shared/README.md). Cross-site primitives, control catalogs, spacing/radius/focus/motion tokens and format helpers have a single source in `shared/`. App-specific composition stays here. Install `npm ci --prefix shared` before app dependencies; both app checks/formatters include shared source and use the root Prettier config.
 
-Docs reuse the landing eyebrow and font families, with serif article titles, Inter reading text and mono interface labels. Use existing feature/code surfaces for hierarchy rather than introducing another palette or animation system.
-
-Search uses a content-sized square top Drawer, capped at 44rem or the viewport minus 1rem, with a fixed intro/input/close control and an independently scrolling results region. Keep the empty state compact and let CSS grow/shrink the panel with results; do not add JavaScript height measurement. Drawer 4.2.1 uses percentage transforms and reads current geometry at gesture start. Reduced-motion rules must only disable motion, not change sizing. The native handle closes upward (`showHandle` and `handleOnly`); input/results opt out of dragging. Drawer still owns gestures, animations, focus trapping and restoration. Search only assigns initial field focus after native mounting. Keep close, Escape and backdrop available as alternatives to dragging. Test deep result scrolling, upward dragging, focus restoration and unchanged background scroll together.
+Tabs and CardGrid are also used in docs. Preserve existing demo variants/events/data hooks, keyboard handling and no-JavaScript content when changing them. A shared change requires both sites' build/browser checks. Keep native/Astro scope attributes forwarded, the user-selected Box sizes intact, and setup/CI/packaging/catalog references synchronized. Do not fork shared controls or copy documentation-specific search code into the landing.

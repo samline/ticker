@@ -11,8 +11,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "check": "node scripts/check-translations.mjs && astro check && npm run test",
-    "format": "prettier --plugin prettier-plugin-astro --write .",
-    "format:check": "prettier --plugin prettier-plugin-astro --check .",
+    "format": "prettier --plugin prettier-plugin-astro --config ../.prettierrc.cjs --write . ../shared",
+    "format:check": "prettier --plugin prettier-plugin-astro --config ../.prettierrc.cjs --check . ../shared",
     "test": "node --test tests/*.test.mjs",
     "test:browser": "playwright test"
   },

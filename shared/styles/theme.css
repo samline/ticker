@@ -2,6 +2,18 @@
 @custom-variant light (&:where([data-theme=light], [data-theme=light] *));
 
 @theme {
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --radius-control: 0.5rem;
+  --radius-panel: 1rem;
+  --focus-width: 0.125rem;
+  --focus-offset: 0.1875rem;
+  --text-small: 0.8125rem;
+  --text-caption: 0.6875rem;
+
   --breakpoint-xs: 23.4375rem;
   --breakpoint-sm: 37.5rem;
   --breakpoint-md: 48rem;

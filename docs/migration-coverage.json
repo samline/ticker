@@ -4,7 +4,7 @@
     {
       "source": "example/src/content/docs/getting-started.mdx",
       "sha256": "0147187cd97b15e86829383175653885cdddb6f300baaaa2a6532de13a5d2ada",
-      "destination": "docs/src/content/docs/getting-started.md"
+      "destination": "docs/src/content/docs/getting-started.mdx"
     },
     {
       "source": "example/src/content/docs/guides/accessibility.md",
@@ -29,7 +29,7 @@
     {
       "source": "example/src/content/docs/index.mdx",
       "sha256": "9a25bd466455897a47d30f5609f4b065fc357dc6212b9461dc35e3c22ae07a05",
-      "destination": "docs/src/content/docs/index.md"
+      "destination": "docs/src/content/docs/index.mdx"
     },
     {
       "source": "example/src/content/docs/reference/api.md",
@@ -54,7 +54,7 @@
     {
       "source": "example/src/content/docs/reference/entrypoints.md",
       "sha256": "6f1b2cc039bde9ec02b8a112d35d6598a344d25170427b026ff48a1b82663632",
-      "destination": "docs/src/content/docs/reference/entrypoints.md"
+      "destination": "docs/src/content/docs/reference/entrypoints.mdx"
     },
     {
       "source": "example/src/content/docs/reference/examples.md",
@@ -142,13 +142,13 @@
     {
       "source": "docs/entrypoints.md",
       "sha256": "f24104111e1478d160a6bd30a71eaae513a721a491eea1b0c0ee490431b03f30",
-      "destination": "docs/src/content/docs/reference/entrypoints.md",
+      "destination": "docs/src/content/docs/reference/entrypoints.mdx",
       "review": "Consolidated into published guide; overlapping instructions have a single canonical home."
     },
     {
       "source": "docs/getting-started.md",
       "sha256": "775906190985079b27e083d4e897ad6882a0ac5b2619a3ae4931d7c4dc62770e",
-      "destination": "docs/src/content/docs/getting-started.md",
+      "destination": "docs/src/content/docs/getting-started.mdx",
       "review": "Consolidated into published guide; overlapping instructions have a single canonical home."
     },
     {

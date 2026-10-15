@@ -24,6 +24,8 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: landing/package-lock.json
+      - name: Install shared UI tooling
+        run: npm ci --prefix shared
       - name: Build documentation
         run: npm ci --prefix docs && npm --prefix docs run build
       - uses: withastro/action@3eafd002e65cc31b4f0eae0bb05450d521562247

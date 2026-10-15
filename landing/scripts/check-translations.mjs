@@ -38,7 +38,7 @@ export function findUnlocalizedCopy(source) {
         )
       if (
         ((textAttributes.has(name) &&
-          !(name === 'name' && ['meta', 'slot'].includes(parent?.name?.name))) ||
+          !(name === 'name' && ['meta', 'slot', 'Icon'].includes(parent?.name?.name))) ||
           metaDescription) &&
         hasLetters(
           node.value?.type === 'JSXExpressionContainer'
@@ -123,7 +123,12 @@ async function files(directory) {
 export async function checkTranslations() {
   const sourceDirectory = fileURLToPath(new URL('../src/', import.meta.url))
   let failures = 0
-  for (const file of await files(sourceDirectory)) {
+  const directories = [
+    sourceDirectory,
+    fileURLToPath(new URL('../../shared/components/', import.meta.url)),
+    fileURLToPath(new URL('../../docs/src/', import.meta.url)),
+  ]
+  for (const file of (await Promise.all(directories.map(files))).flat()) {
     for (const issue of findUnlocalizedCopy(await readFile(file, 'utf8'))) {
       console.error(
         `${path.relative(path.dirname(sourceDirectory), file)}:${issue.line}: Move interface copy into src/i18n/translations: ${JSON.stringify(issue.value)}`

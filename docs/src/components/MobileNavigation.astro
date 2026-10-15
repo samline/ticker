@@ -1,10 +1,11 @@
 ---
-import Icon from './Icon.astro'
-import IconButton from './IconButton.astro'
+import drawerCss from '@samline/drawer/styles.css?inline'
+import Icon from '../../../shared/components/Icon.astro'
+import IconButton from '../../../shared/components/IconButton.astro'
 import Navigation from './Navigation.astro'
 import { getI18n } from '../i18n/utils'
 const t = getI18n(Astro)
-import DrawerStyles from './DrawerStyles.astro'
+import DrawerStyles from '../../../shared/components/DrawerStyles.astro'
 interface Props {
   current: string
 }
@@ -57,12 +58,12 @@ const id = `docs-menu-${crypto.randomUUID()}`
           contentClassName: 'docs-menu-panel',
           overlayClassName: 'docs-menu-overlay',
           closeButton: { icon: '×', ariaLabel: this.dataset.close, className: 'docs-menu-close' },
-          onOpenChange: (open) => button.setAttribute('aria-expanded', String(open)),
+          onOpenChange: open => button.setAttribute('aria-expanded', String(open)),
         },
       })
       this.addEventListener(
         'click',
-        (event) => {
+        event => {
           if (event.target instanceof Element && event.target.closest('.docs-menu-panel a'))
             drawer?.setOpen(false)
         },
@@ -70,7 +71,7 @@ const id = `docs-menu-${crypto.randomUUID()}`
       )
       matchMedia('(width >= 64rem)').addEventListener(
         'change',
-        (event) => {
+        event => {
           if (event.matches) drawer?.setOpen(false)
         },
         { signal }
@@ -85,7 +86,7 @@ const id = `docs-menu-${crypto.randomUUID()}`
   }
   if (!customElements.get('ticker-docs-menu')) customElements.define('ticker-docs-menu', DocsMenu)
 </script>
-<DrawerStyles scope="ticker-docs-menu" />
+<DrawerStyles scope="ticker-docs-menu" css={drawerCss} />
 <style>
   .mobile {
     display: block;
@@ -93,8 +94,7 @@ const id = `docs-menu-${crypto.randomUUID()}`
   [hidden] {
     display: none !important;
   }
-  summary,
-  .mobile :global(.docs-menu-close) {
+  summary {
     display: grid;
     place-items: center;
     min-width: 2.5rem;
@@ -161,26 +161,18 @@ const id = `docs-menu-${crypto.randomUUID()}`
     z-index: 100;
     background: rgb(0 0 0 / 0.5);
   }
-  .mobile :global(.docs-menu-close) {
-    position: absolute;
-    right: 1rem;
-    top: 1rem;
-  }
-  summary,
-  .mobile :global(.docs-menu-close) {
+  summary {
     transition:
       color var(--duration-ui) var(--ease-ui),
       background-color var(--duration-ui) var(--ease-ui);
   }
   @media (hover: hover) {
-    summary:hover,
-    .mobile :global(.docs-menu-close:hover) {
+    summary:hover {
       color: var(--color-accent);
       background: var(--color-accent-soft);
     }
   }
-  :focus-visible,
-  .mobile :global(.docs-menu-close:focus-visible) {
+  :focus-visible {
     outline: 0.125rem solid var(--color-accent);
     outline-offset: 0.1875rem;
   }
@@ -190,14 +182,8 @@ const id = `docs-menu-${crypto.randomUUID()}`
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    summary,
-    .mobile :global(.docs-menu-close) {
+    summary {
       transition: none;
-    }
-    .mobile :global(.docs-menu-panel),
-    .mobile :global(.docs-menu-overlay) {
-      animation: none !important;
-      transition: none !important;
     }
   }
 </style>

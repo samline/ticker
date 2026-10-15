@@ -1,0 +1,35 @@
+# Ticker site foundations
+
+The landing and documentation are two routes of one product website. This private source package owns their reusable UI, shared interface catalogs and design tokens. The apps compile the same `.astro` sources; there is no second UI build, copied component tree or published npm UI artifact.
+
+## Ownership
+
+- `components/`: Box, Button, Logo, Theme/ThemeToggle, Heading/Eyebrow, CopyButton/CodeFrame, Icon/IconButton, TextField, NavLink, Disclosure, Surface/LinkCard and DrawerStyles. Components own scoped CSS and processed behavior. Pass native and Astro scope attributes through composed roots.
+- `styles/theme.css`: the single palette, font families, breakpoints, spacing scale, radii, focus and motion tokens. This is theme configuration, not a global component stylesheet.
+- `i18n/translations/<locale>/`: shared branding and control messages. Each app owns its navigation/article/marketing copy. `i18n/format.ts` interpolates whole translated messages.
+
+Keep complete sections, content collections, search integration and package demos in the app that owns them. Share genuine UI roles; do not force every distinct section into the same layout or add props for hypothetical variants.
+
+## Visual contracts
+
+NavLink owns navigation padding, nested indentation, hover, background-only current state and focus. Nest by margin rather than asymmetric padding. Lists own their gaps and rail inset; current backgrounds must leave room on both sides of a divider. Do not style NavLink internals from a page.
+
+Surface owns card background, border, radius and optional hover. Consumers own layout and content padding. Disclosure owns native details/summary layout, indicator and keyboard focus; consumers own panel/FAQ boundaries and content spacing. CodeFrame owns the code toolbar and typography variant; CopyButton owns exact copying, failure selection, independent feedback/reset and cleanup.
+
+DrawerStyles receives the installed vendor stylesheet from each consuming app, normalizes fixed lengths to rem and scopes it to the owning custom element. It owns common native close appearance and reduced-motion overrides. Drawer owns animations, gestures, focus trapping, scroll locking and dismissal; app integrations own configuration and meaningful content only.
+
+## Setup and checks
+
+From the repository root, install `npm ci --prefix shared`, then the apps' dependencies. Astro is a development dependency here so shared components have their own type environment. It does not add another runtime framework. Both apps' TypeScript checks include this source package; both formatter commands include it and use the root Prettier configuration. Tailwind scans `shared/components/` explicitly in both apps.
+
+After a shared change, run both app checks/format checks, `npm run site:build`, `npm run site:test:browser`, and the landing browser suite. Check 320–1440, both themes, enlarged text, keyboard, no JavaScript and reduced motion. Inspect the original report visually; automated checks do not establish complete accessibility or visual quality.
+
+CI installs this package before checking either app. Keep its lockfile and the CI/deployment setup synchronized. Root npm packaging must continue to include only the runtime distribution and maintained documentation Markdown, never these components or site dependencies.
+
+## Content composition
+
+`Tabs` is the same component in landing demos/installers and documentation. `TabPanel` adds readable labels when JavaScript is disabled and preserves stable published fragment IDs. Tabs support roving keyboard focus, Home/End/arrows, independent instances, native hidden panels and fragment activation; do not rebuild tab markup in a Markdown transform. Use tabs for alternatives, while keeping ordered steps and API tables visible.
+
+`CardGrid` lays out landing features and documentation destinations. `LinkCard` owns compact navigation title/body appearance. `Callout` composes Surface for important prose. Documentation uses the official Astro MDX integration only in articles that need components; plain Markdown remains appropriate elsewhere. The collection accepts both formats without changing route IDs. Preserve source file extensions in edit links and migration inventory records.
+
+Shared interactive roots mark interface content with `data-ui`; Article's prose CSS excludes those subtrees. Do not let a broad Markdown selector override buttons, navigation links, card titles or code frames. Keep catalog messages in shared/app i18n and article prose in locale content files. MDX articles import their locale's UI catalog explicitly.

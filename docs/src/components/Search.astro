@@ -1,11 +1,12 @@
 ---
+import drawerCss from '@samline/drawer/styles.css?inline'
 import { getI18n } from '../i18n/utils'
-import TextField from './TextField.astro'
+import TextField from '../../../shared/components/TextField.astro'
 import SearchResultCard from './SearchResultCard.astro'
-import Icon from './Icon.astro'
-import Box from '../../../landing/src/components/Box.astro'
-import Button from '../../../landing/src/components/Button.astro'
-import DrawerStyles from './DrawerStyles.astro'
+import Icon from '../../../shared/components/Icon.astro'
+import Box from '../../../shared/components/Box.astro'
+import Button from '../../../shared/components/Button.astro'
+import DrawerStyles from '../../../shared/components/DrawerStyles.astro'
 const s = getI18n(Astro).search
 const id = `docs-search-${crypto.randomUUID()}`
 ---
@@ -97,12 +98,12 @@ const id = `docs-search-${crypto.randomUUID()}`
           this.pagefind = import(
             /* @vite-ignore */ new URL(`${base}pagefind/pagefind.js`, location.origin).href
           )
-            .then(async (module) => {
+            .then(async module => {
               const api = module as Pagefind
               await api.options({ baseUrl: base })
               return api
             })
-            .catch((error) => {
+            .catch(error => {
               this.pagefind = undefined
               throw error
             })
@@ -125,7 +126,7 @@ const id = `docs-search-${crypto.randomUUID()}`
           contentClassName: 'docs-search-panel',
           overlayClassName: 'docs-search-overlay',
           closeButton: { icon: '×', className: 'docs-search-close', ariaLabel: this.dataset.close },
-          onOpenChange: (open) => {
+          onOpenChange: open => {
             trigger.setAttribute('aria-expanded', String(open))
             if (!open) {
               ++this.request
@@ -151,7 +152,7 @@ const id = `docs-search-${crypto.randomUUID()}`
       trigger.hidden = false
       document.addEventListener(
         'keydown',
-        (event) => {
+        event => {
           const activeSearch = document.activeElement?.closest('ticker-docs-search')
           if (event.defaultPrevented || (activeSearch && activeSearch !== this)) return
           if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
@@ -163,7 +164,7 @@ const id = `docs-search-${crypto.randomUUID()}`
       )
       this.addEventListener(
         'input',
-        (event) => {
+        event => {
           if (!(event.target instanceof HTMLInputElement)) return
           const input = event.target,
             status = this.querySelector('[role=status]'),
@@ -183,7 +184,7 @@ const id = `docs-search-${crypto.randomUUID()}`
               const api = await load(),
                 found = await api.search(query)
               const results = await Promise.all(
-                found.results.slice(0, 12).map((result) => result.data())
+                found.results.slice(0, 12).map(result => result.data())
               )
               if (signal.aborted || request !== this.request) return
               const cardTemplate = this.querySelector<HTMLTemplateElement>('[data-result-template]')
@@ -221,7 +222,7 @@ const id = `docs-search-${crypto.randomUUID()}`
       )
       this.addEventListener(
         'click',
-        (event) => {
+        event => {
           if (event.target instanceof Element && event.target.closest('.docs-search-panel a'))
             drawer?.setOpen(false)
         },
@@ -238,7 +239,7 @@ const id = `docs-search-${crypto.randomUUID()}`
   if (!customElements.get('ticker-docs-search'))
     customElements.define('ticker-docs-search', DocsSearch)
 </script>
-<DrawerStyles scope="ticker-docs-search" />
+<DrawerStyles scope="ticker-docs-search" css={drawerCss} />
 <style>
   .search {
     display: block;
@@ -357,36 +358,7 @@ const id = `docs-search-${crypto.randomUUID()}`
     z-index: 100;
     background: rgb(0 0 0 / 0.5);
   }
-  .search :global(.docs-search-close) {
-    position: absolute;
-    top: 1.25rem;
-    right: 1.25rem;
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    border: 0.0625rem solid var(--color-border);
-    border-radius: 0.75rem;
-    background: var(--color-surface);
-    color: var(--color-text);
-    font-size: 1.5rem;
-    cursor: pointer;
-    transition:
-      color var(--duration-ui) var(--ease-ui),
-      background-color var(--duration-ui) var(--ease-ui),
-      border-color var(--duration-ui) var(--ease-ui);
-  }
-  .search :global(.docs-search-close:focus-visible) {
-    outline: 0.125rem solid var(--color-accent);
-    outline-offset: 0.1875rem;
-  }
-  @media (hover: hover) {
-    .search :global(.docs-search-close:hover) {
-      color: var(--color-accent);
-      background: var(--color-accent-soft);
-      border-color: var(--palette-border-hover);
-    }
-  }
+
   @media (width>=64rem) {
     .search-trigger {
       width: auto;
@@ -406,16 +378,6 @@ const id = `docs-search-${crypto.randomUUID()}`
       font-family: var(--font-mono);
       font-size: 0.625rem;
       color: var(--color-text-subtle);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .search :global(.docs-search-close) {
-      transition: none;
-    }
-    .search :global(.docs-search-panel),
-    .search :global(.docs-search-overlay) {
-      animation: none !important;
-      transition: none !important;
     }
   }
 </style>

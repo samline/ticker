@@ -14,7 +14,9 @@ before(async () => {
   })
   try {
     i18n = await server.ssrLoadModule('/src/i18n/utils.ts')
-    interpolate = (await server.ssrLoadModule('/src/i18n/format.ts')).format
+    interpolate = (
+      await server.ssrLoadModule(new URL('../../shared/i18n/format.ts', import.meta.url).pathname)
+    ).format
   } finally {
     await server.close()
   }
@@ -43,7 +45,7 @@ test('flags visible text, accessible attributes, inline JSX copy and client-side
 })
 
 test('accepts dictionary expressions, scoped instance messages, structural metadata and decorative symbols', () => {
-  const source = `<nav aria-label={i18n.navigation.mainLabel}><a href="#how" class:list={['btn']}>{i18n.common.buttons.getStarted}<span aria-hidden="true">↗</span></a></nav><meta name="description" content={i18n.seo.description}/><slot name="content"/><style>.button {padding:1rem}</style><script>button.textContent = this.dataset.successMessage; console.error('Developer diagnostic')</script>`
+  const source = `<nav aria-label={i18n.navigation.mainLabel}><a href="#how" class:list={['btn']}>{i18n.common.buttons.getStarted}<span aria-hidden="true">↗</span></a></nav><meta name="description" content={i18n.seo.description}/><Icon name="chevron"/><slot name="content"/><style>.button {padding:1rem}</style><script>button.textContent = this.dataset.successMessage; console.error('Developer diagnostic')</script>`
   assert.deepEqual(findUnlocalizedCopy(source), [])
 })
 

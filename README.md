@@ -163,10 +163,10 @@ Full guides and the same reference are available at **[samline.github.io/ticker/
 
 | Doc                                                               | Purpose                                                        |
 | ----------------------------------------------------------------- | -------------------------------------------------------------- |
-| [Installation](docs/src/content/docs/getting-started.md)          | Installation, first ticker, ownership, and lifecycle.          |
+| [Installation](docs/src/content/docs/getting-started.mdx)          | Installation, first ticker, ownership, and lifecycle.          |
 | [Configuration](docs/src/content/docs/reference/configuration.md) | Every option, default, normalization rule, and data attribute. |
 | [Browser integration](docs/src/content/docs/reference/browser.md) | Browser global and bundler-friendly registry usage.            |
-| [Entrypoints](docs/src/content/docs/reference/entrypoints.md)     | Root, Vanilla, core, browser, global, and CSS exports.         |
+| [Entrypoints](docs/src/content/docs/reference/entrypoints.mdx)     | Root, Vanilla, core, browser, global, and CSS exports.         |
 | [Styling](docs/src/content/docs/reference/styling.md)             | Required stylesheet, DOM contract, classes, and CSS variables. |
 | [Accessibility](docs/src/content/docs/guides/accessibility.md)    | Clone behavior, reduced motion, and interactive content.       |
 | [Core utilities](docs/src/content/docs/reference/core.md)         | Defaults, state factories, validators, and advanced contracts. |
@@ -194,3 +194,8 @@ npm run site:test:browser
 ```
 
 See [the docs maintenance guide](docs/README.md) and [implementation contract](docs/AGENTS.md). Update public API references, examples, navigation, search, source links and coverage checks together whenever the package changes. Only maintained Markdown content is included in the npm package; site dependencies and generated assets are excluded.
+
+
+### Website UI ownership
+
+The landing and docs are routes of one site. Their reusable Astro components, UI catalogs and theme tokens live in [`shared/`](shared/README.md); app folders own their content and composition. Install `npm ci --prefix shared` before installing/checking the apps. Shared source is private and excluded from the runtime npm package. Both app format commands use the root Prettier config and cover shared files; cross-site checks and browser validation are required after shared UI changes.

@@ -7,6 +7,10 @@ title: 'Entrypoints and module formats'
 description: 'Choose the root, Vanilla, core, browser registry, standalone IIFE, or stylesheet export.'
 ---
 
+import Tabs from '../../../../../shared/components/Tabs.astro'
+import TabPanel from '../../../../../shared/components/TabPanel.astro'
+import controls from '../../../i18n/translations/en/controls'
+
 Choose one primary JavaScript surface per integration and always load the stylesheet explicitly.
 
 ## Decision table
@@ -22,17 +26,29 @@ Choose one primary JavaScript surface per integration and always load the styles
 
 ## Root entrypoint
 
+<Tabs id="docs-module-format" label={controls.tabs.moduleFormat} items={controls.tabs.formatItems}>
+
+<TabPanel id="esm" anchor="esm" label={controls.tabs.formatItems[0].label}>
+
 ```ts
 import { browser, mount, refresh, ticker, Ticker, unmount, validateDuration } from '@samline/ticker'
 ```
 
-The root re-exports all public core and Vanilla symbols plus `browser`, `Ticker`, and registry types. It does not export the individual `newTicker`/`getTicker` helper functions; access them through `browser` or import the browser subpath.
+</TabPanel>
+
+<TabPanel id="cjs" anchor="commonjs" label={controls.tabs.formatItems[1].label}>
 
 CommonJS consumers receive matching exports:
 
 ```js
 const { ticker } = require('@samline/ticker')
 ```
+
+</TabPanel>
+
+</Tabs>
+
+The root re-exports all public core and Vanilla symbols plus `browser`, `Ticker`, and registry types. It does not export the individual `newTicker`/`getTicker` helper functions; access them through `browser` or import the browser subpath.
 
 ## Vanilla entrypoint
 

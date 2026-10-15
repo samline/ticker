@@ -1,5 +1,5 @@
 ---
-import Eyebrow from '../../../landing/src/components/Eyebrow.astro'
+import Eyebrow from '../../../shared/components/Eyebrow.astro'
 import { getI18n } from '../i18n/utils'
 const t = getI18n(Astro)
 import { getNavigation } from '../lib/navigation'
@@ -11,7 +11,7 @@ interface Props {
 }
 const { title, description, current } = Astro.props
 const groups = await getNavigation(Astro.currentLocale)
-const section = groups.find((group) => group.pages.some(([id]) => id === current))?.label ?? t.docs
+const section = groups.find(group => group.pages.some(([id]) => id === current))?.label ?? t.docs
 ---
 
 <div class:list={['breadcrumb']} data-pagefind-ignore>
@@ -34,7 +34,7 @@ const section = groups.find((group) => group.pages.some(([id]) => id === current
     gap: 0.625rem;
     font-size: 0.6875rem;
     color: var(--color-text-subtle);
-    margin-bottom: 2.5rem;
+    margin-bottom: var(--space-xl);
   }
   .breadcrumb a {
     color: inherit;
@@ -43,20 +43,18 @@ const section = groups.find((group) => group.pages.some(([id]) => id === current
   .article-eyebrow {
     margin-bottom: 0.875rem;
   }
-  h1 {
-    line-height: 1.1;
-    overflow-wrap: anywhere;
-    margin: 0 0 1rem;
-  }
   .section-name {
     color: var(--palette-heading-accent);
   }
   .article-heading {
-    padding-bottom: 2rem;
-    margin-bottom: 2rem;
+    padding-bottom: var(--space-xl);
+    margin-bottom: var(--space-xl);
     border-bottom: 0.0625rem solid var(--color-border-soft);
   }
   h1 {
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+    margin: 0 0 var(--space-md);
     font-family: var(--font-serif);
     font-weight: 400;
     font-style: italic;

@@ -4,7 +4,7 @@ These instructions apply to the maintained Astro landing. Read README.md for rat
 
 ## Architecture and layout
 
-- Keep individual reusable UI in `src/components/`, complete blocks in `src/sections/`, document structure in `src/layouts/`, and page composition/endpoints in `src/pages/`.
+- Keep cross-site reusable UI in `../shared/components/` and app-specific integrations in `src/components/`, complete blocks in `src/sections/`, document structure in `src/layouts/`, and page composition/endpoints in `src/pages/`.
 - Box owns horizontal gutters and maximum widths. Section owns section semantics, vertical spacing and optional themes. Compose several Boxes for different widths within a section; do not recreate Box with local max-width values or duplicate gutters on the section.
 - Preserve the chosen Box sizes: default 90rem, wide 85.375rem, medium 64rem and narrow 50rem. A new size must solve a reusable layout need. LiveDemo fills its parent's Box; Hero uses narrow/medium/narrow containers.
 - Forward native attributes and Astro scope attributes through reusable roots. Associate sections with their headings and generate unique IDs where instances may repeat.
@@ -105,10 +105,8 @@ HeroBackdrop owns the decorative lavender halo in a clipped, pointer-transparent
 
 The sibling docs now use custom Astro components and Pagefind rather than Starlight. Both sites import `shared/styles/theme.css`; the docs also reuse the landing’s Box, Theme, ThemeToggle and CopyButton. Validate both sites after changing those shared surfaces. See `../docs/README.md` and `../docs/AGENTS.md` for content coverage and search maintenance.
 
-## Shared code presentation and search continuity
+## Shared site foundations
 
-The landing `CodeFrame` owns the filename/language toolbar, code surface, border, overflow and shared CopyButton. `CodeBlock` supplies the landing tokens; docs `Article` clones a frame template around rendered Markdown without changing code text. Preserve the landing `.code-block` hook. Do not fork clipboard feedback or frame styles. Shiki's Ticker theme maps syntax scopes directly to the shared semantic palette, so both color modes follow the same brand tokens. Check both sites after changing this shared component.
+Read and follow [the shared UI contract](../shared/AGENTS.md) and [ownership/setup guide](../shared/README.md). Cross-site primitives, control catalogs, spacing/radius/focus/motion tokens and format helpers have a single source in `shared/`. App-specific composition stays here. Install `npm ci --prefix shared` before app dependencies; both app checks/formatters include shared source and use the root Prettier config.
 
-Docs reuse the landing eyebrow and font families, with serif article titles, Inter reading text and mono interface labels. Use existing feature/code surfaces for hierarchy rather than introducing another palette or animation system.
-
-Search uses a content-sized square top Drawer, capped at 44rem or the viewport minus 1rem, with a fixed intro/input/close control and an independently scrolling results region. Keep the empty state compact and let CSS grow/shrink the panel with results; do not add JavaScript height measurement. Drawer 4.2.1 uses percentage transforms and reads current geometry at gesture start. Reduced-motion rules must only disable motion, not change sizing. The native handle closes upward (`showHandle` and `handleOnly`); input/results opt out of dragging. Drawer still owns gestures, animations, focus trapping and restoration. Search only assigns initial field focus after native mounting. Keep close, Escape and backdrop available as alternatives to dragging. Test deep result scrolling, upward dragging, focus restoration and unchanged background scroll together.
+Tabs and CardGrid are also used in docs. Preserve existing demo variants/events/data hooks, keyboard handling and no-JavaScript content when changing them. A shared change requires both sites' build/browser checks. Keep native/Astro scope attributes forwarded, the user-selected Box sizes intact, and setup/CI/packaging/catalog references synchronized. Do not fork shared controls or copy documentation-specific search code into the landing.

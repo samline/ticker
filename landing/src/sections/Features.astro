@@ -1,7 +1,8 @@
 ---
+import CardGrid from '../../../shared/components/CardGrid.astro'
 import { getI18n } from '../i18n/utils'
 import Section from '../components/Section.astro'
-import Box from '../components/Box.astro'
+import Box from '../../../shared/components/Box.astro'
 import SectionHeading from '../components/SectionHeading.astro'
 import RichText from '../components/RichText.astro'
 import FeatureCard from '../components/FeatureCard.astro'
@@ -28,7 +29,7 @@ const headingId = `section-heading-${crypto.randomUUID()}`
       <span class:list={['serif italic']}>{t.titleAccent}</span>
     </SectionHeading>
 
-    <div class:list={['grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 feature-grid']}>
+    <CardGrid columns={3} class:list={['feature-grid']}>
       <FeatureCard title={t.items.dependencies.title} number="01">
         <Fragment slot="icon">
           <svg
@@ -145,7 +146,7 @@ const headingId = `section-heading-${crypto.randomUUID()}`
         </Fragment>
         <RichText parts={t.items.markup.description} />
       </FeatureCard>
-    </div>
+    </CardGrid>
   </Box>
 </Section>
 

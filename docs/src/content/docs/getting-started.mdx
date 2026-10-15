@@ -1,0 +1,200 @@
+---
+locale: en
+sidebar:
+  group: start
+  order: 2
+title: 'Getting started'
+description: 'Install @samline/ticker, enhance existing HTML, and manage one ticker through its controller.'
+---
+
+import Tabs from '../../../../shared/components/Tabs.astro'
+import TabPanel from '../../../../shared/components/TabPanel.astro'
+import CardGrid from '../../../../shared/components/CardGrid.astro'
+import LinkCard from '../../../../shared/components/LinkCard.astro'
+import Callout from '../../../../shared/components/Callout.astro'
+import controls from '../../i18n/translations/en/controls'
+
+This page walks through installing `@samline/ticker`, loading its stylesheet, and controlling a working ticker. By the end you will understand both controller-owned and declarative lifecycles.
+
+## Prerequisites
+
+- **Node.js 20+** when bundling.
+- A package manager — npm, pnpm, yarn, or bun.
+- A browser target of **ES2020**.
+
+## Install
+
+<Tabs id="docs-install" label={controls.tabs.installation} items={controls.tabs.installItems}>
+
+<TabPanel id="npm" anchor="npm" label={controls.tabs.installItems[0].label}>
+
+```bash
+npm install @samline/ticker
+```
+
+</TabPanel>
+
+<TabPanel id="pnpm" anchor="pnpm" label={controls.tabs.installItems[1].label}>
+
+```bash
+pnpm add @samline/ticker
+```
+
+</TabPanel>
+
+<TabPanel id="yarn" anchor="yarn" label={controls.tabs.installItems[2].label}>
+
+```bash
+yarn add @samline/ticker
+```
+
+</TabPanel>
+
+<TabPanel id="bun" anchor="bun" label={controls.tabs.installItems[3].label}>
+
+```bash
+bun add @samline/ticker
+```
+
+</TabPanel>
+
+<TabPanel id="cdn" anchor="cdn" label={controls.tabs.installItems[4].label}>
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@samline/ticker@2.0.4/dist/style.css" />
+<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@2.0.4/dist/browser/global.global.js"></script>
+```
+
+</TabPanel>
+
+</Tabs>
+
+For package managers, use ESM / TypeScript below. For CDN, load both assets and use Browser global. Both use the same markup and controller.
+
+## First example
+
+```html title="index.html"
+<div id="news-ticker">
+  <a href="/story/one">First story</a>
+  <a href="/story/two">Second story</a>
+</div>
+```
+
+<Tabs id="docs-initialization" label={controls.tabs.initialization} items={controls.tabs.initItems}>
+
+<TabPanel id="module" anchor="module-example" label={controls.tabs.initItems[0].label}>
+
+Import the stylesheet once in your application entrypoint:
+
+```ts title="app.ts"
+import { ticker } from '@samline/ticker'
+import '@samline/ticker/style.css'
+
+const news = ticker('#news-ticker', {
+  duration: 24,
+  direction: 'left',
+  pauseOnHover: true,
+})
+
+if (!news) throw new Error('Ticker target not found')
+
+news.update({ duration: 32 })
+news.refresh()
+```
+
+</TabPanel>
+
+<TabPanel id="global" anchor="global-example" label={controls.tabs.initItems[1].label}>
+
+Place this script after the source markup and the version-pinned CDN script:
+
+```html title="index.html"
+<script>
+  const news = window.Ticker.ticker('#news-ticker', {
+    duration: 24,
+    direction: 'left',
+    pauseOnHover: true,
+  })
+
+  if (!news) throw new Error('Ticker target not found')
+
+  news.update({ duration: 32 })
+  news.refresh()
+</script>
+```
+
+</TabPanel>
+
+</Tabs>
+
+What this does:
+
+- Wraps the source content in the required ticker structure.
+- Measures it and creates enough visual clones to fill the viewport.
+- Keeps clones out of the accessibility tree and tab order by default.
+- Rebuilds after responsive size changes.
+- Returns `null` without changing the DOM if the selector is missing.
+
+## Controller lifecycle
+
+Destroy the controller when the view that created it is removed:
+
+```ts
+news.destroy()
+```
+
+## Declarative markup
+
+When a server or template renders the complete ticker structure, initialize it at page level:
+
+```html title="index.html"
+<div data-ticker data-duration="24" data-direction="left" data-pause-on-hover="true">
+  <div data-ticker-track>
+    <div data-ticker-content>...</div>
+  </div>
+</div>
+```
+
+```ts title="app.ts"
+import { mount, unmount } from '@samline/ticker/vanilla'
+import '@samline/ticker/style.css'
+
+mount()
+window.addEventListener('pagehide', unmount, { once: true })
+```
+
+<Callout title="Keep one lifecycle owner">
+
+Use the controller API for application-owned instances and the page manager for declarative markup. Do not give both lifecycles ownership of the same element.
+
+</Callout>
+
+## What's next?
+
+<CardGrid>
+
+<LinkCard id="configuration" title="Configuration" href="/ticker/docs/reference/configuration/">
+
+Every option, default, normalization rule, and declarative data attribute.
+
+</LinkCard>
+
+<LinkCard id="lifecycle" title="Lifecycle" href="/ticker/docs/guides/lifecycle/">
+
+Understand controller ownership, page management, refreshes, and teardown.
+
+</LinkCard>
+
+<LinkCard id="accessibility" title="Accessibility" href="/ticker/docs/guides/accessibility/">
+
+Reduced motion, clone semantics, keyboard behavior, and interactive content.
+
+</LinkCard>
+
+<LinkCard id="browser-global" title="Browser global" href="/ticker/docs/reference/browser/">
+
+Use the pre-bundled `window.Ticker` registry without a build step.
+
+</LinkCard>
+
+</CardGrid>

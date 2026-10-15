@@ -17,9 +17,9 @@ test('every code block copies exact text and resets feedback', async ({ page, co
 })
 test('lazy search returns valid API pages and heading links', async ({ page }) => {
   const requested: string[] = []
-  page.on('request', (request) => requested.push(request.url()))
+  page.on('request', request => requested.push(request.url()))
   await page.goto('getting-started/')
-  expect(requested.some((url) => url.includes('/pagefind/'))).toBe(false)
+  expect(requested.some(url => url.includes('/pagefind/'))).toBe(false)
   await page.getByRole('button', { name: 'Search documentation', exact: true }).click()
   const dialog = page.getByRole('dialog', { name: 'Search documentation' })
   await dialog.getByRole('searchbox').fill('interactiveClones')
@@ -67,7 +67,7 @@ test('responsive themes, enlarged text, keyboard accessibility and stable drawer
   await page.evaluate(() => (document.documentElement.style.fontSize = ''))
   await page.emulateMedia({ reducedMotion: 'reduce' })
   for (const theme of ['light', 'dark']) {
-    await page.evaluate((theme) => (document.documentElement.dataset.theme = theme), theme)
+    await page.evaluate(theme => (document.documentElement.dataset.theme = theme), theme)
     await page.addScriptTag({
       content: await readFile(
         new URL('../node_modules/axe-core/axe.min.js', import.meta.url),
@@ -135,7 +135,7 @@ test('search Drawer opens from the top, stays inside the viewport and restores f
     expect(bounds.width).toBeLessThanOrEqual(width + 1)
     await panel.getByRole('searchbox').fill('direction')
     await expect(panel.locator('li a').first()).toBeVisible()
-    expect(await panel.evaluate((e) => e.scrollWidth <= e.clientWidth + 1)).toBe(true)
+    expect(await panel.evaluate(e => e.scrollWidth <= e.clientWidth + 1)).toBe(true)
     await panel.getByRole('button', { name: 'Close search', exact: true }).click()
     await expect(panel).not.toBeVisible()
     await expect(trigger).toBeFocused()
@@ -176,7 +176,7 @@ test('search components retain native input focus and accessible results in both
     ),
   })
   for (const theme of ['light', 'dark']) {
-    await page.evaluate((theme) => (document.documentElement.dataset.theme = theme), theme)
+    await page.evaluate(theme => (document.documentElement.dataset.theme = theme), theme)
     await page.keyboard.press('Control+k')
     const panel = page.getByRole('dialog', { name: 'Search documentation' }),
       input = panel.getByRole('searchbox')
@@ -213,9 +213,9 @@ test('search keeps close visible after result scrolling and supports native upwa
   const before = await close.boundingBox()
   await panel
     .locator('.search-results')
-    .evaluate((element) => (element.scrollTop = element.scrollHeight))
+    .evaluate(element => (element.scrollTop = element.scrollHeight))
   await expect
-    .poll(() => panel.locator('.search-results').evaluate((element) => element.scrollTop))
+    .poll(() => panel.locator('.search-results').evaluate(element => element.scrollTop))
     .toBeGreaterThan(0)
   expect(await close.boundingBox()).toEqual(before)
   await close.click()
@@ -301,14 +301,11 @@ test('table of contents tracks clicks, scroll, nested headings and initial fragm
     await expect(link).toHaveAttribute('href', '#first-example')
   await page.locator('.desktop-toc a[href="#install"]').click()
   for (const link of await current.all()) await expect(link).toHaveAttribute('href', '#install')
-  await page.locator('.desktop-toc a[href="#npm"]').click()
-  for (const link of await current.all()) await expect(link).toHaveAttribute('href', '#npm')
   await page.evaluate(() => document.getElementById('first-example')!.scrollIntoView())
   for (const link of await current.all())
     await expect(link).toHaveAttribute('href', '#first-example')
   await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight))
-  for (const link of await current.all())
-    await expect(link).toHaveAttribute('href', '#browser-global')
+  for (const link of await current.all()) await expect(link).toHaveAttribute('href', '#whats-next')
   await page.evaluate(() => scrollTo(0, 0))
   await expect(current).toHaveCount(0)
   await page.setViewportSize({ width: 375, height: 800 })
@@ -320,4 +317,136 @@ test('table of contents tracks clicks, scroll, nested headings and initial fragm
   await page.evaluate(() => (document.documentElement.style.fontSize = '24px'))
   await page.evaluate(() => document.getElementById('install')!.scrollIntoView())
   for (const link of await current.all()) await expect(link).toHaveAttribute('href', '#install')
+})
+
+test('table of contents keeps symmetric item padding and an inset active background beside its rail', async ({
+  page,
+}) => {
+  await page.goto('reference/core/#state-factories')
+  await page.evaluate(() => document.fonts.ready)
+  const active = page.locator('.desktop-toc a[aria-current=location]')
+  await expect(active).toHaveAttribute('href', '#state-factories')
+  const geometry = await active.evaluate(link => {
+    const style = getComputedStyle(link)
+    const rect = link.getBoundingClientRect()
+    const list = link.closest('ul')!.getBoundingClientRect()
+    return {
+      left: rect.left - list.left,
+      right: list.right - rect.right,
+      paddingLeft: style.paddingLeft,
+      paddingRight: style.paddingRight,
+    }
+  })
+  expect(geometry.left).toBeGreaterThan(4)
+  expect(geometry.right).toBeGreaterThan(4)
+  expect(geometry.paddingLeft).toBe(geometry.paddingRight)
+  await page.locator('.desktop-toc a[href="#factory-output"]').click()
+  await expect(active).toHaveAttribute('href', '#factory-output')
+  expect(await active.evaluate(link => getComputedStyle(link).paddingLeft)).toBe(
+    geometry.paddingLeft
+  )
+})
+
+test('all documentation pages fit narrow and desktop layouts in both themes', async ({ page }) => {
+  test.setTimeout(120000)
+  await page.goto('./')
+  const urls = await page
+    .locator('.sidebar nav a')
+    .evaluateAll(links => links.map(link => (link as HTMLAnchorElement).href))
+  expect(urls).toHaveLength(23)
+  for (const url of urls) {
+    await page.goto(url)
+    for (const theme of ['light', 'dark']) {
+      await page.evaluate(theme => (document.documentElement.dataset.theme = theme), theme)
+      for (const width of [320, 1440]) {
+        await page.setViewportSize({ width, height: 900 })
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
+          `${url} ${theme} ${width}`
+        ).toBe(true)
+      }
+    }
+  }
+})
+
+test('installation reuses accessible tabs with exact copying for each package manager and CDN', async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.goto('getting-started/')
+  const installation = page.locator('ticker-tabs[data-group="docs-install"]')
+  for (const name of ['npm', 'pnpm', 'yarn', 'bun', 'CDN']) {
+    const tab = installation.getByRole('tab', { name, exact: true })
+    await tab.click()
+    const panel = installation.getByRole('tabpanel')
+    await expect(panel).toHaveCount(1)
+    await expect(tab).toHaveAttribute('aria-selected', 'true')
+    await panel.getByRole('button', { name: 'Copy code example' }).click()
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      await panel.locator('pre').textContent()
+    )
+    if (name === 'CDN') {
+      await expect(panel.locator('code')).toContainText('/dist/style.css')
+      await expect(panel.locator('code')).toContainText('/dist/browser/global.global.js')
+    }
+  }
+  await installation.getByRole('tab', { name: 'CDN', exact: true }).press('Home')
+  await expect(installation.getByRole('tab', { name: 'npm', exact: true })).toBeFocused()
+  await page
+    .locator('ticker-tabs[data-group="docs-initialization"]')
+    .getByRole('tab', { name: 'Browser global', exact: true })
+    .click()
+  await expect(
+    page.getByRole('tabpanel', { name: 'Browser global', exact: true }).locator('code')
+  ).toContainText('window.Ticker.ticker')
+  await expect(page.locator('.article-footer .edit')).toHaveAttribute(
+    'href',
+    /getting-started\.mdx$/
+  )
+  await page.goto('reference/entrypoints/')
+  await page.getByRole('tab', { name: 'CommonJS', exact: true }).click()
+  await expect(page.getByRole('tabpanel', { name: 'CommonJS' }).locator('code')).toContainText(
+    "require('@samline/ticker')"
+  )
+})
+
+test('old installation fragments reveal the matching tab and no-JavaScript retains every option', async ({
+  page,
+  browser,
+}) => {
+  await page.goto('getting-started/#pnpm')
+  await expect(page.getByRole('tab', { name: 'pnpm', exact: true })).toHaveAttribute(
+    'aria-selected',
+    'true'
+  )
+  await expect(page.getByRole('tabpanel', { name: 'pnpm', exact: true })).toBeVisible()
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    viewport: { width: 320, height: 800 },
+  })
+  const fallback = await context.newPage()
+  await fallback.goto('http://127.0.0.1:4327/ticker/docs/getting-started/')
+  for (const name of ['npm', 'pnpm', 'yarn', 'bun', 'CDN'])
+    await expect(
+      fallback.locator(`section[data-panel="${name.toLowerCase()}"] pre`).first()
+    ).toBeVisible()
+  for (const group of await fallback.locator('ticker-tabs [data-tabs]').all())
+    await expect(group).not.toBeVisible()
+  await context.close()
+})
+
+test('prose styles do not add a second frame to shared code blocks or underline destination cards', async ({
+  page,
+}) => {
+  await page.goto('getting-started/')
+  const code = page.locator('ticker-docs-article .code-frame pre').first()
+  expect(
+    await code.evaluate(element => {
+      const style = getComputedStyle(element)
+      return { margin: style.marginTop, border: style.borderTopWidth, radius: style.borderRadius }
+    })
+  ).toEqual({ margin: '0px', border: '0px', radius: '0px' })
+  const card = page.locator('a.link-card#configuration')
+  expect(await card.evaluate(element => getComputedStyle(element).textDecorationLine)).toBe('none')
 })

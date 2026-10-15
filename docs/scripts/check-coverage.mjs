@@ -7,14 +7,14 @@ const content = new URL('../src/content/docs/', import.meta.url)
 async function files(dir) {
   return (
     await Promise.all(
-      (await readdir(dir, { withFileTypes: true })).map((item) =>
+      (await readdir(dir, { withFileTypes: true })).map(item =>
         item.isDirectory() ? files(new URL(`${item.name}/`, dir)) : [new URL(item.name, dir)]
       )
     )
   ).flat()
 }
-const pages = (await files(content)).filter((url) => url.pathname.endsWith('.md'))
-const texts = await Promise.all(pages.map((url) => readFile(url, 'utf8')))
+const pages = (await files(content)).filter(url => /\.mdx?$/.test(url.pathname))
+const texts = await Promise.all(pages.map(url => readFile(url, 'utf8')))
 const all = texts.join('\n')
 const inventory = JSON.parse(await readFile(new URL('../migration-coverage.json', import.meta.url)))
 assert.equal(
@@ -48,7 +48,7 @@ async function exportsFrom(path, seen = new Set()) {
         }
         for (const name of await exportsFrom(relative, seen)) names.add(name)
       }
-    } else if (node.modifiers?.some((mod) => mod.kind === ts.SyntaxKind.ExportKeyword)) {
+    } else if (node.modifiers?.some(mod => mod.kind === ts.SyntaxKind.ExportKeyword)) {
       if (node.name) names.add(node.name.text)
       if (ts.isVariableStatement(node))
         for (const declaration of node.declarationList.declarations)
@@ -92,7 +92,7 @@ for (const [subpath, source] of Object.entries(entrypoints)) {
 const manifest = JSON.parse(await readFile(new URL('package.json', root)))
 for (let i = 0; i < texts.length; i++) {
   assert.ok(
-    !/@astrojs\/starlight|:::caution|<CardGrid|<TabItem/.test(texts[i]),
+    !/@astrojs\/starlight|:::caution|<TabItem\b/.test(texts[i]),
     `Unmigrated markup: ${pages[i].pathname}`
   )
   for (const match of texts[i].matchAll(/@samline\/ticker@(\d+\.\d+\.\d+)/g))

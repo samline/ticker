@@ -7,6 +7,7 @@ Custom Astro 7 + Tailwind 4 documentation at `https://samline.github.io/ticker/d
 Use Node >=22.12.0 and npm. From the repository root:
 
 ```sh
+npm ci --prefix shared
 npm ci --prefix docs
 npm run docs:dev
 npm run docs:check
@@ -23,9 +24,9 @@ The browser suite uses Chromium; install it with `npm exec --prefix docs -- play
 
 `src/content/docs/` is the only maintained documentation source. Astro content collections validate frontmatter and render Markdown, headings and syntax highlighting. The official `@astrojs/markdown-remark` processor is configured through `markdown.processor`, so the accessible-overflow rehype plugin runs without deprecated configuration keys. The catch-all route preserves every published page path and relevant fragment. The shell has grouped navigation, an article, a responsive table of contents, edit links and previous/next navigation. Mobile navigation delegates modal behavior to `@samline/drawer`.
 
-Reusable controls live in `src/components/`, the document shell in `src/layouts/`, and UI strings in `src/i18n/translations/en/`. Article prose and example strings belong to Markdown. There is no runtime UI framework. Component styles and scripts stay inside their Astro components, using scoped selectors and instance-owned custom elements.
+Reusable controls live in `../shared/components/`, docs integrations in `src/components/`, the document shell in `src/layouts/`, and UI strings in `src/i18n/translations/en/`. Article prose and example strings belong to Markdown. There is no runtime UI framework. Component styles and scripts stay inside their Astro components, using scoped selectors and instance-owned custom elements.
 
-The docs import the shared `shared/styles/theme.css` tokens, Box, Theme, ThemeToggle and CopyButton intentionally. This keeps colors, breakpoints, container conventions, theme persistence and clipboard feedback consistent. `Article` wraps each rendered fence with a template of the shared CodeFrame, which owns the toolbar and CopyButton; code remains readable without JavaScript. The build-time rehype plugin makes overflowing code and tables keyboard reachable even without JavaScript.
+The docs import the shared `shared/styles/theme.css` tokens, Box, Theme, ThemeToggle and CopyButton intentionally. This keeps colors, breakpoints, container conventions, theme persistence and clipboard feedback consistent. `Article` wraps each rendered Markdown/MDX fence with a template of the shared CodeFrame, which owns the toolbar and CopyButton; code remains readable without JavaScript. The build-time rehype plugin makes overflowing code and tables keyboard reachable even without JavaScript.
 
 ## Search
 
@@ -65,18 +66,20 @@ English is the only published locale. Astro config declares it explicitly. UI co
 
 Do not reformat or rewrite upstream skill content or computed hashes. Review installer/lock diffs when refreshing skills. The user's requirements and actual Astro 7/package contracts override generic framework/version/font examples in a skill.
 
-Reusable primitives live in `components/`: Icon, IconButton (composing the landing Button), TextField and LinkCard own their markup and scoped styles. SearchResultCard composes LinkCard and provides the inert result template that Search clones; the client script only fills its escaped text/URL fields. Pagination uses the same LinkCard. DrawerStyles centralizes the vendor stylesheet adaptation for both menus without copying animations. Close buttons rendered by Drawer remain package-owned.
+Reusable primitives live in `../shared/components/`: Icon, IconButton (composing the shared Button), TextField and LinkCard own their markup and scoped styles. SearchResultCard composes LinkCard and provides the inert result template that Search clones; the client script only fills its escaped text/URL fields. Pagination uses the same LinkCard. DrawerStyles centralizes the vendor stylesheet adaptation for both menus without copying animations. Close buttons rendered by Drawer remain package-owned.
 
 The collection/i18n design follows the official [Content Collections guide](https://docs.astro.build/en/guides/content-collections/) and [i18n recipe](https://docs.astro.build/en/recipes/i18n/): validated build-time entries supply typed data and Markdown rendering, while interface catalogs and content language remain separate responsibilities.
 
-## Shared code presentation and search continuity
+## Shared site foundations
 
-The landing `CodeFrame` owns the filename/language toolbar, code surface, border, overflow and shared CopyButton. `CodeBlock` supplies the landing tokens; docs `Article` clones a frame template around rendered Markdown without changing code text. Preserve the landing `.code-block` hook. Do not fork clipboard feedback or frame styles. Shiki's Ticker theme maps syntax scopes directly to the shared semantic palette, so both color modes follow the same brand tokens. Check both sites after changing this shared component.
+Read [shared/README.md](../shared/README.md) for component ownership, tokens, catalog location, setup and cross-site validation. Install shared tooling before either app. Both format commands include shared source and use the root Prettier configuration. The source-copy audit scans landing, docs and shared components. Never recreate a shared primitive here or import its implementation from the sibling app.
 
-Docs reuse the landing eyebrow and font families, with serif article titles, Inter reading text and mono interface labels. Use existing feature/code surfaces for hierarchy rather than introducing another palette or animation system.
+Search remains specific to docs: use a content-sized square top Drawer capped at 44rem/viewport minus 1rem, keep intro/input/close fixed and scroll results independently. Query after 300ms, retain previous results while typing/loading and discard stale responses. Clear immediately on empty input. Use the native upward handle with handleOnly, plus close/Escape/backdrop alternatives; do not add height measurement or gesture/focus-trap code. Test focus and unchanged background scroll after close.
 
-Search uses a content-sized square top Drawer, capped at 44rem or the viewport minus 1rem, with a fixed intro/input/close control and an independently scrolling results region. Keep the empty state compact and let CSS grow/shrink the panel with results; do not add JavaScript height measurement. Drawer 4.2.1 uses percentage transforms and reads current geometry at gesture start. Reduced-motion rules must only disable motion, not change sizing. The native handle closes upward (`showHandle` and `handleOnly`); input/results opt out of dragging. Drawer still owns gestures, animations, focus trapping and restoration. Search only assigns initial field focus after native mounting. Keep close, Escape and backdrop available as alternatives to dragging. Test deep result scrolling, upward dragging, focus restoration and unchanged background scroll together.
+The ToC tracks the last heading at the header plus 2.5rem boundary, nested headings and the document end. Both instances use aria-current="location" and the same NavLink. Lists inset current backgrounds from the rail; scroll tracking must not rewrite the URL or move focus.
 
-Search waits 300ms after the last input before querying. Keep previous results during typing and asynchronous loading, replacing the list only when the latest response is ready. Clearing the field resets immediately; stale requests must never overwrite newer input.
+## Component-rich articles
 
-The table of contents marks exactly one current heading per instance with `aria-current="location"` and the shared active background. Follow document geometry at the sticky header plus 2.5rem anchor offset, including nested headings, initial fragments, scrolling upward and the document end. Preserve native anchor behavior, synchronize desktop/mobile instances, and clean up frame/listener/resize observation on disconnect. Do not rewrite the URL or move focus during scroll tracking.
+The collection accepts `.md` and `.mdx`. The official `@astrojs/mdx` integration inherits the unified processor, syntax theme and accessible-overflow plugin. Getting started uses shared Tabs/TabPanel for npm, pnpm, yarn, bun, CDN and module/global initialization; entrypoints uses the same tabs for ESM/CommonJS. Overview and next steps compose shared CardGrid/LinkCard; the lifecycle note uses Callout/Surface. These are actual Astro components, with no React runtime or duplicated tab script.
+
+Keep alternative examples in tabs and consecutive instructions visible. No-JavaScript renders every option with its own label; keyboard selection, exact copying and original installation fragments must work. `entry.filePath` drives the actual edit URL for either extension. The migration inventory and coverage scanner include both extensions, while routes remain stable. Update imports, source links, inventory destinations and package checks when changing an article's extension. All 33 original-source records remain intact.

@@ -1,15 +1,22 @@
 ---
+import type { HTMLAttributes } from 'astro/types'
 import CopyButton from './CopyButton.astro'
-interface Props {
+interface Props extends HTMLAttributes<'div'> {
   label: string
   text: string
   copyLabel: string
+  size?: 'compact' | 'comfortable'
   class?: string
 }
-const { label, text, copyLabel, class: className } = Astro.props
+const { label, text, copyLabel, size = 'compact', class: className, ...attributes } = Astro.props
 ---
 
-<div data-copy-source class:list={['code-frame', className]}>
+<div
+  {...attributes}
+  data-ui
+  data-copy-source
+  class:list={['code-frame', { comfortable: size === 'comfortable' }, className]}
+>
   <header data-pagefind-ignore>
     <span class:list={['file-label']}>
       <span class:list={['dot']} aria-hidden="true"></span>
@@ -31,6 +38,9 @@ const { label, text, copyLabel, class: className } = Astro.props
     font-family: var(--font-mono);
     font-size: 0.73rem;
     line-height: 1.7;
+  }
+  .comfortable {
+    font-size: var(--text-small);
   }
   header {
     display: flex;

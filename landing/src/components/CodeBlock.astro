@@ -1,7 +1,7 @@
 ---
-import CodeFrame from './CodeFrame.astro'
+import CodeFrame from '../../../shared/components/CodeFrame.astro'
 import { getI18n } from '../i18n/utils'
-import { format } from '../i18n/format'
+import { format } from '../../../shared/i18n/format'
 interface Props {
   tokens: readonly {
     readonly kind: 'plain' | 'com' | 'key' | 'str' | 'fn' | 'num' | 'tag' | 'attr' | 'pun'

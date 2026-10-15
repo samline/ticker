@@ -1,13 +1,9 @@
 ---
-import { format } from '../i18n/format'
+import { format } from '../../../shared/i18n/format'
 import { docsHref } from '../lib/docs'
+import DrawerStyles from '../../../shared/components/DrawerStyles.astro'
 import drawerCss from '@samline/drawer/styles.css?inline'
 import { getI18n } from '../i18n/utils'
-// Keep vendor lengths in rem; native CSS scope isolates the imported stylesheet.
-const drawerStyles = drawerCss.replace(
-  /(\d*\.?\d+)px\b/g,
-  (_, length) => `${Number(length) / 16}rem`
-)
 const i18n = getI18n(Astro)
 const t = i18n.navigation.mobile
 const instanceId = `mobile-menu-${crypto.randomUUID()}`
@@ -201,15 +197,14 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
     customElements.define('ticker-mobile-menu', TickerMobileMenu)
 </script>
 
-<style is:inline set:html={`@scope (ticker-mobile-menu) { ${drawerStyles} }`} />
+<DrawerStyles scope="ticker-mobile-menu" css={drawerCss} />
 
 <style>
   .mobile-menu {
     display: block;
     flex-shrink: 0;
   }
-  .menu-toggle,
-  .mobile-menu :global(.menu-close) {
+  .menu-toggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -227,8 +222,7 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
       border-color var(--duration-ui) var(--ease-ui);
   }
   @media (hover: hover) {
-    .menu-toggle:hover,
-    .mobile-menu :global(.menu-close:hover) {
+    .menu-toggle:hover {
       color: var(--color-accent);
       background: var(--color-accent-soft);
       border-color: var(--palette-border-hover);
@@ -424,16 +418,6 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
     outline: 0.125rem solid var(--color-accent);
     outline-offset: 0.1875rem;
   }
-  .mobile-menu :global(.menu-close) {
-    position: absolute;
-    top: 1.25rem;
-    right: 1.25rem;
-    font-size: 1.5rem;
-  }
-  .mobile-menu :global(.menu-close:focus-visible) {
-    outline: 0.125rem solid var(--color-accent);
-    outline-offset: 0.1875rem;
-  }
   /* Only the panel design lives here; runtime animation rules come from the package. */
   .mobile-menu :global(.mobile-menu-overlay) {
     position: fixed;
@@ -464,14 +448,8 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
   }
   @media (prefers-reduced-motion: reduce) {
     .menu-toggle,
-    .menu-content a,
-    .mobile-menu :global(.menu-close) {
+    .menu-content a {
       transition: none;
-    }
-    .mobile-menu :global(.mobile-menu-panel),
-    .mobile-menu :global(.mobile-menu-overlay) {
-      animation: none !important;
-      transition: none !important;
     }
   }
 </style>

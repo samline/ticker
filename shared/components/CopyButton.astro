@@ -1,16 +1,18 @@
 ---
+import type { HTMLAttributes } from 'astro/types'
 import { getI18n } from '../i18n/utils'
-interface Props {
+interface Props extends HTMLAttributes<'div'> {
   text: string
   ariaLabel: string
   variant?: 'code' | 'command'
 }
-const { text, ariaLabel, variant = 'code' } = Astro.props
+const { text, ariaLabel, variant = 'code', class: className, ...attributes } = Astro.props
 const t = getI18n(Astro).controls.copy
 ---
 
 <ticker-copy
-  class:list={['copy-control']}
+  {...attributes}
+  class:list={['copy-control', className]}
   data-copy-text={text}
   data-label={t.label}
   data-copied-label={t.copiedLabel}
