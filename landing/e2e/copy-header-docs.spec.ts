@@ -124,7 +124,7 @@ test('Docs is available in desktop and mobile navigation and CTAs point to their
   )
   await expect(page.getByRole('link', { name: 'Read the update() reference' })).toHaveAttribute(
     'href',
-    '/ticker/docs/reference/api/#updateoptions'
+    '/ticker/docs/reference/api/update/'
   )
   await expect(page.getByRole('link', { name: 'Read the browser registry guide' })).toHaveAttribute(
     'href',

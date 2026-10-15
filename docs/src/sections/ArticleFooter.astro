@@ -8,21 +8,16 @@ import { href } from '../lib/routes'
 import manifest from '../../../package.json'
 interface Props {
   current: string
-  sourcePath?: string
 }
-const { current, sourcePath = `${Astro.props.current}.md` } = Astro.props
+const { current } = Astro.props
 const groups = await getNavigation(Astro.currentLocale)
 const pages = groups.flatMap(group => group.pages)
 const index = pages.findIndex(([id]) => id === current)
 const previous = pages[index - 1],
   next = pages[index + 1]
-const repository = manifest.repository.url.replace(/^git\+/, '').replace(/\.git$/, '')
 ---
 
 <footer class:list={['article-footer']} data-pagefind-ignore>
-  <a class:list={['edit']} href={`${repository}/edit/main/docs/src/content/docs/${sourcePath}`}>
-    {t.edit} <span aria-hidden="true">↗</span>
-  </a>
   <nav class:list={['pagination']} aria-label={t.paginationLabel}>
     {previous && (
       <LinkCard href={href(previous[0])} variant="compact">
@@ -51,16 +46,11 @@ const repository = manifest.repository.url.replace(/^git\+/, '').replace(/\.git$
     border-top: 0.0625rem solid var(--color-border-soft);
     padding-top: 1.5rem;
   }
-  .edit {
-    color: var(--color-text-subtle);
-    font-size: 0.75rem;
-    text-decoration: none;
-  }
   .pagination {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-md);
-    margin: var(--space-xl) 0;
+    margin: 0 0 var(--space-xl);
   }
   .pagination span {
     font-size: 0.6875rem;
@@ -79,11 +69,6 @@ const repository = manifest.repository.url.replace(/^git\+/, '').replace(/\.git$
     color: var(--color-text-subtle);
     border-top: 0.0625rem solid var(--color-border-soft);
   }
-  @media (hover: hover) {
-    .edit:hover {
-      color: var(--color-accent);
-    }
-  }
   @media (width < 37.5rem) {
     .pagination {
       grid-template-columns: minmax(0, 1fr);
@@ -92,13 +77,5 @@ const repository = manifest.repository.url.replace(/^git\+/, '').replace(/\.git$
   :focus-visible {
     outline: 0.125rem solid var(--color-accent);
     outline-offset: 0.1875rem;
-  }
-  .edit {
-    transition: color var(--duration-ui) var(--ease-ui);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .edit {
-      transition: none;
-    }
   }
 </style>

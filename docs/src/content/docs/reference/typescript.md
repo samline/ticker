@@ -73,7 +73,7 @@ interface TickerInstance {
 }
 ```
 
-`element` becomes `null` after destruction; `source` remains stable; `options` returns a fresh snapshot. See [API](/ticker/docs/reference/api/#tickerinstance).
+`element` becomes `null` after destruction; `source` remains stable; `options` returns a fresh snapshot. See [controller reference](/ticker/docs/reference/api/controller/).
 
 ## Browser registry types
 

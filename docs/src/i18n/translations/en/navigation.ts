@@ -5,7 +5,6 @@ export default {
   menu: 'Browse documentation',
   close: 'Close navigation',
   toc: 'On this page',
-  edit: 'Edit this page',
   previous: 'Previous',
   next: 'Next',
   breadcrumb: 'Docs',

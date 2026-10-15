@@ -400,15 +400,25 @@ test('installation reuses accessible tabs with exact copying for each package ma
   await expect(
     page.getByRole('tabpanel', { name: 'Browser global', exact: true }).locator('code')
   ).toContainText('window.Ticker.ticker')
-  await expect(page.locator('.article-footer .edit')).toHaveAttribute(
-    'href',
-    /getting-started\.mdx$/
-  )
+  await expect(page.getByRole('link', { name: 'Edit this page' })).toHaveCount(0)
   await page.goto('reference/entrypoints/')
   await page.getByRole('tab', { name: 'CommonJS', exact: true }).click()
   await expect(page.getByRole('tabpanel', { name: 'CommonJS' }).locator('code')).toContainText(
     "require('@samline/ticker')"
   )
+})
+
+test('article footer offers working reading navigation without a GitHub editing action', async ({
+  page,
+}) => {
+  await page.goto('getting-started/')
+  const pagination = page.getByRole('navigation', { name: 'Documentation pagination' })
+  await expect(page.getByRole('link', { name: 'Edit this page' })).toHaveCount(0)
+  await pagination.getByRole('link', { name: /Next/ }).click()
+  await expect(page).toHaveURL(/\/guides\/lifecycle\/$/)
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Lifecycle and updates')
+  await pagination.getByRole('link', { name: /Previous/ }).click()
+  await expect(page).toHaveURL(/\/getting-started\/$/)
 })
 
 test('old installation fragments reveal the matching tab and no-JavaScript retains every option', async ({

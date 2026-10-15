@@ -18,7 +18,6 @@ const { Content, headings } = await render(entry)
   description={entry.data.description}
   current={entry.id}
   headings={headings}
-  sourcePath={entry.filePath?.split('content/docs/')[1]}
 >
   <Content />
 </DocsLayout>

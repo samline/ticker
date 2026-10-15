@@ -101,6 +101,6 @@ Prefer registry cleanup over direct `instance.destroy()` for registered instance
 
 ## Related
 
-- [API reference](/ticker/docs/reference/api/#browser-registry)
+- [Registry API reference](/ticker/docs/reference/api/browser-registry/)
 - [HTML and browser guide](/ticker/docs/guides/html-and-browser/)
 - [TypeScript registry types](/ticker/docs/reference/typescript/#browser-registry-types)

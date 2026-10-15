@@ -44,4 +44,4 @@ Schedules a rebuild for every ticker currently tracked by the shared runtime, in
 
 - [`update()`](/ticker/docs/reference/api/update/)
 - [`mount()`](/ticker/docs/reference/api/mount/)
-- [Lifecycle guide](/ticker/docs/getting-started/#controller-lifecycle)
+- [Lifecycle guide](/ticker/docs/guides/lifecycle/)

@@ -37,7 +37,7 @@ export default {
   news: [
     {
       href: '#how',
-      label: 'Release notes for v{version}',
+      label: 'Get started with v{version}',
       openPrices: false,
     },
     {

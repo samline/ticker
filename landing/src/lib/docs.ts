@@ -3,7 +3,7 @@ export const docsRoutes = {
   overview: '',
   setup: 'getting-started/',
   options: 'reference/configuration/',
-  update: 'reference/api/#updateoptions',
+  update: 'reference/api/update/',
   content: 'guides/lifecycle/#update-versus-refresh',
   registry: 'reference/browser/#cleanup',
 } as const

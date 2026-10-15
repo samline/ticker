@@ -16,9 +16,8 @@ interface Props {
   description: string
   current: string
   headings: MarkdownHeading[]
-  sourcePath?: string
 }
-const { title, description, current, headings, sourcePath } = Astro.props
+const { title, description, current, headings } = Astro.props
 const t = getI18n(Astro)
 ---
 
@@ -50,7 +49,7 @@ const t = getI18n(Astro)
           <slot />
         </Article>
 
-        <ArticleFooter current={current} sourcePath={sourcePath} />
+        <ArticleFooter current={current} />
       </main>
       <div class:list={['desktop-toc']} data-pagefind-ignore>
         <TableOfContents headings={headings} />

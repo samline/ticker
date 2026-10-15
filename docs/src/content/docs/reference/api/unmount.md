@@ -35,4 +35,4 @@ Calls are safe no-ops in non-DOM environments and when no manager work is active
 
 - [`mount()`](/ticker/docs/reference/api/mount/)
 - [`destroy()`](/ticker/docs/reference/api/destroy/)
-- [Lifecycle guide](/ticker/docs/getting-started/#controller-lifecycle)
+- [Lifecycle guide](/ticker/docs/guides/lifecycle/)
