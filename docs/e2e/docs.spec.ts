@@ -263,3 +263,30 @@ test('search grows with results and shrinks again when cleared in both motion pr
     }
   }
 })
+
+test('search debounces typing without collapsing the previous results', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('getting-started/')
+  await page.getByRole('button', { name: 'Search documentation', exact: true }).click()
+  const panel = page.getByRole('dialog', { name: 'Search documentation' })
+  const input = panel.getByRole('searchbox')
+  await input.fill('direction')
+  await expect(panel.locator('li a').first()).toBeVisible()
+  const previous = await panel.locator('ul').innerHTML()
+  const height = (await panel.boundingBox())!.height
+  const time = new Date('2026-10-15T12:00:00Z')
+  await page.clock.install({ time })
+  await page.clock.pauseAt(time)
+  await input.fill('zzzznosuchwordzzzz')
+  await page.clock.runFor(200)
+  expect(await panel.locator('ul').innerHTML()).toBe(previous)
+  expect((await panel.boundingBox())!.height).toBeCloseTo(height, 0)
+  await input.fill('zzzznosuchwordzzzz1')
+  await page.clock.runFor(200)
+  expect(await panel.locator('ul').innerHTML()).toBe(previous)
+  await page.clock.runFor(100)
+  await expect(panel.getByRole('status')).toHaveText('No results. Try another term.')
+  await expect(panel.locator('li')).toHaveCount(0)
+  await input.fill('')
+  await expect(panel.locator('[role=status]')).toBeEmpty()
+})

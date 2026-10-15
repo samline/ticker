@@ -171,22 +171,24 @@ const id = `docs-search-${crypto.randomUUID()}`
           if (!status || !list) return
           clearTimeout(this.timer)
           const request = ++this.request
-          list.replaceChildren()
-          if (!input.value.trim()) {
+          const query = input.value.trim()
+          if (!query) {
+            list.replaceChildren()
             status.textContent = ''
             return
           }
-          status.textContent = this.dataset.loading ?? ''
           this.timer = setTimeout(async () => {
+            status.textContent = this.dataset.loading ?? ''
             try {
               const api = await load(),
-                found = await api.search(input.value.trim())
+                found = await api.search(query)
               const results = await Promise.all(
                 found.results.slice(0, 12).map((result) => result.data())
               )
               if (signal.aborted || request !== this.request) return
               const cardTemplate = this.querySelector<HTMLTemplateElement>('[data-result-template]')
               if (!cardTemplate?.content.firstElementChild) return
+              list.replaceChildren()
               for (const result of results) {
                 const li = document.createElement('li')
                 const link = cardTemplate.content.firstElementChild.cloneNode(
@@ -213,7 +215,7 @@ const id = `docs-search-${crypto.randomUUID()}`
               if (!signal.aborted && request === this.request)
                 status.textContent = this.dataset.error ?? ''
             }
-          }, 150)
+          }, 300)
         },
         { signal }
       )
