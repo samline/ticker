@@ -136,7 +136,7 @@ test('search Drawer opens from the top, stays inside the viewport and restores f
     await panel.getByRole('searchbox').fill('direction')
     await expect(panel.locator('li a').first()).toBeVisible()
     expect(await panel.evaluate((e) => e.scrollWidth <= e.clientWidth + 1)).toBe(true)
-    await panel.getByRole('button', { name: 'Close search' }).click()
+    await panel.getByRole('button', { name: 'Close search', exact: true }).click()
     await expect(panel).not.toBeVisible()
     await expect(trigger).toBeFocused()
     await expect.poll(() => page.evaluate(() => scrollY)).toBeCloseTo(before, 0)
@@ -196,4 +196,39 @@ test('search components retain native input focus and accessible results in both
     await page.keyboard.press('Escape')
     await expect(panel).not.toBeVisible()
   }
+})
+
+test('search keeps close visible after result scrolling and supports native upward drag', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.setViewportSize({ width: 375, height: 700 })
+  await page.goto('getting-started/')
+  const trigger = page.getByRole('button', { name: 'Search documentation', exact: true })
+  await trigger.click()
+  const panel = page.getByRole('dialog', { name: 'Search documentation' })
+  await panel.getByRole('searchbox').fill('ticker')
+  await expect(panel.locator('li a').first()).toBeVisible()
+  const close = panel.getByRole('button', { name: 'Close search', exact: true })
+  const before = await close.boundingBox()
+  await panel
+    .locator('.search-results')
+    .evaluate((element) => (element.scrollTop = element.scrollHeight))
+  await expect
+    .poll(() => panel.locator('.search-results').evaluate((element) => element.scrollTop))
+    .toBeGreaterThan(0)
+  expect(await close.boundingBox()).toEqual(before)
+  await close.click()
+  await expect(panel).not.toBeVisible()
+  await trigger.click()
+  const handle = panel.getByRole('button', { name: 'Drag up to close search' })
+  // Drawer 4.2.1 intentionally ignores gestures for 500ms after opening, even with reduced motion.
+  await page.waitForTimeout(550)
+  const box = (await handle.boundingBox())!
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width / 2, 50, { steps: 20 })
+  await page.mouse.up()
+  await expect(panel).not.toBeVisible()
+  await expect(trigger).toBeFocused()
 })

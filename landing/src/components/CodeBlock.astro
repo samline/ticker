@@ -1,5 +1,5 @@
 ---
-import CopyButton from './CopyButton.astro'
+import CodeFrame from './CodeFrame.astro'
 import { getI18n } from '../i18n/utils'
 import { format } from '../i18n/format'
 interface Props {
@@ -14,110 +14,43 @@ const { filename, tokens, class: className } = Astro.props
 const i18n = getI18n(Astro)
 ---
 
-<div data-copy-source="" class:list={['code-block', className]}>
-  <header>
-    <span class:list={['file-label']}>
-      <span class:list={['dot']} aria-hidden="true"></span> {filename}
-    </span>
-    <CopyButton
-      text={tokens.map(token => token.value).join('')}
-      ariaLabel={format(i18n.controls.code.copyLabel, { filename })}
-    />
-  </header>
+<CodeFrame
+  label={filename}
+  text={tokens.map(token => token.value).join('')}
+  copyLabel={format(i18n.controls.code.copyLabel, { filename })}
+  class:list={['code-block', className]}
+>
   <pre
     tabindex="0"
     role="region"
     aria-label={format(i18n.controls.code.label, { filename })}
   ><code>{tokens.map(token => token.kind === 'plain' ? token.value : <span class:list={[`tok-${token.kind}`]}>{token.value}</span>)}</code></pre>
-</div>
+</CodeFrame>
 
 <style>
-  .code-block {
-    background: var(--palette-on-accent);
-    border: 0.0625rem solid var(--color-border);
-    border-radius: 1rem;
-    overflow: hidden;
-    font-family: var(--font-mono);
-    font-size: 0.825rem;
-    line-height: 1.7;
-  }
-  .code-block header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 0.6rem 1rem;
-    border-bottom: 0.0625rem solid var(--color-border-soft);
-    font-size: 0.7rem;
-    color: var(--color-text-subtle);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .file-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-width: 0;
-    overflow-wrap: anywhere;
-  }
-  .code-block header .dot {
-    flex-shrink: 0;
-    width: 0.625rem;
-    height: 0.625rem;
-    border-radius: 624.9375rem;
-    background: var(--color-border);
-  }
-  .code-block pre {
-    margin: 0;
-    padding: 1rem 1.25rem 1.25rem;
-    overflow-x: auto;
-    color: var(--palette-code-text);
-  }
-  .code-block pre code {
-    font-family: inherit;
-  }
-
-  .code-block .tok-com {
+  .tok-com {
     color: var(--palette-syntax-muted);
     font-style: italic;
   }
-  .code-block .tok-key {
+  .tok-key {
     color: var(--palette-lavender);
   }
-  .code-block .tok-str {
+  .tok-str {
     color: var(--palette-syntax-string);
   }
-  .code-block .tok-fn {
+  .tok-fn {
     color: var(--palette-syntax-tag);
   }
-  .code-block .tok-num {
+  .tok-num {
     color: var(--palette-syntax-attribute);
   }
-  .code-block .tok-tag {
+  .tok-tag {
     color: var(--palette-syntax-number);
   }
-  .code-block .tok-attr {
+  .tok-attr {
     color: var(--palette-syntax-function);
   }
-  .code-block .tok-pun {
+  .tok-pun {
     color: var(--palette-syntax-muted);
-  }
-  .code-block {
-    background: var(--palette-code-surface);
-    border-color: var(--palette-code-border);
-    border-radius: 0.625rem;
-    font-size: 0.73rem;
-  }
-  .code-block header {
-    color: var(--palette-code-header);
-    font-size: 0.58rem;
-  }
-  .code-block pre {
-    padding: 1rem;
-  }
-  pre:focus-visible {
-    outline: 0.125rem solid var(--color-accent);
-    outline-offset: -0.125rem;
   }
 </style>

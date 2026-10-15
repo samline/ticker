@@ -37,7 +37,8 @@ const { current } = Astro.props
     padding-inline: 0.75rem;
     color: var(--color-text);
     font-size: 0.6875rem;
-    font-weight: 650;
+    font-weight: 500;
+    font-family: var(--font-mono);
     letter-spacing: 0.07em;
     text-transform: uppercase;
   }
@@ -50,6 +51,7 @@ const { current } = Astro.props
   }
   a {
     display: block;
+    border-left: 0.125rem solid transparent;
     padding: 0.5rem 0.75rem;
     border-radius: 0.4375rem;
     color: var(--color-text-muted);
@@ -61,6 +63,7 @@ const { current } = Astro.props
       color var(--duration-ui) var(--ease-ui);
   }
   a[aria-current='page'] {
+    border-left-color: var(--color-accent);
     color: var(--color-accent);
     background: var(--color-accent-soft);
     font-weight: 600;

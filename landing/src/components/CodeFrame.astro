@@ -1,0 +1,83 @@
+---
+import CopyButton from './CopyButton.astro'
+interface Props {
+  label: string
+  text: string
+  copyLabel: string
+  class?: string
+}
+const { label, text, copyLabel, class: className } = Astro.props
+---
+
+<div data-copy-source class:list={['code-frame', className]}>
+  <header data-pagefind-ignore>
+    <span class:list={['file-label']}>
+      <span class:list={['dot']} aria-hidden="true"></span>
+      <span data-code-label>{label}</span>
+    </span>
+    <CopyButton text={text} ariaLabel={copyLabel} />
+  </header>
+  <div class:list={['code-content']} data-code-content>
+    <slot />
+  </div>
+</div>
+<style>
+  .code-frame {
+    min-width: 0;
+    overflow: hidden;
+    background: var(--palette-code-surface);
+    border: 0.0625rem solid var(--palette-code-border);
+    border-radius: 0.625rem;
+    font-family: var(--font-mono);
+    font-size: 0.73rem;
+    line-height: 1.7;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border-bottom: 0.0625rem solid var(--palette-code-border);
+    color: var(--palette-code-header);
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .file-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .dot {
+    flex-shrink: 0;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    opacity: 0.7;
+  }
+  .code-content {
+    min-width: 0;
+  }
+  .code-content :global(pre) {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    border: 0;
+    border-radius: 0;
+    background: var(--palette-code-surface);
+    color: var(--palette-code-text);
+    font: inherit;
+  }
+  .code-content :global(pre code) {
+    font: inherit;
+  }
+  .code-content :global(pre:focus-visible) {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: -0.125rem;
+  }
+</style>

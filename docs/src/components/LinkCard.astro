@@ -19,7 +19,8 @@ const { href, variant = 'default', class: className, ...attributes } = Astro.pro
     display: grid;
     gap: 0.5rem;
     padding: 1rem 1.125rem;
-    border: 0.0625rem solid var(--color-border-soft);
+    border: 0.0625rem solid var(--palette-feature-border);
+    background: var(--palette-feature-surface);
     border-radius: 0.875rem;
     color: var(--color-text);
     text-decoration: none;
@@ -41,7 +42,7 @@ const { href, variant = 'default', class: className, ...attributes } = Astro.pro
   @media (hover: hover) {
     .link-card:hover {
       color: var(--color-accent);
-      background: var(--color-accent-soft);
+      background: var(--palette-feature-hover);
       border-color: var(--palette-border-hover);
     }
   }

@@ -1,5 +1,5 @@
 ---
-import CopyButton from '../../../landing/src/components/CopyButton.astro'
+import CodeFrame from '../../../landing/src/components/CodeFrame.astro'
 import { getI18n } from '../i18n/utils'
 const t = getI18n(Astro)
 ---
@@ -7,7 +7,7 @@ const t = getI18n(Astro)
 <ticker-docs-article class:list={['article']}>
   <slot />
   <template>
-    <CopyButton text="" ariaLabel={t.copy.aria} />
+    <CodeFrame label={t.copy.code} text="" copyLabel={t.copy.aria} />
   </template>
 </ticker-docs-article>
 <script>
@@ -19,17 +19,14 @@ const t = getI18n(Astro)
         if (pre.parentElement?.hasAttribute('data-copy-source')) continue
         const code = pre.querySelector('code')
         if (!code) continue
-        const frame = document.createElement('div')
-        frame.className = 'code-frame'
-        frame.setAttribute('data-copy-source', '')
-        const toolbar = document.createElement('div')
-        toolbar.className = 'code-toolbar'
-        toolbar.setAttribute('data-pagefind-ignore', '')
-        toolbar.append(template.content.cloneNode(true))
-        const copy = toolbar.querySelector<HTMLElement>('ticker-copy')
+        const frame = template.content.firstElementChild?.cloneNode(true) as HTMLElement | undefined
+        if (!frame) continue
+        const copy = frame.querySelector<HTMLElement>('ticker-copy')
         if (copy) copy.dataset.copyText = code.textContent ?? ''
+        const label = frame.querySelector('[data-code-label]')
+        if (label && pre.dataset.language) label.textContent = pre.dataset.language
         pre.before(frame)
-        frame.append(toolbar, pre)
+        frame.querySelector('[data-code-content]')?.append(pre)
       }
     }
   }
@@ -41,7 +38,7 @@ const t = getI18n(Astro)
     display: block;
     min-width: 0;
     color: var(--color-text-muted);
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.85;
     overflow-wrap: anywhere;
   }
@@ -107,7 +104,7 @@ const t = getI18n(Astro)
     margin: 1.5rem 0;
     padding: 1.25rem;
     overflow-x: auto;
-    border: 0.0625rem solid var(--color-border-soft);
+    border: 0.0625rem solid var(--palette-code-border);
     border-radius: 0.75rem;
     font-family: var(--font-mono);
     font-size: 0.8125rem;
@@ -121,22 +118,14 @@ const t = getI18n(Astro)
     overflow-wrap: normal;
   }
   .article :global(.code-frame) {
-    margin: 1.5rem 0;
-    border: 0.0625rem solid var(--color-border-soft);
-    border-radius: 0.75rem;
-    overflow: hidden;
-    background: var(--palette-code-surface);
-  }
-  .article :global(.code-toolbar) {
-    display: flex;
-    justify-content: flex-end;
-    padding: 0.5rem 0.625rem;
-    border-bottom: 0.0625rem solid var(--color-border-soft);
+    margin: 1.75rem 0;
+    font-size: 0.8125rem;
   }
   .article :global(.code-frame pre) {
     margin: 0;
     border: 0;
     border-radius: 0;
+    padding: 1rem;
   }
   .article :global(table) {
     display: block;
@@ -159,7 +148,7 @@ const t = getI18n(Astro)
   .article :global(th) {
     color: var(--color-text);
     font-weight: 600;
-    background: var(--color-bg-soft);
+    background: var(--palette-feature-surface);
   }
   .article :global(blockquote) {
     margin: 1.5rem 0;
@@ -183,19 +172,5 @@ const t = getI18n(Astro)
   .article :global(img) {
     max-width: 100%;
     height: auto;
-  }
-  @media (prefers-color-scheme: dark) {
-    .article :global(.astro-code),
-    .article :global(.astro-code span) {
-      color: var(--shiki-dark) !important;
-    }
-  }
-  :global([data-theme='light']) .article :global(.astro-code),
-  :global([data-theme='light']) .article :global(.astro-code span) {
-    color: var(--shiki-light) !important;
-  }
-  :global([data-theme='dark']) .article :global(.astro-code),
-  :global([data-theme='dark']) .article :global(.astro-code span) {
-    color: var(--shiki-dark) !important;
   }
 </style>

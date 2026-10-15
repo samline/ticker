@@ -16,6 +16,7 @@ const id = `docs-search-${crypto.randomUUID()}`
   data-base={import.meta.env.BASE_URL}
   data-title={s.label}
   data-close={s.close}
+  data-handle={s.handle}
   data-loading={s.loading}
   data-empty={s.empty}
   data-error={s.error}
@@ -35,8 +36,8 @@ const id = `docs-search-${crypto.randomUUID()}`
     <kbd aria-hidden="true">{s.hint}</kbd>
   </Button>
   <template>
-    <div class:list={['search-content']} data-drawer-no-drag>
-      <Box size="medium">
+    <div class:list={['search-content']}>
+      <Box size="medium" class:list={['search-intro']} data-drawer-no-drag>
         <div class:list={['search-heading']}>
           <p>{s.label}</p>
           <span id={`${id}-hint`} class:list={['search-hint']}>
@@ -54,10 +55,14 @@ const id = `docs-search-${crypto.randomUUID()}`
           aria-controls={`${id}-results`}
           aria-describedby={`${id}-hint`}
         />
-        <p class:list={['search-status']} role="status" aria-live="polite"></p>
-        <ul id={`${id}-results`} aria-label={s.results}></ul>
-        <SearchResultCard />
       </Box>
+      <div class:list={['search-results']} data-drawer-no-drag>
+        <Box size="medium">
+          <p class:list={['search-status']} role="status" aria-live="polite"></p>
+          <ul id={`${id}-results`} aria-label={s.results}></ul>
+          <SearchResultCard />
+        </Box>
+      </div>
     </div>
   </template>
 </ticker-docs-search>
@@ -111,6 +116,10 @@ const id = `docs-search-${crypto.randomUUID()}`
           container: this,
           triggerElement: trigger,
           direction: 'top',
+          showHandle: true,
+          handleOnly: true,
+          handleAriaLabel: this.dataset.handle,
+          handleClassName: 'docs-search-handle',
           autoFocus: true,
           ariaLabel: this.dataset.title,
           contentClassName: 'docs-search-panel',
@@ -123,6 +132,13 @@ const id = `docs-search-${crypto.randomUUID()}`
               clearTimeout(this.timer)
               return
             }
+            // The native handle precedes the field; search should start ready to type.
+            queueMicrotask(() => {
+              if (!signal.aborted && trigger.getAttribute('aria-expanded') === 'true')
+                this.querySelector<HTMLInputElement>('[role=searchbox]')?.focus({
+                  preventScroll: true,
+                })
+            })
             load().catch(() => {
               if (!signal.aborted) {
                 const status = this.querySelector('[role=status]')
@@ -241,16 +257,36 @@ const id = `docs-search-${crypto.randomUUID()}`
   }
   .search-content {
     min-width: 0;
-    padding-block: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding-block: 2rem 3rem;
+  }
+  .search-intro {
+    flex: none;
+    padding-bottom: 1.25rem;
+    border-bottom: 0.0625rem solid var(--palette-feature-border);
+  }
+  .search-results {
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-block: 0.25rem 1.5rem;
+    scrollbar-width: thin;
   }
   .search-heading {
     padding-right: 3rem;
     margin-bottom: 1.5rem;
   }
   .search-heading p {
-    font-size: 1.25rem;
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-style: italic;
+    color: var(--palette-heading-accent);
     letter-spacing: -0.025em;
-    font-weight: 500;
+    line-height: 1.1;
+    font-weight: 400;
     margin: 0 0 0.5rem;
   }
   .search-hint {
@@ -275,14 +311,33 @@ const id = `docs-search-${crypto.randomUUID()}`
     inset: 0 0 auto;
     z-index: 101;
     width: 100%;
-    max-height: min(44rem, calc(100dvh - 1rem));
-    overflow-y: auto;
+    height: min(44rem, calc(100dvh - 1rem));
+    overflow: hidden;
     overscroll-behavior: contain;
-    background: var(--color-bg);
+    background: linear-gradient(135deg, var(--palette-feature-surface), var(--color-bg) 65%);
     color: var(--color-text);
     border-bottom: 0.0625rem solid var(--color-border);
-    border-radius: 0 0 1.25rem 1.25rem;
+    border-radius: 0;
     box-shadow: 0 1rem 3rem rgb(0 0 0 / 0.2);
+  }
+  .search :global([data-drawer-body]),
+  .search :global([data-drawer-body] > div) {
+    height: 100%;
+    min-height: 0;
+  }
+  .search :global(.docs-search-handle) {
+    position: absolute;
+    bottom: 1.125rem;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    width: 3rem;
+    height: 0.3125rem;
+    background: var(--color-accent);
+  }
+  .search :global(.docs-search-handle:focus-visible) {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.375rem;
   }
   .search :global(.docs-search-overlay) {
     position: fixed;
@@ -346,6 +401,25 @@ const id = `docs-search-${crypto.randomUUID()}`
       transition: none;
     }
     .search :global(.docs-search-panel),
+    .search :global([data-drawer-body]),
+    .search :global([data-drawer-body] > div) {
+      height: 100%;
+      min-height: 0;
+    }
+    .search :global(.docs-search-handle) {
+      position: absolute;
+      bottom: 1.125rem;
+      left: 50%;
+      transform: translateX(-50%);
+      margin: 0;
+      width: 3rem;
+      height: 0.3125rem;
+      background: var(--color-accent);
+    }
+    .search :global(.docs-search-handle:focus-visible) {
+      outline: 0.125rem solid var(--color-accent);
+      outline-offset: 0.375rem;
+    }
     .search :global(.docs-search-overlay) {
       animation: none !important;
       transition: none !important;

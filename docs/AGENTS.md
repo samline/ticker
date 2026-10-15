@@ -29,3 +29,11 @@ Read README.md before changing the docs. This site replaces Starlight; `src/cont
 - Nine skills were installed with autoskills 0.4.1 in `.agents/skills/`. Preserve upstream files and skills-lock.json, use relevant guides, and keep them outside formatting. Backend skills do not authorize adding a backend to a static companion site.
 
 - Reuse Icon, IconButton, TextField and LinkCard for controls/fields/cards. SearchResultCard owns the result template; Search fills it rather than constructing another card design in JavaScript. Pagination composes LinkCard. Keep scope/native attributes forwarded through composed components. DrawerStyles owns the shared vendor CSS adaptation; native package close controls remain package-owned.
+
+## Shared code presentation and search continuity
+
+The landing `CodeFrame` owns the filename/language toolbar, code surface, border, overflow and shared CopyButton. `CodeBlock` supplies the landing tokens; docs `Article` clones a frame template around rendered Markdown without changing code text. Preserve the landing `.code-block` hook. Do not fork clipboard feedback or frame styles. Shiki's Ticker theme maps syntax scopes directly to the shared semantic palette, so both color modes follow the same brand tokens. Check both sites after changing this shared component.
+
+Docs reuse the landing eyebrow and font families, with serif article titles, Inter reading text and mono interface labels. Use existing feature/code surfaces for hierarchy rather than introducing another palette or animation system.
+
+Search uses a square top Drawer with a fixed intro/input/close control and an independently scrolling results region. The native handle closes upward (`showHandle` and `handleOnly`); input/results opt out of dragging. Drawer still owns gestures, animations, focus trapping and restoration. Search only assigns initial field focus after native mounting. Keep close, Escape and backdrop available as alternatives to dragging. Test deep result scrolling, upward dragging, focus restoration and unchanged background scroll together.

@@ -25,7 +25,7 @@ The browser suite uses Chromium; install it with `npm exec --prefix docs -- play
 
 Reusable controls live in `src/components/`, the document shell in `src/layouts/`, and UI strings in `src/i18n/translations/en/`. Article prose and example strings belong to Markdown. There is no runtime UI framework. Component styles and scripts stay inside their Astro components, using scoped selectors and instance-owned custom elements.
 
-The docs import the shared `shared/styles/theme.css` tokens, Box, Theme, ThemeToggle and CopyButton intentionally. This keeps colors, breakpoints, container conventions, theme persistence and clipboard feedback consistent. `Article` attaches a template of the shared CopyButton to each fenced block; code remains readable without JavaScript. The build-time rehype plugin makes overflowing code and tables keyboard reachable even without JavaScript.
+The docs import the shared `shared/styles/theme.css` tokens, Box, Theme, ThemeToggle and CopyButton intentionally. This keeps colors, breakpoints, container conventions, theme persistence and clipboard feedback consistent. `Article` wraps each rendered fence with a template of the shared CodeFrame, which owns the toolbar and CopyButton; code remains readable without JavaScript. The build-time rehype plugin makes overflowing code and tables keyboard reachable even without JavaScript.
 
 ## Search
 
@@ -68,3 +68,11 @@ Do not reformat or rewrite upstream skill content or computed hashes. Review ins
 Reusable primitives live in `components/`: Icon, IconButton (composing the landing Button), TextField and LinkCard own their markup and scoped styles. SearchResultCard composes LinkCard and provides the inert result template that Search clones; the client script only fills its escaped text/URL fields. Pagination uses the same LinkCard. DrawerStyles centralizes the vendor stylesheet adaptation for both menus without copying animations. Close buttons rendered by Drawer remain package-owned.
 
 The collection/i18n design follows the official [Content Collections guide](https://docs.astro.build/en/guides/content-collections/) and [i18n recipe](https://docs.astro.build/en/recipes/i18n/): validated build-time entries supply typed data and Markdown rendering, while interface catalogs and content language remain separate responsibilities.
+
+## Shared code presentation and search continuity
+
+The landing `CodeFrame` owns the filename/language toolbar, code surface, border, overflow and shared CopyButton. `CodeBlock` supplies the landing tokens; docs `Article` clones a frame template around rendered Markdown without changing code text. Preserve the landing `.code-block` hook. Do not fork clipboard feedback or frame styles. Shiki's Ticker theme maps syntax scopes directly to the shared semantic palette, so both color modes follow the same brand tokens. Check both sites after changing this shared component.
+
+Docs reuse the landing eyebrow and font families, with serif article titles, Inter reading text and mono interface labels. Use existing feature/code surfaces for hierarchy rather than introducing another palette or animation system.
+
+Search uses a square top Drawer with a fixed intro/input/close control and an independently scrolling results region. The native handle closes upward (`showHandle` and `handleOnly`); input/results opt out of dragging. Drawer still owns gestures, animations, focus trapping and restoration. Search only assigns initial field focus after native mounting. Keep close, Escape and backdrop available as alternatives to dragging. Test deep result scrolling, upward dragging, focus restoration and unchanged background scroll together.
