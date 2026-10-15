@@ -11,23 +11,82 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3)
 ---
 
 {items.length > 0 && (
-  <aside class:list={['toc']} aria-label={t.toc}>
-    <details open={!collapsed}>
-      <summary>{t.toc}</summary>
-      <nav>
-        <ul>
-          {items.map((h) => (
-            <li class:list={[{ nested: h.depth === 3 }]}>
-              <a href={`#${h.slug}`}>{h.text}</a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    </details>
-  </aside>
+  <ticker-docs-toc class:list={['toc']}>
+    <aside aria-label={t.toc}>
+      <details open={!collapsed}>
+        <summary>{t.toc}</summary>
+        <nav>
+          <ul>
+            {items.map((h) => (
+              <li class:list={[{ nested: h.depth === 3 }]}>
+                <a href={`#${h.slug}`}>{h.text}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </details>
+    </aside>
+  </ticker-docs-toc>
 )}
+<script>
+  class DocsTableOfContents extends HTMLElement {
+    private lifecycle?: AbortController
+    private observer?: ResizeObserver
+    private frame = 0
+    connectedCallback() {
+      this.lifecycle?.abort()
+      this.observer?.disconnect()
+      this.lifecycle = new AbortController()
+      const { signal } = this.lifecycle
+      const entries = Array.from(this.querySelectorAll<HTMLAnchorElement>('a[href^="#"]'))
+        .map((link) => ({
+          link,
+          heading: document.getElementById(decodeURIComponent(link.hash.slice(1))),
+        }))
+        .filter((entry) => entry.heading)
+      const header = document.querySelector('ticker-docs-header')
+      const update = () => {
+        this.frame = 0
+        const offset =
+          (header?.getBoundingClientRect().bottom ?? 0) +
+          2.5 * parseFloat(getComputedStyle(document.documentElement).fontSize) +
+          1
+        const atEnd =
+          scrollY > 0 && scrollY + innerHeight >= document.documentElement.scrollHeight - 1
+        const current = atEnd
+          ? entries.at(-1)
+          : entries.findLast((entry) => entry.heading!.getBoundingClientRect().top <= offset)
+        for (const entry of entries) {
+          if (entry === current) entry.link.setAttribute('aria-current', 'location')
+          else entry.link.removeAttribute('aria-current')
+        }
+      }
+      const schedule = () => {
+        if (!this.frame) this.frame = requestAnimationFrame(update)
+      }
+      window.addEventListener('scroll', schedule, { passive: true, signal })
+      window.addEventListener('resize', schedule, { signal })
+      window.addEventListener('hashchange', schedule, { signal })
+      window.addEventListener('load', schedule, { signal })
+      this.observer = new ResizeObserver(schedule)
+      if (header) this.observer.observe(header)
+      const article = document.querySelector('ticker-docs-article')
+      if (article) this.observer.observe(article)
+      schedule()
+    }
+    disconnectedCallback() {
+      this.lifecycle?.abort()
+      this.observer?.disconnect()
+      cancelAnimationFrame(this.frame)
+      this.frame = 0
+    }
+  }
+  if (!customElements.get('ticker-docs-toc'))
+    customElements.define('ticker-docs-toc', DocsTableOfContents)
+</script>
 <style>
   .toc {
+    display: block;
     min-width: 0;
     font-size: 0.75rem;
   }
@@ -46,7 +105,11 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3)
   }
   a {
     display: block;
-    padding: 0.3125rem 0 0.3125rem 1rem;
+    padding: 0.3125rem 0.5rem 0.3125rem 1rem;
+    border-radius: 0.4375rem;
+    transition:
+      background-color var(--duration-ui) var(--ease-ui),
+      color var(--duration-ui) var(--ease-ui);
     line-height: 1.55;
     color: var(--color-text-subtle);
     text-decoration: none;
@@ -55,6 +118,14 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3)
   .nested a {
     padding-left: 1.75rem;
     font-size: 0.6875rem;
+  }
+  a[aria-current='location'] {
+    background: var(--color-accent-soft);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    a {
+      transition: none;
+    }
   }
   a:focus-visible {
     outline: 0.125rem solid var(--color-accent);
