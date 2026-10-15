@@ -13,6 +13,7 @@ export default defineConfig({
   site: site?.href,
   base: site?.pathname ?? '/',
   output: 'static',
+  trailingSlash: 'always',
   redirects: Object.fromEntries(
     [
       'getting-started',

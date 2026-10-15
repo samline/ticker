@@ -2,6 +2,7 @@
 import drawerCss from '@samline/drawer/styles.css?inline'
 import Icon from '../../../shared/components/Icon.astro'
 import IconButton from '../../../shared/components/IconButton.astro'
+import ExamplesLink from './ExamplesLink.astro'
 import Navigation from './Navigation.astro'
 import { getI18n } from '../i18n/utils'
 const t = getI18n(Astro)
@@ -30,6 +31,7 @@ const id = `docs-menu-${crypto.randomUUID()}`
       <p class:list={['eyebrow']}>{t.name}</p>
       <h2>{t.docs}</h2>
       <Navigation current={current} />
+      <ExamplesLink />
     </div>
   </details>
 </ticker-docs-menu>

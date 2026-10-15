@@ -5,6 +5,12 @@ import SEO from '../components/SEO.astro'
 import Theme from '../../../shared/components/Theme.astro'
 import Header from './Header.astro'
 import Footer from './Footer.astro'
+interface Props {
+  title?: string
+  description?: string
+  keywords?: readonly string[]
+}
+const { title, description, keywords } = Astro.props
 const i18n = getI18n(Astro)
 ---
 
@@ -13,7 +19,7 @@ const i18n = getI18n(Astro)
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <SEO />
+    <SEO title={title} description={description} keywords={keywords} />
 
     <link rel="preconnect" href="https://fonts.bunny.net" />
     <link

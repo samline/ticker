@@ -7,6 +7,8 @@ title: 'Recipes'
 description: 'Practical patterns for dynamic content, multiple tickers, declarative markup, updates, browser globals, and teardown.'
 ---
 
+Looking for a complete starting point? [Open the working examples](/ticker/examples/) to try announcements, logos, sample prices, opposite rows, dynamic content and playback controls. Each recipe includes a complete HTML/CDN file and an npm/ESM alternative. The patterns below explain integrations in more detail.
+
 ## Dynamic content
 
 ```ts

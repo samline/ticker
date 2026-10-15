@@ -36,6 +36,20 @@ const png = await readFile(new URL('social.png', directory))
 assert.equal(png.readUInt32BE(16), 1200)
 assert.equal(png.readUInt32BE(20), 630)
 assert.ok(html.includes(`href="${base}docs/"`))
+const examples = await readFile(new URL('examples/index.html', directory), 'utf8')
+assert.ok(examples.includes(`rel="canonical" href="${canonical}examples/"`))
+assert.ok(examples.includes(`property="og:image" content="${canonical}social.png"`))
+assert.ok(sitemap.includes(`<loc>${canonical}examples/</loc>`))
+const skill = await readFile(new URL('skills/ticker/SKILL.md', directory), 'utf8')
+const skillSource = await readFile(new URL('../../skills/ticker/SKILL.md', import.meta.url), 'utf8')
+const manifest = JSON.parse(await readFile(new URL('../../package.json', import.meta.url), 'utf8'))
+assert.equal(skill, skillSource, 'The downloadable skill must match its maintained source')
+assert.ok(
+  skill.includes(`package-version: '${manifest.version}'`),
+  'Review the skill for the current package release'
+)
+assert.ok(!examples.includes('<iframe'), 'Examples must reuse native landing components')
+
 const redirect = await readFile(new URL('getting-started/index.html', directory), 'utf8')
 assert.ok(
   redirect.includes(`url=${base}docs/getting-started/`),

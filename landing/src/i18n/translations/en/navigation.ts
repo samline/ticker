@@ -30,6 +30,7 @@ export default {
       label: 'FAQ',
       description: 'A few details before you build.',
     },
+    { page: 'examples', label: 'Examples', description: 'Working recipes. Complete code to copy.' },
     { docsRoute: 'overview', label: 'Docs', description: 'The complete guide and API reference.' },
   ],
   footer: {
@@ -38,6 +39,8 @@ export default {
     explore: 'Explore',
     project: 'Project',
     setup: 'Installation guide',
+    examples: 'Working examples',
+    skill: 'Ticker skill for AI agents',
     backToTop: 'Back to top',
     credit: 'Samuel Olvera · Made for the open web.',
   },

@@ -12,7 +12,7 @@ const t = i18n.navigation.footer
   <Box>
     <div class:list={['footer-main']}>
       <div class:list={['footer-brand']}>
-        <Logo />
+        <Logo href={import.meta.env.BASE_URL} />
         <p>{t.description}</p>
         <div class:list={['footer-meta']}>
           <span>{format(i18n.common.versionLabel, { version: i18n.common.version })}</span>
@@ -25,9 +25,13 @@ const t = i18n.navigation.footer
           <h2>{t.explore}</h2>
           <a href={docsHref('overview')}>{i18n.common.links.docs}</a>
           <a href={docsHref('setup')}>{t.setup}</a>
+          <a href={`${import.meta.env.BASE_URL}examples/`}>{t.examples}</a>
         </div>
         <div class:list={['footer-group']}>
           <h2>{t.project}</h2>
+          <a href={`${import.meta.env.BASE_URL}skills/ticker/SKILL.md`} download="SKILL.md">
+            {t.skill}
+          </a>
           <a href="https://github.com/samline/ticker" target="_blank" rel="noopener noreferrer">
             {i18n.common.links.github}
             <span aria-hidden="true">↗</span>

@@ -15,6 +15,8 @@
 - [What You Can Build](#what-you-can-build)
 - [API at a Glance](#api-at-a-glance)
 - [Documentation](#documentation)
+- [AI agent skill](#ai-agent-skill)
+- [Website development](#website-development)
 - [License](#license)
 
 ---
@@ -163,10 +165,10 @@ Full guides and the same reference are available at **[samline.github.io/ticker/
 
 | Doc                                                               | Purpose                                                        |
 | ----------------------------------------------------------------- | -------------------------------------------------------------- |
-| [Installation](docs/src/content/docs/getting-started.mdx)          | Installation, first ticker, ownership, and lifecycle.          |
+| [Installation](docs/src/content/docs/getting-started.mdx)         | Installation, first ticker, ownership, and lifecycle.          |
 | [Configuration](docs/src/content/docs/reference/configuration.md) | Every option, default, normalization rule, and data attribute. |
 | [Browser integration](docs/src/content/docs/reference/browser.md) | Browser global and bundler-friendly registry usage.            |
-| [Entrypoints](docs/src/content/docs/reference/entrypoints.mdx)     | Root, Vanilla, core, browser, global, and CSS exports.         |
+| [Entrypoints](docs/src/content/docs/reference/entrypoints.mdx)    | Root, Vanilla, core, browser, global, and CSS exports.         |
 | [Styling](docs/src/content/docs/reference/styling.md)             | Required stylesheet, DOM contract, classes, and CSS variables. |
 | [Accessibility](docs/src/content/docs/guides/accessibility.md)    | Clone behavior, reduced motion, and interactive content.       |
 | [Core utilities](docs/src/content/docs/reference/core.md)         | Defaults, state factories, validators, and advanced contracts. |
@@ -180,22 +182,60 @@ Full guides and the same reference are available at **[samline.github.io/ticker/
 
 MIT
 
-## Documentation site
+## Website development
 
-The custom Astro 7 documentation lives in `docs/`; the landing lives in `landing/`. They share theme tokens and reusable controls, and deploy together at `/ticker/` and `/ticker/docs/` as one GitHub Pages artifact. Starlight has been replaced.
+Home, Examples and Docs are one website, built as two Astro 7 applications with shared components and Tailwind 4 tokens:
+
+| Destination      | Source                             | Public URL                                                                   |
+| ---------------- | ---------------------------------- | ---------------------------------------------------------------------------- |
+| Home             | `landing/src/pages/index.astro`    | [Landing](https://samline.github.io/ticker/)                                 |
+| Working examples | `landing/src/pages/examples.astro` | [Examples](https://samline.github.io/ticker/examples/)                       |
+| Documentation    | `docs/src/content/docs/`           | [Docs](https://samline.github.io/ticker/docs/)                               |
+| Agent skill      | `skills/ticker/SKILL.md`           | [Download SKILL.md](https://samline.github.io/ticker/skills/ticker/SKILL.md) |
+
+The website requires Node 22.12+; the runtime package's bundling requirement remains Node 20+. Install shared tooling before both applications:
 
 ```sh
+npm ci --prefix shared
+npm ci --prefix landing
 npm ci --prefix docs
+npm run landing:dev
+# In a second terminal:
 npm run docs:dev
+```
+
+Home's demo keeps announcements, logos and prices in separate tabs, with independent speed settings. Examples reuses that same TickerDemo, BrandLogo, SpeedControl and demo presentation, alongside shared buttons, headings, tabs and code-copy controls. Previews are native components, not iframes. Six recipes provide complete CDN and npm/ESM HTML files; preview changes do not rewrite the copied initial settings. See [integration recipes](https://samline.github.io/ticker/docs/reference/examples/) for deeper lifecycle patterns.
+
+Reusable Astro primitives, UI catalogs, helpers and theme tokens live in [`shared/`](shared/README.md). App folders own content and composition. Preserve scoped component styles/scripts, rem lengths, class:list, translated interface text and the existing Box widths. [AGENTS.md](AGENTS.md) records accepted project decisions and mistakes to avoid; read the app-specific contracts before editing.
+
+```sh
+npm run landing:check
 npm run docs:check
+npm --prefix landing run format:check
+npm --prefix docs run format:check
 npm run site:build
-npm run docs:test:browser
+npm --prefix landing run test:browser
 npm run site:test:browser
 ```
 
-See [the docs maintenance guide](docs/README.md) and [implementation contract](docs/AGENTS.md). Update public API references, examples, navigation, search, source links and coverage checks together whenever the package changes. Only maintained Markdown content is included in the npm package; site dependencies and generated assets are excluded.
+`site:build` builds docs, includes their output under the landing artifact, merges sitemaps and audits local links, anchors, assets and redirects. GitHub Pages deploys that artifact with `/ticker/` as its base. Do not deploy docs over the landing root. Search is local Pagefind generated from the maintained Content Collection; Starlight is retired. The docs preserve all 23 articles and the inventory of 33 former sources.
 
+Docs use per-article canonical/share metadata, WebPage/TechArticle/BreadcrumbList structured data, semantic navigation, named main content, keyboard-accessible code copying and search, and light/dark themes. Browser checks cover all articles' metadata and automated accessibility in both themes; they complement keyboard, responsive and reduced-motion checks, not a complete accessibility certification.
 
-### Website UI ownership
+See [landing maintenance](landing/README.md), [docs maintenance](docs/README.md), and [shared ownership](shared/README.md). When package options, lifecycle, version or exports change, review the skill, copied examples, documentation, landing claims and tests together. Route/theme/component changes require checking all affected destinations. The npm package includes runtime distribution and maintained documentation prose, excluding website dependencies, generated assets and the website-only skill download endpoint.
 
-The landing and docs are routes of one site. Their reusable Astro components, UI catalogs and theme tokens live in [`shared/`](shared/README.md); app folders own their content and composition. Install `npm ci --prefix shared` before installing/checking the apps. Shared source is private and excluded from the runtime npm package. Both app format commands use the root Prettier config and cover shared files; cross-site checks and browser validation are required after shared UI changes.
+## AI agent skill
+
+The public [Ticker skill](skills/ticker/SKILL.md) teaches an agent how to choose a Ticker integration, load CSS, manage controllers, preserve accessible motion and avoid nonexistent APIs. It is self-contained and describes v2.0.4; agents must verify their installed version.
+
+Download [SKILL.md](https://samline.github.io/ticker/skills/ticker/SKILL.md) into a `ticker/` folder in your agent's supported skill directory. For agents that discover project skills from `.agents/skills/`:
+
+```sh
+mkdir -p .agents/skills/ticker
+curl --fail --location https://samline.github.io/ticker/skills/ticker/SKILL.md \
+  --output .agents/skills/ticker/SKILL.md
+```
+
+When working from this repository, copy `skills/ticker/SKILL.md` instead. Keep the filename `SKILL.md`; ask the agent to use the Ticker skill to implement a marquee, announcement strip, logo row or another supported pattern. Discovery paths and explicit invocation syntax depend on the agent.
+
+The download is generated directly from that source file. Update its version, contracts, links and examples with package changes, validate the skill, and rebuild the website. Do not maintain a second public copy by hand.

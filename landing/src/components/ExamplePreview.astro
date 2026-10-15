@@ -1,0 +1,191 @@
+---
+import type { Recipe } from '../i18n/translations/en/examples'
+import { getI18n } from '../i18n/utils'
+import DemoStudio from './DemoStudio.astro'
+import DemoPanel from './DemoPanel.astro'
+import DemoFooter from './DemoFooter.astro'
+import TickerDemo from './TickerDemo.astro'
+import BrandLogo from './BrandLogo.astro'
+import SpeedControl from './SpeedControl.astro'
+import Button from '../../../shared/components/Button.astro'
+interface Props {
+  recipe: Recipe
+}
+const { recipe } = Astro.props
+const t = getI18n(Astro).examples
+const base = import.meta.env.BASE_URL
+---
+
+<ticker-example-preview data-added={t.added} data-added-status={t.addedStatus}>
+  <DemoStudio>
+    {recipe.rows.map(row => (
+      <DemoPanel label={row.label}>
+        <TickerDemo
+          kind={recipe.kind === 'logos' || recipe.kind === 'prices' ? recipe.kind : 'news'}
+          label={row.label}
+          duration={row.duration}
+          direction={row.direction}
+        >
+          {row.items.map(item =>
+            item.logo ? (
+              <BrandLogo src={`${base}assets/brands/${item.logo}`} name={item.label} />
+            ) : (
+              <>
+                {item.href ? (
+                  <a href={`${base}docs/${item.href}`}>{item.label}</a>
+                ) : item.value ? (
+                  <>
+                    <span class:list={['font-semibold']}>{item.label}</span>
+                    <span class:list={['price']}>{item.value}</span>
+                    <span class:list={[item.change?.startsWith('+') ? 'delta-up' : 'delta-down']}>
+                      {item.change}
+                    </span>
+                  </>
+                ) : (
+                  <span>{item.label}</span>
+                )}
+                <span class:list={['sep']} aria-hidden="true"></span>
+              </>
+            )
+          )}
+        </TickerDemo>
+      </DemoPanel>
+    ))}
+    <DemoFooter
+      note={recipe.note}
+      controls={recipe.kind === 'dynamic' || recipe.kind === 'controls'}
+    >
+      {recipe.kind === 'dynamic' && (
+        <Button variant="ghost" data-add disabled>
+          {t.add}
+        </Button>
+      )}
+      {recipe.kind === 'controls' && (
+        <>
+          <SpeedControl />
+          <div role="group" aria-label={t.direction} class:list={['direction-controls']}>
+            <Button
+              variant="ghost"
+              context="ticker"
+              data-example-direction="left"
+              aria-pressed="true"
+              disabled
+            >
+              {t.left}
+            </Button>
+            <Button
+              variant="ghost"
+              context="ticker"
+              data-example-direction="right"
+              aria-pressed="false"
+              disabled
+            >
+              {t.right}
+            </Button>
+          </div>
+        </>
+      )}
+    </DemoFooter>
+  </DemoStudio>
+  {recipe.kind === 'dynamic' && (
+    <p class:list={['update-status']} role="status" aria-live="polite"></p>
+  )}
+</ticker-example-preview>
+<script>
+  class TickerExamplePreview extends HTMLElement {
+    private lifecycle?: AbortController
+    connectedCallback() {
+      this.lifecycle?.abort()
+      this.lifecycle = new AbortController()
+      const { signal } = this.lifecycle
+      const demo = this.querySelector<HTMLElement>('ticker-demo')
+      const add = this.querySelector<HTMLButtonElement>('[data-add]')
+      const sync = () => {
+        const enabled = demo?.dataset.initialized === 'true'
+        if (add) add.disabled = !enabled
+        this.querySelectorAll<HTMLButtonElement>('button[data-example-direction]').forEach(
+          button => {
+            button.disabled = !enabled
+          }
+        )
+        this.querySelector('ticker-speed')?.dispatchEvent(
+          new CustomEvent('speed:set', {
+            detail: { duration: Number(demo?.dataset.duration), enabled },
+          })
+        )
+      }
+      this.addEventListener('ticker:ready', sync, { signal })
+      this.addEventListener(
+        'speed:change',
+        event =>
+          demo?.dispatchEvent(
+            new CustomEvent('ticker:duration', { detail: (event as CustomEvent<number>).detail })
+          ),
+        { signal }
+      )
+      this.addEventListener(
+        'click',
+        event => {
+          const button = (event.target as Element).closest<HTMLButtonElement>(
+            'button[data-example-direction]'
+          )
+          const direction = button?.dataset.exampleDirection
+          if (direction !== 'left' && direction !== 'right') return
+          demo?.dispatchEvent(new CustomEvent('ticker:direction', { detail: direction }))
+          this.querySelectorAll<HTMLButtonElement>('button[data-example-direction]').forEach(item =>
+            item.setAttribute('aria-pressed', String(item === button))
+          )
+        },
+        { signal }
+      )
+      let count = 0
+      add?.addEventListener(
+        'click',
+        () => {
+          count++
+          demo?.dispatchEvent(
+            new CustomEvent('ticker:append', {
+              detail: this.dataset.added?.replace('{count}', String(count)) ?? '',
+            })
+          )
+          const status = this.querySelector('[role=status]')
+          if (status)
+            status.textContent = this.dataset.addedStatus?.replace('{count}', String(count)) ?? ''
+        },
+        { signal }
+      )
+      Promise.all(
+        ['ticker-demo', 'ticker-speed'].map(name => customElements.whenDefined(name))
+      ).then(() => {
+        if (!signal.aborted) sync()
+      })
+    }
+    disconnectedCallback() {
+      this.lifecycle?.abort()
+    }
+  }
+  if (!customElements.get('ticker-example-preview'))
+    customElements.define('ticker-example-preview', TickerExamplePreview)
+</script>
+<style>
+  ticker-example-preview {
+    display: block;
+  }
+  .direction-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+  .direction-controls [aria-pressed='true'] {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+  .update-status {
+    color: var(--color-text-muted);
+    font-size: var(--text-small);
+    margin-top: var(--space-sm);
+  }
+  .update-status:empty {
+    display: none;
+  }
+</style>

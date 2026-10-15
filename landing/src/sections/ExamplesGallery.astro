@@ -1,0 +1,108 @@
+---
+import { getI18n } from '../i18n/utils'
+import Section from '../components/Section.astro'
+import Box from '../../../shared/components/Box.astro'
+import Heading from '../../../shared/components/Heading.astro'
+import Eyebrow from '../../../shared/components/Eyebrow.astro'
+import Button from '../../../shared/components/Button.astro'
+import TextLink from '../../../shared/components/TextLink.astro'
+import ExampleRecipe from '../components/ExampleRecipe.astro'
+const t = getI18n(Astro).examples
+---
+
+<Section spacing="none" aria-labelledby="examples-title">
+  <Box size="medium" class:list={['gallery']}>
+    <header class:list={['introduction']}>
+      <Eyebrow>{t.eyebrow}</Eyebrow>
+      <Heading id="examples-title" level={1}>
+        {`${t.heading} `}
+        <span class:list={['serif']}>{t.headingAccent}</span>
+      </Heading>
+      <p>{t.introduction}</p>
+      <p class:list={['navigation-label']}>{t.navigation}</p>
+      <nav aria-label={t.navigation} class:list={['recipe-navigation']}>
+        {t.recipes.map(recipe => (
+          <Button variant="secondary" href={`#${recipe.id}`} class:list={['recipe-link']}>
+            {recipe.navigationLabel}
+            <span aria-hidden="true">↓</span>
+          </Button>
+        ))}
+      </nav>
+      <p class:list={['accessibility']}>{t.accessibility}</p>
+      <div class:list={['resources']}>
+        <TextLink href={`${import.meta.env.BASE_URL}docs/getting-started/`}>
+          {t.gettingStarted}
+        </TextLink>
+        <TextLink href={`${import.meta.env.BASE_URL}skills/ticker/SKILL.md`} download="SKILL.md">
+          {t.skill}
+        </TextLink>
+      </div>
+    </header>
+    {t.recipes.map(recipe => (
+      <ExampleRecipe recipe={recipe} />
+    ))}
+    <p class:list={['attribution']}>
+      <a href={`${import.meta.env.BASE_URL}assets/brands/LICENSE.md`}>{t.brandAttribution}</a>
+    </p>
+  </Box>
+</Section>
+<style>
+  .gallery {
+    padding-block: 2.5rem 5rem;
+  }
+  .introduction {
+    padding-bottom: 2.5rem;
+  }
+  .introduction > p {
+    margin-top: 1.5rem;
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+  .introduction .accessibility {
+    font-size: 0.875rem;
+  }
+  .resources {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm) var(--space-lg);
+  }
+  .recipe-navigation {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-sm);
+    margin-top: var(--space-sm);
+  }
+  .introduction .navigation-label {
+    margin-top: 2rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+  }
+  .recipe-link {
+    height: auto;
+    min-height: 3.125rem;
+    justify-content: space-between;
+    white-space: normal;
+    text-align: left;
+    padding-block: 0.75rem;
+  }
+  @media (width < 48rem) {
+    .recipe-navigation {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (width < 30rem) {
+    .recipe-navigation {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .attribution {
+    padding-top: 1.5rem;
+    color: var(--color-text-subtle);
+    font-size: var(--text-small);
+  }
+  a {
+    color: var(--color-accent);
+    text-underline-offset: 0.1875rem;
+  }
+</style>

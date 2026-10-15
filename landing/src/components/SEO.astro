@@ -5,14 +5,30 @@ import packageInfo from '../../../package.json'
 
 const i18n = getI18n(Astro)
 const locale = getLocale(Astro.currentLocale)
-const canonical = Astro.site?.href
+interface Props {
+  title?: string
+  description?: string
+  keywords?: readonly string[]
+}
+const {
+  title = i18n.seo.title,
+  description = i18n.seo.description,
+  keywords = i18n.seo.keywords,
+} = Astro.props
+const canonical = Astro.site
+  ? new URL(
+      Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`,
+      Astro.site
+    ).href
+  : undefined
+const home = Astro.site?.href
 const indexable = import.meta.env.PROD && !!canonical
-const image = canonical ? new URL('social.png', canonical).href : undefined
+const image = canonical ? new URL('social.png', home).href : undefined
 const icon = `${import.meta.env.BASE_URL}favicon.svg`
 const repository = packageInfo.repository.url.replace(/^git\+/, '').replace(/\.git$/, '')
 const software = {
   '@type': 'SoftwareSourceCode',
-  '@id': canonical ? `${canonical}#software` : undefined,
+  '@id': canonical ? `${home}#software` : undefined,
   name: i18n.common.packageName,
   description: i18n.seo.description,
   version: i18n.common.version,
@@ -21,7 +37,7 @@ const software = {
   runtimePlatform: i18n.seo.software.platform,
   license: `${repository}/blob/main/LICENSE.md`,
   author: { '@type': 'Person', name: i18n.common.author },
-  url: canonical,
+  url: home,
   inLanguage: locale,
 }
 const schema = {
@@ -29,20 +45,20 @@ const schema = {
   '@graph': [
     {
       '@type': 'WebSite',
-      '@id': canonical ? `${canonical}#website` : undefined,
+      '@id': canonical ? `${home}#website` : undefined,
       name: i18n.common.packageName,
-      url: canonical,
+      url: home,
       inLanguage: locale,
     },
     {
       '@type': 'WebPage',
       '@id': canonical ? `${canonical}#webpage` : undefined,
       url: canonical,
-      name: i18n.seo.title,
-      description: i18n.seo.description,
+      name: title,
+      description,
       inLanguage: locale,
-      isPartOf: canonical ? { '@id': `${canonical}#website` } : undefined,
-      mainEntity: canonical ? { '@id': `${canonical}#software` } : software,
+      isPartOf: canonical ? { '@id': `${home}#website` } : undefined,
+      mainEntity: canonical ? { '@id': `${home}#software` } : software,
       primaryImageOfPage: image
         ? { '@type': 'ImageObject', url: image, width: 1200, height: 630 }
         : undefined,
@@ -52,9 +68,9 @@ const schema = {
 }
 ---
 
-<title>{i18n.seo.title}</title>
-<meta name="description" content={i18n.seo.description} />
-<meta name="keywords" content={i18n.seo.keywords.join(', ')} />
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="keywords" content={keywords.join(', ')} />
 <meta name="author" content={i18n.common.author} />
 <meta
   name="robots"
@@ -70,8 +86,8 @@ const schema = {
 {canonical && <link rel="canonical" href={canonical} />}
 <link rel="icon" type="image/svg+xml" href={icon} />
 <meta property="og:type" content="website" />
-<meta property="og:title" content={i18n.seo.title} />
-<meta property="og:description" content={i18n.seo.description} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
 <meta property="og:site_name" content={i18n.common.packageName} />
 <meta property="og:locale" content={i18n.seo.social.locale} />
 {canonical && <meta property="og:url" content={canonical} />}
@@ -86,8 +102,8 @@ const schema = {
   </>
 )}
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content={i18n.seo.title} />
-<meta name="twitter:description" content={i18n.seo.description} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
 {image && (
   <>
     <meta name="twitter:image" content={image} />

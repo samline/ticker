@@ -1,7 +1,7 @@
 ---
 import Icon from '../../../shared/components/Icon.astro'
 import { format } from '../../../shared/i18n/format'
-import { docsHref } from '../lib/docs'
+import { navigationHref, isHome } from '../lib/navigation'
 import DrawerStyles from '../../../shared/components/DrawerStyles.astro'
 import drawerCss from '@samline/drawer/styles.css?inline'
 import { getI18n } from '../i18n/utils'
@@ -45,7 +45,8 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
           {i18n.navigation.items.map((item, index) => (
             <li>
               <a
-                href={'docsRoute' in item ? docsHref(item.docsRoute) : item.href}
+                href={navigationHref(item, Astro.url.pathname)}
+                aria-current={'page' in item && !isHome(Astro.url.pathname) ? 'page' : undefined}
                 aria-label={item.label}
                 class:list={['menu-link']}
               >
@@ -122,7 +123,13 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
           }
         )
         for (const link of this.querySelectorAll<HTMLAnchorElement>('.menu-link')) {
-          if (section?.id && link.getAttribute('href') === `#${section.id}`)
+          const target = new URL(link.href)
+          if (
+            target.pathname.replace(/\/$/, '') === location.pathname.replace(/\/$/, '') &&
+            !target.hash
+          )
+            link.setAttribute('aria-current', 'page')
+          else if (section?.id && link.getAttribute('href') === `#${section.id}`)
             link.setAttribute('aria-current', 'location')
           else link.removeAttribute('aria-current')
         }

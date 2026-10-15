@@ -1,4 +1,5 @@
 export default {
+  examplesLabel: 'Try the complete working examples',
   eyebrow: '04 / Working with a live instance',
   title: 'Beyond the first render.',
   titleAccent: 'Handle what changes.',

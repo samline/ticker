@@ -17,7 +17,7 @@ const items = headings.filter(h => h.depth === 2 || h.depth === 3)
     <aside aria-label={t.toc}>
       <Disclosure open={!collapsed} class:list={['toc-disclosure']}>
         <span slot="summary">{t.toc}</span>
-        <nav>
+        <nav aria-label={t.toc}>
           <ul>
             {items.map(h => (
               <li>

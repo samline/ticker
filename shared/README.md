@@ -1,6 +1,6 @@
 # Ticker site foundations
 
-The landing and documentation are two routes of one product website. This private source package owns their reusable UI, shared interface catalogs and design tokens. The apps compile the same `.astro` sources; there is no second UI build, copied component tree or published npm UI artifact.
+The landing, examples gallery and documentation are routes of one product website. This private source package owns their reusable UI, shared interface catalogs and design tokens. The apps compile the same `.astro` sources; there is no second UI build, copied component tree or published npm UI artifact.
 
 ## Ownership
 

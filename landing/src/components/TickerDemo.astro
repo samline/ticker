@@ -6,8 +6,10 @@ interface Props {
   id?: string
   kind: 'news' | 'logos' | 'prices'
   label: string
+  duration?: number
+  direction?: 'left' | 'right'
 }
-const { id = 'ticker', kind, label } = Astro.props
+const { id = 'ticker', kind, label, duration, direction } = Astro.props
 const instanceId = `${id}-${crypto.randomUUID()}`
 const defaults = {
   news: { duration: 38, direction: 'left' },
@@ -19,8 +21,8 @@ const i18n = getI18n(Astro)
 
 <ticker-demo
   data-kind={kind}
-  data-duration={defaults[kind].duration}
-  data-direction={defaults[kind].direction}
+  data-duration={duration ?? defaults[kind].duration}
+  data-direction={direction ?? defaults[kind].direction}
 >
   <div
     class:list={['ticker-frame ticker-wrapper']}
@@ -103,6 +105,32 @@ const i18n = getI18n(Astro)
             const duration = (event as CustomEvent<number>).detail
             this.dataset.duration = String(duration)
             this.controller?.update({ duration })
+          },
+          { signal }
+        )
+        this.addEventListener(
+          'ticker:direction',
+          event => {
+            const direction = (event as CustomEvent<'left' | 'right'>).detail
+            this.dataset.direction = direction
+            this.controller?.update({ direction })
+          },
+          { signal }
+        )
+        this.addEventListener(
+          'ticker:append',
+          event => {
+            if (!this.controller) return
+            const item = document.createElement('span')
+            item.textContent = (event as CustomEvent<string>).detail
+            const separator = document.createElement('span')
+            separator.className = 'sep'
+            separator.setAttribute('aria-hidden', 'true')
+            const content = this.controller.source.querySelector<HTMLElement>(
+              '.ticker-content:not(.ticker-clone)'
+            )
+            content?.append(item, separator)
+            this.controller.refresh()
           },
           { signal }
         )

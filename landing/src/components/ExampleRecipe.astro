@@ -1,0 +1,263 @@
+---
+import { readFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
+import { format as formatCode, resolveConfig } from 'prettier'
+import { escapeXml } from '../../../shared/lib/serialize'
+import { format } from '../../../shared/i18n/format'
+import { getI18n } from '../i18n/utils'
+import type { Recipe } from '../i18n/translations/en/examples'
+import ExamplePreview from './ExamplePreview.astro'
+import Heading from '../../../shared/components/Heading.astro'
+import TextLink from '../../../shared/components/TextLink.astro'
+import Disclosure from '../../../shared/components/Disclosure.astro'
+import Tabs from '../../../shared/components/Tabs.astro'
+import TabPanel from '../../../shared/components/TabPanel.astro'
+import CodeFrame from '../../../shared/components/CodeFrame.astro'
+import manifest from '../../../package.json'
+interface Props {
+  recipe: Recipe
+}
+const { recipe } = Astro.props
+const t = getI18n(Astro).examples
+const base = import.meta.env.BASE_URL
+const docsBase = `${manifest.homepage.replace(/\/$/, '')}/docs/`
+const cdn = `https://cdn.jsdelivr.net/npm/${manifest.name}@${manifest.version}/dist/`
+const e = escapeXml
+const themeSource = await readFile(resolve('../shared/styles/theme.css'), 'utf8')
+const palette = (theme: 'light' | 'dark') => {
+  const block = themeSource.match(new RegExp(`\\[data-theme='${theme}'\\] \\{([^}]+)\\}`))?.[1]
+  if (!block) throw new Error(`Missing recipe theme: ${theme}`)
+  const tokens = Object.fromEntries(
+    [...block.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map(match => [match[1], match[2]])
+  )
+  return Object.entries({
+    bg: '--theme-bg',
+    text: '--theme-text',
+    surface: '--theme-surface',
+    border: '--theme-border',
+    accent: '--theme-accent',
+    up: '--palette-price-up',
+    down: '--palette-price-down',
+    hover: '--palette-button-hover',
+  })
+    .map(([name, token]) => {
+      if (!tokens[token]) throw new Error(`Missing recipe color: ${token}`)
+      return `--${name}: ${tokens[token]};`
+    })
+    .join(' ')
+}
+const rows = await Promise.all(
+  recipe.rows.map(async row => {
+    const items = await Promise.all(
+      row.items.map(async item => {
+        if (item.logo) {
+          const svg = await readFile(resolve('public/assets/brands', item.logo), 'utf8')
+          return `<span class="item"><img src="data:image/svg+xml,${encodeURIComponent(svg)}" alt="">${e(item.label)}</span>`
+        }
+        if (item.href)
+          return `<a class="item" href="${e(docsBase + item.href)}" target="_blank" rel="noopener noreferrer">${e(item.label)}</a>`
+        if (item.value)
+          return `<span class="item"><strong>${e(item.label)}</strong> ${e(item.value)} <span class="${item.change?.startsWith('+') ? 'up' : 'down'}">${e(item.change ?? '')}</span></span>`
+        return `<span class="item">${e(item.label)}</span>`
+      })
+    )
+    return `<div class="window" tabindex="0" role="region" aria-label="${e(row.label)}" aria-live="off">
+  <div data-row data-duration="${row.duration}" data-direction="${row.direction}">${items.join('\n    ')}</div>
+</div>`
+  })
+)
+const controls =
+  recipe.kind === 'controls'
+    ? `
+  <label>${e(t.speed)} <input type="range" min="14" max="60" value="24" aria-label="${e(t.speed)}"><output>24s</output></label>
+  <label>${e(t.direction)} <select aria-label="${e(t.direction)}"><option value="left">${e(t.left)}</option><option value="right">${e(t.right)}</option></select></label>`
+    : ''
+const markup = `<ticker-recipe data-added="${e(t.added)}" data-added-status="${e(t.addedStatus)}">
+  <h1>${e(recipe.title)}</h1>
+  ${rows.join('\n  ')}
+  <div class="controls" hidden>
+    <button type="button" data-pause aria-pressed="false">${e(t.pause)}</button>${
+      recipe.kind === 'dynamic'
+        ? `
+    <button type="button" data-add>${e(t.add)}</button>`
+        : ''
+    }${controls}
+  </div>
+  <p>${e(recipe.note)}</p>${recipe.kind === 'logos' ? `\n  <p><a href="${e(manifest.homepage + '/assets/brands/LICENSE.md')}" target="_blank" rel="noopener noreferrer">${e(t.brandAttribution)}</a></p>` : ''}
+  <p role="status" aria-live="polite"></p>
+  <noscript><p>${e(t.noJs)}</p></noscript>
+</ticker-recipe>`
+// Standalone copied files need their own styles. Site previews reuse the landing components.
+const css = `body { margin: 0; font: 1rem/1.6 system-ui, sans-serif; }
+ticker-recipe {
+  ${palette('light')}
+  display: block; padding: 1rem; background: var(--bg); color: var(--text);
+}
+@media (prefers-color-scheme: dark) {
+  ticker-recipe { ${palette('dark')} }
+}
+@scope (ticker-recipe) {
+  h1 { margin: 0 0 1rem; font-size: 1.125rem; font-weight: 500; }
+  .window { overflow-x: auto; margin-block: 0.75rem; border: 0.0625rem solid var(--border); border-radius: 0.75rem; background: var(--surface); }
+  [data-row] { display: flex; align-items: center; gap: 1.5rem; width: max-content; }
+  .ticker-track { gap: 1.5rem; padding-block: 1rem; }
+  .item { display: inline-flex; align-items: center; gap: 0.625rem; white-space: nowrap; padding-inline: 0.25rem; }
+  a { color: var(--accent); text-underline-offset: 0.1875rem; }
+  img { width: 2rem; height: 2rem; object-fit: contain; }
+  .up { color: var(--up); } .down { color: var(--down); }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 1rem; }
+  button, select { font: inherit; padding: 0.375rem 0.75rem; background: var(--surface); color: var(--text); border: 0.0625rem solid var(--border); border-radius: 0.5rem; cursor: pointer; }
+  @media (hover: hover) { button:hover, select:hover { background: var(--hover); } }
+  label { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+  input { accent-color: var(--accent); width: 6rem; } output { font-variant-numeric: tabular-nums; }
+  p { margin: 0.75rem 0 0; font-size: 0.8125rem; } p:empty { display: none; }
+  [hidden] { display: none !important; }
+  :focus-visible { outline: 0.125rem solid var(--accent); outline-offset: 0.1875rem; }
+  .window:focus-visible { outline-offset: -0.1875rem; }
+  .window:focus-within .ticker-track { animation-play-state: paused; }
+}
+ticker-recipe[data-paused="true"] .ticker-wrapper .ticker-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  ticker-recipe [data-pause] { display: none; }
+}`
+const behavior = `if (!customElements.get('ticker-recipe')) {
+  customElements.define('ticker-recipe', class extends HTMLElement {
+    connectedCallback() {
+      this.lifecycle = new AbortController();
+      const { signal } = this.lifecycle;
+      this.controllers = Array.from(this.querySelectorAll('[data-row]')).flatMap(row => {
+        const controller = ticker(row, {
+          duration: Number(row.dataset.duration),
+          direction: row.dataset.direction === 'right' ? 'right' : 'left',
+          pauseOnHover: true,
+        });
+        return controller ? [controller] : [];
+      });
+      this.querySelector('.controls').hidden = false;
+      const pause = this.querySelector('[data-pause]');
+      pause.addEventListener('click', () => {
+        const paused = this.dataset.paused !== 'true';
+        this.dataset.paused = String(paused);
+        pause.setAttribute('aria-pressed', String(paused));
+      }, { signal });
+      const speed = this.querySelector('input');
+      speed?.addEventListener('input', () => {
+        this.controllers.forEach(controller => controller.update({ duration: Number(speed.value) }));
+        this.querySelector('output').value = speed.value + 's';
+      }, { signal });
+      const direction = this.querySelector('select');
+      direction?.addEventListener('change', () => {
+        this.controllers.forEach(controller => controller.update({ direction: direction.value }));
+      }, { signal });
+      let count = 0;
+      this.querySelector('[data-add]')?.addEventListener('click', () => {
+        const item = document.createElement('span');
+        item.className = 'item';
+        item.textContent = this.dataset.added.replace('{count}', String(++count));
+        this.controllers[0].source.append(item);
+        this.controllers[0].refresh();
+        this.querySelector('[role=status]').textContent = this.dataset.addedStatus.replace('{count}', String(count));
+      }, { signal });
+      document.fonts.ready.then(() => {
+        if (!signal.aborted) this.controllers.forEach(controller => controller.refresh());
+      });
+    }
+    disconnectedCallback() {
+      this.lifecycle.abort();
+      this.controllers.forEach(controller => controller.destroy());
+    }
+  });
+}`
+const documentFor = (mode: 'cdn' | 'npm') => `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${e(recipe.title)}</title>
+${mode === 'cdn' ? `<link rel="stylesheet" href="${cdn}style.css">` : ''}
+<style>
+${css}
+</style>
+</head>
+<body>
+<main aria-label="${e(recipe.title)}">
+${markup}
+</main>
+${mode === 'cdn' ? `<script src="${cdn}browser/global.global.js"></script>` : ''}
+<script type="module">
+${mode === 'cdn' ? 'const ticker = window.Ticker.ticker;' : `import { ticker } from '${manifest.name}';\nimport '${manifest.name}/style.css';`}
+${behavior}
+</script>
+</body>
+</html>`
+const codeOptions = await resolveConfig(resolve('src/components/ExampleRecipe.astro'))
+const documents = {
+  cdn: await formatCode(documentFor('cdn'), { ...codeOptions, parser: 'html' }),
+  npm: await formatCode(documentFor('npm'), { ...codeOptions, parser: 'html' }),
+}
+---
+
+<section id={recipe.id} class:list={['recipe']} aria-labelledby={`${recipe.id}-title`}>
+  <div class:list={['recipe-heading']}>
+    <Heading level={2} id={`${recipe.id}-title`}>
+      {recipe.title}
+    </Heading>
+    <p>{recipe.description}</p>
+  </div>
+  <ExamplePreview recipe={recipe} />
+  <TextLink compact href={`${base}docs/${recipe.docsPath}`}>
+    {recipe.docsLabel}
+  </TextLink>
+  <Disclosure class:list={['code-disclosure']}>
+    <span slot="summary">{t.code}</span>
+    <p class:list={['note']}>{t.instructions}</p>
+    <p class:list={['note']}>{t.sourceNote}</p>
+    <Tabs id={`example-${recipe.id}`} label={t.format} items={t.formats}>
+      {t.formats.map(item => (
+        <TabPanel id={item.id} label={item.label}>
+          <CodeFrame
+            label={t.file}
+            text={documents[item.id]}
+            copyLabel={format(t.copy, { format: item.label, title: recipe.title })}
+            size="comfortable"
+          >
+            <pre tabindex="0"><code>{documents[item.id]}</code></pre>
+          </CodeFrame>
+        </TabPanel>
+      ))}
+    </Tabs>
+  </Disclosure>
+</section>
+<style>
+  .recipe {
+    --recipe-top-space: 2.5rem;
+    padding-block: var(--recipe-top-space);
+    border-top: 0.0625rem solid var(--color-border-soft);
+  }
+  .recipe[id] {
+    scroll-margin-top: calc(var(--header-offset, 9rem) - var(--recipe-top-space) - 0.0625rem);
+  }
+  .recipe-heading {
+    display: grid;
+    overflow-wrap: anywhere;
+    gap: 0.75rem;
+    margin-bottom: var(--space-lg);
+  }
+  p {
+    color: var(--color-text-muted);
+    line-height: 1.75;
+  }
+  .note {
+    font-size: var(--text-small);
+    margin-block: var(--space-sm);
+  }
+  .code-disclosure {
+    margin-top: var(--space-lg);
+    border: 0.0625rem solid var(--color-border-soft);
+    border-radius: var(--radius-panel);
+    padding: var(--space-xs);
+  }
+  pre {
+    max-height: 28rem;
+  }
+</style>

@@ -5,6 +5,9 @@ import Tabs from '../../../shared/components/Tabs.astro'
 import SpeedControl from '../components/SpeedControl.astro'
 import TickerDemo from '../components/TickerDemo.astro'
 import BrandLogo from '../components/BrandLogo.astro'
+import DemoStudio from '../components/DemoStudio.astro'
+import DemoPanel from '../components/DemoPanel.astro'
+import DemoFooter from '../components/DemoFooter.astro'
 
 interface Props {
   id?: string
@@ -15,80 +18,77 @@ const t = i18n.sections.liveDemo
 ---
 
 <ticker-live-demo role="region" aria-label={t.label} class:list={['demo-studio']} id={id}>
-  <Tabs id="demo" variant="demo" label={t.label} class:list={['demo-tabs']} items={t.tabs}>
-    <div slot="heading" class:list={['studio-title']}>
-      <span class:list={['status-dot']} aria-hidden="true"></span>
-      <span>{t.title}</span>
-    </div>
+  <DemoStudio>
+    <Tabs id="demo" variant="demo" label={t.label} class:list={['demo-tabs']} items={t.tabs}>
+      <div slot="heading" class:list={['studio-title']}>
+        <span class:list={['status-dot']} aria-hidden="true"></span>
+        <span>{t.title}</span>
+      </div>
 
-    <div class:list={['studio-panels']}>
-      <div class:list={['studio-panel']} data-panel="news">
-        <div class:list={['specimen-heading']}>
-          <span>{t.panels.news.eyebrow}</span>
-          <span>{t.panels.news.tagline}</span>
-        </div>
-        <div class:list={['specimen']}>
-          <TickerDemo id="ticker-news" kind="news" label={t.panels.news.label}>
-            {t.news.map((item, index) => (
-              <>
-                <a
-                  href={item.openPrices ? `#${id}` : item.href}
-                  data-open-demo={item.openPrices ? 'prices' : undefined}
-                  class:list={[{ 'font-medium': index === 0 }]}
-                >
-                  {format(item.label, { version: i18n.common.version })}
-                </a>
-                <span class:list={['sep']} aria-hidden="true"></span>
-              </>
-            ))}
-          </TickerDemo>
-        </div>
+      <div class:list={['studio-panels']}>
+        <DemoPanel data-panel="news" label={t.panels.news.eyebrow} tagline={t.panels.news.tagline}>
+          <div class:list={['specimen']}>
+            <TickerDemo id="ticker-news" kind="news" label={t.panels.news.label}>
+              {t.news.map((item, index) => (
+                <>
+                  <a
+                    href={item.openPrices ? `#${id}` : item.href}
+                    data-open-demo={item.openPrices ? 'prices' : undefined}
+                    class:list={[{ 'font-medium': index === 0 }]}
+                  >
+                    {format(item.label, { version: i18n.common.version })}
+                  </a>
+                  <span class:list={['sep']} aria-hidden="true"></span>
+                </>
+              ))}
+            </TickerDemo>
+          </div>
+        </DemoPanel>
+        <DemoPanel
+          data-panel="logos"
+          label={t.panels.logos.eyebrow}
+          tagline={t.panels.logos.tagline}
+        >
+          <div class:list={['specimen']}>
+            <TickerDemo id="ticker-logos" kind="logos" label={t.panels.logos.label}>
+              {t.brands.map(brand => (
+                <BrandLogo
+                  src={`${import.meta.env.BASE_URL}${brand.src.replace(/^\//, '')}`}
+                  name={brand.name}
+                />
+              ))}
+            </TickerDemo>
+          </div>
+        </DemoPanel>
+        <DemoPanel
+          data-panel="prices"
+          label={t.panels.prices.eyebrow}
+          tagline={t.panels.prices.tagline}
+        >
+          <div class:list={['specimen']}>
+            <TickerDemo id="ticker-prices" kind="prices" label={t.panels.prices.label}>
+              {t.prices.map(item => (
+                <>
+                  <span class:list={['font-semibold']}>{item.symbol}</span>
+                  <span class:list={['price']}>{item.price}</span>
+                  <span class:list={[item.direction === 'up' ? 'delta-up' : 'delta-down']}>
+                    {item.change}
+                  </span>
+                  <span class:list={['sep']} aria-hidden="true"></span>
+                </>
+              ))}
+            </TickerDemo>
+          </div>
+        </DemoPanel>
       </div>
-      <div class:list={['studio-panel']} data-panel="logos">
-        <div class:list={['specimen-heading']}>
-          <span>{t.panels.logos.eyebrow}</span>
-          <span>{t.panels.logos.tagline}</span>
-        </div>
-        <div class:list={['specimen']}>
-          <TickerDemo id="ticker-logos" kind="logos" label={t.panels.logos.label}>
-            {t.brands.map(brand => (
-              <BrandLogo
-                src={`${import.meta.env.BASE_URL}${brand.src.replace(/^\//, '')}`}
-                name={brand.name}
-              />
-            ))}
-          </TickerDemo>
-        </div>
-      </div>
-      <div class:list={['studio-panel']} data-panel="prices">
-        <div class:list={['specimen-heading']}>
-          <span>{t.panels.prices.eyebrow}</span>
-          <span>{t.panels.prices.tagline}</span>
-        </div>
-        <div class:list={['specimen']}>
-          <TickerDemo id="ticker-prices" kind="prices" label={t.panels.prices.label}>
-            {t.prices.map(item => (
-              <>
-                <span class:list={['font-semibold']}>{item.symbol}</span>
-                <span class:list={['price']}>{item.price}</span>
-                <span class:list={[item.direction === 'up' ? 'delta-up' : 'delta-down']}>
-                  {item.change}
-                </span>
-                <span class:list={['sep']} aria-hidden="true"></span>
-              </>
-            ))}
-          </TickerDemo>
-        </div>
-      </div>
-    </div>
-  </Tabs>
-  <div class:list={['studio-footer']}>
-    <p>
-      {t.hoverHint} <span>{t.paceHint}</span>
-    </p>
-    <SpeedControl />
-  </div>
-  <p class:list={['studio-note']}>{t.integrationNote}</p>
+    </Tabs>
+    <DemoFooter note={t.integrationNote}>
+      <p class:list={['hover-hint']}>
+        {t.hoverHint} <span>{t.paceHint}</span>
+      </p>
+      <SpeedControl />
+    </DemoFooter>
+  </DemoStudio>
 </ticker-live-demo>
 
 <script>
@@ -169,19 +169,8 @@ const t = i18n.sections.liveDemo
     letter-spacing: 0.13em;
     line-height: 1.6;
   }
-  .specimen-heading {
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    letter-spacing: 0.13em;
-    line-height: 1.6;
-  }
   .demo-studio {
     margin-top: 2.625rem;
-    background: var(--palette-studio-surface);
-    border: 0.0625rem solid var(--palette-studio-border);
-    border-radius: 1.25rem;
-    overflow: hidden;
-    box-shadow: 0 1.5rem 4rem -2.25rem #0008;
     scroll-margin-top: 1.5rem;
   }
   .studio-title {
@@ -190,64 +179,13 @@ const t = i18n.sections.liveDemo
     gap: 0.5625rem;
     color: var(--palette-studio-title);
   }
-  .studio-panel {
-    background: var(--palette-specimen-surface);
-    padding: 1.5625rem 1.5rem 1rem;
-    color: var(--palette-specimen-text);
-  }
-  .specimen-heading {
-    display: flex;
-    justify-content: space-between;
-    gap: 1.25rem;
-    color: var(--palette-specimen-label);
-    margin-bottom: 1.25rem;
-    font-size: 0.6rem;
-  }
-  .studio-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1.25rem;
-    padding: 1rem 1.5rem;
-    color: var(--color-text-subtle);
-    font-size: 0.72rem;
-  }
-  .studio-note {
-    border-top: 0.0625rem solid var(--color-border);
-    padding: 1rem 1.5rem;
-    color: var(--color-text-muted);
-    font-size: 0.825rem;
-    line-height: 1.6;
-  }
-  .studio-footer p span {
+  .hover-hint span {
     color: var(--palette-studio-footer);
     margin-left: 0.25rem;
   }
   @media (width < 48rem) {
     .demo-studio {
       margin-top: 2.5rem;
-    }
-    .studio-panel {
-      padding: 1.375rem 1.125rem 0.875rem;
-    }
-    .specimen-heading {
-      font-size: 0.52rem;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    .studio-footer {
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 1rem 1.125rem;
-      gap: 0.875rem;
-    }
-    .studio-note {
-      padding-inline: 1.125rem;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .studio-footer {
-      display: none;
     }
   }
   ticker-live-demo {

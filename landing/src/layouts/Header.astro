@@ -1,6 +1,6 @@
 ---
+import { navigationHref, isHome } from '../lib/navigation'
 import NavLink from '../../../shared/components/NavLink.astro'
-import { docsHref } from '../lib/docs'
 import { getI18n } from '../i18n/utils'
 import Logo from '../../../shared/components/Logo.astro'
 import Box from '../../../shared/components/Box.astro'
@@ -13,12 +13,19 @@ const i18n = getI18n(Astro)
 <ticker-header>
   <header>
     <nav aria-label={i18n.navigation.mainLabel} class:list={['py-5']}>
-      <Box size="wide" class:list={['flex items-center justify-between gap-3']}>
-        <Logo version={i18n.common.version} />
+      <Box size="wide" class:list={['flex flex-wrap items-center justify-between gap-3']}>
+        <Logo
+          href={isHome(Astro.url.pathname) ? '#top' : import.meta.env.BASE_URL}
+          version={i18n.common.version}
+        />
 
         <div class:list={['hidden min-w-0 flex-wrap items-center gap-1 lg:flex']}>
           {i18n.navigation.items.map(item => (
-            <NavLink inline href={'docsRoute' in item ? docsHref(item.docsRoute) : item.href}>
+            <NavLink
+              inline
+              href={navigationHref(item, Astro.url.pathname)}
+              current={'page' in item && !isHome(Astro.url.pathname) ? 'page' : undefined}
+            >
               {item.label}
             </NavLink>
           ))}
@@ -52,7 +59,7 @@ const i18n = getI18n(Astro)
           </Button>
           <Button
             context="nav"
-            href="#how"
+            href={navigationHref({ href: '#how' }, Astro.url.pathname)}
             class:list={['hidden lg:inline-flex']}
             variant="primary"
           >

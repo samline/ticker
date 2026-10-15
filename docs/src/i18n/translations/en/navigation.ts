@@ -8,6 +8,7 @@ export default {
   previous: 'Previous',
   next: 'Next',
   breadcrumb: 'Docs',
+  breadcrumbLabel: 'Breadcrumb',
   groupLabels: {
     start: 'Start here',
     guides: 'Guides',

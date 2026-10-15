@@ -2,7 +2,6 @@
 import Eyebrow from '../../../shared/components/Eyebrow.astro'
 import { getI18n } from '../i18n/utils'
 const t = getI18n(Astro)
-import { getNavigation } from '../lib/navigation'
 import { href } from '../lib/routes'
 interface Props {
   title: string
@@ -10,31 +9,54 @@ interface Props {
   current: string
 }
 const { title, description, current } = Astro.props
-const groups = await getNavigation(Astro.currentLocale)
-const section = groups.find(group => group.pages.some(([id]) => id === current))?.label ?? t.docs
 ---
 
-<div class:list={['breadcrumb']} data-pagefind-ignore>
-  <a href={href('index')}>{t.breadcrumb}</a>
-  <span aria-hidden="true">/</span>
-  <span class:list={['section-name']}>{section}</span>
-</div>
+<nav class:list={['breadcrumb']} aria-label={t.breadcrumbLabel} data-pagefind-ignore>
+  <ol>
+    <li>
+      {current === 'index' ? (
+        <span aria-current="page">{t.breadcrumb}</span>
+      ) : (
+        <a href={href('index')}>{t.breadcrumb}</a>
+      )}
+    </li>
+    {current !== 'index' && (
+      <li>
+        <span aria-hidden="true">/</span>
+        <span class:list={['section-name']} aria-current="page">
+          {title}
+        </span>
+      </li>
+    )}
+  </ol>
+</nav>
 <header class:list={['article-heading']}>
   <Eyebrow class:list={['article-eyebrow']}>
     {current.startsWith('reference') ? t.apiReading : t.reading}
   </Eyebrow>
-  <h1 data-pagefind-meta="title">{title}</h1>
+  <h1 id="article-title" data-pagefind-meta="title">
+    {title}
+  </h1>
   <p class:list={['description']}>{description}</p>
 </header>
 
 <style>
   .breadcrumb {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.625rem;
     font-size: 0.6875rem;
     color: var(--color-text-subtle);
     margin-bottom: var(--space-xl);
+  }
+  .breadcrumb ol,
+  .breadcrumb li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.625rem;
+  }
+  .breadcrumb ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
   .breadcrumb a {
     color: inherit;

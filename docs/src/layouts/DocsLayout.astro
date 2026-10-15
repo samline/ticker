@@ -40,7 +40,7 @@ const t = getI18n(Astro)
     <Header current={current} />
     <Box size="wide" class:list={['shell']}>
       <Sidebar current={current} />
-      <main id="content" tabindex="-1" data-pagefind-body>
+      <main id="content" aria-labelledby="article-title" tabindex="-1" data-pagefind-body>
         <ArticleHeader current={current} title={title} description={description} />
         <div class:list={['mobile-toc']} data-pagefind-ignore>
           <TableOfContents headings={headings} collapsed />
