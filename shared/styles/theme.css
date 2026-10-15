@@ -34,8 +34,6 @@
   --duration-reveal: 600ms;
   --ease-ui: cubic-bezier(0.2, 0, 0, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --shadow-glow:
-    0 0 0 0.0625rem rgba(183, 174, 210, 0.3), 0 0.5rem 2rem -0.5rem rgba(183, 174, 210, 0.25);
 }
 
 @theme inline {
@@ -75,9 +73,6 @@
   --palette-hero-halo-soft: rgba(183, 174, 210, 0.13);
   --palette-on-accent: #0a0a0a;
   --palette-border-hover: #80708f;
-  --palette-card-border-hover: var(--palette-border-hover);
-  --palette-elevated-top: #141414;
-  --palette-elevated-bottom: #0e0e0e;
   --palette-code-text: #d4d4d4;
   --palette-syntax-muted: #b0a6bf;
   --palette-lavender: #b7aed2;
@@ -114,7 +109,6 @@
   --palette-feature-border: #493f54;
   --palette-feature-surface: #2d2835;
   --palette-feature-hover: #37303f;
-  --palette-feature-border-hover: #695879;
   --palette-feature-number: #bcaed0;
   --palette-step-surface: #292530;
   --palette-step-border: #4b4057;
@@ -123,9 +117,6 @@
   --palette-code-header: #b0a0bd;
   --palette-tabs-border: #42364c;
   --palette-tabs-surface: #25222e;
-  --palette-compare-border: #827192;
-  --palette-compare-surface: #342c40;
-  --palette-compare-text: #d9cce8;
   --palette-closing-surface: #332b40;
   --palette-closing-eyebrow: #c7b8d6;
   --palette-closing-title: #e3daee;
@@ -157,9 +148,6 @@
   --palette-hero-halo-soft: rgba(165, 139, 189, 0.16);
   --palette-on-accent: #ffffff;
   --palette-border-hover: #a99ab9;
-  --palette-card-border-hover: var(--palette-border-hover);
-  --palette-elevated-top: #ffffff;
-  --palette-elevated-bottom: #f2edf7;
   --palette-code-text: #43364f;
   --palette-syntax-muted: #796388;
   --palette-lavender: #69518d;
@@ -196,7 +184,6 @@
   --palette-feature-border: #d8cce4;
   --palette-feature-surface: #f3eef8;
   --palette-feature-hover: #eae1f4;
-  --palette-feature-border-hover: #b4a0c6;
   --palette-feature-number: #766187;
   --palette-step-surface: #ffffff;
   --palette-step-border: #d0c1dd;
@@ -205,9 +192,6 @@
   --palette-code-header: #756085;
   --palette-tabs-border: #d1bfdf;
   --palette-tabs-surface: #f3edf9;
-  --palette-compare-border: #a58bbd;
-  --palette-compare-surface: #eee4f8;
-  --palette-compare-text: #62427e;
   --palette-closing-surface: #ede3f8;
   --palette-closing-eyebrow: #6b4e83;
   --palette-closing-title: #3e2855;

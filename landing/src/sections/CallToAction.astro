@@ -1,4 +1,5 @@
 ---
+import TextLink from '../../../shared/components/TextLink.astro'
 import { docsHref } from '../lib/docs'
 import RichText from '../components/RichText.astro'
 import { getI18n } from '../i18n/utils'
@@ -20,7 +21,7 @@ const headingId = `section-heading-${crypto.randomUUID()}`
 >
   <Box>
     <Reveal>
-      <div class:list={['cta-card p-10 text-center sm:p-14 section-heading']} data-reveal="">
+      <div class:list={['cta-card text-center']}>
         <Eyebrow context="closing">{t.eyebrow}</Eyebrow>
         <Heading id={headingId} context="closing" class:list={['mx-auto mt-5 max-w-xl']}>
           <RichText parts={t.heading} />
@@ -56,10 +57,9 @@ const headingId = `section-heading-${crypto.randomUUID()}`
         </div>
         <div class:list={['closing-docs']}>
           <p>{t.docs.description}</p>
-          <a href={docsHref('overview')}>
+          <TextLink href={docsHref('overview')} tone="closing">
             {t.docs.label}
-            <span aria-hidden="true">↗</span>
-          </a>
+          </TextLink>
         </div>
       </div>
     </Reveal>
@@ -69,14 +69,7 @@ const headingId = `section-heading-${crypto.randomUUID()}`
 <style>
   .cta-card {
     position: relative;
-    background:
-      radial-gradient(circle at 50% 0%, rgba(183, 174, 210, 0.12), transparent 60%),
-      var(--color-surface);
-    border: 0.0625rem solid var(--color-border);
-    border-radius: 1.75rem;
     overflow: hidden;
-  }
-  .cta-card {
     background: var(--palette-closing-surface);
     border: 0;
     border-radius: 1.25rem;
@@ -86,14 +79,6 @@ const headingId = `section-heading-${crypto.randomUUID()}`
     color: var(--palette-closing-text);
     font-size: 0.9rem;
   }
-  @media (prefers-reduced-motion: reduce) {
-    .closing-docs a {
-      transition: none;
-    }
-  }
-</style>
-
-<style>
   .closing-docs {
     display: grid;
     justify-items: center;
@@ -104,28 +89,5 @@ const headingId = `section-heading-${crypto.randomUUID()}`
     color: var(--palette-closing-text);
     font-size: 0.875rem;
     line-height: 1.7;
-  }
-  .closing-docs a {
-    transition: color var(--duration-ui) var(--ease-ui);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--palette-closing-title);
-    text-decoration: underline;
-    text-underline-offset: 0.1875rem;
-  }
-  @media (hover: hover) {
-    .closing-docs a:hover {
-      color: var(--palette-closing-secondary);
-    }
-  }
-  .closing-docs a:focus-visible {
-    outline: 0.125rem solid var(--palette-closing-title);
-    outline-offset: 0.25rem;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .closing-docs a {
-      transition: none;
-    }
   }
 </style>

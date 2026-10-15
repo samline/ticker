@@ -14,13 +14,10 @@ const t = i18n.controls.speed
       max="60"
       value="38"
       step="1"
-      data-speed=""
       disabled=""
       aria-label={t.ariaLabel}
     />
-    <output aria-live="off" data-speed-output="">
-      {format(t.display, { seconds: 38 })}
-    </output>
+    <output aria-live="off">{format(t.display, { seconds: 38 })}</output>
   </label>
 </ticker-speed>
 
@@ -96,8 +93,6 @@ const t = i18n.controls.speed
     .speed-control {
       width: 100%;
     }
-  }
-  @media (width < 48rem) {
     .speed-control input {
       flex: 1;
       min-width: 3.75rem;

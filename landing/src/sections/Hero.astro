@@ -14,7 +14,6 @@ interface Props {
 const { background = 'halo' } = Astro.props
 const i18n = getI18n(Astro)
 const t = i18n.sections.hero
-const iconSeparator = ' '
 const headingId = `section-heading-${crypto.randomUUID()}`
 ---
 
@@ -33,14 +32,12 @@ const headingId = `section-heading-${crypto.randomUUID()}`
       {t.descriptionContinuation}
     </p>
     <div class:list={['hero-actions']}>
-      <Button context="hero" href="#how" class:list={['']} variant="primary">
+      <Button context="hero" href="#how" variant="primary">
         {i18n.common.buttons.getStarted}
-        {iconSeparator}
         <span aria-hidden="true">↗</span>
       </Button>
-      <Button context="hero" href="#demo" class:list={['']} variant="secondary">
+      <Button context="hero" href="#demo" variant="secondary">
         {i18n.common.buttons.exploreDemo}
-        {iconSeparator}
         <span aria-hidden="true">↓</span>
       </Button>
     </div>
@@ -80,8 +77,8 @@ const headingId = `section-heading-${crypto.randomUUID()}`
   }
   .compatibility > p {
     font-family: var(--font-mono);
-    font-size: 0.65rem;
-    letter-spacing: 0.13em;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
     line-height: 1.6;
   }
   .hero-description {
@@ -111,8 +108,6 @@ const headingId = `section-heading-${crypto.randomUUID()}`
   }
   .compatibility > p {
     color: var(--color-text-subtle);
-    font-size: 0.6rem;
-    letter-spacing: 0.12em;
   }
   .compatibility > div {
     display: flex;
@@ -130,29 +125,19 @@ const headingId = `section-heading-${crypto.randomUUID()}`
     .hero-section {
       padding-top: 3rem;
     }
-  }
-  @media (width < 48rem) {
     .hero-description {
       font-size: 0.9rem;
     }
-  }
-  @media (width < 48rem) {
     .desktop-break {
       display: none;
     }
-  }
-  @media (width < 48rem) {
     .compatibility {
       margin-top: 2.25rem;
     }
-  }
-  @media (width < 48rem) {
     .compatibility > div {
       column-gap: 1.4375rem;
       font-size: 0.88rem;
     }
-  }
-  @media (width < 48rem) {
     .compatibility > p {
       margin-inline: auto;
     }
@@ -163,8 +148,6 @@ const headingId = `section-heading-${crypto.randomUUID()}`
       flex-direction: column;
       margin-inline: auto;
     }
-  }
-  @media (width < 30rem) {
     .hero-footnote {
       font-size: 0.65rem;
       gap: 0.4375rem;

@@ -3,6 +3,7 @@ import { test, before } from 'node:test'
 import { createServer } from 'vite'
 
 let site
+let serialization
 before(async () => {
   const server = await createServer({
     configFile: false,
@@ -12,6 +13,9 @@ before(async () => {
   })
   try {
     site = await server.ssrLoadModule('/src/lib/site.ts')
+    serialization = await server.ssrLoadModule(
+      new URL('../../shared/lib/serialize.ts', import.meta.url).pathname
+    )
   } finally {
     await server.close()
   }
@@ -41,14 +45,14 @@ test('normalizes the deployed base path and excludes local preview URLs', () => 
 
 test('serializes structured metadata without allowing a script element to be terminated', () => {
   const value = { description: '</script><script>alert("test")</script>&' }
-  const json = site.serializeJsonLd(value)
+  const json = serialization.serializeJsonLd(value)
   assert.doesNotMatch(json, /[<>&]/)
   assert.deepEqual(JSON.parse(json), value)
 })
 
 test('escapes translated sharing-image text as XML, including quotes and ampersands', () => {
   assert.equal(
-    site.escapeXml('<title "A&B">\'text\'</title>'),
+    serialization.escapeXml('<title "A&B">\'text\'</title>'),
     '&lt;title &quot;A&amp;B&quot;&gt;&apos;text&apos;&lt;/title&gt;'
   )
 })

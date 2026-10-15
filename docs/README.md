@@ -1,6 +1,6 @@
 # Ticker documentation
 
-Custom Astro 7 + Tailwind 4 documentation at `https://samline.github.io/ticker/docs/`. This replaces the Starlight site formerly in `example/`. The sibling landing remains at `/ticker/`; GitHub Pages receives one combined artifact.
+Custom Astro 7 + Tailwind 4 documentation at `https://samline.github.io/ticker/docs/`. The former Starlight `example/` project has been removed. The sibling landing remains at `/ticker/`; GitHub Pages receives one combined artifact.
 
 ## Local development and validation
 
@@ -56,7 +56,7 @@ Docs are a companion to the landing. Header uses its Logo, Box, Button and Theme
 
 The content collection is validated at build time. Every article declares non-empty title/description, `locale`, and `sidebar.group`/`sidebar.order`. Explicit `generateId` preserves `index` source IDs so route, catalog and current-page lookup agree. `getNavigation()` queries the collection, filters the locale, validates unique order positions and resolves translated labels; it does not maintain a second page list. `getStaticPaths()` and `render()` consume these same entries. Add metadata and the catalog page label when adding an article; missing labels or duplicate positions fail the build.
 
-English is the only published locale. Astro config declares it explicitly. UI copy is split into common, navigation, controls and SEO catalogs, resolved through typed `getI18n(Astro)` with regional-tag normalization and a safe default, following the landing. Structural route IDs are catalog keys, never translated values. Markdown contains the article prose, while the schema declares its language. Adding another catalog alone does not publish translated documentation: add translated collection entries, supported locale/schema and prefixed routes/links/search/metadata together before exposing another language.
+English is the only published locale. Astro config declares it explicitly. UI copy is split into common, navigation, controls and SEO catalogs, resolved through typed `getI18n(Astro)` with regional-tag normalization and a safe default, through shared `createI18n`/`TranslationShape`, following the landing. Structural route IDs are catalog keys, never translated values. Markdown contains the article prose, while the schema declares its language. Adding another catalog alone does not publish translated documentation: add translated collection entries, supported locale/schema and prefixed routes/links/search/metadata together before exposing another language.
 
 [The dated content audit](CONTENT-AUDIT.md) records the review of all original sources and the recovered CSS-contract details. Keep the migration inventory and this review context when reorganizing content.
 
@@ -87,3 +87,5 @@ Keep alternative examples in tabs and consecutive instructions visible. No-JavaS
 ## Link integrity
 
 Both builds use `shared/scripts/check-links.mjs`. It checks live anchors, assets, relative and absolute same-origin destinations, fragments, deployment bases, duplicate IDs and static redirects; inert search templates are excluded. The combined build checks landing and docs together. HTTP checks are a separate online review: authentication redirects and anti-bot responses are not evidence that an action works. Reader footers intentionally provide pagination without an unverified GitHub editing action. Keep link labels and destinations aligned; prefer detailed API pages for contextual references.
+
+Source cleanup retains all 23 maintained articles and all 33 migration records. There is no parallel legacy documentation tree. Metadata uses shared/lib/serialize.ts rather than importing landing internals; app catalogs remain independent while their locale resolution is shared. Keep native fallback menus, search result templates and vendor-driven state/clone selectors: these are live behavior even when static import tools cannot see their consumers. Follow shared/AGENTS.md before deleting source or generated hooks.

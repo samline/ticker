@@ -1,4 +1,5 @@
 ---
+import Icon from '../../../shared/components/Icon.astro'
 import { format } from '../../../shared/i18n/format'
 import { docsHref } from '../lib/docs'
 import DrawerStyles from '../../../shared/components/DrawerStyles.astro'
@@ -24,33 +25,11 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
     aria-expanded="false"
     aria-haspopup="dialog"
   >
-    <svg
-      aria-hidden="true"
-      width="1.25rem"
-      height="1.25rem"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.6"
-      stroke-linecap="round"
-    >
-      <path d="M4 6h16M4 12h16M4 18h16"></path>
-    </svg>
+    <Icon name="menu" size="1.25rem" />
   </button>
   <details class:list={['menu-fallback']}>
     <summary class:list={['menu-toggle']} aria-label={t.open}>
-      <svg
-        aria-hidden="true"
-        width="1.25rem"
-        height="1.25rem"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.6"
-        stroke-linecap="round"
-      >
-        <path d="M4 6h16M4 12h16M4 18h16"></path>
-      </svg>
+      <Icon name="menu" size="1.25rem" />
     </summary>
     <div class:list={['menu-content']} data-menu-content="" data-drawer-no-drag="">
       <div class:list={['menu-heading']}>

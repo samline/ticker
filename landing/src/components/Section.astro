@@ -40,13 +40,11 @@ const {
 <style>
   .content-section {
     --section-top-space: 6.25rem;
-    max-width: 68rem;
     padding-top: var(--section-top-space);
     padding-bottom: 1.5rem;
   }
   [data-layout='faq'] {
     --section-top-space: 6.75rem;
-    max-width: 47.5rem;
     padding-top: var(--section-top-space);
   }
   .content-section[id] {
@@ -54,30 +52,16 @@ const {
   }
   .closing-section {
     padding-bottom: 5rem;
-    max-width: 68rem;
   }
   @media (width < 48rem) {
     .content-section {
       --section-top-space: 4.5rem;
     }
-  }
-  @media (width < 48rem) {
     [data-layout='faq'] {
       --section-top-space: 4.5rem;
     }
-  }
-  @media (width < 48rem) {
     .closing-section {
       padding-bottom: 3rem;
     }
-  }
-  .content-section {
-    max-width: none;
-  }
-  [data-layout='faq'] {
-    max-width: none;
-  }
-  .closing-section {
-    max-width: none;
   }
 </style>

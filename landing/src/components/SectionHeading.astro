@@ -18,12 +18,7 @@ const {
 ---
 
 <Reveal>
-  <div
-    data-context={context}
-    {...attributes}
-    class:list={['section-heading', className]}
-    data-reveal
-  >
+  <div data-context={context} {...attributes} class:list={['section-heading', className]}>
     <Eyebrow>{eyebrow}</Eyebrow>
     <Heading id={headingId} context={context === 'faq' ? 'faq' : 'default'}>
       <slot />
@@ -40,15 +35,12 @@ const {
   .section-lede {
     margin-top: 0.75rem;
     color: var(--color-text-muted);
-    font-size: 1rem;
     max-width: 36rem;
+    line-height: 1.75;
+    font-size: 0.95rem;
   }
   .section-heading {
     gap: 1.125rem;
-  }
-  .section-lede {
-    line-height: 1.75;
-    font-size: 0.95rem;
   }
   .section-heading[data-context='features'] {
     align-items: center;

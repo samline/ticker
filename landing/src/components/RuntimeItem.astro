@@ -8,7 +8,7 @@ const { label, entrypoint } = Astro.props
 ---
 
 <Reveal>
-  <article class:list={['card']} data-reveal>
+  <article class:list={['card']}>
     <p class:list={['font-mono text-[0.72rem] tracking-wider text-text-subtle uppercase']}>
       {label}
     </p>
@@ -73,8 +73,6 @@ const { label, entrypoint } = Astro.props
     .card {
       display: block;
     }
-  }
-  @media (width < 48rem) {
     h3 {
       margin-top: 0.5625rem;
     }
@@ -84,8 +82,6 @@ const { label, entrypoint } = Astro.props
       display: grid;
       grid-template-columns: 4.0625rem 1fr;
     }
-  }
-  @media (width < 30rem) {
     h3 {
       margin-top: 0;
     }

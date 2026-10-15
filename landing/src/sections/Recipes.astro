@@ -26,7 +26,7 @@ const headingId = `section-heading-${crypto.randomUUID()}`
     </SectionHeading>
     {t.items.map(item => (
       <Reveal>
-        <div data-reveal="">
+        <div>
           <RecipeCard
             title={item.title}
             context={item.context}

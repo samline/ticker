@@ -4,10 +4,9 @@ import { format } from '../i18n/format'
 import { getI18n } from '../i18n/utils'
 interface Props extends HTMLAttributes<'a'> {
   version?: string
-  license?: string
   href?: string
 }
-const { version, license, href = '#top', class: className, ...attributes } = Astro.props
+const { version, href = '#top', class: className, ...attributes } = Astro.props
 const i18n = getI18n(Astro)
 ---
 
@@ -27,14 +26,6 @@ const i18n = getI18n(Astro)
     >
       {format(i18n.common.versionLabel, { version })}
     </span>
-  )}
-  {license && (
-    <>
-      <span class:list={['text-text-subtle']} aria-hidden="true">
-        ·
-      </span>
-      <span class:list={['text-text-subtle']}>{license}</span>
-    </>
   )}
 </a>
 
@@ -60,10 +51,5 @@ const i18n = getI18n(Astro)
   :focus-visible {
     outline: 0.125rem solid var(--color-accent);
     outline-offset: 0.25rem;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    :where(a, button, summary) {
-      transition: none;
-    }
   }
 </style>

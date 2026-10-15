@@ -12,7 +12,6 @@ export default {
     github: 'GitHub',
     docs: 'Docs',
     npm: 'npm',
-    externalLinkHint: '(opens in a new tab)',
     license: 'License',
   },
   buttons: {

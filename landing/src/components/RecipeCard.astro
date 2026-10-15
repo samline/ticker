@@ -1,4 +1,5 @@
 ---
+import TextLink from '../../../shared/components/TextLink.astro'
 interface Props {
   title: string
   context: string
@@ -16,10 +17,9 @@ const headingId = `recipe-${crypto.randomUUID()}`
     <p>
       <slot name="description" />
     </p>
-    <a href={href}>
+    <TextLink href={href} compact>
       {linkLabel}
-      <span aria-hidden="true">↗</span>
-    </a>
+    </TextLink>
   </div>
   <div class:list={['recipe-example']}>
     <slot />
@@ -59,28 +59,6 @@ const headingId = `recipe-${crypto.randomUUID()}`
     font-size: 0.95rem;
     line-height: 1.75;
   }
-  a {
-    transition: color var(--duration-ui) var(--ease-ui);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    justify-self: start;
-    color: var(--color-accent);
-    font-size: 0.875rem;
-    line-height: 1.5;
-    text-decoration: underline;
-    text-underline-offset: 0.1875rem;
-  }
-  @media (hover: hover) {
-    a:hover {
-      color: var(--color-text);
-    }
-  }
-  a:focus-visible {
-    outline: 0.125rem solid var(--color-accent);
-    outline-offset: 0.25rem;
-    border-radius: 0.125rem;
-  }
   .recipe-example {
     min-width: 0;
   }
@@ -92,11 +70,6 @@ const headingId = `recipe-${crypto.randomUUID()}`
     }
     h3 {
       font-size: 1.25rem;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    a {
-      transition: none;
     }
   }
 </style>

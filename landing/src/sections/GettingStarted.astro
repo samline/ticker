@@ -1,4 +1,5 @@
 ---
+import TextLink from '../../../shared/components/TextLink.astro'
 import RichText from '../components/RichText.astro'
 import { docsHref } from '../lib/docs'
 import { getI18n } from '../i18n/utils'
@@ -26,34 +27,18 @@ const headingId = `section-heading-${crypto.randomUUID()}`
     <div class:list={['grid grid-cols-1 gap-6 lg:grid-cols-3']}>
       <StepCard number={1} title={t.steps.install}>
         <Tabs id="install" label={t.installLabel} class:list={['mt-4']} items={t.installTabs}>
-          <div data-panel-group="install" class:list={['mt-4']}>
+          <div class:list={['mt-4']}>
             <div data-panel="npm">
-              <CodeBlock
-                filename={t.examples.npm.filename}
-                tokens={t.examples.npm.tokens}
-                class:list={['']}
-              />
+              <CodeBlock filename={t.examples.npm.filename} tokens={t.examples.npm.tokens} />
             </div>
             <div data-panel="pnpm">
-              <CodeBlock
-                filename={t.examples.pnpm.filename}
-                tokens={t.examples.pnpm.tokens}
-                class:list={['']}
-              />
+              <CodeBlock filename={t.examples.pnpm.filename} tokens={t.examples.pnpm.tokens} />
             </div>
             <div data-panel="bun">
-              <CodeBlock
-                filename={t.examples.bun.filename}
-                tokens={t.examples.bun.tokens}
-                class:list={['']}
-              />
+              <CodeBlock filename={t.examples.bun.filename} tokens={t.examples.bun.tokens} />
             </div>
             <div data-panel="cdn">
-              <CodeBlock
-                filename={t.examples.cdn.filename}
-                tokens={t.examples.cdn.tokens}
-                class:list={['']}
-              />
+              <CodeBlock filename={t.examples.cdn.filename} tokens={t.examples.cdn.tokens} />
             </div>
           </div>
         </Tabs>
@@ -70,20 +55,15 @@ const headingId = `section-heading-${crypto.randomUUID()}`
 
       <StepCard number={3} title={t.steps.initialize}>
         <Tabs id="init" label={t.initLabel} class:list={['mt-4']} items={t.initTabs}>
-          <div data-panel-group="init" class:list={['mt-4']}>
+          <div class:list={['mt-4']}>
             <div data-panel="vanilla">
               <CodeBlock
                 filename={t.examples.vanilla.filename}
                 tokens={t.examples.vanilla.tokens}
-                class:list={['']}
               />
             </div>
             <div data-panel="global">
-              <CodeBlock
-                filename={t.examples.global.filename}
-                tokens={t.examples.global.tokens}
-                class:list={['']}
-              />
+              <CodeBlock filename={t.examples.global.filename} tokens={t.examples.global.tokens} />
             </div>
           </div>
         </Tabs>
@@ -91,10 +71,7 @@ const headingId = `section-heading-${crypto.randomUUID()}`
     </div>
     <div class:list={['setup-docs']}>
       <p>{t.docs.description}</p>
-      <a href={docsHref('options')}>
-        {t.docs.label}
-        <span aria-hidden="true">↗</span>
-      </a>
+      <TextLink href={docsHref('options')}>{t.docs.label}</TextLink>
     </div>
   </Box>
 </Section>
@@ -110,29 +87,5 @@ const headingId = `section-heading-${crypto.randomUUID()}`
     color: var(--color-text-muted);
     font-size: 0.95rem;
     line-height: 1.7;
-  }
-  a {
-    transition: color var(--duration-ui) var(--ease-ui);
-    justify-self: start;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--color-accent);
-    text-decoration: underline;
-    text-underline-offset: 0.1875rem;
-  }
-  @media (hover: hover) {
-    a:hover {
-      color: var(--color-text);
-    }
-  }
-  a:focus-visible {
-    outline: 0.125rem solid var(--color-accent);
-    outline-offset: 0.25rem;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    a {
-      transition: none;
-    }
   }
 </style>

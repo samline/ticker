@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro'
 import { Resvg } from '@resvg/resvg-js'
 import { getI18n } from '../i18n/utils'
-import { escapeXml } from '../lib/site'
+import { escapeXml } from '../../../shared/lib/serialize'
 
 /** The image is generated at build time from the same locale copy as the page. */
 export const GET: APIRoute = () => {

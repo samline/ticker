@@ -22,7 +22,7 @@ const i18n = getI18n(Astro)
     />
     <Theme />
   </head>
-  <body class:list={['bg-bg text-text antialiased']}>
+  <body>
     <a class:list={['skip-link']} href="#top">
       {i18n.navigation.skipContent}
     </a>
@@ -36,16 +36,7 @@ const i18n = getI18n(Astro)
 </html>
 
 <style>
-  html {
-    background: var(--color-bg);
-    color: var(--color-text);
-    font-family: var(--font-sans);
-    font-feature-settings: 'ss01', 'cv11';
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-  }
-
+  html,
   body {
     background: var(--color-bg);
     color: var(--color-text);
@@ -54,10 +45,6 @@ const i18n = getI18n(Astro)
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-  }
-
-  body {
-    overflow-x: clip;
   }
 
   ::selection {
@@ -66,11 +53,11 @@ const i18n = getI18n(Astro)
   }
 
   .grain {
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    opacity: 0.04;
+    opacity: 0.008;
     mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   }
@@ -93,13 +80,6 @@ const i18n = getI18n(Astro)
   main :global([id]) {
     scroll-margin-top: var(--header-offset, 9rem);
   }
-  body {
-    background: var(--color-bg);
-  }
-  .grain {
-    opacity: 0.008;
-    position: absolute;
-  }
 
   main:focus {
     outline: none;
@@ -107,10 +87,5 @@ const i18n = getI18n(Astro)
   :focus-visible {
     outline: 0.125rem solid var(--color-accent);
     outline-offset: 0.25rem;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    :where(a, button, summary) {
-      transition: none;
-    }
   }
 </style>

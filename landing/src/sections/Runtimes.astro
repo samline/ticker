@@ -10,11 +10,7 @@ const t = i18n.sections.runtimes
 const headingId = `section-heading-${crypto.randomUUID()}`
 ---
 
-<Section
-  aria-labelledby={headingId}
-  spacing="none"
-  class:list={['content-section runtime-section']}
->
+<Section aria-labelledby={headingId} spacing="none" class:list={['content-section']}>
   <Box>
     <SectionHeading
       headingId={headingId}
@@ -26,7 +22,7 @@ const headingId = `section-heading-${crypto.randomUUID()}`
       <Fragment slot="description">{t.description}</Fragment>
     </SectionHeading>
 
-    <div class:list={['grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 runtime-grid']}>
+    <div class:list={['runtime-grid']}>
       <RuntimeItem label={t.items.main.label} entrypoint={t.items.main.entrypoint}>
         {t.items.main.description}
       </RuntimeItem>
@@ -51,6 +47,7 @@ const headingId = `section-heading-${crypto.randomUUID()}`
 
 <style>
   .runtime-grid {
+    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: 2.25rem;
     row-gap: 0;

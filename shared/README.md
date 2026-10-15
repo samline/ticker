@@ -4,15 +4,17 @@ The landing and documentation are two routes of one product website. This privat
 
 ## Ownership
 
-- `components/`: Box, Button, Logo, Theme/ThemeToggle, Heading/Eyebrow, CopyButton/CodeFrame, Icon/IconButton, TextField, NavLink, Disclosure, Surface/LinkCard and DrawerStyles. Components own scoped CSS and processed behavior. Pass native and Astro scope attributes through composed roots.
+- `components/`: Box, Button/TextLink, Logo, Theme/ThemeToggle, Heading/Eyebrow, CopyButton/CodeFrame, Icon/IconButton, TextField, NavLink, Disclosure, Surface/LinkCard and DrawerStyles. Components own scoped CSS and processed behavior. Pass native and Astro scope attributes through composed roots.
 - `styles/theme.css`: the single palette, font families, breakpoints, spacing scale, radii, focus and motion tokens. This is theme configuration, not a global component stylesheet.
+- `lib/serialize.ts`: safe JSON-LD and XML serialization shared by metadata and social images.
+- `i18n/createI18n.ts`: one typed locale resolver and translation-shape contract; each app still owns its catalogs.
 - `i18n/translations/<locale>/`: shared branding and control messages. Each app owns its navigation/article/marketing copy. `i18n/format.ts` interpolates whole translated messages.
 
 Keep complete sections, content collections, search integration and package demos in the app that owns them. Share genuine UI roles; do not force every distinct section into the same layout or add props for hypothetical variants.
 
 ## Visual contracts
 
-NavLink owns navigation padding, nested indentation, hover, background-only current state and focus. Nest by margin rather than asymmetric padding. Lists own their gaps and rail inset; current backgrounds must leave room on both sides of a divider. Do not style NavLink internals from a page.
+TextLink owns contextual underlined links, arrows, focus and closing-theme colors. NavLink owns navigation padding, nested indentation, hover, background-only current state and focus. Nest by margin rather than asymmetric padding. Lists own their gaps and rail inset; current backgrounds must leave room on both sides of a divider. Do not style NavLink internals from a page.
 
 Surface owns card background, border, radius and optional hover. Consumers own layout and content padding. Disclosure owns native details/summary layout, indicator and keyboard focus; consumers own panel/FAQ boundaries and content spacing. CodeFrame owns the code toolbar and typography variant; CopyButton owns exact copying, failure selection, independent feedback/reset and cleanup.
 
@@ -35,3 +37,7 @@ CI installs this package before checking either app. Keep its lockfile and the C
 Shared interactive roots mark interface content with `data-ui`; Article's prose CSS excludes those subtrees. Do not let a broad Markdown selector override buttons, navigation links, card titles or code frames. Keep catalog messages in shared/app i18n and article prose in locale content files. MDX articles import their locale's UI catalog explicitly.
 
 `shared/scripts/check-links.mjs` is the build-only link validator consumed by both apps. It validates generated live markup, same-origin destinations (including absolute URLs), fragments, assets, duplicate IDs and static redirects. The combined landing artifact closes the cross-site coverage gap. It does not claim online availability or semantic correctness of external actions; review those separately.
+
+## Source hygiene
+
+Before deleting a source, trace imports, Astro/MDX composition, generated DOM hooks, translated data, assets and build/CI entrypoints. Keep package-owned runtime CSS adaptations, no-JavaScript fallbacks, compatibility fragments/redirects, asset licenses and migration evidence. Remove only proven-unused hooks, palette values, retired props and obsolete override rules. Adjacent equivalent media blocks can be consolidated without changing cascade order. Keep final visual values in the owning component rather than layering a retired design underneath. Generated dependency/build directories are not maintained source; never revive the retired Starlight example project.

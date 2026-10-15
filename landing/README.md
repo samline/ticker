@@ -51,7 +51,7 @@ CI runs the maintained landing's formatting, source checks, build and browser su
 | `src/pages/`              | Section composition and generated robots/social-image endpoints                                                                                                               |
 | `src/styles/tailwind.css` | Tailwind entry, breakpoints, typography tokens and theme palettes                                                                                                             |
 | `src/i18n/`               | Locale resolution, typed interpolation and all editable interface copy                                                                                                        |
-| `src/lib/site.ts`         | Public URL validation, XML escaping and safe JSON-LD serialization                                                                                                            |
+| `src/lib/site.ts`         | Landing deployment URL validation; safe serializers live in `../shared/lib/serialize.ts`                                                                                      |
 | `scripts/`                | Copy audit, production-output checks and documentation packaging                                                                                                              |
 | `tests/`, `e2e/`          | Source/metadata regression tests and compiled-site browser checks                                                                                                             |
 | `public/assets/`          | Licensed example brand marks and their attribution                                                                                                                            |
@@ -123,7 +123,7 @@ All UI copy lives in `src/i18n/translations/en/`, including navigation, headings
 | `controls.ts`   | Copy feedback, theme, pause, duration and code-region labels                     |
 | `sections/`     | Each section's descriptions, items, samples and code tokens                      |
 
-Use `getI18n(Astro)` with typed keys. `getLocale` normalizes supported regional tags and falls back safely. Additional dictionaries must satisfy `TranslationDictionary`; actual localized routes need matching canonical, sitemap and sharing metadata. Use complete messages with named placeholders through `format`, rather than concatenating fragments that a translator cannot reorder.
+Use `getI18n(Astro)` with typed keys. Shared `createI18n` and `TranslationShape` own locale normalization and the catalog shape; the app registers its own dictionaries. `getLocale` normalizes supported regional tags and falls back safely. Additional dictionaries must satisfy `TranslationDictionary`; actual localized routes need matching canonical, sitemap and sharing metadata. Use complete messages with named placeholders through `format`, rather than concatenating fragments that a translator cannot reorder.
 
 RichText renders escaped text/code/emphasis/strong parts. CodeBlock renders escaped syntax tokens. Catalogs contain no executable HTML. Pass selected messages to custom elements through their own `data-*` attributes instead of shipping all dictionaries into client bundles. `set:html` is reserved here for safely serialized JSON-LD and the trusted scoped vendor stylesheet, not translated UI content.
 
@@ -234,3 +234,7 @@ The sibling docs now use custom Astro components and Pagefind rather than Starli
 Read and follow [the shared UI contract](../shared/AGENTS.md) and [ownership/setup guide](../shared/README.md). Cross-site primitives, control catalogs, spacing/radius/focus/motion tokens and format helpers have a single source in `shared/`. App-specific composition stays here. Install `npm ci --prefix shared` before app dependencies; both app checks/formatters include shared source and use the root Prettier config.
 
 Tabs and CardGrid are also used in docs. Preserve existing demo variants/events/data hooks, keyboard handling and no-JavaScript content when changing them. A shared change requires both sites' build/browser checks. Keep native/Astro scope attributes forwarded, the user-selected Box sizes intact, and setup/CI/packaging/catalog references synchronized. Do not fork shared controls or copy documentation-specific search code into the landing.
+
+## Cleanup and maintenance
+
+The retired `example/` Starlight project has been removed, including local generated dependencies/output. Keep current Astro source, dependency locks, installed skill provenance, licensed brand assets and documentation migration evidence. All current UI components and brand assets have active consumers. Use shared TextLink for contextual docs CTAs and Icon for repeated menu glyphs; do not copy their markup/styles. Reveal owns visibility through its wrapper and no longer needs data-reveal markers. Tabs discover instance-owned panels directly; do not restore data-panel-group or other retired hooks. Fixed values and responsive states belong in one coherent CSS rule set, without a second obsolete design underneath. Run both sites’ checks, combined build/link audit and browser suites after shared cleanup.

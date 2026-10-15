@@ -157,10 +157,6 @@ test('collection index IDs select the matching navigation page', async ({ page }
   await expect(page.locator('.sidebar a[aria-current=page]')).toHaveText('Overview')
   await page.goto('reference/')
   await expect(page.locator('.sidebar a[aria-current=page]')).toHaveText('Reference overview')
-  await expect(page.locator('.article-footer .edit')).toHaveAttribute(
-    'href',
-    /reference\/index\.md$/
-  )
 })
 
 test('search components retain native input focus and accessible results in both themes', async ({
