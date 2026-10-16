@@ -172,6 +172,7 @@ test('gallery navigation, metadata and layouts work in both themes from 320 to 1
   page,
 }) => {
   await page.goto('examples/')
+  await page.locator('#announcements summary').click()
   await expect(page.locator('link[rel=canonical]')).toHaveAttribute(
     'href',
     'https://samline.github.io/ticker/examples/'

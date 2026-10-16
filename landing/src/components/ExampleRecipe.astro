@@ -210,22 +210,26 @@ const documents = {
   </TextLink>
   <Disclosure class:list={['code-disclosure']}>
     <span slot="summary">{t.code}</span>
-    <p class:list={['note']}>{t.instructions}</p>
-    <p class:list={['note']}>{t.sourceNote}</p>
-    <Tabs id={`example-${recipe.id}`} label={t.format} items={t.formats}>
-      {t.formats.map(item => (
-        <TabPanel id={item.id} label={item.label}>
-          <CodeFrame
-            label={t.file}
-            text={documents[item.id]}
-            copyLabel={format(t.copy, { format: item.label, title: recipe.title })}
-            size="comfortable"
-          >
-            <pre tabindex="0"><code>{documents[item.id]}</code></pre>
-          </CodeFrame>
-        </TabPanel>
-      ))}
-    </Tabs>
+    <div class:list={['code-body']}>
+      <div class:list={['code-notes']}>
+        <p class:list={['note']}>{t.instructions}</p>
+        <p class:list={['note']}>{t.sourceNote}</p>
+      </div>
+      <Tabs id={`example-${recipe.id}`} label={t.format} items={t.formats}>
+        {t.formats.map(item => (
+          <TabPanel id={item.id} label={item.label} class:list={['example-code-panel']}>
+            <CodeFrame
+              label={t.file}
+              text={documents[item.id]}
+              copyLabel={format(t.copy, { format: item.label, title: recipe.title })}
+              size="comfortable"
+            >
+              <pre tabindex="0"><code>{documents[item.id]}</code></pre>
+            </CodeFrame>
+          </TabPanel>
+        ))}
+      </Tabs>
+    </div>
   </Disclosure>
 </section>
 <style>
@@ -249,7 +253,20 @@ const documents = {
   }
   .note {
     font-size: var(--text-small);
-    margin-block: var(--space-sm);
+    margin: 0;
+  }
+  .code-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-md);
+    padding: var(--space-sm);
+  }
+  .code-notes {
+    display: grid;
+    gap: var(--space-xs);
+  }
+  .example-code-panel {
+    margin-bottom: 0;
   }
   .code-disclosure {
     margin-top: var(--space-lg);

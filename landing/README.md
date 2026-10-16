@@ -252,3 +252,5 @@ Navigation resolves home fragments correctly from both pages, keeps Examples cur
 The gallery uses shared secondary Buttons for its jump navigation, with visible resting surfaces and direction cues, not plain text links. Keep its titles direct and check actual word spacing after Astro compilation. Home panels retain data-panel hooks so Tabs can isolate them and SpeedControl targets only the selected ticker. Browser regression checks compare actual Home/gallery surfaces in both themes.
 
 The agent skill source lives at ../skills/ticker/SKILL.md. The /skills/ticker/SKILL.md endpoint serves that file at build time; Examples and the footer link its download. Keep the file self-contained, validate it after edits and synchronize its version/API claims with the package. No separately edited public copy or generated preview bundle is needed.
+
+Example code disclosures use one aligned content inset and explicit gaps for notes, tabs and source. Their grid tracks can shrink to zero, preserving code-only scrolling on narrow screens. Keep the open disclosure in responsive/enlarged-text checks; a collapsed panel does not prove its contents fit.
