@@ -16,7 +16,9 @@ export default {
   },
   ticker: {
     pause: 'Pause animation',
+    play: 'Play animation',
     pauseLabel: 'Pause animation: {label}',
+    playLabel: 'Play animation: {label}',
   },
   speed: {
     label: 'Loop duration',

@@ -1,4 +1,4 @@
-/** Widen editable copy while retaining structural discriminants in rich text/code tokens. */
+/** Widen editable copy while retaining structural discriminants in rich text. */
 export type TranslationShape<T> = T extends string
   ? string
   : T extends readonly (infer Item)[]

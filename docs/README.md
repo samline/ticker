@@ -26,7 +26,7 @@ The browser suite uses Chromium; install it with `npm exec --prefix docs -- play
 
 Reusable controls live in `../shared/components/`, docs integrations in `src/components/`, the document shell in `src/layouts/`, and UI strings in `src/i18n/translations/en/`. Article prose and example strings belong to Markdown. There is no runtime UI framework. Component styles and scripts stay inside their Astro components, using scoped selectors and instance-owned custom elements.
 
-The docs import the shared `shared/styles/theme.css` tokens, Box, Theme, ThemeToggle and CopyButton intentionally. This keeps colors, breakpoints, container conventions, theme persistence and clipboard feedback consistent. `Article` wraps each rendered Markdown/MDX fence with a template of the shared CodeFrame, which owns the toolbar and CopyButton; code remains readable without JavaScript. The build-time rehype plugin makes overflowing code and tables keyboard reachable even without JavaScript.
+The docs import the shared `shared/styles/theme.css` tokens, Box, Theme, ThemeToggle and CopyButton intentionally. This keeps colors, breakpoints, container conventions, theme persistence and clipboard feedback consistent. `Article` wraps each rendered Markdown/MDX fence with a template of the shared CodeFrame, which owns the toolbar and CopyButton; code remains readable and highlighted without JavaScript. Syntax highlighting uses the same `shared/lib/code-theme.mjs` configuration as CodeFrame in Home/Examples; Article preserves its generated token spans. The build-time rehype plugin makes overflowing code and tables keyboard reachable even without JavaScript.
 
 ## Search
 

@@ -1,14 +1,28 @@
 ---
-import type { HTMLAttributes } from 'astro/types'
+import type { HTMLAttributes, ComponentProps } from 'astro/types'
+import { Code } from 'astro:components'
+import { codeTheme } from '../lib/code-theme.mjs'
+import { getI18n } from '../i18n/utils'
+import { format } from '../i18n/format'
 import CopyButton from './CopyButton.astro'
 interface Props extends HTMLAttributes<'div'> {
+  language?: ComponentProps<typeof Code>['lang']
   label: string
   text: string
   copyLabel: string
   size?: 'compact' | 'comfortable'
   class?: string
 }
-const { label, text, copyLabel, size = 'compact', class: className, ...attributes } = Astro.props
+const {
+  label,
+  text,
+  language = 'plaintext',
+  copyLabel,
+  size = 'compact',
+  class: className,
+  ...attributes
+} = Astro.props
+const codeLabel = format(getI18n(Astro).controls.code.label, { filename: label })
 ---
 
 <div
@@ -25,7 +39,28 @@ const { label, text, copyLabel, size = 'compact', class: className, ...attribute
     <CopyButton text={text} ariaLabel={copyLabel} />
   </header>
   <div class:list={['code-content']} data-code-content>
-    <slot />
+    {Astro.slots.has('default') ? (
+      <slot />
+    ) : (
+      text && (
+        <Code
+          code={text}
+          lang={language}
+          theme={codeTheme}
+          transformers={[
+            {
+              code(node) {
+                // Astro removes one terminal newline; keep displayed and copied source identical.
+                if (text.endsWith('\n')) node.children.push({ type: 'text', value: '\n' })
+              },
+            },
+          ]}
+          tabindex="0"
+          role="region"
+          aria-label={codeLabel}
+        />
+      )
+    )}
   </div>
 </div>
 <style>
@@ -77,6 +112,7 @@ const { label, text, copyLabel, size = 'compact', class: className, ...attribute
     margin: 0;
     padding: 1rem;
     overflow-x: auto;
+    max-height: var(--code-max-height, none);
     border: 0;
     border-radius: 0;
     background: var(--palette-code-surface);

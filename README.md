@@ -204,7 +204,7 @@ npm run landing:dev
 npm run docs:dev
 ```
 
-Home's demo keeps announcements, logos and prices in separate tabs, with independent speed settings. Examples reuses that same TickerDemo, BrandLogo, SpeedControl and demo presentation, alongside shared buttons, headings, tabs and code-copy controls. Previews are native components, not iframes. Six recipes provide complete CDN and npm/ESM HTML files; preview changes do not rewrite the copied initial settings. See [integration recipes](https://samline.github.io/ticker/docs/reference/examples/) for deeper lifecycle patterns.
+Home's demo keeps announcements, logos and prices in separate tabs, with independent speed settings. Examples reuses that same TickerDemo, BrandLogo, SpeedControl and demo presentation, alongside shared buttons, headings, tabs and code-copy controls. Previews are native components, not iframes. Code containers and syntax highlighting share CodeFrame and one Astro/Shiki theme across all routes; Markdown keeps its native compilation and feeds the shared frame. Pause buttons switch between Pause and Play with matching accessible names. Six recipes provide complete CDN and npm/ESM HTML files; preview changes do not rewrite the copied initial settings. See [integration recipes](https://samline.github.io/ticker/docs/reference/examples/) for deeper lifecycle patterns.
 
 Reusable Astro primitives, UI catalogs, helpers and theme tokens live in [`shared/`](shared/README.md). App folders own content and composition. Preserve scoped component styles/scripts, rem lengths, class:list, translated interface text and the existing Box widths. [AGENTS.md](AGENTS.md) records accepted project decisions and mistakes to avoid; read the app-specific contracts before editing.
 

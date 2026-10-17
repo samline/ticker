@@ -50,7 +50,6 @@ export default {
   ] as const,
   file: 'index.html',
   copy: 'Copy complete {format} example: {title}',
-  pause: 'Pause animation',
   add: 'Add an update',
   added: 'New update {count}',
   addedStatus: 'Added update {count}. Visual copies refreshed.',

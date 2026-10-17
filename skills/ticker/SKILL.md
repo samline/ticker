@@ -45,7 +45,7 @@ Options are `duration` (positive seconds per full loop, default 20), `direction`
 
 Always preserve readable original content. CSS must be loaded for reduced-motion behavior. Clones are hidden from assistive technology and keyboard interaction by default; avoid enabling `interactiveClones` unless each repeated control really must be independently usable. Avoid IDs in content that will be cloned.
 
-`pauseOnHover` is not a persistent pause control. Provide a named application button for continuing motion, with synchronized `aria-pressed`, plus keyboard focus pause. Keep this state outside the package-owned `data-playing` attribute. For example, scope an application rule to its own component:
+`pauseOnHover` is not a persistent pause control. Provide a named application button for continuing motion, plus keyboard focus pause. For an action button, update the visible and accessible labels between Pause and Play. For a toggle button, keep the label stable and synchronize `aria-pressed` instead. Keep this state outside the package-owned `data-playing` attribute. For example, scope an application rule to its own component:
 
 ```css
 .ticker-example[data-paused='true'] .ticker-wrapper .ticker-track,

@@ -18,7 +18,9 @@ interface Props {
   recipe: Recipe
 }
 const { recipe } = Astro.props
-const t = getI18n(Astro).examples
+const i18n = getI18n(Astro)
+const t = i18n.examples
+const playback = i18n.controls.ticker
 const base = import.meta.env.BASE_URL
 const docsBase = `${manifest.homepage.replace(/\/$/, '')}/docs/`
 const cdn = `https://cdn.jsdelivr.net/npm/${manifest.name}@${manifest.version}/dist/`
@@ -72,11 +74,11 @@ const controls =
   <label>${e(t.speed)} <input type="range" min="14" max="60" value="24" aria-label="${e(t.speed)}"><output>24s</output></label>
   <label>${e(t.direction)} <select aria-label="${e(t.direction)}"><option value="left">${e(t.left)}</option><option value="right">${e(t.right)}</option></select></label>`
     : ''
-const markup = `<ticker-recipe data-added="${e(t.added)}" data-added-status="${e(t.addedStatus)}">
+const markup = `<ticker-recipe data-pause-text="${e(playback.pause)}" data-play-text="${e(playback.play)}" data-added="${e(t.added)}" data-added-status="${e(t.addedStatus)}">
   <h1>${e(recipe.title)}</h1>
   ${rows.join('\n  ')}
   <div class="controls" hidden>
-    <button type="button" data-pause aria-pressed="false">${e(t.pause)}</button>${
+    <button type="button" data-pause>${e(playback.pause)}</button>${
       recipe.kind === 'dynamic'
         ? `
     <button type="button" data-add>${e(t.add)}</button>`
@@ -138,7 +140,7 @@ const behavior = `if (!customElements.get('ticker-recipe')) {
       pause.addEventListener('click', () => {
         const paused = this.dataset.paused !== 'true';
         this.dataset.paused = String(paused);
-        pause.setAttribute('aria-pressed', String(paused));
+        pause.textContent = paused ? this.dataset.playText : this.dataset.pauseText;
       }, { signal });
       const speed = this.querySelector('input');
       speed?.addEventListener('input', () => {
@@ -223,9 +225,9 @@ const documents = {
               text={documents[item.id]}
               copyLabel={format(t.copy, { format: item.label, title: recipe.title })}
               size="comfortable"
-            >
-              <pre tabindex="0"><code>{documents[item.id]}</code></pre>
-            </CodeFrame>
+              language="html"
+              class:list={['example-source']}
+            />
           </TabPanel>
         ))}
       </Tabs>
@@ -274,7 +276,7 @@ const documents = {
     border-radius: var(--radius-panel);
     padding: var(--space-xs);
   }
-  pre {
-    max-height: 28rem;
+  .example-source {
+    --code-max-height: 28rem;
   }
 </style>

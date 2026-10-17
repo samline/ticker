@@ -23,8 +23,8 @@ These instructions apply to the maintained Astro landing. Read README.md for rat
 
 ## Copy, examples and information design
 
-- Put all editable UI text in `src/i18n/translations/<locale>/`: headings, navigation, descriptions, accessible names, metadata, sample/demo content, code tokens and client feedback. Use `getI18n(Astro)` and descriptive keys.
-- Use complete messages with named placeholders through `format`. Rich translations and code tokens render as escaped text; catalogs contain no executable HTML. Pass resolved client messages through instance-owned data attributes, not entire dictionaries.
+- Put all editable UI text in `src/i18n/translations/<locale>/`: headings, navigation, descriptions, accessible names, metadata, sample/demo content, code source and language identifiers and client feedback. Use `getI18n(Astro)` and descriptive keys.
+- Use complete messages with named placeholders through `format`. Rich translations render as escaped text; code source is safely highlighted by shared CodeFrame; catalogs contain no executable HTML. Pass resolved client messages through instance-owned data attributes, not entire dictionaries.
 - Keep every locale compatible with `TranslationDictionary` and register it in `dictionaries`. English is the current language. Adding a catalog does not create locale routes or a language selector; add those only with a corresponding requirement and metadata plan.
 - Preserve structural identifiers, code syntax and placeholder names when translating. Do not move copy into arbitrary TypeScript objects to evade the AST source-copy audit; the audit is not exhaustive.
 - Audit the existing landing before adding content. Each section must answer a distinct question. Prefer concrete verified recipes over another list of benefits. The Recipes section adds partial updates, original-source edits/clone synchronization and registry cleanup; the former responsibility table belongs in docs.
@@ -128,3 +128,7 @@ Keep Home LiveDemo's data-panel hooks on DemoPanel roots; shared Tabs requires t
 The distributable Ticker integration skill lives in ../skills/ticker/SKILL.md and is served by the build-time skills/ticker/SKILL.md endpoint. Do not install it into users' agents automatically. Keep version/contracts aligned with the package, preserve self-contained downloads and audit the endpoint links.
 
 Example code disclosures align summary text, notes, tabs and CodeFrame to the same inner inset. Group notes with a single gap, remove the final TabPanel's bottom margin, and keep bottom padding equal to horizontal padding. The body grid needs minmax(0, 1fr) so long source lines scroll inside CodeFrame instead of expanding the document. Responsive checks must include an open code disclosure.
+
+Share syntax rendering as well as the frame. Use CodeFrame text/language with the shared Astro/Shiki theme; CodeBlock only adapts catalog copy/filenames. Preserve whole source strings rather than manual syntax-token arrays. Markdown/MDX in docs uses the same theme and container. Verify computed colors and exact source copying across Home, Examples and Docs in both themes.
+
+Pause controls use changing action labels (Pause animation / Play animation) and matching accessible names. Keep per-instance data attributes and state inside TickerDemo. The copied recipe uses the same translated messages. Changing-action buttons do not use aria-pressed; stable-label toggle semantics must not be mixed with this pattern.

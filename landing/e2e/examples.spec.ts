@@ -36,13 +36,19 @@ test('all six previews run actual controllers, pause independently, and expose f
         .first()
         .evaluate(el => getComputedStyle(el).animationPlayState)
     ).toBe('paused')
+    await expect(frame.getByRole('button', { name: /Play animation:/ }).first()).toHaveText(
+      'Play animation'
+    )
     await frame
-      .getByRole('button', { name: /Pause animation:/ })
+      .getByRole('button', { name: /Play animation:/ })
       .first()
       .press('Enter')
     await expect(frame.locator('.ticker-frame').first()).toHaveAttribute(
       'data-user-paused',
       'false'
+    )
+    await expect(frame.getByRole('button', { name: /Pause animation:/ }).first()).toHaveText(
+      'Pause animation'
     )
   }
   const dynamic = page.locator('#dynamic-content')
@@ -161,6 +167,11 @@ test('every copied CDN and npm document executes as a standalone example', async
       )
       await standalone.getByRole('button', { name: 'Pause animation' }).click()
       await expect(standalone.locator('ticker-recipe')).toHaveAttribute('data-paused', 'true')
+      await expect(
+        standalone.getByRole('button', { name: 'Play animation', exact: true })
+      ).toBeVisible()
+      await standalone.getByRole('button', { name: 'Play animation', exact: true }).click()
+      await expect(standalone.locator('ticker-recipe')).toHaveAttribute('data-paused', 'false')
       expect(errors).toEqual([])
       await standalone.close()
     }
@@ -258,6 +269,12 @@ test('Home keeps three separate demo tabs, remembers per-example speed, and shar
 }) => {
   await page.goto('./')
   const studio = page.locator('ticker-live-demo')
+  await studio.getByRole('button', { name: /Pause animation:/ }).click()
+  await expect(studio.getByRole('button', { name: /Play animation:/ })).toHaveText('Play animation')
+  await studio.getByRole('button', { name: /Play animation:/ }).click()
+  await expect(studio.getByRole('button', { name: /Pause animation:/ })).toHaveText(
+    'Pause animation'
+  )
   await expect(studio.getByRole('tab')).toHaveCount(3)
   await expect(studio.locator('[role=tabpanel]:visible')).toHaveCount(1)
   const speed = studio.getByRole('slider')

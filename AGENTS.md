@@ -11,6 +11,8 @@ Landing (`/ticker/`), Examples (`/ticker/examples/`) and Docs (`/ticker/docs/`) 
 
 ## Lessons that must guide future edits
 
+- Reuse the complete code-rendering contract, not just its toolbar: CodeFrame and the shared Shiki theme must produce the same highlighting in Home, Examples and Docs. Keep whole source/language entries, not manual token arrays, and verify computed colors in both themes plus exact copied text.
+- Pause action buttons must display Play while paused and Pause while playing, with a matching accessible name. Do not mix changing action labels with stable-label aria-pressed toggle semantics.
 - Inventory existing components before writing markup or CSS. Reuse shared Box, Heading, Button, NavLink, TextLink, Surface, Tabs, CodeFrame/CopyButton, Theme and DrawerStyles. Extract existing presentation when two consumers need it; do not recreate a visually similar control with new CSS.
 - Examples must use the actual Home demo: TickerDemo, BrandLogo and SpeedControl, composed through DemoStudio/DemoPanel/DemoFooter. Iframe/srcdoc previews were rejected because they introduced foreign typography, controls, colors and redundant sizing/theme/runtime machinery. Do not restore that approach without an explicit new requirement.
 - Preserve behavior hooks when extracting UI: Home Tabs needs data-panel on each DemoPanel root. Test exactly one visible panel and independent remembered speed values. Astro can strip literal whitespace between expressions and inline tags; verify compiled heading text, not only source formatting.

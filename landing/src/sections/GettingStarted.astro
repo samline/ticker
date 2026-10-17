@@ -29,16 +29,32 @@ const headingId = `section-heading-${crypto.randomUUID()}`
         <Tabs id="install" label={t.installLabel} class:list={['mt-4']} items={t.installTabs}>
           <div class:list={['mt-4']}>
             <div data-panel="npm">
-              <CodeBlock filename={t.examples.npm.filename} tokens={t.examples.npm.tokens} />
+              <CodeBlock
+                filename={t.examples.npm.filename}
+                code={t.examples.npm.code}
+                language={t.examples.npm.language}
+              />
             </div>
             <div data-panel="pnpm">
-              <CodeBlock filename={t.examples.pnpm.filename} tokens={t.examples.pnpm.tokens} />
+              <CodeBlock
+                filename={t.examples.pnpm.filename}
+                code={t.examples.pnpm.code}
+                language={t.examples.pnpm.language}
+              />
             </div>
             <div data-panel="bun">
-              <CodeBlock filename={t.examples.bun.filename} tokens={t.examples.bun.tokens} />
+              <CodeBlock
+                filename={t.examples.bun.filename}
+                code={t.examples.bun.code}
+                language={t.examples.bun.language}
+              />
             </div>
             <div data-panel="cdn">
-              <CodeBlock filename={t.examples.cdn.filename} tokens={t.examples.cdn.tokens} />
+              <CodeBlock
+                filename={t.examples.cdn.filename}
+                code={t.examples.cdn.code}
+                language={t.examples.cdn.language}
+              />
             </div>
           </div>
         </Tabs>
@@ -48,7 +64,8 @@ const headingId = `section-heading-${crypto.randomUUID()}`
         <p class:list={['text-sm text-text-muted']}>{t.markupDescription}</p>
         <CodeBlock
           filename={t.examples.markup.filename}
-          tokens={t.examples.markup.tokens}
+          code={t.examples.markup.code}
+          language={t.examples.markup.language}
           class:list={['mt-4']}
         />
       </StepCard>
@@ -59,11 +76,16 @@ const headingId = `section-heading-${crypto.randomUUID()}`
             <div data-panel="vanilla">
               <CodeBlock
                 filename={t.examples.vanilla.filename}
-                tokens={t.examples.vanilla.tokens}
+                code={t.examples.vanilla.code}
+                language={t.examples.vanilla.language}
               />
             </div>
             <div data-panel="global">
-              <CodeBlock filename={t.examples.global.filename} tokens={t.examples.global.tokens} />
+              <CodeBlock
+                filename={t.examples.global.filename}
+                code={t.examples.global.code}
+                language={t.examples.global.language}
+              />
             </div>
           </div>
         </Tabs>

@@ -35,7 +35,11 @@ const headingId = `section-heading-${crypto.randomUUID()}`
             linkLabel={item.docsLabel}
           >
             <RichText slot="description" parts={item.description} />
-            <CodeBlock filename={item.code.filename} tokens={item.code.tokens} />
+            <CodeBlock
+              filename={item.code.filename}
+              code={item.code.code}
+              language={item.code.language}
+            />
           </RecipeCard>
         </div>
       </Reveal>

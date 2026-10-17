@@ -121,11 +121,11 @@ All UI copy lives in `src/i18n/translations/en/`, including navigation, headings
 | `navigation.ts` | Desktop/mobile navigation, skip link and footer credit                           |
 | `seo.ts`        | Metadata, keywords and sharing-image copy                                        |
 | `controls.ts`   | Copy feedback, theme, pause, duration and code-region labels                     |
-| `sections/`     | Each section's descriptions, items, samples and code tokens                      |
+| `sections/`     | Each section's descriptions, items, samples and code source/language             |
 
 Use `getI18n(Astro)` with typed keys. Shared `createI18n` and `TranslationShape` own locale normalization and the catalog shape; the app registers its own dictionaries. `getLocale` normalizes supported regional tags and falls back safely. Additional dictionaries must satisfy `TranslationDictionary`; actual localized routes need matching canonical, sitemap and sharing metadata. Use complete messages with named placeholders through `format`, rather than concatenating fragments that a translator cannot reorder.
 
-RichText renders escaped text/code/emphasis/strong parts. CodeBlock renders escaped syntax tokens. Catalogs contain no executable HTML. Pass selected messages to custom elements through their own `data-*` attributes instead of shipping all dictionaries into client bundles. `set:html` is reserved here for safely serialized JSON-LD and the trusted scoped vendor stylesheet, not translated UI content.
+RichText renders escaped text/code/emphasis/strong parts. CodeBlock passes code source and its language to shared CodeFrame, which uses Astro Code/Shiki and the single shared syntax theme. Catalogs contain no executable HTML. Pass selected messages to custom elements through their own `data-*` attributes instead of shipping all dictionaries into client bundles. `set:html` is reserved here for safely serialized JSON-LD and the trusted scoped vendor stylesheet, not translated UI content.
 
 The source-copy audit detects literal UI text, human-facing attributes and direct client feedback. It is a guardrail, not a complete semantic audit of all possible JavaScript. Review newly added props and data objects as well; do not hide copy outside the catalogs to bypass it.
 
@@ -254,3 +254,7 @@ The gallery uses shared secondary Buttons for its jump navigation, with visible 
 The agent skill source lives at ../skills/ticker/SKILL.md. The /skills/ticker/SKILL.md endpoint serves that file at build time; Examples and the footer link its download. Keep the file self-contained, validate it after edits and synchronize its version/API claims with the package. No separately edited public copy or generated preview bundle is needed.
 
 Example code disclosures use one aligned content inset and explicit gaps for notes, tabs and source. Their grid tracks can shrink to zero, preserving code-only scrolling on narrow screens. Keep the open disclosure in responsive/enlarged-text checks; a collapsed panel does not prove its contents fit.
+
+Code highlighting has one configuration in ../shared/lib/code-theme.mjs. Home catalogs store whole code strings and language identifiers; Examples uses the same CodeFrame renderer for complete HTML documents. Do not recreate manual token colors or plain pre tags beside it. The docs Markdown adapter uses the same theme and shared frame.
+
+TickerDemo pause controls are action buttons: Pause animation becomes Play animation when paused, with a matching accessible name. Keep this behavior in the component and in the copied standalone recipes. Do not combine a changing action label with aria-pressed; a stable-label toggle is a different interaction pattern.

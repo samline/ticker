@@ -16,7 +16,7 @@ Keep complete sections, content collections, search integration and package demo
 
 TextLink owns contextual underlined links, arrows, focus and closing-theme colors. NavLink owns navigation padding, nested indentation, hover, background-only current state and focus. Nest by margin rather than asymmetric padding. Lists own their gaps and rail inset; current backgrounds must leave room on both sides of a divider. Do not style NavLink internals from a page.
 
-Surface owns card background, border, radius and optional hover. Consumers own layout and content padding. Disclosure owns native details/summary layout, indicator and keyboard focus; consumers own panel/FAQ boundaries and content spacing. CodeFrame owns the code toolbar and typography variant; CopyButton owns exact copying, failure selection, independent feedback/reset and cleanup.
+Surface owns card background, border, radius and optional hover. Consumers own layout and content padding. Disclosure owns native details/summary layout, indicator and keyboard focus; consumers own panel/FAQ boundaries and content spacing. CodeFrame owns the code toolbar, typography variant and build-time Astro/Shiki renderer for source passed as text; CopyButton owns exact copying, failure selection, independent feedback/reset and cleanup.
 
 DrawerStyles receives the installed vendor stylesheet from each consuming app, normalizes fixed lengths to rem and scopes it to the owning custom element. It owns common native close appearance and reduced-motion overrides. Drawer owns animations, gestures, focus trapping, scroll locking and dismissal; app integrations own configuration and meaningful content only.
 
@@ -41,3 +41,9 @@ Shared interactive roots mark interface content with `data-ui`; Article's prose 
 ## Source hygiene
 
 Before deleting a source, trace imports, Astro/MDX composition, generated DOM hooks, translated data, assets and build/CI entrypoints. Keep package-owned runtime CSS adaptations, no-JavaScript fallbacks, compatibility fragments/redirects, asset licenses and migration evidence. Remove only proven-unused hooks, palette values, retired props and obsolete override rules. Adjacent equivalent media blocks can be consolidated without changing cascade order. Keep final visual values in the owning component rather than layering a retired design underneath. Generated dependency/build directories are not maintained source; never revive the retired Starlight example project.
+
+## Code rendering
+
+`components/CodeFrame.astro` renders source with Astro Code/Shiki when given text and a language, and composes the existing CopyButton. The optional slot accepts already-highlighted native Markdown output. `lib/code-theme.mjs` is the only syntax-theme configuration for both paths, using the existing palette tokens in both themes. App code must not create manual tok-* spans, plain pre alternatives for known languages or another Shiki theme. No highlighter JavaScript is shipped to the client.
+
+Home's CodeBlock is a small catalog/filename adapter; Examples passes its complete HTML directly. Docs retain Astro's Markdown/MDX compilation and Article frames that highlighted output with CodeFrame without replacing spans. Keep exact source copying (including terminal newlines), readable no-JavaScript code and code-only scrolling. Browser checks compare actual tag/attribute/string colors across routes and both themes.

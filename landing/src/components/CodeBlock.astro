@@ -1,56 +1,22 @@
 ---
 import CodeFrame from '../../../shared/components/CodeFrame.astro'
+import type { ComponentProps } from 'astro/types'
 import { getI18n } from '../i18n/utils'
 import { format } from '../../../shared/i18n/format'
 interface Props {
-  tokens: readonly {
-    readonly kind: 'plain' | 'com' | 'key' | 'str' | 'fn' | 'num' | 'tag' | 'attr' | 'pun'
-    readonly value: string
-  }[]
+  code: string
+  language: ComponentProps<typeof CodeFrame>['language']
   filename: string
   class?: string
 }
-const { filename, tokens, class: className } = Astro.props
+const { filename, code, language, class: className } = Astro.props
 const i18n = getI18n(Astro)
 ---
 
 <CodeFrame
   label={filename}
-  text={tokens.map(token => token.value).join('')}
+  text={code}
+  language={language}
   copyLabel={format(i18n.controls.code.copyLabel, { filename })}
   class:list={['code-block', className]}
->
-  <pre
-    tabindex="0"
-    role="region"
-    aria-label={format(i18n.controls.code.label, { filename })}
-  ><code>{tokens.map(token => token.kind === 'plain' ? token.value : <span class:list={[`tok-${token.kind}`]}>{token.value}</span>)}</code></pre>
-</CodeFrame>
-
-<style>
-  .tok-com {
-    color: var(--palette-syntax-muted);
-    font-style: italic;
-  }
-  .tok-key {
-    color: var(--palette-lavender);
-  }
-  .tok-str {
-    color: var(--palette-syntax-string);
-  }
-  .tok-fn {
-    color: var(--palette-syntax-tag);
-  }
-  .tok-num {
-    color: var(--palette-syntax-attribute);
-  }
-  .tok-tag {
-    color: var(--palette-syntax-number);
-  }
-  .tok-attr {
-    color: var(--palette-syntax-function);
-  }
-  .tok-pun {
-    color: var(--palette-syntax-muted);
-  }
-</style>
+/>

@@ -22,13 +22,10 @@ export default {
       docsLabel: 'Read the update() reference',
       code: {
         filename: 'update.js',
-        tokens: [
-          { kind: 'plain', value: 'news?.' },
-          { kind: 'fn', value: 'update' },
-          { kind: 'plain', value: '({\n  direction: ' },
-          { kind: 'str', value: "'right'" },
-          { kind: 'plain', value: ',\n})' },
-        ],
+        language: 'javascript',
+        code: `news?.update({
+  direction: 'right',
+})`,
       },
     },
     {
@@ -47,20 +44,12 @@ export default {
       docsLabel: 'See how content refresh works',
       code: {
         filename: 'content.js',
-        tokens: [
-          { kind: 'key', value: 'const' },
-          { kind: 'plain', value: ' item = document.' },
-          { kind: 'fn', value: 'createElement' },
-          { kind: 'plain', value: '(' },
-          { kind: 'str', value: "'span'" },
-          { kind: 'plain', value: ')\nitem.textContent = ' },
-          { kind: 'str', value: "'Shipping something new.'" },
-          { kind: 'plain', value: '\n\nnews?.source.' },
-          { kind: 'fn', value: 'append' },
-          { kind: 'plain', value: '(item)\nnews?.' },
-          { kind: 'fn', value: 'refresh' },
-          { kind: 'plain', value: '()' },
-        ],
+        language: 'javascript',
+        code: `const item = document.createElement('span')
+item.textContent = 'Shipping something new.'
+
+news?.source.append(item)
+news?.refresh()`,
       },
     },
     {
@@ -81,14 +70,8 @@ export default {
       docsLabel: 'Read the browser registry guide',
       code: {
         filename: 'cleanup.js',
-        tokens: [
-          { kind: 'attr', value: 'window' },
-          { kind: 'plain', value: '.Ticker.' },
-          { kind: 'fn', value: 'destroyTicker' },
-          { kind: 'plain', value: '(' },
-          { kind: 'str', value: "'news'" },
-          { kind: 'plain', value: ')' },
-        ],
+        language: 'javascript',
+        code: `window.Ticker.destroyTicker('news')`,
       },
     },
   ],

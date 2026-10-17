@@ -51,3 +51,5 @@ Link the working gallery at /ticker/examples/ from ExamplesLink and relevant col
 Read the root AGENTS.md project memory. Docs, Examples and Home share one visual contract; changes to shared primitives must be verified in all affected routes. Do not fork an existing landing control or introduce an independent palette/typography system.
 
 SEO must remain per article: unique title/description/canonical, social metadata and safe WebPage/TechArticle/BreadcrumbList JSON-LD linked to the root website/software identities. Breadcrumb markup and schema must agree about the current article. Do not invent dates or unsupported rich-result claims. main is named by article-title; TOC navigation has a translated label. Extend the all-article metadata/accessibility browser checks when collection coverage changes.
+
+Native Markdown/MDX fences use Astro/Shiki with the shared code-theme.mjs configuration; do not maintain a docs-specific theme or overwrite highlighted spans when framing them in Article. The same CodeFrame/CopyButton serves Home and Examples. Keep Markdown, MDX and no-JavaScript color checks in both themes alongside exact copying tests.
