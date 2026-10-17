@@ -10,7 +10,12 @@ export interface Recipe {
   rows: readonly {
     label: string
     duration: number
-    direction: 'left' | 'right'
+    direction: import('../../../../../src/core/types').TickerDirection
+    speed?: number
+    autoplay?: boolean
+    navigation?: boolean
+    rtl?: boolean
+    responsive?: import('../../../../../src/core/types').TickerResponsiveRule[]
     items: readonly {
       label: string
       href?: string
@@ -28,13 +33,13 @@ const news = [
 export default {
   title: 'Ticker examples — Copy, paste, make it move',
   description:
-    'Six working Ticker recipes with complete HTML/CDN and npm examples. Try announcements, logos, sample prices, opposite rows, dynamic content and controls.',
+    'Working Ticker recipes with complete HTML/CDN and npm examples. Try announcements, logos, sample prices, opposite rows, dynamic content and controls.',
   keywords: ['ticker examples', 'marquee examples', 'copy and paste HTML', 'vanilla JavaScript'],
   eyebrow: 'Examples',
   heading: 'Ticker',
   headingAccent: 'examples.',
   introduction:
-    'Six patterns to try, adjust and copy. Start with a live preview, then open the complete HTML / CDN or npm example below it.',
+    'Patterns to try, adjust and copy. Start with a live preview, then open the complete HTML / CDN or npm example below it.',
   instructions:
     'HTML / CDN opens directly as an index.html file with an internet connection. For npm / ESM, install @samline/ticker and use the file in an HTML-entry bundler such as Vite.',
   accessibility:
@@ -62,6 +67,117 @@ export default {
     'Copied code uses the initial settings shown when this page loads. Preview changes are not included.',
   brandAttribution: 'Demo brand marks and attribution',
   recipes: [
+    {
+      id: 'manual-navigation',
+      navigationLabel: 'Manual navigation',
+      kind: 'news',
+      title: 'Read at your own pace',
+      description:
+        'Start paused. Use Previous, Next, the position rail or a pointer gesture to explore a repeating sequence. Navigation leaves playback paused.',
+      docsPath: 'reference/api/controller/#manual-navigation',
+      docsLabel: 'Read the manual navigation contract',
+      note: 'Buttons advance one visible extent. The rail represents one repeated sequence and wraps at its end. Drag horizontally; vertical page scrolling stays available.',
+      rows: [
+        {
+          label: 'Manual news navigation',
+          duration: 20,
+          direction: 'left',
+          autoplay: false,
+          navigation: true,
+          items: news,
+        },
+      ],
+    },
+    {
+      id: 'vertical-news',
+      navigationLabel: 'Vertical news',
+      kind: 'news',
+      title: 'Vertical news',
+      description:
+        'Move a column of links upward at a constant 28 pixels per second. The viewport has a fixed height; original items can have different heights.',
+      docsPath: 'reference/configuration/#vertical-and-writing-direction',
+      docsLabel: 'Configure vertical movement',
+      note: 'Up and down use measured heights and the vertical track gap. Focus pauses the moving links. Buttons, rail and dragging work on the vertical axis.',
+      rows: [
+        {
+          label: 'Vertical ticker resources',
+          duration: 20,
+          speed: 28,
+          direction: 'up',
+          navigation: true,
+          items: news,
+        },
+      ],
+    },
+    {
+      id: 'constant-speed',
+      navigationLabel: 'Constant speed',
+      kind: 'rows',
+      title: 'Duration and constant speed',
+      description:
+        'Compare a fixed 20-second cycle with a longer sequence moving at 40 pixels per second. Speed takes precedence over duration and survives content resizing.',
+      docsPath: 'reference/configuration/#speed',
+      docsLabel: 'Compare speed and duration',
+      note: 'The first row uses duration. The second uses speed, so its duration follows the measured sequence length.',
+      rows: [
+        { label: 'Fixed duration', duration: 20, direction: 'left', items: news },
+        {
+          label: 'Constant pixel speed',
+          duration: 20,
+          speed: 40,
+          direction: 'left',
+          items: [...news, ...news],
+        },
+      ],
+    },
+    {
+      id: 'rtl-content',
+      navigationLabel: 'RTL content',
+      kind: 'news',
+      title: 'RTL content and logical movement',
+      description:
+        'Arabic and Hebrew text retain their writing order alongside numbers and Latin text. Automatic direction follows the inherited writing direction.',
+      docsPath: 'reference/configuration/#vertical-and-writing-direction',
+      docsLabel: 'Read the writing direction contract',
+      note: 'The preview has an explicit RTL region inside this LTR page. Previous and Next follow reading order; left and right remain physical animation directions.',
+      rows: [
+        {
+          label: 'RTL mixed content',
+          duration: 20,
+          direction: 'auto',
+          rtl: true,
+          navigation: true,
+          autoplay: false,
+          items: [
+            { label: 'العربية 123 ABC' },
+            { label: 'עברית 456 XYZ' },
+            { label: 'Release 2.1 — 789' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'responsive-options',
+      navigationLabel: 'Responsive options',
+      kind: 'news',
+      title: 'Responsive motion',
+      description:
+        'Resize the viewport: the same content uses 45 pixels per second on desktop and 24 on narrow screens. Focus and explicit pause remain independent.',
+      docsPath: 'reference/configuration/#responsive',
+      docsLabel: 'Configure viewport rules',
+      note: 'Below 48rem the viewport rule overrides speed. Leaving the rule restores the current base speed. Reduced motion still prevents autoplay.',
+      rows: [
+        {
+          label: 'Responsive news',
+          duration: 20,
+          direction: 'left',
+          speed: 45,
+          responsive: [{ query: '(width < 48rem)', options: { speed: 24 } }],
+          items: news,
+        },
+      ],
+    },
+
     {
       id: 'announcements',
       navigationLabel: 'Announcements',

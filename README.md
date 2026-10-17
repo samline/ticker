@@ -52,11 +52,11 @@ import '@samline/ticker/style.css'
 Use the browser build when you do not have a bundler and need to run the package directly in HTML, WordPress, Shopify, or a traditional server-rendered template.
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.0.4/dist/style.css" />
-<script src="https://unpkg.com/@samline/ticker@2.0.4/dist/browser/global.global.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.1.0/dist/style.css" />
+<script src="https://unpkg.com/@samline/ticker@2.1.0/dist/browser/global.global.js"></script>
 ```
 
-> Pin the version in production. Replace `2.0.4` with the version you ship.
+> Pin the version in production. Replace `2.1.0` with the version you ship.
 
 The browser bundle exposes a single global: `window.Ticker`.
 
@@ -155,15 +155,37 @@ The runtime preserves fractional measurements in both directions. Match item spa
 | Core utilities        | [Defaults, state factories, and validators](docs/src/content/docs/reference/core.md)                                                                                                                               |
 | Types                 | [TypeScript reference](docs/src/content/docs/reference/typescript.md)                                                                                                                                              |
 
-The controller exposes `element`, `source`, and an immutable options snapshot. `update()` and instance `refresh()` are chainable; `destroy()` owns teardown and restoration.
+The controller exposes `element`, `source`, `state`, and an immutable options snapshot. Playback, navigation, events and viewport rules are documented in the [controller reference](docs/src/content/docs/reference/api/controller.md). `update()` and instance `refresh()` are chainable; `destroy()` owns teardown and restoration.
 
 See the complete [API reference](docs/src/content/docs/reference/api.md).
 
 ---
 
+## Playback, navigation and responsive motion
+
+```ts
+const news = ticker('#news', {
+  speed: 40, // CSS pixels per second; takes precedence over duration.
+  direction: 'auto', // Inherited LTR moves left; inherited RTL moves right.
+  autoplay: false,
+  navigation: true,
+  responsive: [{ query: '(width < 48rem)', options: { speed: 24 } }],
+})
+news?.play()
+news?.pause()
+news?.scrollBy(120) // Instant logical distance; wraps and leaves playback paused.
+const unsubscribe = news?.on('playback', state => console.log(state.playing, state.reasons))
+```
+
+`direction` also accepts physical `left`/`right` and vertical `up`/`down`. Give vertical wrappers an explicit height. `pauseOnFocus` defaults to true; manual pause survives environmental and breakpoint changes. `play()` respects reduced motion, document visibility and viewport intersection. Attach application-owned native buttons and a labelled range using `connectControls({ previous, next, rail })`; `navigation: true` enables touch/mouse dragging without blocking perpendicular page scroll. Responsive rules use viewport media queries in array order over the current base configuration. The same typed controller is returned by Vanilla and browser/CDN factories, with equivalent declarative data attributes.
+
+See [configuration](docs/src/content/docs/reference/configuration.md) for normalization, RTL and rule precedence, and [controller contracts](docs/src/content/docs/reference/api/controller.md) for events, keyboard controls and cleanup.
+
+---
+
 ## Documentation
 
-Read the full guides and API reference in the **[documentation](https://samline.github.io/ticker/docs/)**. Explore six **[working examples](https://samline.github.io/ticker/examples/)** with complete HTML / CDN and npm code to copy and adapt.
+Read the full guides and API reference in the **[documentation](https://samline.github.io/ticker/docs/)**. Explore **[working examples](https://samline.github.io/ticker/examples/)** with complete HTML / CDN and npm code to copy and adapt.
 
 | Doc                                                               | Purpose                                                        |
 | ----------------------------------------------------------------- | -------------------------------------------------------------- |
@@ -182,7 +204,7 @@ Read the full guides and API reference in the **[documentation](https://samline.
 
 ## AI agent skill
 
-The public [Ticker skill](skills/ticker/SKILL.md) teaches an agent how to choose a Ticker integration, load CSS, manage controllers, preserve accessible motion and avoid nonexistent APIs. It is self-contained and describes v2.0.4; agents must verify their installed version.
+The public [Ticker skill](skills/ticker/SKILL.md) teaches an agent how to choose a Ticker integration, load CSS, manage controllers, preserve accessible motion and avoid nonexistent APIs. It is self-contained and describes v2.1.0; agents must verify their installed version.
 
 Download [SKILL.md](https://samline.github.io/ticker/skills/ticker/SKILL.md) into a `ticker/` folder in your agent's supported skill directory. For agents that discover project skills from `.agents/skills/`:
 

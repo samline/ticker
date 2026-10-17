@@ -63,8 +63,8 @@ const rows = await Promise.all(
         return `<span class="item">${e(item.label)}</span>`
       })
     )
-    return `<div class="window" tabindex="0" role="region" aria-label="${e(row.label)}" aria-live="off">
-  <div data-row data-duration="${row.duration}" data-direction="${row.direction}">${items.join('\n    ')}</div>
+    return `<div class="window" dir="${row.rtl ? 'rtl' : 'ltr'}" data-vertical="${row.direction === 'up' || row.direction === 'down'}" tabindex="0" role="region" aria-label="${e(row.label)}" aria-live="off">
+  <div data-row data-duration="${row.duration}" data-direction="${row.direction}" data-speed="${row.speed ?? 0}" data-autoplay="${row.autoplay !== false}" data-navigation="${row.navigation === true}" data-responsive="${e(JSON.stringify(row.responsive ?? []))}">${items.join('\n    ')}</div>
 </div>`
   })
 )
@@ -73,7 +73,11 @@ const controls =
     ? `
   <label>${e(t.speed)} <input type="range" min="14" max="60" value="24" aria-label="${e(t.speed)}"><output>24s</output></label>
   <label>${e(t.direction)} <select aria-label="${e(t.direction)}"><option value="left">${e(t.left)}</option><option value="right">${e(t.right)}</option></select></label>`
-    : ''
+    : recipe.rows.some(row => row.navigation)
+      ? `
+  <button type="button" data-previous>${e(playback.previous)}</button><button type="button" data-next>${e(playback.next)}</button>
+  <label>${e(playback.position)} <input type="range" data-position min="0" max="1" value="0"></label>`
+      : ''
 const markup = `<ticker-recipe data-pause-text="${e(playback.pause)}" data-play-text="${e(playback.play)}" data-added="${e(t.added)}" data-added-status="${e(t.addedStatus)}">
   <h1>${e(recipe.title)}</h1>
   ${rows.join('\n  ')}
@@ -116,9 +120,10 @@ ticker-recipe {
   [hidden] { display: none !important; }
   :focus-visible { outline: 0.125rem solid var(--accent); outline-offset: 0.1875rem; }
   .window:focus-visible { outline-offset: -0.1875rem; }
-  .window:focus-within .ticker-track { animation-play-state: paused; }
+  .window[data-vertical="true"] .ticker-wrapper { height: 10rem; }
+  .window[data-vertical="true"] [data-row] { flex-direction: column; width: 100%; align-items: flex-start; }
+  .window[data-vertical="true"] .item { white-space: normal; }
 }
-ticker-recipe[data-paused="true"] .ticker-wrapper .ticker-track { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
   ticker-recipe [data-pause] { display: none; }
 }`
@@ -130,19 +135,34 @@ const behavior = `if (!customElements.get('ticker-recipe')) {
       this.controllers = Array.from(this.querySelectorAll('[data-row]')).flatMap(row => {
         const controller = ticker(row, {
           duration: Number(row.dataset.duration),
-          direction: row.dataset.direction === 'right' ? 'right' : 'left',
+          direction: row.dataset.direction,
+          speed: Number(row.dataset.speed),
+          autoplay: row.dataset.autoplay !== 'false',
+          navigation: row.dataset.navigation === 'true',
+          responsive: JSON.parse(row.dataset.responsive || '[]'),
           pauseOnHover: true,
         });
         return controller ? [controller] : [];
       });
       this.querySelector('.controls').hidden = false;
       const pause = this.querySelector('[data-pause]');
-      pause.addEventListener('click', () => {
-        const paused = this.dataset.paused !== 'true';
+      const renderPause = () => {
+        const paused = !this.controllers.some(controller => controller.state.requested);
         this.dataset.paused = String(paused);
         pause.textContent = paused ? this.dataset.playText : this.dataset.pauseText;
+      };
+      this.controllers.forEach(controller => controller.on('playback', renderPause));
+      renderPause();
+      this.controllers[0]?.connectControls({
+        previous: this.querySelector('[data-previous]'),
+        next: this.querySelector('[data-next]'),
+        rail: this.querySelector('[data-position]'),
+      });
+      pause.addEventListener('click', () => {
+        const paused = this.dataset.paused !== 'true';
+        this.controllers.forEach(controller => paused ? controller.pause() : controller.play());
       }, { signal });
-      const speed = this.querySelector('input');
+      const speed = this.querySelector('input:not([data-position])');
       speed?.addEventListener('input', () => {
         this.controllers.forEach(controller => controller.update({ duration: Number(speed.value) }));
         this.querySelector('output').value = speed.value + 's';

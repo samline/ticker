@@ -1,15 +1,32 @@
 ---
 import { format } from '../../../shared/i18n/format'
 import { getI18n } from '../i18n/utils'
+import RangeControl from '../../../shared/components/RangeControl.astro'
 import Button from '../../../shared/components/Button.astro'
 interface Props {
   id?: string
   kind: 'news' | 'logos' | 'prices'
   label: string
   duration?: number
-  direction?: 'left' | 'right'
+  direction?: import('../../../src/core/types').TickerDirection
+  speed?: number
+  autoplay?: boolean
+  navigation?: boolean
+  rtl?: boolean
+  responsive?: import('../../../src/core/types').TickerResponsiveRule[]
 }
-const { id = 'ticker', kind, label, duration, direction } = Astro.props
+const {
+  id = 'ticker',
+  kind,
+  label,
+  duration,
+  direction,
+  speed,
+  autoplay = true,
+  navigation = false,
+  responsive = [],
+  rtl = false,
+} = Astro.props
 const instanceId = `${id}-${crypto.randomUUID()}`
 const defaults = {
   news: { duration: 38, direction: 'left' },
@@ -20,6 +37,10 @@ const i18n = getI18n(Astro)
 ---
 
 <ticker-demo
+  data-speed={speed}
+  data-autoplay={String(autoplay)}
+  data-navigation={String(navigation)}
+  data-responsive={JSON.stringify(responsive)}
   data-kind={kind}
   data-pause-text={i18n.controls.ticker.pause}
   data-play-text={i18n.controls.ticker.play}
@@ -30,6 +51,7 @@ const i18n = getI18n(Astro)
 >
   <div
     class:list={['ticker-frame ticker-wrapper']}
+    dir={rtl ? 'rtl' : undefined}
     id={instanceId}
     data-ticker={kind}
     role="region"
@@ -44,9 +66,28 @@ const i18n = getI18n(Astro)
     </div>
   </div>
   <div class:list={['ticker-controls']} hidden>
+    {navigation && (
+      <>
+        <Button variant="ghost" context="ticker" data-previous aria-controls={instanceId}>
+          {i18n.controls.ticker.previous}
+        </Button>
+        <Button variant="ghost" context="ticker" data-next aria-controls={instanceId}>
+          {i18n.controls.ticker.next}
+        </Button>
+        <RangeControl
+          label={i18n.controls.ticker.position}
+          data-position
+          min="0"
+          max="1"
+          value="0"
+          aria-controls={instanceId}
+        />
+      </>
+    )}
     <Button
       variant="ghost"
       context="ticker"
+      data-pause
       aria-controls={instanceId}
       aria-label={format(i18n.controls.ticker.pauseLabel, { label })}
     >
@@ -66,15 +107,25 @@ const i18n = getI18n(Astro)
       const { signal } = this.lifecycle
       const frame = this.querySelector<HTMLElement>('.ticker-frame')
       const controls = this.querySelector<HTMLElement>('.ticker-controls')
-      const button = controls?.querySelector<HTMLButtonElement>('button')
+      const button = controls?.querySelector<HTMLButtonElement>('button[data-pause]')
       if (!frame || !controls || !button) return
       try {
         this.controller = ticker(frame, {
           duration: Number(this.dataset.duration),
-          direction: this.dataset.direction === 'right' ? 'right' : 'left',
+          direction: this.dataset.direction as import('../../../src/core/types').TickerDirection,
+          speed: Number(this.dataset.speed),
+          autoplay: this.dataset.autoplay !== 'false',
+          navigation: this.dataset.navigation === 'true',
+          responsive: JSON.parse(this.dataset.responsive ?? '[]'),
           pauseOnHover: true,
         })
         if (!this.controller) return
+        if (this.dataset.navigation === 'true')
+          this.controller.connectControls({
+            previous: controls.querySelector<HTMLButtonElement>('[data-previous]')!,
+            next: controls.querySelector<HTMLButtonElement>('[data-next]')!,
+            rail: controls.querySelector<HTMLInputElement>('[data-position]')!,
+          })
         // DOM measurements are returned as pixels by the library. Keep this
         // component's animation distance in rem without changing the library API.
         const normalizeDistance = () => {
@@ -99,12 +150,13 @@ const i18n = getI18n(Astro)
             (paused ? this.dataset.playLabel : this.dataset.pauseLabel) ?? ''
           )
         }
-        renderPaused(false)
+        renderPaused(!this.controller.state.requested)
+        this.controller.on('playback', state => renderPaused(!state.requested))
         button.addEventListener(
           'click',
           () => {
-            const paused = frame.dataset.userPaused !== 'true'
-            renderPaused(paused)
+            if (this.controller?.state.requested) this.controller.pause()
+            else this.controller?.play()
           },
           { signal }
         )
@@ -171,11 +223,15 @@ const i18n = getI18n(Astro)
     --ticker-duration: 20s;
     width: 100%;
     overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .ticker-track {
     display: flex;
     width: max-content;
+    direction: ltr;
+    justify-self: left;
     transform: translate3d(0, 0, 0);
   }
 
@@ -201,21 +257,12 @@ const i18n = getI18n(Astro)
     animation: none !important;
   }
 
-  .ticker-wrapper[data-direction='left'] .ticker-track {
+  .ticker-wrapper[data-motion-direction='left'] .ticker-track {
     animation: ticker-left var(--ticker-duration) linear infinite;
   }
 
-  .ticker-wrapper[data-direction='right'] .ticker-track {
+  .ticker-wrapper[data-motion-direction='right'] .ticker-track {
     animation: ticker-right var(--ticker-duration) linear infinite;
-  }
-
-  .ticker-wrapper:hover .ticker-track.ticker-pause-on-hover {
-    animation-play-state: paused;
-  }
-
-  .ticker-wrapper[data-active='false'] .ticker-track,
-  .ticker-wrapper:not([data-playing='true']) .ticker-track {
-    animation-play-state: paused;
   }
 
   @keyframes ticker-left {
@@ -236,6 +283,61 @@ const i18n = getI18n(Astro)
     }
   }
 
+  .ticker-wrapper[data-writing-direction='rtl'] .ticker-track > * {
+    direction: rtl;
+  }
+
+  .ticker-wrapper[data-axis='vertical'] .ticker-track {
+    flex-direction: column;
+    width: 100%;
+    height: max-content;
+  }
+
+  .ticker-wrapper[data-axis='vertical'] .ticker-track > * {
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .ticker-wrapper[data-motion-direction='up'] .ticker-track {
+    animation: ticker-up var(--ticker-duration) linear infinite;
+  }
+
+  .ticker-wrapper[data-motion-direction='down'] .ticker-track {
+    animation: ticker-down var(--ticker-duration) linear infinite;
+  }
+
+  /* Pause declarations must follow every animation shorthand. */
+  .ticker-wrapper:not([data-playing='true']) .ticker-track {
+    animation-play-state: paused;
+  }
+
+  .ticker-wrapper[data-navigation='true'] {
+    touch-action: pan-y;
+  }
+
+  .ticker-wrapper[data-navigation='true'][data-axis='vertical'] {
+    touch-action: pan-x;
+  }
+
+  @keyframes ticker-up {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(0, calc(-1 * var(--ticker-distance)), 0);
+    }
+  }
+
+  @keyframes ticker-down {
+    from {
+      transform: translate3d(0, calc(-1 * var(--ticker-distance)), 0);
+    }
+    to {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .ticker-track {
       animation: none !important;
@@ -243,11 +345,32 @@ const i18n = getI18n(Astro)
       will-change: auto !important;
     }
 
-    .ticker-clone {
+    .ticker-wrapper:not([data-navigation='true']) .ticker-clone {
       display: none;
+    }
+
+    .ticker-wrapper[data-navigation='true'] .ticker-track {
+      transform: translate3d(var(--ticker-position, 0rem), 0, 0) !important;
+    }
+
+    .ticker-wrapper[data-navigation='true'][data-axis='vertical'] .ticker-track {
+      transform: translate3d(0, var(--ticker-position, 0rem), 0) !important;
     }
   }
 
+  .ticker-frame[data-axis='vertical'] {
+    height: 10rem;
+  }
+  .ticker-frame[data-axis='vertical'] .ticker-content {
+    align-items: flex-start;
+  }
+  .ticker-frame[data-axis='vertical'] .ticker-track {
+    white-space: normal;
+  }
+  .ticker-frame[data-axis='vertical']::before,
+  .ticker-frame[data-axis='vertical']::after {
+    display: none;
+  }
   .ticker-frame {
     position: relative;
     background: transparent;
@@ -321,12 +444,6 @@ const i18n = getI18n(Astro)
     color: var(--palette-price-down);
   }
 
-  .ticker-frame:focus-within .ticker-track {
-    animation-play-state: paused;
-  }
-  .ticker-frame[data-user-paused='true'] .ticker-track {
-    animation-play-state: paused;
-  }
   .ticker-frame:not([data-ready='true']) {
     overflow-x: auto;
   }
@@ -351,6 +468,9 @@ const i18n = getI18n(Astro)
   .ticker-controls {
     display: flex;
     justify-content: flex-end;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-sm);
     margin-top: 0.625rem;
   }
   .ticker-controls button {

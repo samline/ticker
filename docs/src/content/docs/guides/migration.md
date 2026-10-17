@@ -56,3 +56,7 @@ UI-library adapters are no longer shipped. Integrations should call `ticker()` w
 ## Browser entrypoint
 
 `@samline/ticker/browser` is now a side-effect-free ESM/CJS registry module. Direct HTML usage loads `dist/browser/global.global.js`, which installs `window.Ticker`.
+
+## Upgrade from 2.0 to 2.1
+
+Existing physical left/right directions, duration mode, selectors, entrypoints and registry ownership remain supported. Focus pause is now enabled by default; set `pauseOnFocus: false` only when the integration has an equivalent policy. Replace application CSS pause state with controller `pause()` / `play()` and read `state` or subscribe with `on('playback', listener)`. `data-playing` now includes manual, focus and hover causes. See [configuration](/ticker/docs/reference/configuration/) for vertical motion, speed, responsive rules and RTL, and [controller](/ticker/docs/reference/api/controller/) for manual navigation and event ordering.

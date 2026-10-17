@@ -122,7 +122,14 @@ test('every copied CDN and npm document executes as a standalone example', async
       ])
     : assets
   await page.goto('examples/')
-  for (const id of ids) {
+  for (const id of [
+    ...ids,
+    'manual-navigation',
+    'vertical-news',
+    'constant-speed',
+    'rtl-content',
+    'responsive-options',
+  ]) {
     const recipe = page.locator(`#${id}`)
     await recipe.locator('summary').click()
     for (const mode of ['HTML / CDN', 'npm / ESM']) {
@@ -163,9 +170,11 @@ test('every copied CDN and npm document executes as a standalone example', async
       standalone.on('pageerror', error => errors.push(error.message))
       await standalone.setContent(executable)
       await expect(standalone.locator('.ticker-wrapper[data-ready=true]')).toHaveCount(
-        id === 'opposite-rows' ? 2 : 1
+        id === 'opposite-rows' || id === 'constant-speed' ? 2 : 1
       )
-      await standalone.getByRole('button', { name: 'Pause animation' }).click()
+      if (id === 'manual-navigation' || id === 'rtl-content')
+        await standalone.getByRole('button', { name: 'Play animation', exact: true }).click()
+      await standalone.getByRole('button', { name: 'Pause animation', exact: true }).click()
       await expect(standalone.locator('ticker-recipe')).toHaveAttribute('data-paused', 'true')
       await expect(
         standalone.getByRole('button', { name: 'Play animation', exact: true })

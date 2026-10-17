@@ -171,11 +171,11 @@ export default {
         {
           kind: 'text',
           value:
-            'Size depends on the entrypoint and your bundler’s tree shaking. The locally built v2.0.4 browser bundle is approximately ',
+            'Size depends on the entrypoint and your bundler’s tree shaking. The locally built v2.1.0 browser bundle is approximately ',
         },
         {
           kind: 'strong',
-          value: '4.3 KiB gzipped',
+          value: '8.0 KiB gzipped',
         },
         {
           kind: 'text',
@@ -183,7 +183,7 @@ export default {
         },
         {
           kind: 'strong',
-          value: '0.5 KiB',
+          value: '0.7 KiB gzipped',
         },
         {
           kind: 'text',

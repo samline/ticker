@@ -31,7 +31,7 @@ When `prefers-reduced-motion: reduce` matches, animation stops, transforms reset
 
 ## Pause controls
 
-`pauseOnHover` is a pointer convenience. It is not a persistent pause control, and Ticker does not expose `pause()` or `play()` methods. Provide a clearly labelled application control for continuous moving content; keep its action label synchronized with your own CSS pause state (Pause while playing, Play while paused). Update both visible text and any accessible name. If using a toggle button instead, keep its label stable and report the pause state with `aria-pressed`. The landing demonstrates this integration. Keep the original content readable when motion is disabled.
+`pauseOnHover` is a pointer convenience. Focus pause is enabled by default in 2.1 and composes with manual pause, hidden document, viewport and reduced motion. Use `pause()` / `play()` for a persistent control and `state` / `on('playback', ...)` to synchronize its action label (Pause while playback is requested, Play while explicitly paused). Update visible text and any accessible name together. A changing action label does not use `aria-pressed`; a stable toggle label may use that state instead. The landing demonstrates the controller API. Keep originals readable when motion is disabled and supply labelled native controls for manual navigation. See [controller examples](/ticker/docs/reference/api/controller/).
 
 ## Content guidance
 

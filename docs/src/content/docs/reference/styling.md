@@ -9,7 +9,7 @@ description: 'Generated markup, package-owned attributes, classes, CSS variables
 
 ## Load the stylesheet
 
-Import the package CSS once alongside the JavaScript entrypoint. It owns layout, animation, direction, hover pause, measurement visibility, and reduced-motion behavior.
+Import the package CSS once alongside the JavaScript entrypoint. It owns layout, animation, direction, effective playback pause, measurement visibility, and reduced-motion behavior.
 
 ```ts
 import '@samline/ticker/style.css'
@@ -40,16 +40,16 @@ Application styles should use stable classes or data attributes. Clone count and
 
 ## Package-owned CSS
 
-| Name                     | Purpose                                        |
-| ------------------------ | ---------------------------------------------- |
-| `--ticker-duration`      | Normalized animation duration.                 |
-| `--ticker-distance`      | Exact content width plus horizontal track gap. |
-| `.ticker-wrapper`        | Clipping container.                            |
-| `.ticker-track`          | Animated `width: max-content` flex row.        |
-| `.ticker-track > *`      | Non-shrinking content sequences.               |
-| `.ticker-content`        | Original content sequence.                     |
-| `.ticker-clone`          | Non-selectable generated visual copy.          |
-| `.ticker-pause-on-hover` | Track state used by `pauseOnHover`.            |
+| Name                     | Purpose                                              |
+| ------------------------ | ---------------------------------------------------- |
+| `--ticker-duration`      | Normalized animation duration.                       |
+| `--ticker-distance`      | Exact content extent plus axis track gap.            |
+| `.ticker-wrapper`        | Clipping container.                                  |
+| `.ticker-track`          | Inline flex row, or full-width vertical column.      |
+| `.ticker-track > *`      | Non-shrinking content sequences.                     |
+| `.ticker-content`        | Original content sequence.                           |
+| `.ticker-clone`          | Non-selectable generated visual copy.                |
+| `.ticker-pause-on-hover` | Compatibility class; runtime state owns hover pause. |
 
 `data-active` reports viewport intersection with no extra margin. With `IntersectionObserver`, tickers start paused until the first intersection result; without it, they are treated as active. `data-ready="false"` suppresses animation during measurement.
 
@@ -77,7 +77,7 @@ Classes passed through `options.class` are controller-owned. Other wrapper class
 
 ## Seamless loops
 
-The runtime keeps fractional content widths when calculating `--ticker-distance`. The animation travels exactly one sequence width plus the horizontal track gap, so the first clone aligns with the original when either direction restarts. Vertical `row-gap` does not affect the travel distance. Leave this runtime-owned variable unchanged.
+The runtime keeps fractional content widths when calculating `--ticker-distance`. The animation travels exactly one sequence width plus the horizontal track gap, so the first clone aligns with the original when a horizontal direction restarts. Vertical directions use the content height plus `row-gap` instead. Leave this runtime-owned variable unchanged.
 
 For an evenly spaced logo strip, use the same gap between items and between repeated sequences:
 
@@ -95,3 +95,7 @@ For an evenly spaced logo strip, use the same gap between items and between repe
 If your sequence alternates text and decorative separators, include a separator after the final item as well. The last-to-first join should follow the same pattern as every interior pair. Mismatched gaps or a missing final separator can look like a jump even when the animation distance is correct.
 
 Call the controller's `refresh()` after changing content or loading fonts when no automatic resize measurement occurs. Keep content copies free of transforms or unequal margins that change the repeat spacing independently of the track's gap.
+
+## Vertical, logical direction and manual position
+
+`data-axis` selects a row or column, `data-motion-direction` holds the resolved physical direction and `data-writing-direction` preserves LTR/RTL content ordering. Give vertical wrappers a definite height. `--ticker-position` holds the instantaneous physical offset for manual navigation with reduced motion. Regular playback and seeking share the CSS animation timeline, preserving position across duration/speed updates and same-axis rebuilds. Use the controller rather than overriding transforms or animation time. See [configuration](/ticker/docs/reference/configuration/) and [manual navigation](/ticker/docs/reference/api/controller/#manual-navigation).

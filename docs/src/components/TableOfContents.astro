@@ -54,7 +54,9 @@ const items = headings.filter(h => h.depth === 2 || h.depth === 3)
         const offset =
           (header?.getBoundingClientRect().bottom ?? 0) +
           2.5 * parseFloat(getComputedStyle(document.documentElement).fontSize) +
-          1
+          // Native anchor rounding and fractional font metrics can differ by
+          // slightly more than one CSS pixel after layout settles.
+          2
         const atEnd =
           scrollY > 0 && scrollY + innerHeight >= document.documentElement.scrollHeight - 1
         const current = atEnd

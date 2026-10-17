@@ -66,7 +66,7 @@ For ordinary source content, the factory:
 5. Initializes runtime state, observers, measurement, and accessible clones.
 6. Returns the controller.
 
-For adopted markup it applies normalized attributes to the existing wrapper and initializes its existing track/content pair. If the required track or content is missing, the controller is still returned but no runtime state is initialized.
+For adopted markup it applies normalized attributes to the existing wrapper and initializes its existing track/content pair. If the required track or content is missing, the factory returns `null`.
 
 ## Server behavior
 

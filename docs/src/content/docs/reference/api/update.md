@@ -35,7 +35,7 @@ instance.update({ duration: 32, direction: 'right' }).refresh()
 - Supplied fields are normalized again.
 - Previous controller-owned `class` tokens are removed and the new tokens are added.
 - Unrelated classes added by application code remain.
-- `data-duration`, `data-direction`, `data-pause-on-hover`, and `data-interactive-clones` are synchronized.
+- Behavior attributes and effective options are synchronized after applying viewport rules. Existing explicit pause intent is preserved unless `autoplay` is explicitly supplied. Same-axis changes preserve pixel position; axis changes reset it. See [responsive precedence](/ticker/docs/reference/configuration/#responsive).
 - Rebuilding is scheduled through `requestAnimationFrame`; it is not a synchronous geometry read.
 
 Calling `update()` with no argument still normalizes the current snapshot and schedules a refresh. After destruction it is a chainable no-op.

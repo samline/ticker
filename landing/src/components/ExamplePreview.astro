@@ -25,6 +25,11 @@ const base = import.meta.env.BASE_URL
           label={row.label}
           duration={row.duration}
           direction={row.direction}
+          speed={row.speed}
+          autoplay={row.autoplay}
+          navigation={row.navigation}
+          rtl={row.rtl}
+          responsive={row.responsive}
         >
           {row.items.map(item =>
             item.logo ? (

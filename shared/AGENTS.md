@@ -13,3 +13,5 @@ Share locale resolution through i18n/createI18n.ts and safe metadata serializati
 Landing, Examples and Docs are one website. Before creating a variant, compare it to existing Home UI and reuse the implementation. Keep visual regression checks against real shared consumers; duplicated tokens or a similar screenshot are not proof of reuse. Root AGENTS.md records the cross-project decisions and previous mistakes to avoid.
 
 CodeFrame owns Astro Code/Shiki rendering for text/language input and shared/lib/code-theme.mjs owns the single syntax configuration. Native Markdown/MDX highlighting consumes that same theme; Article only frames the result. Remove manual syntax-token arrays and separate theme objects. Preserve text exactly: Astro trims one final newline, so CodeFrame restores it through its build-time transformer. Verify actual colors, copied source, no-JavaScript output and both themes, not merely the presence of a toolbar or token spans.
+
+RangeControl owns the existing demo range presentation, shared by speed and position controls. It supplies native input/focus styling and a label/slot; the owning application or package supplies behavior.

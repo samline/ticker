@@ -15,6 +15,9 @@ export default {
     title: 'Switch color theme',
   },
   ticker: {
+    previous: 'Previous items',
+    next: 'Next items',
+    position: 'Position in repeated sequence',
     pause: 'Pause animation',
     play: 'Play animation',
     pauseLabel: 'Pause animation: {label}',

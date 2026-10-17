@@ -90,10 +90,14 @@ Both builds use `shared/scripts/check-links.mjs`. It checks live anchors, assets
 
 Source cleanup retains all 23 maintained articles and all 33 migration records. There is no parallel legacy documentation tree. Metadata uses shared/lib/serialize.ts rather than importing landing internals; app catalogs remain independent while their locale resolution is shared. Keep native fallback menus, search result templates and vendor-driven state/clone selectors: these are live behavior even when static import tools cannot see their consumers. Follow shared/AGENTS.md before deleting source or generated hooks.
 
-The companion `/ticker/examples/` gallery provides six working, complete recipes with CDN and npm/ESM files. `ExamplesLink` composes the shared LinkCard in desktop/mobile navigation; overview and recipe content link to the same gallery. The existing reference/examples article retains advanced integration patterns and published fragments. A standalone docs build defers its two sibling landing paths to the combined artifact audit; deployment must build both sites.
+The companion `/ticker/examples/` gallery provides working, complete recipes with CDN and npm/ESM files. `ExamplesLink` composes the shared LinkCard in desktop/mobile navigation; overview and recipe content link to the same gallery. The existing reference/examples article retains advanced integration patterns and published fragments. A standalone docs build defers its two sibling landing paths to the combined artifact audit; deployment must build both sites.
 
 ## Article discovery and accessibility
 
 Every collection article receives its own canonical, title, description, social image metadata and safe WebPage/TechArticle/BreadcrumbList JSON-LD. Do not invent publication dates, ratings or accessibility certification. Breadcrumbs identify the current page semantically; main is named by its h1, and table-of-contents navigation is labelled. Keep locale/social copy in translations and URLs derived from site/base configuration.
 
 The browser suite audits all 23 articles' metadata and runs axe WCAG A/AA plus best-practice checks in both themes, in addition to the existing keyboard, search, no-JavaScript, reduced-motion and responsive tests. Preserve those checks when adding or moving content; automated success is not a complete accessibility audit.
+
+## Ticker 2.1 coverage
+
+Configuration and controller references cover vertical/logical direction, constant pixel speed, playback intent and focus, typed events, native manual controls and ordered viewport rules. The 2.0 migration article retains its route and adds the 2.1 upgrade behavior. Keep API shapes, declarative attributes and the public integration skill synchronized; run the runtime browser suite as well as docs/combined-site checks after package changes.

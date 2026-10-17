@@ -132,3 +132,7 @@ Example code disclosures align summary text, notes, tabs and CodeFrame to the sa
 Share syntax rendering as well as the frame. Use CodeFrame text/language with the shared Astro/Shiki theme; CodeBlock only adapts catalog copy/filenames. Preserve whole source strings rather than manual syntax-token arrays. Markdown/MDX in docs uses the same theme and container. Verify computed colors and exact source copying across Home, Examples and Docs in both themes.
 
 Pause controls use changing action labels (Pause animation / Play animation) and matching accessible names. Keep per-instance data attributes and state inside TickerDemo. The copied recipe uses the same translated messages. Changing-action buttons do not use aria-pressed; stable-label toggle semantics must not be mixed with this pattern.
+
+## Ticker 2.1 runtime contract
+
+Playback intent, automatic pause causes, CSS-animation seeking, logical navigation, vertical measurements and viewport rules belong to the package runtime. Site demos call play()/pause(), state/on() and connectControls() rather than implementing pause CSS or gesture/rail controllers. Horizontal left/right stay physical; auto uses inherited writing direction, while next/previous and position are logical. Axis changes reset position; same-axis updates preserve pixels modulo the measured period. Keep pinned versions, public skill, copied recipes and the scoped package CSS adaptation synchronized. Runtime browser tests live in landing/e2e/runtime.spec.ts alongside the site suites.
