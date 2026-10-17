@@ -47,7 +47,7 @@ These instructions apply to the maintained Astro landing. Read README.md for rat
 
 - Keep SEO metadata in SEO.astro and its copy in the catalog. Derive canonical, sharing, sitemap and robots URLs from validated SITE_URL, never request/preview hosts. Keep development noindex.
 - Escape JSON-LD through `serializeJsonLd`; escape generated-image text as XML. `set:html` may render this safe structured data and the trusted scoped vendor stylesheet, not translated interface HTML.
-- Preserve the generated social image, source-package schema, description, keywords, accessible image text and absolute sharing URLs. Only include factual supported claims; verify output after edits.
+- Preserve the generated social image, source-package schema, description, keywords, accessible image text and absolute sharing URLs. Only include factual supported claims; verify output after edits. Social artwork uses shared dark palette tokens, translated copy and bundled Inter/Instrument Serif fonts with their licenses; disable system fonts to keep CI rendering reproducible. Inspect the generated 1200×630 PNG after typography or layout edits.
 - Repository deployments have a base path. Use BASE_URL for local links/assets. A domain/base change must update Astro/default SITE_URL, docs Astro config, documentation paths, redirects, sitemap packaging, output assertions, browser config/test URLs and workflows together.
 - Current deployment: landing `/ticker/`, documentation `/ticker/docs/`. `include-docs.mjs` copies sibling `docs/dist/` and merges sitemap entries. Adapt/remove this contract when replicating into a project without that docs site.
 - Preserve useful existing fragments and redirects during renames. Navigation now uses `#recipes`; `#compare` remains a compatibility alias.

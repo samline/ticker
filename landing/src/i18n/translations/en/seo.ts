@@ -19,6 +19,7 @@ export default {
       'Ticker: A little motion. A lot of possibility. Accessible, dependency-free ticker tapes for the web.',
     tagline: 'Accessible ticker tapes for the open web.',
     details: 'Zero dependencies · TypeScript ready · MIT licensed',
+    items: ['Announcements', 'Logos', 'Prices'],
   },
   software: { languages: ['JavaScript', 'TypeScript'], platform: 'Web browsers' },
 } as const
