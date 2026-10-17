@@ -14,7 +14,7 @@ npm ci --prefix landing
 npm run landing:dev
 ```
 
-Open `http://localhost:4321/ticker/`. Astro accepts both `/ticker` and `/ticker/` with `trailingSlash: 'ignore'`; the configured base retains its trailing slash for links and assets. The local package API is imported from repository source, so library changes reach the demo without copying a built JavaScript bundle.
+Open `http://localhost:4321/ticker/`. Astro accepts both `/ticker` and `/ticker/` with `trailingSlash: 'ignore'` and a slashless routing base. The config explicitly keeps `import.meta.env.BASE_URL` slash-terminated for links and assets. The local package API is imported from repository source, so library changes reach the demo without copying a built JavaScript bundle.
 
 ```sh
 npm run landing:check

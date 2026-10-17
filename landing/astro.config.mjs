@@ -8,12 +8,13 @@ import { getSiteUrl, productionSiteUrl } from './src/lib/site.ts'
 const directory = fileURLToPath(new URL('.', import.meta.url))
 const environment = loadEnv(process.env.NODE_ENV ?? 'development', directory, 'SITE_')
 const site = getSiteUrl(process.env.SITE_URL ?? environment.SITE_URL ?? productionSiteUrl)
+const base = site?.pathname ?? '/'
 
 export default defineConfig({
   site: site?.href,
-  base: site?.pathname ?? '/',
+  base: base === '/' ? base : base.replace(/\/$/, ''),
   output: 'static',
-  trailingSlash: 'always',
+  trailingSlash: 'ignore',
   redirects: Object.fromEntries(
     [
       'getting-started',
@@ -35,5 +36,9 @@ export default defineConfig({
   integrations: site ? [sitemap()] : [],
   devToolbar: { enabled: false },
   compressHTML: true,
-  vite: { plugins: [tailwindcss()] },
+  vite: {
+    plugins: [tailwindcss()],
+    // Keep link/asset composition slash-terminated while routing accepts the bare base.
+    define: { 'import.meta.env.BASE_URL': JSON.stringify(base) },
+  },
 })
