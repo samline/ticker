@@ -5,6 +5,10 @@ import type {
   TickerOptions,
   TickerState,
   TickerTarget,
+  TickerSnapshot,
+  TickerEventMap,
+  TickerControls,
+  TickerPauseReason,
 } from '../core/types'
 import {
   validateDuration,
@@ -61,21 +65,120 @@ const getReducedMotionMedia = (): ReducedMotionMedia | null => {
 
 interface RuntimeTickerState extends TickerState {
   forceRebuild: boolean
+  requested: boolean
+  manualOverride: boolean
+  intentRevision: number
+  hovered: boolean
+  destroyed: boolean
+  position: number
+  duration: number
+  direction: 'left' | 'right' | 'up' | 'down'
+  vertical: boolean
+  rtl: boolean
+  listeners: Map<keyof TickerEventMap, Set<(value: TickerSnapshot) => void>>
+  cleanup: Array<() => void>
+  playbackKey: string
+  initialized: boolean
+  configured?: NormalizedTickerOptions
+  rules: Array<{ media: MediaQueryList; options: TickerOptions }>
   measurement: {
-    contentWidth: number
-    wrapperWidth: number
+    contentExtent: number
+    wrapperExtent: number
     interactiveClones: boolean
     reducedMotion: boolean
+    vertical: boolean
   } | null
 }
 
 const tickersState = new Map<HTMLElement, RuntimeTickerState>()
 let managerState: TickerManagerState = createEmptyManagerState()
 
-const syncPlayback = ({ wrapper }: TickerState): void => {
-  wrapper.dataset.playing = String(
-    wrapper.dataset.active === 'true' && !document.hidden && !getReducedMotionMedia()?.matches
+const modulo = (value: number, period: number): number =>
+  period > 0 ? ((value % period) + period) % period : 0
+const backwards = (state: RuntimeTickerState): boolean =>
+  state.direction === 'right' || state.direction === 'down'
+const animation = (state: RuntimeTickerState): Animation | undefined =>
+  state.track
+    .getAnimations?.()
+    .find(
+      item =>
+        'animationName' in item &&
+        String((item as CSSAnimation).animationName).startsWith('ticker-')
+    )
+
+const readPosition = (state: RuntimeTickerState): number => {
+  const distance = state.measurement?.contentExtent ?? 0
+  const time = animation(state)?.currentTime
+  if (typeof time === 'number' && distance && state.duration) {
+    const phase = modulo(time / (state.duration * 1000), 1)
+    const physical = (backwards(state) ? 1 - phase : phase) * distance
+    state.position = modulo(state.rtl && !state.vertical ? -physical : physical, distance)
+  }
+  return state.position
+}
+
+const seek = (state: RuntimeTickerState, position: number): void => {
+  const distance = state.measurement?.contentExtent ?? 0
+  state.position = modulo(position, distance)
+  const physical = modulo(state.rtl && !state.vertical ? -state.position : state.position, distance)
+  const phase = distance ? physical / distance : 0
+  // Force style resolution after changing ready/direction/duration, then restore
+  // the current CSS animation's time instead of restarting from its first frame.
+  const current = animation(state)
+  if (current) current.currentTime = (backwards(state) ? 1 - phase : phase) * state.duration * 1000
+  state.wrapper.style.setProperty('--ticker-position', `${-physical}px`)
+}
+
+const snapshot = (state: RuntimeTickerState): TickerSnapshot => {
+  const reasons: TickerPauseReason[] = []
+  if (!state.requested) reasons.push('manual')
+  if (state.hovered && state.wrapper.dataset.pauseOnHover === 'true') reasons.push('hover')
+  if (
+    state.wrapper.dataset.pauseOnFocus === 'true' &&
+    state.wrapper.contains(document.activeElement)
   )
+    reasons.push('focus')
+  if (document.hidden) reasons.push('hidden')
+  if (state.wrapper.dataset.active !== 'true') reasons.push('offscreen')
+  if (getReducedMotionMedia()?.matches) reasons.push('reduced-motion')
+  const ready = !state.destroyed && state.wrapper.dataset.ready === 'true'
+  return Object.freeze({
+    ready,
+    destroyed: state.destroyed,
+    requested: state.requested,
+    playing: ready && reasons.length === 0,
+    reasons: Object.freeze(reasons),
+    position: readPosition(state),
+    distance: state.measurement?.contentExtent ?? 0,
+    duration: state.duration,
+    direction: state.direction,
+  })
+}
+
+const emit = (state: RuntimeTickerState, event: keyof TickerEventMap): void => {
+  if (state.destroyed && event !== 'destroy') return
+  const value = snapshot(state)
+  // Snapshot iteration: newly registered listeners wait until the next event;
+  // cancellation/destruction during dispatch prevents subsequent callbacks.
+  for (const listener of [...(state.listeners.get(event) ?? [])]) {
+    if (!state.listeners.get(event)?.has(listener)) continue
+    try {
+      listener(value)
+    } catch (error) {
+      console.error('[ticker] Event listener failed', error)
+    }
+    if (state.destroyed && event !== 'destroy') break
+  }
+}
+
+const syncPlayback = (state: RuntimeTickerState): void => {
+  const value = snapshot(state)
+  state.wrapper.dataset.playing = String(value.playing)
+  const key = JSON.stringify([value.requested, value.playing, value.reasons])
+  if (key !== state.playbackKey) {
+    state.playbackKey = key
+    emit(state, 'playback')
+  }
 }
 
 const handleVisibilityChange = (): void => tickersState.forEach(syncPlayback)
@@ -150,23 +253,35 @@ const removeClones = (state: TickerState): void => {
   state.clones = []
 }
 
-const syncConfig = (state: TickerState): void => {
+const syncConfig = (state: RuntimeTickerState): void => {
   const { wrapper, track } = state
   const duration = validateDuration(wrapper.dataset.duration)
-  const direction = validateDirection(wrapper.dataset.direction)
+  const configuredDirection = validateDirection(wrapper.dataset.direction)
+  const writingDirection = window.getComputedStyle(wrapper).direction
+  state.rtl = writingDirection
+    ? writingDirection === 'rtl'
+    : wrapper.closest('[dir]')?.getAttribute('dir') === 'rtl'
+  const direction =
+    configuredDirection === 'auto' ? (state.rtl ? 'right' : 'left') : configuredDirection
+  state.direction = direction
+  state.vertical = direction === 'up' || direction === 'down'
+  wrapper.dataset.axis = state.vertical ? 'vertical' : 'horizontal'
+  wrapper.dataset.writingDirection = state.rtl ? 'rtl' : 'ltr'
+  wrapper.dataset.motionDirection = direction
   const pauseOnHover = validatePauseOnHover(wrapper.dataset.pauseOnHover === 'true')
   const interactiveClones = validateInteractiveClones(wrapper.dataset.interactiveClones === 'true')
-
-  if (wrapper.dataset.direction !== direction) {
-    wrapper.dataset.direction = direction
-  }
 
   const newInteractiveClones = interactiveClones ? 'true' : 'false'
   if (wrapper.dataset.interactiveClones !== newInteractiveClones) {
     wrapper.dataset.interactiveClones = newInteractiveClones
   }
 
-  const newDuration = `${duration}s`
+  const speed = Number(wrapper.dataset.speed)
+  state.duration =
+    Number.isFinite(speed) && speed > 0 && state.measurement
+      ? state.measurement.contentExtent / speed
+      : duration
+  const newDuration = `${state.duration}s`
   if (wrapper.dataset.duration !== String(duration)) {
     wrapper.dataset.duration = String(duration)
   }
@@ -186,17 +301,21 @@ const rebuildTickerState = (state: RuntimeTickerState, force: boolean): void => 
   const { wrapper, track, content } = state
   if (!track || !content || !wrapper.isConnected) return
 
+  const position = readPosition(state)
   syncConfig(state)
   const contentRect = content.getBoundingClientRect()
   const wrapperRect = wrapper.getBoundingClientRect()
 
   const trackStyles = window.getComputedStyle(track)
-  const gap = parseFloat(trackStyles.columnGap || trackStyles.gap) || 0
+  const gap =
+    parseFloat((state.vertical ? trackStyles.rowGap : trackStyles.columnGap) || trackStyles.gap) ||
+    0
 
   // The animation must travel exactly one content-and-gap period. Rounding
   // fractional layout widths introduces a visible offset when the loop resets.
-  const contentWidth = contentRect.width + gap
-  const wrapperWidth = Math.ceil(wrapperRect.width)
+  const measuredExtent = state.vertical ? contentRect.height : contentRect.width
+  const contentExtent = measuredExtent > 0 ? measuredExtent + gap : 0
+  const wrapperExtent = Math.ceil(state.vertical ? wrapperRect.height : wrapperRect.width)
 
   const reducedMotion = getReducedMotionMedia()?.matches ?? false
   const interactiveClones = wrapper.dataset.interactiveClones === 'true'
@@ -205,10 +324,11 @@ const rebuildTickerState = (state: RuntimeTickerState, force: boolean): void => 
   if (
     !force &&
     wrapper.dataset.ready === 'true' &&
-    previous?.contentWidth === contentWidth &&
-    previous.wrapperWidth === wrapperWidth &&
+    previous?.contentExtent === contentExtent &&
+    previous.wrapperExtent === wrapperExtent &&
     previous.interactiveClones === interactiveClones &&
-    previous.reducedMotion === reducedMotion
+    previous.reducedMotion === reducedMotion &&
+    previous.vertical === state.vertical
   ) {
     return
   }
@@ -216,17 +336,32 @@ const rebuildTickerState = (state: RuntimeTickerState, force: boolean): void => 
   wrapper.dataset.ready = 'false'
   removeClones(state)
   state.measurement = null
-  if (!contentWidth || !wrapperWidth) return
-
-  state.measurement = { contentWidth, wrapperWidth, interactiveClones, reducedMotion }
-
-  if (reducedMotion) {
+  if (!contentExtent || !wrapperExtent) {
+    // A gap is not a sequence. Keep empty sources clone-free and let a later
+    // refresh/resize recover when original content becomes measurable again.
+    if (!contentExtent) state.position = 0
     wrapper.style.setProperty('--ticker-distance', '0px')
-    wrapper.dataset.ready = 'true'
+    syncPlayback(state)
     return
   }
 
-  const clonesNeeded = Math.max(1, Math.ceil(wrapperWidth / contentWidth))
+  state.measurement = {
+    contentExtent,
+    wrapperExtent,
+    interactiveClones,
+    reducedMotion,
+    vertical: state.vertical,
+  }
+  syncConfig(state)
+
+  if (reducedMotion && wrapper.dataset.navigation !== 'true') {
+    wrapper.style.setProperty('--ticker-distance', '0px')
+    wrapper.dataset.ready = 'true'
+    finishMeasurement(state, position)
+    return
+  }
+
+  const clonesNeeded = Math.max(1, Math.ceil(wrapperExtent / contentExtent))
   const fragment = document.createDocumentFragment()
 
   for (let index = 0; index < clonesNeeded; index += 1) {
@@ -237,8 +372,19 @@ const rebuildTickerState = (state: RuntimeTickerState, force: boolean): void => 
   }
 
   track.appendChild(fragment)
-  wrapper.style.setProperty('--ticker-distance', `${contentWidth}px`)
+  wrapper.style.setProperty('--ticker-distance', `${contentExtent}px`)
   wrapper.dataset.ready = 'true'
+  finishMeasurement(state, previous?.vertical !== state.vertical ? 0 : position)
+}
+
+const finishMeasurement = (state: RuntimeTickerState, position: number): void => {
+  seek(state, position)
+  if (!state.initialized) {
+    state.initialized = true
+    emit(state, 'ready')
+  }
+  emit(state, 'measure')
+  syncPlayback(state)
 }
 
 const scheduleRebuild = (state: RuntimeTickerState, force = false): void => {
@@ -252,6 +398,284 @@ const scheduleRebuild = (state: RuntimeTickerState, force = false): void => {
     state.forceRebuild = false
     rebuildTickerState(state, forceRebuild)
   })
+}
+
+const parseResponsive = (value?: string): NonNullable<TickerOptions['responsive']> => {
+  if (!value) return []
+  try {
+    const parsed: unknown = JSON.parse(value)
+    return Array.isArray(parsed)
+      ? parsed.filter(
+          rule =>
+            rule &&
+            typeof rule.query === 'string' &&
+            rule.options &&
+            typeof rule.options === 'object'
+        )
+      : []
+  } catch {
+    return []
+  }
+}
+
+const navigate = (state: RuntimeTickerState, position: number, fromDrag = false): void => {
+  // Manual navigation is always instantaneous, including reduced motion. It
+  // leaves playback paused unless a drag explicitly restores its prior intent.
+  const previousPosition = readPosition(state)
+  if (!fromDrag) state.intentRevision++
+  state.requested = false
+  state.manualOverride = true
+  if (getReducedMotionMedia()?.matches && state.wrapper.dataset.navigation !== 'true') {
+    state.wrapper.dataset.navigation = 'true'
+    rebuildTickerState(state, true)
+  }
+  syncPlayback(state)
+  seek(state, position)
+  if (Math.abs(state.position - previousPosition) > 0.000001) emit(state, 'navigate')
+}
+
+const setupInteraction = (state: RuntimeTickerState): void => {
+  const { wrapper, content } = state
+  const abort = new AbortController()
+  const { signal } = abort
+  state.cleanup.push(() => abort.abort())
+  wrapper.addEventListener(
+    'mouseenter',
+    () => {
+      state.hovered = true
+      syncPlayback(state)
+    },
+    { signal }
+  )
+  wrapper.addEventListener(
+    'mouseleave',
+    () => {
+      state.hovered = false
+      syncPlayback(state)
+    },
+    { signal }
+  )
+  wrapper.addEventListener('focusin', () => syncPlayback(state), { signal })
+  wrapper.addEventListener(
+    'focusout',
+    event => {
+      if (event.relatedTarget instanceof Node && wrapper.contains(event.relatedTarget)) return
+      // focusout precedes activeElement being set to the new outside target.
+      queueMicrotask(() => {
+        if (!state.destroyed) syncPlayback(state)
+      })
+    },
+    { signal }
+  )
+  // Captured load also catches images inserted after initialization.
+  content.addEventListener('load', () => scheduleRebuild(state), { capture: true, signal })
+  document.fonts?.ready
+    .then(() => {
+      if (!state.destroyed) scheduleRebuild(state)
+    })
+    .catch(() => {})
+  let pointer:
+    | {
+        id: number
+        x: number
+        y: number
+        start: number
+        dragging: boolean
+        requested: boolean
+        manualOverride: boolean
+        revision: number
+      }
+    | undefined
+  let suppressClick = false
+  wrapper.addEventListener(
+    'pointerdown',
+    event => {
+      if (wrapper.dataset.navigation !== 'true' || event.isPrimary === false || event.button !== 0)
+        return
+      if ((event.target as Element).closest('input, textarea, select, [contenteditable]')) return
+      // Preserve existing keyboard focus when an opt-in mouse drag begins.
+      // Otherwise pointerdown focuses the region/link and prevents resumption.
+      if (event.pointerType === 'mouse' && wrapper.dataset.resumeAfterDrag === 'true')
+        event.preventDefault()
+      pointer = {
+        id: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+        start: readPosition(state),
+        dragging: false,
+        requested: state.requested,
+        manualOverride: state.manualOverride,
+        revision: state.intentRevision,
+      }
+      suppressClick = false
+    },
+    { signal }
+  )
+  wrapper.addEventListener(
+    'pointermove',
+    event => {
+      if (!pointer || pointer.id !== event.pointerId) return
+      const primary = state.vertical ? event.clientY - pointer.y : event.clientX - pointer.x
+      const perpendicular = state.vertical ? event.clientX - pointer.x : event.clientY - pointer.y
+      if (!pointer.dragging) {
+        if (Math.abs(perpendicular) > Math.max(6, Math.abs(primary))) {
+          pointer = undefined
+          return
+        }
+        if (Math.abs(primary) < 6) return
+        pointer.requested = state.requested
+        pointer.manualOverride = state.manualOverride
+        pointer.revision = state.intentRevision
+        pointer.dragging = true
+        wrapper.setPointerCapture?.(event.pointerId)
+      }
+      event.preventDefault()
+      suppressClick = true
+      navigate(state, pointer.start - primary * (state.rtl && !state.vertical ? -1 : 1), true)
+    },
+    { signal }
+  )
+  const release = (event: PointerEvent) => {
+    if (pointer?.id !== event.pointerId) return
+    const finished = pointer
+    pointer = undefined
+    if (wrapper.hasPointerCapture?.(event.pointerId)) wrapper.releasePointerCapture(event.pointerId)
+    if (
+      !state.destroyed &&
+      finished.dragging &&
+      finished.requested &&
+      finished.revision === state.intentRevision &&
+      wrapper.dataset.resumeAfterDrag === 'true'
+    ) {
+      state.requested = true
+      state.manualOverride = finished.manualOverride
+      syncPlayback(state)
+    }
+  }
+  wrapper.addEventListener(
+    'dragstart',
+    event => {
+      // Native HTML link/image dragging must not cancel an active ticker gesture.
+      if (pointer) event.preventDefault()
+    },
+    { signal }
+  )
+  wrapper.addEventListener('pointerup', release, { signal })
+  wrapper.addEventListener('pointercancel', release, { signal })
+  wrapper.addEventListener(
+    'lostpointercapture',
+    event => {
+      // Touch starts with implicit capture on the original target. Transferring
+      // it to the wrapper bubbles a lost event from that child.
+      if (event.target === wrapper) release(event)
+    },
+    { signal }
+  )
+  wrapper.addEventListener(
+    'click',
+    event => {
+      if (suppressClick) {
+        event.preventDefault()
+        event.stopPropagation()
+        suppressClick = false
+      }
+    },
+    { capture: true, signal }
+  )
+  state.cleanup.push(() => {
+    if (pointer && wrapper.hasPointerCapture?.(pointer.id))
+      wrapper.releasePointerCapture(pointer.id)
+    pointer = undefined
+  })
+}
+
+const connectControls = (state: RuntimeTickerState, controls: TickerControls): (() => void) => {
+  if (state.destroyed) return () => {}
+  const abort = new AbortController()
+  const { signal } = abort
+  const { previous, next, rail } = controls
+  const originalRail = rail
+    ? ['min', 'max', 'step', 'value', 'aria-controls', 'aria-orientation'].map(
+        name => [name, rail.getAttribute(name)] as const
+      )
+    : []
+  const distance = () =>
+    Number.isFinite(controls.step) && Number(controls.step) > 0
+      ? Number(controls.step)
+      : state.measurement?.wrapperExtent || 1
+  previous?.addEventListener('click', () => navigate(state, readPosition(state) - distance()), {
+    signal,
+  })
+  next?.addEventListener('click', () => navigate(state, readPosition(state) + distance()), {
+    signal,
+  })
+  const sync = () => {
+    if (!rail) return
+    rail.min = '0'
+    rail.max = String(state.measurement?.contentExtent ?? 0)
+    rail.step = 'any'
+    rail.value = String(readPosition(state))
+    // The supplied range may remain horizontal for a vertical ticker. ARIA
+    // describes the control's rendered orientation, not the content axis.
+    rail.setAttribute(
+      'aria-orientation',
+      window.getComputedStyle(rail).writingMode.startsWith('vertical') ? 'vertical' : 'horizontal'
+    )
+    if (state.wrapper.id) rail.setAttribute('aria-controls', state.wrapper.id)
+  }
+  rail?.addEventListener('input', () => navigate(state, Number(rail.value)), { signal })
+  // Native range keyboard behavior differs across browser RTL/vertical modes;
+  // make logical previous/next explicit, without intercepting content inputs.
+  rail?.addEventListener(
+    'keydown',
+    event => {
+      const forward = state.vertical
+        ? event.key === 'ArrowDown'
+        : event.key === (state.rtl ? 'ArrowLeft' : 'ArrowRight')
+      const backward = state.vertical
+        ? event.key === 'ArrowUp'
+        : event.key === (state.rtl ? 'ArrowRight' : 'ArrowLeft')
+      if (!forward && !backward && event.key !== 'Home' && event.key !== 'End') return
+      event.preventDefault()
+      const period = state.measurement?.contentExtent ?? 0
+      const target =
+        event.key === 'Home'
+          ? 0
+          : event.key === 'End'
+            ? Math.max(0, period - 0.001)
+            : readPosition(state) + (forward ? 1 : -1) * distance()
+      navigate(state, target)
+    },
+    { signal }
+  )
+  const events = ['measure', 'navigate', 'playback'] as const
+  events.forEach(event => {
+    let listeners = state.listeners.get(event)
+    if (!listeners) state.listeners.set(event, (listeners = new Set()))
+    listeners.add(sync)
+  })
+  // A connected rail reflects animation without emitting public frame events.
+  const timer = rail
+    ? window.setInterval(() => {
+        if (state.wrapper.dataset.playing === 'true') sync()
+      }, 100)
+    : 0
+  let disconnected = false
+  const disconnect = () => {
+    if (disconnected) return
+    disconnected = true
+    abort.abort()
+    if (timer) window.clearInterval(timer)
+    events.forEach(event => state.listeners.get(event)?.delete(sync))
+    originalRail.forEach(([name, value]) =>
+      value === null ? rail?.removeAttribute(name) : rail?.setAttribute(name, value)
+    )
+    const index = state.cleanup.indexOf(disconnect)
+    if (index >= 0) state.cleanup.splice(index, 1)
+  }
+  state.cleanup.push(disconnect)
+  sync()
+  return disconnect
 }
 
 const setupObservers = (state: RuntimeTickerState): void => {
@@ -289,6 +713,9 @@ const destroyTicker = (wrapper: HTMLElement): void => {
   if (state.frameId) cancelFrame(state.frameId)
   if (state.resizeTimeout) clearTimeout(state.resizeTimeout)
 
+  state.position = readPosition(state)
+  state.destroyed = true
+  state.cleanup.splice(0).forEach(cleanup => cleanup())
   state.resizeObserver?.disconnect()
   state.intersectionObserver?.disconnect()
   removeClones(state)
@@ -297,6 +724,8 @@ const destroyTicker = (wrapper: HTMLElement): void => {
   wrapper.dataset.active = 'false'
   wrapper.dataset.playing = 'false'
   wrapper.dataset.ready = 'false'
+  emit(state, 'destroy')
+  state.listeners.clear()
   if (!tickersState.size) removePlaybackListeners()
 }
 
@@ -319,6 +748,21 @@ const initTicker = (wrapper: HTMLElement): void => {
     ...createEmptyTickerState(),
     forceRebuild: false,
     measurement: null,
+    requested: wrapper.dataset.autoplay !== 'false',
+    manualOverride: false,
+    intentRevision: 0,
+    hovered: false,
+    destroyed: false,
+    position: 0,
+    duration: 20,
+    direction: 'left',
+    vertical: false,
+    rtl: false,
+    listeners: new Map(),
+    cleanup: [],
+    playbackKey: '',
+    initialized: false,
+    rules: [],
   }
 
   tickersState.set(wrapper, state)
@@ -329,11 +773,15 @@ const initTicker = (wrapper: HTMLElement): void => {
   syncPlayback(state)
 
   syncConfig(state)
+  setupInteraction(state)
   setupObservers(state)
   scheduleRebuild(state)
 }
 
-const initAll = (root: ParentNode): void => getTickerElements(root).forEach(initTicker)
+const initAll = (root: ParentNode): void =>
+  getTickerElements(root).forEach(element => {
+    if (!tickersState.has(element)) ticker(element)
+  })
 const destroyAll = (root: ParentNode): void => getTickerElements(root).forEach(destroyTicker)
 const refreshAll = (): void => tickersState.forEach(state => scheduleRebuild(state, true))
 
@@ -426,6 +874,15 @@ const normalizeClassName = (className = ''): string =>
 
 const normalizeOptions = (options: TickerOptions = {}): NormalizedTickerOptions => ({
   duration: validateDuration(options.duration),
+  speed: Number.isFinite(options.speed) && Number(options.speed) > 0 ? Number(options.speed) : 0,
+  autoplay: options.autoplay !== false,
+  pauseOnFocus: options.pauseOnFocus !== false,
+  navigation: options.navigation === true,
+  resumeAfterDrag: options.resumeAfterDrag === true,
+  responsive: (Array.isArray(options.responsive) ? options.responsive : []).map(rule => ({
+    query: String(rule.query),
+    options: { ...rule.options },
+  })),
   direction: validateDirection(options.direction),
   pauseOnHover: validatePauseOnHover(options.pauseOnHover),
   interactiveClones: validateInteractiveClones(options.interactiveClones),
@@ -443,6 +900,11 @@ const applyOptions = (
   if (previousClasses.length) wrapper.classList.remove(...previousClasses)
   if (nextClasses.length) wrapper.classList.add(...nextClasses)
 
+  wrapper.dataset.speed = String(next.speed)
+  wrapper.dataset.autoplay = String(next.autoplay)
+  wrapper.dataset.pauseOnFocus = String(next.pauseOnFocus)
+  wrapper.dataset.navigation = String(next.navigation)
+  wrapper.dataset.resumeAfterDrag = String(next.resumeAfterDrag)
   wrapper.dataset.duration = String(next.duration)
   wrapper.dataset.direction = next.direction
   wrapper.dataset.pauseOnHover = next.pauseOnHover ? 'true' : 'false'
@@ -475,6 +937,8 @@ const enhanceElement = (element: HTMLElement, options: NormalizedTickerOptions):
   const parent = element.parentNode
   const nextSibling = element.nextSibling
   const { wrapper, track } = createWrapper(options)
+  if (element.hasAttribute('dir')) wrapper.setAttribute('dir', element.getAttribute('dir')!)
+  if (element.style.direction) wrapper.style.direction = element.style.direction
   const tickerContent = isTickerContentElement(content) ? content : document.createElement('div')
 
   tickerContent.classList.add('ticker-content')
@@ -497,10 +961,28 @@ export const ticker = (
   if (!source) return null
 
   const ownsWrapper = !source.matches(TICKER_SELECTOR)
+  const originalContent = ownsWrapper
+    ? source.querySelector<HTMLElement>('[data-ticker-content], .ticker-content')
+    : null
+  const contentParent = originalContent?.parentNode
+  const contentNext = originalContent?.nextSibling
+  const markedContent = ownsWrapper
+    ? isTickerContentElement(source)
+      ? source
+      : originalContent
+    : null
+  const hadContentClass = markedContent?.classList.contains('ticker-content') ?? false
+  const contentMarker = markedContent?.getAttribute('data-ticker-content') ?? null
   const markupOptions: TickerOptions = ownsWrapper
     ? {}
     : {
         duration: validateDuration(source.dataset.duration),
+        speed: Number(source.dataset.speed),
+        autoplay: source.dataset.autoplay !== 'false',
+        pauseOnFocus: source.dataset.pauseOnFocus !== 'false',
+        navigation: source.dataset.navigation === 'true',
+        resumeAfterDrag: source.dataset.resumeAfterDrag === 'true',
+        responsive: parseResponsive(source.dataset.responsive),
         direction: validateDirection(source.dataset.direction),
         pauseOnHover: source.dataset.pauseOnHover === 'true',
         interactiveClones: source.dataset.interactiveClones === 'true',
@@ -516,20 +998,114 @@ export const ticker = (
     initTicker(wrapper)
   }
 
+  const runtime = tickersState.get(wrapper)
+  if (!runtime) return null
+  let ruleCleanup = () => {}
+  const resolveOptions = () => {
+    if (!wrapper || runtime.destroyed) return
+    const position = readPosition(runtime)
+    const effective = runtime.rules.reduce(
+      (value, rule) => (rule.media.matches ? { ...value, ...rule.options } : value),
+      { ...currentOptions }
+    )
+    const next = normalizeOptions(effective)
+    applyOptions(wrapper, runtime.configured ?? {}, next)
+    if (!runtime.manualOverride) runtime.requested = next.autoplay
+    const changed = JSON.stringify(runtime.configured) !== JSON.stringify(next)
+    runtime.configured = next
+    syncConfig(runtime)
+    seek(runtime, position)
+    syncPlayback(runtime)
+    refreshTicker(wrapper)
+    if (changed) emit(runtime, 'update')
+  }
+  const configureRules = () => {
+    ruleCleanup()
+    runtime.rules =
+      typeof window.matchMedia === 'function'
+        ? currentOptions.responsive.map(rule => ({
+            media: window.matchMedia(rule.query),
+            options: { ...rule.options },
+          }))
+        : []
+    const removals = runtime.rules.map(({ media }) => {
+      if (media.addEventListener) {
+        media.addEventListener('change', resolveOptions)
+        return () => media.removeEventListener('change', resolveOptions)
+      }
+      media.addListener?.(resolveOptions)
+      return () => media.removeListener?.(resolveOptions)
+    })
+    ruleCleanup = () => removals.forEach(remove => remove())
+    resolveOptions()
+  }
+  runtime.cleanup.push(() => ruleCleanup())
+  configureRules()
+
   const instance: TickerInstance = {
     get element() {
       return wrapper
     },
     source,
     get options() {
-      return { ...currentOptions }
+      return {
+        ...currentOptions,
+        responsive: currentOptions.responsive.map(rule => ({
+          ...rule,
+          options: { ...rule.options },
+        })),
+      }
+    },
+    get state() {
+      return snapshot(runtime)
+    },
+    play() {
+      if (!runtime.destroyed) {
+        runtime.intentRevision++
+        runtime.requested = true
+        runtime.manualOverride = true
+        syncPlayback(runtime)
+      }
+      return instance
+    },
+    pause() {
+      if (!runtime.destroyed) {
+        runtime.intentRevision++
+        runtime.requested = false
+        runtime.manualOverride = true
+        syncPlayback(runtime)
+      }
+      return instance
+    },
+    scrollTo(position) {
+      if (!runtime.destroyed && Number.isFinite(position)) navigate(runtime, position)
+      return instance
+    },
+    scrollBy(distance) {
+      if (!runtime.destroyed && Number.isFinite(distance))
+        navigate(runtime, readPosition(runtime) + distance)
+      return instance
+    },
+    connectControls(controls) {
+      return connectControls(runtime, controls)
+    },
+    on(event, listener) {
+      if (runtime.destroyed) return () => {}
+      let listeners = runtime.listeners.get(event)
+      if (!listeners) runtime.listeners.set(event, (listeners = new Set()))
+      listeners.add(listener)
+      return () => listeners.delete(listener)
     },
     update(options = {}) {
       if (!wrapper) return instance
       const nextOptions = normalizeOptions({ ...currentOptions, ...options })
-      applyOptions(wrapper, currentOptions, nextOptions)
+      if ('autoplay' in options) {
+        runtime.intentRevision++
+        runtime.requested = nextOptions.autoplay
+        runtime.manualOverride = false
+      }
       currentOptions = nextOptions
-      refreshTicker(wrapper)
+      configureRules()
       return instance
     },
     refresh() {
@@ -539,7 +1115,16 @@ export const ticker = (
     destroy() {
       if (!wrapper) return
       destroyTicker(wrapper)
-      if (ownsWrapper && wrapper.isConnected) wrapper.replaceWith(source)
+      if (ownsWrapper) {
+        if (originalContent && contentParent)
+          contentParent.insertBefore(originalContent, contentNext ?? null)
+        if (markedContent) {
+          if (!hadContentClass) markedContent.classList.remove('ticker-content')
+          if (contentMarker === null) markedContent.removeAttribute('data-ticker-content')
+          else markedContent.setAttribute('data-ticker-content', contentMarker)
+        }
+        if (wrapper.parentNode) wrapper.replaceWith(source)
+      }
       wrapper = null
     },
   }

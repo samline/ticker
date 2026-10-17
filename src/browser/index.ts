@@ -10,4 +10,14 @@ export {
   Ticker as default,
 } from './registry'
 export type { NewTickerInput, TickerApi, TickerAvailable } from './registry'
-export type { TickerInstance, TickerOptions, TickerTarget } from '../core/types'
+export type {
+  TickerInstance,
+  TickerOptions,
+  TickerTarget,
+  TickerSnapshot,
+  TickerEventMap,
+  TickerControls,
+  TickerPauseReason,
+  TickerResponsiveRule,
+  TickerDirection,
+} from '../core/types'

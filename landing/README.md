@@ -14,7 +14,7 @@ npm ci --prefix landing
 npm run landing:dev
 ```
 
-Open `http://localhost:4321/ticker/`. The local package API is imported from repository source, so library changes reach the demo without copying a built JavaScript bundle.
+Open `http://localhost:4321/ticker/`. Astro accepts both `/ticker` and `/ticker/` with `trailingSlash: 'ignore'` and a slashless routing base. The config explicitly keeps `import.meta.env.BASE_URL` slash-terminated for links and assets. The local package API is imported from repository source, so library changes reach the demo without copying a built JavaScript bundle.
 
 ```sh
 npm run landing:check
@@ -137,7 +137,7 @@ Use semantic headings and section associations, an effective skip link, visible 
 
 Do not let overflow clipping conceal broken layouts. Stack narrow hero actions, allow navigation/tab groups to wrap with enlarged text, and test the 320 viewport explicitly. Code examples and static tickers can intentionally scroll; those regions must remain keyboard reachable. Test menu focus, close-button hover, focus restoration, desktop transitions and no-JavaScript navigation in both themes.
 
-Execute published examples against the package, not just the renderer. The Recipes examples were verified for preserved options/wrapper identity, updated source/clones and complete registry cleanup. Recheck them when API contracts change. Brand marks are illustrative Simple Icons v16.0.0 assets with attribution; prices are sample data, not a market feed or endorsements. Bundle-size statements are measurements, not permanent promises: the FAQ currently cites the v2.0.4 browser build at roughly 4.3 KiB gzip plus 0.5 KiB CSS and must be remeasured after relevant changes.
+Execute published examples against the package, not just the renderer. The Recipes examples were verified for preserved options/wrapper identity, updated source/clones and complete registry cleanup. Recheck them when API contracts change. Brand marks are illustrative Simple Icons v16.0.0 assets with attribution; prices are sample data, not a market feed or endorsements. Bundle-size statements are measurements, not permanent promises: the FAQ currently cites the v2.1.0 browser build (remeasured during runtime changes) and must be remeasured after relevant changes.
 
 ## SEO and deployment
 
@@ -243,11 +243,11 @@ The retired `example/` Starlight project has been removed, including local gener
 
 `/ticker/examples/` is a direct child of the landing. It uses Main, Header, Footer and the actual Home demo components, not an isolated design. `ExamplePreview` composes TickerDemo, BrandLogo, Button, SpeedControl and shared direction buttons. DemoStudio, DemoPanel and DemoFooter extract the existing hero's surface, spacing, colors and captions so changes apply to both routes. TickerDemo remains the single controller owner. There are no iframe previews or separate preview-runtime assets/build steps.
 
-The six recipes cover announcements, embedded SVG logos, illustrative prices, opposite rows, dynamic content/refresh and duration/direction controls. Their content, settings, labels and state messages live in `src/i18n/translations/en/examples.ts`. ExampleRecipe generates and formats complete HTML documents for CodeFrame/CopyButton with CDN and npm/ESM tabs. CDN files open directly online. npm/ESM files are HTML entries for a bundler such as Vite after `npm install @samline/ticker`. Copied standalone documents include their own CSS/setup; native previews use the site's shared UI. Preview interactions do not modify copied initial settings. Opposite-row previews expose independent pause controls; copied files offer a combined pause.
+The original six recipes cover announcements, embedded SVG logos, illustrative prices, opposite rows, dynamic content/refresh and duration/direction controls. Their content, settings, labels and state messages live in `src/i18n/translations/en/examples.ts`. ExampleRecipe generates and formats complete HTML documents for CodeFrame/CopyButton with CDN and npm/ESM tabs. CDN files open directly online. npm/ESM files are HTML entries for a bundler such as Vite after `npm install @samline/ticker`. Copied standalone documents include their own CSS/setup; native previews use the site's shared UI. Preview interactions do not modify copied initial settings. Opposite-row previews expose independent pause controls; copied files offer a combined pause.
 
-Brand assets and the standalone recipe palette come from existing licensed SVGs and shared CSS tokens. Keep attribution, manifest-pinned CDN URLs, package behavior and tests synchronized. Browser tests compile dependency fixtures in memory and execute all twelve copied documents; production has no duplicate fixture build.
+Brand assets and the standalone recipe palette come from existing licensed SVGs and shared CSS tokens. Keep attribution, manifest-pinned CDN URLs, package behavior and tests synchronized. Browser tests compile dependency fixtures in memory and execute all 24 copied documents; production has no duplicate fixture build.
 
-Navigation resolves home fragments correctly from both pages, keeps Examples current and Docs last in mobile navigation. Both routes have distinct canonical/title/description/JSON-LD and share the root social image. Docs offer contextual gallery links without dropping existing integration recipes. Browser checks execute all twelve copied CDN/npm documents against the package, test actual controls, both themes, 320–1440/enlarged text, no JavaScript and accessibility inside previews. Dependency delivery is substituted in those tests so CI does not depend on a CDN.
+Navigation resolves home fragments correctly from both pages, keeps Examples current and Docs last in mobile navigation. Both routes have distinct canonical/title/description/JSON-LD and share the root social image. Docs offer contextual gallery links without dropping existing integration recipes. Browser checks execute all 24 copied CDN/npm documents against the package, test actual controls, both themes, 320–1440/enlarged text, no JavaScript and accessibility inside previews. Dependency delivery is substituted in those tests so CI does not depend on a CDN.
 
 The gallery uses shared secondary Buttons for its jump navigation, with visible resting surfaces and direction cues, not plain text links. Keep its titles direct and check actual word spacing after Astro compilation. Home panels retain data-panel hooks so Tabs can isolate them and SpeedControl targets only the selected ticker. Browser regression checks compare actual Home/gallery surfaces in both themes.
 
@@ -258,3 +258,15 @@ Example code disclosures use one aligned content inset and explicit gaps for not
 Code highlighting has one configuration in ../shared/lib/code-theme.mjs. Home catalogs store whole code strings and language identifiers; Examples uses the same CodeFrame renderer for complete HTML documents. Do not recreate manual token colors or plain pre tags beside it. The docs Markdown adapter uses the same theme and shared frame.
 
 TickerDemo pause controls are action buttons: Pause animation becomes Play animation when paused, with a matching accessible name. Keep this behavior in the component and in the copied standalone recipes. Do not combine a changing action label with aria-pressed; a stable-label toggle is a different interaction pattern.
+
+## Extended runtime examples
+
+The gallery additionally demonstrates manual navigation, vertical news, duration versus pixel speed, mixed RTL text and viewport rules. TickerDemo owns the actual package controller and connects existing shared Button/RangeControl instances. Its CSS adaptation mirrors src/style.css, including physical grid alignment of the track in RTL. Copied CDN/npm documents use the same catalog settings and public methods. Pause labels follow requested playback; environmental focus/hover pauses remain visible through state. The runtime suite checks four axes, fractional geometry, continuity, RTL, controls, reduced motion and breakpoint cleanup.
+
+Keep the six original recipes first, in their published order; append new recipes after them. The dynamic feed uses speed rather than fixed duration and offers application-owned first/last/selected removal with an empty/repopulate state. TickerDemo remains the controller owner and synchronizes the item picker through instance-local events. Vertical news uses ExampleStory cards composed from Surface, TextLink and compact BrandLogo images; the copied file includes the same content and matching column layout.
+
+The manual-navigation recipe opts into `resumeAfterDrag`: press Play before dragging to demonstrate automatic resumption after pointer release and hover exit. Vertical resources include Up/Down controls using the same direction group as Home-style playback controls.
+
+The gallery and copied logo recipes link to `/ticker/attribution/`, which presents the bundled Simple Icons version and source metadata in the shared site layout. Raw CC0/disclaimer files remain explicitly labelled Markdown downloads; do not use a raw license as an attribution destination.
+
+The appended drag-playback recipe starts playing and exposes a stable-label pressed button to update `resumeAfterDrag` through TickerDemo. Switching the option does not change playback intent. Keep both toggle states and prior manual pause covered in the live preview and copied CDN/npm documents.

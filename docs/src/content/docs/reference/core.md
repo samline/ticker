@@ -27,13 +27,13 @@ Treat imported defaults as read-only data. Mutating them does not configure exis
 
 ```ts
 validateDuration(value: unknown): number
-validateDirection(value: unknown): 'left' | 'right'
+validateDirection(value: unknown): 'left' | 'right' | 'up' | 'down' | 'auto'
 validatePauseOnHover(value: unknown): boolean
 validateInteractiveClones(value: unknown): boolean
 ```
 
 - `validateDuration` uses a number directly or `parseFloat(String(value))`; only finite values greater than zero survive, otherwise it returns `20`.
-- `validateDirection` returns `'right'` only for that exact string; everything else becomes `'left'`.
+- `validateDirection` accepts exact `left`, `right`, `up`, `down` and `auto` strings; everything else becomes `left`.
 - Both boolean validators return `true` only for literal boolean `true`. Declarative markup converts exact `"true"` attribute strings before validation.
 
 ## State factories

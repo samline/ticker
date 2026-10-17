@@ -11,3 +11,11 @@ landing/skills-lock.json
 
 docs/.agents/
 docs/skills-lock.json
+
+# Generated browser reports and vendor assets.
+landing/test-results/
+docs/test-results/
+landing/playwright-report/
+docs/playwright-report/
+landing/public/assets/
+**/package-lock.json

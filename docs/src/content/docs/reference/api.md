@@ -28,7 +28,7 @@ Returns `TickerInstance`, or `null` when a selector has no match. A missing sele
 
 Selector strings are passed directly to `document.querySelector`; invalid CSS selector syntax throws the browser's `DOMException`.
 
-Ordinary content is moved into generated `.ticker-wrapper > .ticker-track > .ticker-content` markup. Existing `[data-ticker]` or `.ticker-wrapper` markup is adopted, its data attributes are read, and explicit options win. Adopted roots need a recognized `[data-ticker-track]` / `.ticker-track` and `[data-ticker-content]` / `.ticker-content` to initialize runtime state.
+Ordinary content is moved into generated `.ticker-wrapper > .ticker-track > .ticker-content` markup. Existing `[data-ticker]` or `.ticker-wrapper` markup is adopted, its data attributes are read, and explicit options win. Adopted roots need a recognized `[data-ticker-track]` / `.ticker-track` and `[data-ticker-content]` / `.ticker-content` to initialize runtime state; malformed roots return `null`.
 
 ```ts
 const news = ticker('#news', { duration: 24, pauseOnHover: true })
@@ -45,6 +45,16 @@ interface TickerInstance {
   readonly element: HTMLElement | null
   readonly source: HTMLElement
   readonly options: Readonly<NormalizedTickerOptions>
+  readonly state: Readonly<TickerSnapshot>
+  play(): TickerInstance
+  pause(): TickerInstance
+  scrollTo(position: number): TickerInstance
+  scrollBy(distance: number): TickerInstance
+  connectControls(controls: TickerControls): () => void
+  on<K extends keyof TickerEventMap>(
+    event: K,
+    listener: (state: TickerEventMap[K]) => void
+  ): () => void
   update(options?: TickerOptions): TickerInstance
   refresh(): TickerInstance
   destroy(): void
@@ -53,11 +63,16 @@ interface TickerInstance {
 
 ### Properties
 
-| Property  | Contract                                                                               |
-| --------- | -------------------------------------------------------------------------------------- |
-| `element` | Active wrapper, generated or adopted. Becomes `null` after destruction.                |
-| `source`  | Stable reference to the original target. Generated wrappers restore it on destruction. |
-| `options` | Fresh read-only normalized snapshot. Mutating it does not update runtime behavior.     |
+| Property  | Contract                                                                                   |
+| --------- | ------------------------------------------------------------------------------------------ |
+| `element` | Active wrapper, generated or adopted. Becomes `null` after destruction.                    |
+| `source`  | Stable reference to the original target. Generated wrappers restore it on destruction.     |
+| `options` | Fresh read-only base configuration snapshot. Mutating it does not update runtime behavior. |
+| `state`   | Frozen current readiness, intent, effective playback, reasons, position and measurements.  |
+
+### Playback, navigation and events
+
+`play()` / `pause()` preserve position and record persistent intent. Focus, hover, document visibility, viewport and reduced-motion causes still control effective playback. `scrollTo()` / `scrollBy()` seek instantly in logical CSS pixels, wrap at one sequence and leave playback paused. `connectControls()` binds application-owned native previous/next buttons and a labelled range, returning a disconnect function. `on()` subscribes to ready, playback, update, measure, navigate or destroy and returns an unsubscribe function. Subscriptions do not replay; use `state` for initial status. Destroy releases every runtime-owned subscription and binding. See the [complete controller contract](/ticker/docs/reference/api/controller/) for event ordering, keyboard and touch behavior, RTL and cleanup.
 
 ### `update(options?)`
 
@@ -67,9 +82,9 @@ Omitted fields stay unchanged. A new `class` removes only tokens owned by the pr
 
 ### `refresh()`
 
-Schedules measurement and clone regeneration for this controller, then returns it. The rebuild synchronizes config, measures exact content width plus computed horizontal track gap, clears prior clones, creates enough clones to cover the wrapper, and writes `--ticker-distance` without rounding fractional pixels. Reduced-motion mode creates no clones.
+Schedules measurement and clone regeneration for this controller, then returns it. The rebuild synchronizes config, measures exact content extent plus the computed axis gap, clears prior clones, creates enough clones to cover the wrapper, and writes `--ticker-distance` without rounding fractional pixels. Reduced-motion mode creates no clones unless manual navigation is enabled.
 
-Explicit refresh regenerates clones even when content width is unchanged. Automatic resize and intersection checks reuse clones when measurements and clone settings are unchanged. Multiple calls before the frame runs collapse to the latest scheduled rebuild; automatic checks preserve pending explicit refreshes. After destruction, it is a chainable no-op.
+Explicit refresh regenerates clones even when content extent is unchanged. Automatic resize and intersection checks reuse clones when measurements and clone settings are unchanged. Multiple calls before the frame runs collapse to the latest scheduled rebuild; automatic checks preserve pending explicit refreshes. After destruction, it is a chainable no-op.
 
 ### `destroy()`
 

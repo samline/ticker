@@ -23,7 +23,9 @@ export const validateDuration = (duration: unknown): number => {
 }
 
 export const validateDirection = (direction: unknown): TickerDirection => {
-  return direction === 'right' ? 'right' : 'left'
+  return direction === 'right' || direction === 'up' || direction === 'down' || direction === 'auto'
+    ? direction
+    : 'left'
 }
 
 export const validatePauseOnHover = (pauseOnHover: unknown): boolean => {

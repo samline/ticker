@@ -28,7 +28,11 @@ describe('ticker core', () => {
   describe('validateDirection', () => {
     it('returns left for invalid input', () => {
       expect(validateDirection(undefined)).toBe('left')
-      expect(validateDirection('up')).toBe('left')
+      expect(validateDirection('invalid')).toBe('left')
+    })
+
+    it.each(['up', 'down', 'auto'] as const)('accepts %s', direction => {
+      expect(validateDirection(direction)).toBe(direction)
     })
 
     it('returns right for right direction', () => {

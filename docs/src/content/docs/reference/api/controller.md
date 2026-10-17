@@ -14,6 +14,16 @@ interface TickerInstance {
   readonly element: HTMLElement | null
   readonly source: HTMLElement
   readonly options: Readonly<NormalizedTickerOptions>
+  readonly state: Readonly<TickerSnapshot>
+  play(): TickerInstance
+  pause(): TickerInstance
+  scrollTo(position: number): TickerInstance
+  scrollBy(distance: number): TickerInstance
+  connectControls(controls: TickerControls): () => void
+  on<K extends keyof TickerEventMap>(
+    event: K,
+    listener: (state: TickerEventMap[K]) => void
+  ): () => void
   update(options?: TickerOptions): TickerInstance
   refresh(): TickerInstance
   destroy(): void
@@ -36,15 +46,84 @@ A fresh, read-only snapshot of the normalized options:
 
 ```ts
 {
-  duration: 20,
-  direction: 'left',
-  pauseOnHover: false,
-  interactiveClones: false,
-  class: '',
+  duration: 20, speed: 0, direction: 'left', autoplay: true,
+  pauseOnHover: false, pauseOnFocus: true, navigation: false, resumeAfterDrag: false,
+  responsive: [], interactiveClones: false, class: '',
 }
 ```
 
 Mutating a returned snapshot does not affect the controller. Use [`update()`](/ticker/docs/reference/api/update/).
+
+## Playback and state
+
+`play()` and `pause()` are chainable, idempotent and preserve visual position. Explicit pause persists through refresh, resize, hover, focus, visibility, intersection and responsive rules. `play()` records intent but still respects automatic causes.
+
+`TickerSnapshot` is a frozen snapshot containing `ready`, `destroyed`, `requested`, `playing`, `reasons`, `position`, `distance`, `duration` and resolved physical `direction`. Position and distance are CSS pixels; duration is measured seconds per cycle. Read `state` whenever the current position is needed. `TickerPauseReason` is `manual`, `hover`, `focus`, `hidden`, `offscreen` or `reduced-motion`. The reasons array is also frozen.
+
+```ts
+const news = ticker('#news', { autoplay: false })
+const button = document.querySelector<HTMLButtonElement>('#playback')!
+if (news) {
+  const render = () => {
+    button.textContent = news.state.requested ? 'Pause animation' : 'Play animation'
+  }
+  render()
+  const unsubscribe = news.on('playback', render)
+  button.addEventListener('click', () => (news.state.requested ? news.pause() : news.play()))
+  // Remove application listeners and call unsubscribe() when their owner leaves.
+}
+```
+
+Use changing action labels as above without `aria-pressed`. Environmental pauses do not change the requested action. Initial state is available immediately; measurements become ready asynchronously.
+
+## Manual navigation
+
+`scrollTo(position)` seeks to a logical CSS-pixel distance; `scrollBy(distance)` adds to the current logical position. Both wrap modulo one complete content-and-gap period, act instantly, and leave playback explicitly paused. Negative values wrap backward. Nonfinite values are ignored. Buttons default to one visible extent per click; provide a positive `step` to use a fixed distance. There is no item snapping.
+
+```ts
+const news = ticker('#news', { autoplay: false, navigation: true })
+const disconnect = news?.connectControls({
+  previous: document.querySelector<HTMLButtonElement>('#previous')!,
+  next: document.querySelector<HTMLButtonElement>('#next')!,
+  rail: document.querySelector<HTMLInputElement>('#position')!,
+  step: 120,
+})
+```
+
+`TickerControls` accepts optional native previous/next buttons and an `input type="range"` rail supplied by the application. Give buttons accessible names (Previous items / Next items), a labelled range and visible focus styles. Ticker owns only their bindings; it does not create UI or replace application styling. `connectControls()` returns an idempotent disconnect function. Destruction disconnects automatically and restores rail attributes. Use one set per ticker.
+
+The range spans one repeating sequence, not an infinite scrollbar. Its end wraps to zero; keyboard End selects just before the seam. Home selects zero. Arrow keys follow logical writing order/axis; other inputs in content retain native behavior. The connected rail samples the position every 100ms while playing without public frame events. It updates immediately after seeking and measuring.
+
+With `navigation: true`, Pointer Events support touch and mouse dragging after a six-pixel axis threshold. Perpendicular scrolling remains native (`pan-y` for horizontal and `pan-x` for vertical); input, select, textarea and editable content do not initiate a drag. A tap retains its link action; an actual drag suppresses the resulting click. No inertia or forced smooth animation is applied. Reduced motion disables autoplay but still permits instantaneous navigation with repeated inert copies. Calling `scrollTo`/`scrollBy` also enables those copies when needed under reduced motion.
+
+Set `resumeAfterDrag: true` (or `data-resume-after-drag="true"`) to restore playback intent when a drag ends, including pointer cancellation or capture loss. It defaults to false. The ticker resumes only if playback was requested when dragging began and no explicit playback or navigation command intervened. A ticker paused beforehand stays paused. Hover, focus, reduced motion, visibility and viewport pauses still apply: with hover pause enabled, movement resumes when the pointer leaves. Opt-in mouse gestures preserve the existing focus rather than focusing the dragged region or link; keyboard focus already inside the ticker still pauses playback. Buttons, the rail and `scrollTo`/`scrollBy` continue to pause explicitly.
+
+```ts
+const feed = ticker('#feed', {
+  navigation: true,
+  resumeAfterDrag: true,
+  pauseOnHover: true,
+})
+```
+
+Try both modes in the [interactive drag example](/ticker/examples/#drag-playback). The Resume after drag control changes the option without starting playback.
+
+## Events
+
+`on(event, listener)` returns an idempotent unsubscribe function. The typed `TickerEventMap` maps every event below to `TickerSnapshot`; browser/CDN has the same contract. Events do not replay for late subscriptions: use `state` for initial status.
+
+| Event      | Emission                                                                        |
+| ---------- | ------------------------------------------------------------------------------- |
+| `ready`    | Once, after the first successful nonzero measurement.                           |
+| `measure`  | After geometry or copied content is rebuilt, including explicit refresh.        |
+| `playback` | Only when requested playback, effective playback or pause reasons change.       |
+| `update`   | When effective normalized configuration changes, including a breakpoint change. |
+| `navigate` | After each explicit seek, button, rail or drag movement.                        |
+| `destroy`  | Once, after runtime teardown, with destroyed true and playing false.            |
+
+On first measurement, `ready` precedes `measure`; readiness-dependent playback synchronization follows. Configuration changes apply before `update`; scheduled measurement follows asynchronously. User navigation records pause first, then seeks and emits `navigate`. There are no automatic frame events. Callbacks run synchronously using a listener snapshot. New subscriptions wait for the next event; unsubscribed callbacks are skipped. Reentrant controller calls are allowed; destruction prevents further non-destroy callbacks. Callback exceptions are reported to the console and do not abort other listeners. Destruction removes every subscription, observer, control binding, media listener and timer.
+
+After destruction, chainable methods do nothing, `on()`/`connectControls()` return empty cleanup functions, and `state.destroyed` remains true. `element` is null. Do not retain destroyed instances unnecessarily.
 
 ## Ownership
 

@@ -1,4 +1,5 @@
 ---
+import RangeControl from '../../../shared/components/RangeControl.astro'
 import { format } from '../../../shared/i18n/format'
 import { getI18n } from '../i18n/utils'
 const i18n = getI18n(Astro)
@@ -6,19 +7,17 @@ const t = i18n.controls.speed
 ---
 
 <ticker-speed data-display-template={t.display} data-description-template={t.description}>
-  <label class:list={['speed-control']}>
-    {t.label}
-    <input
-      type="range"
-      min="14"
-      max="60"
-      value="38"
-      step="1"
-      disabled=""
-      aria-label={t.ariaLabel}
-    />
+  <RangeControl
+    label={t.label}
+    min="14"
+    max="60"
+    value="38"
+    step="1"
+    disabled
+    aria-label={t.ariaLabel}
+  >
     <output aria-live="off">{format(t.display, { seconds: 38 })}</output>
-  </label>
+  </RangeControl>
 </ticker-speed>
 
 <script>
@@ -71,32 +70,11 @@ const t = i18n.controls.speed
   if (!customElements.get('ticker-speed')) customElements.define('ticker-speed', TickerSpeed)
 </script>
 <style>
-  .speed-control {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.65rem;
-    white-space: nowrap;
-  }
-  .speed-control input {
-    accent-color: var(--color-accent);
-    width: 7rem;
-    cursor: pointer;
-  }
-  .speed-control output {
+  ticker-speed output {
     color: var(--color-text);
     width: 3ch;
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
-  }
-  @media (width < 48rem) {
-    .speed-control {
-      width: 100%;
-    }
-    .speed-control input {
-      flex: 1;
-      min-width: 3.75rem;
-    }
   }
   ticker-speed {
     display: block;

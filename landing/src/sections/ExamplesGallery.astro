@@ -42,7 +42,7 @@ const t = getI18n(Astro).examples
       <ExampleRecipe recipe={recipe} />
     ))}
     <p class:list={['attribution']}>
-      <a href={`${import.meta.env.BASE_URL}assets/brands/LICENSE.md`}>{t.brandAttribution}</a>
+      <TextLink href={`${import.meta.env.BASE_URL}attribution/`}>{t.brandAttribution}</TextLink>
     </p>
   </Box>
 </Section>
