@@ -83,7 +83,11 @@ const controls =
 const verticalControls = recipe.rows.some(row => row.direction === 'up' || row.direction === 'down')
   ? `<div role="group" aria-label="${e(t.direction)}"><button type="button" data-example-direction="up" aria-pressed="true">${e(t.up)}</button><button type="button" data-example-direction="down" aria-pressed="false">${e(t.down)}</button></div>`
   : ''
-const markup = `<ticker-recipe data-pause-text="${e(playback.pause)}" data-play-text="${e(playback.play)}" data-added="${e(t.added)}" data-added-status="${e(t.addedStatus)}" data-removed-status="${e(t.removedStatus)}" data-item-empty="${e(t.itemEmpty)}">
+const dragControls =
+  recipe.kind === 'drag'
+    ? `<button type="button" data-example-resume aria-label="${e(t.resumeAfterDrag)}" aria-pressed="${recipe.rows[0].resumeAfterDrag === true}">${e(t.resumeAfterDrag)} <span data-resume-state aria-hidden="true">${e(recipe.rows[0].resumeAfterDrag ? t.enabled : t.disabled)}</span></button>`
+    : ''
+const markup = `<ticker-recipe data-pause-text="${e(playback.pause)}" data-play-text="${e(playback.play)}" data-added="${e(t.added)}" data-added-status="${e(t.addedStatus)}" data-removed-status="${e(t.removedStatus)}" data-item-empty="${e(t.itemEmpty)}" data-resume-on="${e(t.enabled)}" data-resume-off="${e(t.disabled)}">
   <h1>${e(recipe.title)}</h1>
   ${rows.join('\n  ')}
   <div class="controls" hidden>
@@ -96,7 +100,7 @@ const markup = `<ticker-recipe data-pause-text="${e(playback.pause)}" data-play-
     <label>${e(t.itemLabel)} <select data-item-select></select></label>
     <button type="button" data-remove-selected>${e(t.removeSelected)}</button>`
         : ''
-    }${controls}${verticalControls}
+    }${controls}${verticalControls}${dragControls}
   </div>
   <p>${e(recipe.note)}</p>${recipe.rows.some(row => row.items.some(item => item.logo)) ? `\n  <p><a href="${e(manifest.homepage + '/attribution/')}" target="_blank" rel="noopener noreferrer">${e(t.brandAttribution)}</a></p>` : ''}
   <p role="status" aria-live="polite"></p>
@@ -179,6 +183,13 @@ const behavior = `if (!customElements.get('ticker-recipe')) {
       pause.addEventListener('click', () => {
         const paused = this.dataset.paused !== 'true';
         this.controllers.forEach(controller => paused ? controller.pause() : controller.play());
+      }, { signal });
+      const resume = this.querySelector('button[data-example-resume]');
+      resume?.addEventListener('click', () => {
+        const enabled = resume.getAttribute('aria-pressed') !== 'true';
+        this.controllers.forEach(controller => controller.update({ resumeAfterDrag: enabled }));
+        resume.setAttribute('aria-pressed', String(enabled));
+        resume.querySelector('[data-resume-state]').textContent = enabled ? this.dataset.resumeOn : this.dataset.resumeOff;
       }, { signal });
       const speed = this.querySelector('input:not([data-position])');
       speed?.addEventListener('input', () => {

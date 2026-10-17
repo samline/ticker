@@ -143,3 +143,5 @@ Keep original gallery recipes and their jump links first in the established orde
 `resumeAfterDrag` defaults to false. Opting in restores playback requested before dragging only when no explicit intent command intervenes; hover/focus and other automatic pauses still apply. Keep its data attribute, types, copied recipes and browser regression coverage synchronized. Vertical example direction controls use the existing shared Button group and update the owning TickerDemo controller.
 
 Brand attribution links target the rendered attribution page, backed by `public/assets/brands/sources.json`. Preserve the bundled license/disclaimer and label direct Markdown links as downloads. Do not imply every individual mark is CC0 or grants trademark rights.
+
+The drag-playback recipe complements manual navigation. Its Resume after drag button uses stable-label aria-pressed semantics, with visible On/Off state. Toggle through the owning TickerDemo controller and retain intent; do not implement separate gesture behavior in the example.

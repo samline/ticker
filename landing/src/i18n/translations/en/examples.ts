@@ -3,7 +3,7 @@ export interface Recipe {
   title: string
   navigationLabel: string
   description: string
-  kind: 'news' | 'logos' | 'prices' | 'rows' | 'dynamic' | 'controls'
+  kind: 'news' | 'logos' | 'prices' | 'rows' | 'dynamic' | 'controls' | 'drag'
   docsPath: string
   docsLabel: string
   note: string
@@ -68,6 +68,9 @@ export default {
   addedStatus: 'Added update {count}. Visual copies refreshed.',
   speed: 'Loop duration (seconds)',
   direction: 'Direction',
+  resumeAfterDrag: 'Resume after drag',
+  enabled: 'On',
+  disabled: 'Off',
   left: 'Left',
   right: 'Right',
   up: 'Up',
@@ -338,7 +341,7 @@ export default {
         'Arabic and Hebrew text retain their writing order alongside numbers and Latin text. Automatic direction follows the inherited writing direction.',
       docsPath: 'reference/configuration/#vertical-and-writing-direction',
       docsLabel: 'Read the writing direction contract',
-      note: 'The preview has an explicit RTL region inside this LTR page. Previous and Next follow reading order; left and right remain physical animation directions.',
+      note: 'Playback starts automatically. The preview has an explicit RTL region inside this LTR page. Previous and Next follow reading order; left and right remain physical animation directions.',
       rows: [
         {
           label: 'RTL mixed content',
@@ -346,7 +349,7 @@ export default {
           direction: 'auto',
           rtl: true,
           navigation: true,
-          autoplay: false,
+          autoplay: true,
           items: [
             { label: 'العربية 123 ABC' },
             { label: 'עברית 456 XYZ' },
@@ -373,6 +376,33 @@ export default {
           speed: 45,
           responsive: [{ query: '(width < 48rem)', options: { speed: 24 } }],
           items: news,
+        },
+      ],
+    },
+    {
+      id: 'drag-playback',
+      navigationLabel: 'Drag and resume',
+      kind: 'drag',
+      title: 'Drag and choose what happens next',
+      description:
+        'Drag the moving strip with a mouse or touch. Turn Resume after drag on to continue playback after release, or off to leave the strip paused.',
+      docsPath: 'reference/api/controller/#manual-navigation',
+      docsLabel: 'Read about drag playback',
+      note: 'With the option on, release and move the pointer away to clear hover pause. With it off, press Play before trying another drag. Changing the option does not start playback or clear a manual pause.',
+      rows: [
+        {
+          label: 'Drag playback demo',
+          duration: 20,
+          speed: 40,
+          direction: 'left',
+          navigation: true,
+          resumeAfterDrag: true,
+          items: [
+            { label: 'Grab the strip' },
+            { label: 'Drag to explore' },
+            { label: 'Release to compare' },
+            { label: 'Switch resume on or off' },
+          ],
         },
       ],
     },

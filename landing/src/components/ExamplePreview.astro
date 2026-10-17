@@ -24,6 +24,8 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
   data-added-status={t.addedStatus}
   data-removed-status={t.removedStatus}
   data-item-empty={t.itemEmpty}
+  data-resume-on={t.enabled}
+  data-resume-off={t.disabled}
 >
   <DemoStudio>
     {recipe.rows.map(row => (
@@ -76,8 +78,30 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
     ))}
     <DemoFooter
       note={recipe.note}
-      controls={recipe.kind === 'dynamic' || recipe.kind === 'controls' || vertical}
+      controls={
+        recipe.kind === 'dynamic' ||
+        recipe.kind === 'controls' ||
+        recipe.kind === 'drag' ||
+        vertical
+      }
     >
+      {recipe.kind === 'drag' && (
+        <div class:list={['direction-controls']}>
+          <Button
+            variant="ghost"
+            context="ticker"
+            data-example-resume
+            disabled
+            aria-label={t.resumeAfterDrag}
+            aria-pressed={recipe.rows[0].resumeAfterDrag === true}
+          >
+            {t.resumeAfterDrag}
+            <span data-resume-state aria-hidden="true">
+              {recipe.rows[0].resumeAfterDrag ? t.enabled : t.disabled}
+            </span>
+          </Button>
+        </div>
+      )}
       {recipe.kind === 'dynamic' && (
         <div class:list={['feed-actions']}>
           <Button variant="ghost" data-add disabled>
@@ -134,6 +158,7 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
       const demo = this.querySelector<HTMLElement>('ticker-demo')
       const add = this.querySelector<HTMLButtonElement>('[data-add]')
       const select = this.querySelector<HTMLSelectElement>('[data-item-select]')
+      const resume = this.querySelector<HTMLButtonElement>('button[data-example-resume]')
       let items: Array<{ id: string; label: string }> = []
       const removeButtons = this.querySelectorAll<HTMLButtonElement>(
         'button[data-remove-first], button[data-remove-last], button[data-remove-selected]'
@@ -141,6 +166,7 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
       const sync = () => {
         const enabled = demo?.dataset.initialized === 'true'
         if (add) add.disabled = !enabled
+        if (resume) resume.disabled = !enabled
         if (enabled && select) demo?.dispatchEvent(new CustomEvent('ticker:list'))
         this.querySelectorAll<HTMLButtonElement>('button[data-example-direction]').forEach(
           button => {
@@ -154,6 +180,18 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
         )
       }
       this.addEventListener('ticker:ready', sync, { signal })
+      resume?.addEventListener(
+        'click',
+        () => {
+          const enabled = resume.getAttribute('aria-pressed') !== 'true'
+          demo?.dispatchEvent(new CustomEvent('ticker:resume-after-drag', { detail: enabled }))
+          resume.setAttribute('aria-pressed', String(enabled))
+          const state = resume.querySelector('[data-resume-state]')
+          if (state)
+            state.textContent = (enabled ? this.dataset.resumeOn : this.dataset.resumeOff) ?? ''
+        },
+        { signal }
+      )
       this.addEventListener(
         'speed:change',
         event =>

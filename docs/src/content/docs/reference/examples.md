@@ -143,3 +143,7 @@ export function mountClientTicker() {
 ```
 
 Module import is server-safe. Calling `ticker()` with a selector before a DOM exists returns `null`, so invoke it in your framework's client mount hook.
+
+## Drag with optional playback resumption
+
+The [drag and resume example](/ticker/examples/#drag-playback) starts moving and exposes a Resume after drag toggle. It calls `update({ resumeAfterDrag: true })` or `update({ resumeAfterDrag: false })`. With the option enabled, a running ticker restores playback intent after release; hover and focus pauses still apply. With it disabled, a drag leaves playback paused. Changing the option never starts a paused ticker: use `play()` for that. A ticker manually paused before dragging remains paused in either mode.

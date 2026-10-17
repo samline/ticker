@@ -106,6 +106,8 @@ const feed = ticker('#feed', {
 })
 ```
 
+Try both modes in the [interactive drag example](/ticker/examples/#drag-playback). The Resume after drag control changes the option without starting playback.
+
 ## Events
 
 `on(event, listener)` returns an idempotent unsubscribe function. The typed `TickerEventMap` maps every event below to `TickerSnapshot`; browser/CDN has the same contract. Events do not replay for late subscriptions: use `state` for initial status.

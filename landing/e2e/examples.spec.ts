@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page, type Locator } from '@playwright/test'
 import axe from 'axe-core'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
@@ -12,6 +12,41 @@ const ids = [
   'dynamic-content',
   'playback-controls',
 ]
+
+async function checkDragModes(page: Page, recipe: Locator) {
+  const frame = recipe.locator('.ticker-wrapper')
+  const resume = recipe.getByRole('button', { name: 'Resume after drag', exact: true })
+  const pause = recipe.locator('button[data-pause]')
+  await expect(resume).toHaveAttribute('aria-pressed', 'true')
+  const drag = async () => {
+    await frame.scrollIntoViewIfNeeded()
+    const box = (await frame.boundingBox())!
+    await page.mouse.move(box.x + 150, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + 60, box.y + box.height / 2, { steps: 5 })
+    await expect(frame).toHaveAttribute('data-playing', 'false')
+    await page.mouse.up()
+    await page.mouse.move(5, 5)
+  }
+  await drag()
+  await expect(frame).toHaveAttribute('data-playing', 'true')
+  await resume.click()
+  await expect(resume).toHaveAttribute('aria-pressed', 'false')
+  await expect(resume).toContainText('Off')
+  await expect(frame).toHaveAttribute('data-resume-after-drag', 'false')
+  await drag()
+  await expect(frame).toHaveAttribute('data-playing', 'false')
+  await resume.click()
+  await expect(resume).toHaveAttribute('aria-pressed', 'true')
+  await expect(resume).toContainText('On')
+  await expect(frame).toHaveAttribute('data-playing', 'false')
+  await pause.click()
+  await drag()
+  await expect(frame).toHaveAttribute('data-playing', 'true')
+  await pause.click()
+  await drag()
+  await expect(frame).toHaveAttribute('data-playing', 'false')
+}
 
 test('all six previews run actual controllers, pause independently, and expose functional controls', async ({
   page,
@@ -95,6 +130,7 @@ test('keeps the original recipes first and edits the dynamic feed at a constant 
     'constant-speed',
     'rtl-content',
     'responsive-options',
+    'drag-playback',
   ])
   const recipe = page.locator('#dynamic-content')
   await page
@@ -240,6 +276,7 @@ test('every copied CDN and npm document executes as a standalone example', async
     'constant-speed',
     'rtl-content',
     'responsive-options',
+    'drag-playback',
   ]) {
     const recipe = page.locator(`#${id}`)
     await recipe.locator('summary').click()
@@ -283,7 +320,7 @@ test('every copied CDN and npm document executes as a standalone example', async
       await expect(standalone.locator('.ticker-wrapper[data-ready=true]')).toHaveCount(
         id === 'opposite-rows' || id === 'constant-speed' ? 2 : 1
       )
-      if (id === 'manual-navigation' || id === 'rtl-content')
+      if (id === 'manual-navigation')
         await standalone.getByRole('button', { name: 'Play animation', exact: true }).click()
       await standalone.getByRole('button', { name: 'Pause animation', exact: true }).click()
       await expect(standalone.locator('ticker-recipe')).toHaveAttribute('data-paused', 'true')
@@ -329,6 +366,8 @@ test('every copied CDN and npm document executes as a standalone example', async
         await standalone.mouse.move(0, 0)
         await expect(frame).toHaveAttribute('data-playing', 'true')
       }
+      if (id === 'drag-playback')
+        await checkDragModes(standalone, standalone.locator('ticker-recipe'))
       expect(errors).toEqual([])
       await standalone.close()
     }
@@ -548,4 +587,26 @@ test('brand attribution opens a readable page with sources and explicit Markdown
   }
   await page.getByRole('link', { name: 'Back to Ticker examples', exact: true }).click()
   await expect(page).toHaveURL(/\/ticker\/examples\/$/)
+})
+
+test('drag recipe switches resume behavior without clearing a manual pause', async ({ page }) => {
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  await page.goto('examples/#drag-playback')
+  await checkDragModes(page, page.locator('#drag-playback'))
+  expect(errors).toEqual([])
+})
+
+test('mixed RTL characters start in autoplay with inherited direction', async ({ page }) => {
+  await page.goto('examples/#rtl-content')
+  const recipe = page.locator('#rtl-content')
+  const frame = recipe.locator('.ticker-wrapper')
+  await frame.scrollIntoViewIfNeeded()
+  await page.mouse.move(5, 5)
+  await expect(frame).toHaveAttribute('data-autoplay', 'true')
+  await expect(frame).toHaveAttribute('data-motion-direction', 'right')
+  await expect(frame).toHaveAttribute('data-playing', 'true')
+  await expect(
+    recipe.getByRole('button', { name: 'Pause animation: RTL mixed content', exact: true })
+  ).toBeVisible()
 })
