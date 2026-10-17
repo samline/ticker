@@ -270,3 +270,5 @@ The manual-navigation recipe opts into `resumeAfterDrag`: press Play before drag
 The gallery and copied logo recipes link to `/ticker/attribution/`, which presents the bundled Simple Icons version and source metadata in the shared site layout. Raw CC0/disclaimer files remain explicitly labelled Markdown downloads; do not use a raw license as an attribution destination.
 
 The appended drag-playback recipe starts playing and exposes a stable-label pressed button to update `resumeAfterDrag` through TickerDemo. Switching the option does not change playback intent. Keep both toggle states and prior manual pause covered in the live preview and copied CDN/npm documents.
+
+Copied standalone recipes use plain JavaScript and native sections, not custom-element classes. Generate only the options and control handlers needed for each recipe; keep one direct controller for single-row cases and an explicit controller list for multi-row cases. Playback state, navigation and dragging stay in the package API. Keep arrow callbacks, exact copy output, font readiness, page cleanup and all live feature controls working.

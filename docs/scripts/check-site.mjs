@@ -18,6 +18,10 @@ const titles = new Set(),
   canonicals = new Set()
 for (const page of pages) {
   const html = await readFile(page, 'utf8')
+  if (html.includes('http-equiv="refresh"')) {
+    assert.ok(html.includes('/ticker/docs/changelog/'), 'Unexpected documentation redirect')
+    continue
+  }
   assert.match(html, /<h1\b/)
   assert.match(html, /<link rel="canonical" href="https:\/\/samline.github.io\/ticker\/docs\//)
   assert.ok(!html.includes('/ticker/docsfavicon'), 'Broken base-path concatenation')

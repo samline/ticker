@@ -323,12 +323,12 @@ test('every copied CDN and npm document executes as a standalone example', async
       if (id === 'manual-navigation')
         await standalone.getByRole('button', { name: 'Play animation', exact: true }).click()
       await standalone.getByRole('button', { name: 'Pause animation', exact: true }).click()
-      await expect(standalone.locator('ticker-recipe')).toHaveAttribute('data-paused', 'true')
+      await expect(standalone.locator('.ticker-recipe')).toHaveAttribute('data-paused', 'true')
       await expect(
         standalone.getByRole('button', { name: 'Play animation', exact: true })
       ).toBeVisible()
       await standalone.getByRole('button', { name: 'Play animation', exact: true }).click()
-      await expect(standalone.locator('ticker-recipe')).toHaveAttribute('data-paused', 'false')
+      await expect(standalone.locator('.ticker-recipe')).toHaveAttribute('data-paused', 'false')
       if (id === 'dynamic-content') {
         const originals = standalone.locator(
           '[data-row]:not(.ticker-clone [data-row]) [data-example-item]'
@@ -367,7 +367,7 @@ test('every copied CDN and npm document executes as a standalone example', async
         await expect(frame).toHaveAttribute('data-playing', 'true')
       }
       if (id === 'drag-playback')
-        await checkDragModes(standalone, standalone.locator('ticker-recipe'))
+        await checkDragModes(standalone, standalone.locator('.ticker-recipe'))
       expect(errors).toEqual([])
       await standalone.close()
     }

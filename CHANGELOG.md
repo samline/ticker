@@ -2,6 +2,14 @@
 
 ## [2.1.0] - 2026-10-17
 
+### Behavior changes
+
+- Keyboard focus now pauses playback by default (`pauseOnFocus: true`). Set `pauseOnFocus: false` only when your integration provides an equivalent policy.
+- `data-playing` now reflects manual, focus and hover pause causes in addition to visibility and reduced motion. Integrations that read it should account for all pause reasons.
+- Existing entrypoints, physical left/right directions, selectors and duration mode remain supported. Use `play()` / `pause()` instead of application-owned pause CSS.
+
+### Added and fixed
+
 - Add vertical `up`/`down` movement and inherited `auto` direction, with logical RTL seeking and fractional measurements on either axis.
 - Add persistent `play()`/`pause()` intent, `autoplay`, immutable state snapshots and typed lifecycle/playback/navigation events.
 - Add `pauseOnFocus` (enabled by default), constant `speed` in CSS pixels per second and ordered viewport `responsive` rules. Manual pause survives automatic causes and breakpoint changes.
@@ -36,6 +44,15 @@
 
 ## [2.0.0] - 2026-09-24
 
+### Breaking changes
+
+- Replace `enhance()` and `createTicker()` with `ticker(target, options)` for an element-scoped controller, or `mount()` for declarative page ownership. Call the returned controller's `destroy()` for teardown.
+- `newTicker()` returns `TickerInstance | null` instead of `HTMLElement | null`. `available`, `getTicker()` and `getTickers()` still expose wrapper elements; use registry destroy helpers to remove registered entries.
+- Framework adapters are no longer shipped. Initialize Ticker in your framework's client mount hook and destroy it during cleanup.
+- `@samline/ticker/browser` is a side-effect-free ESM/CJS registry module. Plain HTML must load `dist/browser/global.global.js` to install `window.Ticker`.
+
+### Added and fixed
+
 - Replaced the ambiguous `createTicker()` / `enhance()` pair with `ticker(target, options)` and an element-scoped controller.
 - Reduced the browser namespace to the factory and registry lifecycle.
 - Fixed `interactiveClones` so interactive clones no longer inherit `pointer-events: none`.
@@ -47,3 +64,39 @@
 - Added a shared `Ticker` / `browser` singleton and named registry helpers.
 - Recreating an id now tears down the previous runtime before enhancing it again.
 - Destroying a registered ticker clears observers, clones, registry state, and restores the source DOM.
+
+## [1.0.8] - 2026-06-11
+
+- Add `interactiveClones` to opt repeated controls into interaction, with matching runtime, framework adapter and documentation support.
+
+## [1.0.7] - 2026-06-11
+
+- Initialize and destroy the React ticker at the component boundary; normalize class tokens and add server-rendering and React regression tests.
+
+## [1.0.6] - 2026-06-11
+
+- Historical npm release. No version-specific functional notes were recorded in the repository.
+
+## [1.0.5] - 2026-06-11
+
+- Historical npm release. No version-specific functional notes were recorded in the repository.
+
+## [1.0.4] - 2026-04-21
+
+- Include the stylesheet as an explicit build entry and align browser/CDN usage documentation.
+
+## [1.0.3] - 2026-04-21
+
+- Correct enhancement of existing content nodes, preserve source placement and accept multiple option class tokens.
+
+## [1.0.2] - 2026-04-21
+
+- Publish the patch release after correcting conditional wrapper classes and CDN references.
+
+## [1.0.1] - 2026-04-21
+
+- Correct the browser entry filename and version-pinned CDN URLs.
+
+## [1.0.0] - 2026-04-21
+
+- Initial ticker runtime for Vanilla JavaScript, browser scripts and React, Vue and Svelte adapters, with automatic visual copies, reduced-motion support and responsive visibility observers.

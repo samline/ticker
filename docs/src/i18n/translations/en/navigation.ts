@@ -22,7 +22,7 @@ export default {
     'guides/html-and-browser': 'HTML & browser',
     'guides/accessibility': 'Accessibility & motion',
     'reference/examples': 'Recipes & examples',
-    'guides/migration': 'Migrating to v2',
+    changelog: 'Changelog',
     'reference/index': 'Reference overview',
     'reference/configuration': 'Configuration',
     'reference/api': 'Runtime API',

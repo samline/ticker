@@ -11,7 +11,8 @@ export default defineConfig({
   trailingSlash: 'always',
   output: 'static',
   i18n: { defaultLocale: 'en', locales: ['en'], routing: { prefixDefaultLocale: false } },
-  integrations: [mdx(), sitemap()],
+  integrations: [mdx(), sitemap({ filter: page => !page.includes('/guides/migration') })],
+  redirects: { '/guides/migration/': '/ticker/docs/changelog/' },
   vite: { plugins: [tailwindcss()] },
   markdown: {
     processor: unified({ rehypePlugins: [accessibleOverflow] }),

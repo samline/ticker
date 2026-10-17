@@ -145,3 +145,5 @@ Keep original gallery recipes and their jump links first in the established orde
 Brand attribution links target the rendered attribution page, backed by `public/assets/brands/sources.json`. Preserve the bundled license/disclaimer and label direct Markdown links as downloads. Do not imply every individual mark is CC0 or grants trademark rights.
 
 The drag-playback recipe complements manual navigation. Its Resume after drag button uses stable-label aria-pressed semantics, with visible On/Off state. Toggle through the owning TickerDemo controller and retain intent; do not implement separate gesture behavior in the example.
+
+Standalone copied recipes are teaching examples: use direct ticker calls, clear variables and arrow callbacks. Generate only per-recipe controls/options; avoid classes, this, generic data-option parsing and unrelated handlers. Internal site custom elements still own real repeated-instance/disconnect lifecycles. Test every copied CDN/npm example including dynamic removals, vertical controls, drag resumption, initial pause and multiple rows.

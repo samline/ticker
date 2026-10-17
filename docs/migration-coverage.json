@@ -24,7 +24,7 @@
     {
       "source": "example/src/content/docs/guides/migration.md",
       "sha256": "124e02fef4469bfeb8accd5718b377499e033819b01379c5ff8210ff0e09f29f",
-      "destination": "docs/src/content/docs/guides/migration.md"
+      "destination": "CHANGELOG.md"
     },
     {
       "source": "example/src/content/docs/index.mdx",

@@ -187,7 +187,7 @@ See [configuration](docs/src/content/docs/reference/configuration.md) for normal
 
 ## Documentation
 
-Read the full guides and API reference in the **[documentation](https://samline.github.io/ticker/docs/)**. Explore **[working examples](https://samline.github.io/ticker/examples/)** with complete HTML / CDN and npm code to copy and adapt.
+See version history and breaking changes in the **[changelog](https://samline.github.io/ticker/docs/changelog/)**. Read the full guides and API reference in the **[documentation](https://samline.github.io/ticker/docs/)**. Explore **[working examples](https://samline.github.io/ticker/examples/)** with complete HTML / CDN and npm code to copy and adapt.
 
 | Doc                                                               | Purpose                                                        |
 | ----------------------------------------------------------------- | -------------------------------------------------------------- |

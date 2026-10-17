@@ -27,6 +27,10 @@ Landing (`/ticker/`), Examples (`/ticker/examples/`) and Docs (`/ticker/docs/`) 
 
 ## Change discipline
 
+Public copied examples teach direct package use: prefer clear variables, arrow callbacks and per-recipe scripts. Do not wrap standalone examples in custom-element classes, `this`, generic data-option parsers or unused control handlers. Internal site components may retain custom elements for their real mount/disconnect lifecycle. Preserve runtime-owned controls, accessible labels and cleanup, and execute every copied CDN/npm recipe after refactoring.
+
+The root CHANGELOG.md is the single release-note source and is loaded into the docs collection. Mark actual API removals/incompatibilities under Breaking changes and distinguish behavior changes; preserve verified historical notes and label gaps rather than inventing release details. The former migration route redirects to the changelog.
+
 The root README is the public package guide: installation, usage, API, examples, documentation and agent integration. Complement that material without replacing it with website architecture or maintenance details; those belong in the app/shared READMEs and AGENTS contracts.
 
 Preserve unrelated user edits. Follow the user's Git instructions; a local commit or merge does not publish. Do not leave obsolete adapters, generated preview runtimes, unused files or superseded CSS after a refactor. When package APIs, version, distribution, site routes or shared UI change, update examples, docs, links, metadata, tests and maintenance notes in the same change. These notes capture accepted project decisions, not permission to override future user instructions.

@@ -15,6 +15,8 @@ async function files(dir) {
 }
 const pages = (await files(content)).filter(url => /\.mdx?$/.test(url.pathname))
 const texts = await Promise.all(pages.map(url => readFile(url, 'utf8')))
+const changelog = await readFile(new URL('CHANGELOG.md', root), 'utf8')
+assert.match(changelog, /## \[2\.0\.0\][\s\S]*### Breaking changes/)
 const all = texts.join('\n')
 const inventory = JSON.parse(await readFile(new URL('../migration-coverage.json', import.meta.url)))
 assert.equal(
@@ -99,5 +101,5 @@ for (let i = 0; i < texts.length; i++) {
     assert.equal(match[1], manifest.version, `Stale CDN version in ${pages[i].pathname}`)
 }
 console.log(
-  `Documentation coverage: ${pages.length} maintained pages, all 33 original sources accounted for; public exports, snippet imports and pinned CDN versions checked.`
+  `Documentation coverage: ${pages.length + 1} maintained pages, all 33 original sources accounted for; public exports, snippet imports and pinned CDN versions checked.`
 )

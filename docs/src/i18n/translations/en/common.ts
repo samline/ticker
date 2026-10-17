@@ -10,6 +10,11 @@ export default {
   skip: 'Skip to content',
   license: 'MIT licensed',
   footer: 'Made for the web. Built with care.',
+  changelog: {
+    title: 'Changelog',
+    description:
+      'Release notes for every documented Ticker version, including breaking changes, behavior changes, features and fixes.',
+  },
   reading: 'Guide',
   apiReading: 'API reference',
 }

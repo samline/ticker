@@ -18,7 +18,7 @@ async function articlePaths(
           .replace(/\/$/, '')
       )
   }
-  return paths
+  return prefix ? paths : [...paths, 'changelog']
 }
 
 test('every article has unique route metadata, meaningful breadcrumbs and valid structured data', async ({
