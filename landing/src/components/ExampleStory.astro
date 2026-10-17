@@ -1,0 +1,44 @@
+---
+import Surface from '../../../shared/components/Surface.astro'
+import TextLink from '../../../shared/components/TextLink.astro'
+import BrandLogo from './BrandLogo.astro'
+interface Props {
+  title: string
+  description: string
+  image: string
+  href: string
+}
+const { title, description, image, href } = Astro.props
+---
+
+<Surface class:list={['story-item']}>
+  <BrandLogo src={image} name="" size="compact" />
+  <div class:list={['story-copy']}>
+    <TextLink href={href} compact>
+      {title}
+    </TextLink>
+    <p>{description}</p>
+  </div>
+</Surface>
+<style>
+  .story-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    width: 100%;
+    box-sizing: border-box;
+    white-space: normal;
+  }
+  .story-copy {
+    display: grid;
+    min-width: 0;
+    gap: var(--space-xs);
+  }
+  .story-copy p {
+    font-size: var(--text-small);
+    line-height: 1.6;
+    color: var(--color-text-muted);
+  }
+</style>

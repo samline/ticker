@@ -2,11 +2,12 @@
 interface Props {
   name: string
   src: string
+  size?: 'default' | 'compact'
 }
-const { name, src } = Astro.props
+const { name, src, size = 'default' } = Astro.props
 ---
 
-<span class:list={['brand-logo']}>
+<span class:list={['brand-logo', { compact: size === 'compact' }]}>
   <img src={src} alt={name} decoding="async" />
 </span>
 
@@ -29,6 +30,14 @@ const { name, src } = Astro.props
     height: 2.25rem;
     object-fit: contain;
     opacity: 0.82;
+  }
+  .brand-logo.compact {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+  .brand-logo.compact img {
+    width: 1.75rem;
+    height: 1.75rem;
   }
   @media (width < 48rem) {
     .brand-logo {

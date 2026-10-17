@@ -12,11 +12,32 @@ Looking for a complete starting point? [Open the working examples](/ticker/examp
 ## Dynamic content
 
 ```ts
-const offers = ticker('#offers')
+const offers = ticker('#offers', { speed: 40 })
 
 offers?.source.append(buildOffer())
 offers?.refresh()
 ```
+
+Use `speed` when content can grow or shrink: a fixed `duration` completes a longer sequence in the same time and therefore moves faster. Pixel speed preserves the reading pace after each refresh. [Try adding and removing items in the live feed](/ticker/examples/#dynamic-content).
+
+### Remove original items
+
+The application owns its content; no package-specific add/remove methods are needed. For an ordinary source element enhanced with `ticker('#offers')`, remove nodes from `source` and call `refresh()` to rebuild the visual copies. Keep separators inside the item, or remove an item's companion separator too.
+
+```ts
+function removeOffer(item?: HTMLElement) {
+  if (!item || !offers?.source.contains(item)) return
+  item.remove()
+  offers.refresh()
+}
+
+const items = offers?.source.querySelectorAll<HTMLElement>('[data-offer]')
+removeOffer(items?.[0]) // First original item.
+removeOffer(items?.[items.length - 1]) // Last original item.
+removeOffer(offers?.source.querySelector<HTMLElement>('[data-offer="sale"]') ?? undefined)
+```
+
+`removeOffer` is an application helper, not a Ticker method. Target original nodes rather than `.ticker-clone` copies; the package still owns measurement, playback and clone cleanup. Removing every item leaves the runtime waiting for measurable content; appending a new item and refreshing makes the feed ready again.
 
 ## Multiple controllers
 

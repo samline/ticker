@@ -12,6 +12,7 @@ interface Props {
   speed?: number
   autoplay?: boolean
   navigation?: boolean
+  resumeAfterDrag?: boolean
   rtl?: boolean
   responsive?: import('../../../src/core/types').TickerResponsiveRule[]
 }
@@ -24,6 +25,7 @@ const {
   speed,
   autoplay = true,
   navigation = false,
+  resumeAfterDrag = false,
   responsive = [],
   rtl = false,
 } = Astro.props
@@ -40,6 +42,7 @@ const i18n = getI18n(Astro)
   data-speed={speed}
   data-autoplay={String(autoplay)}
   data-navigation={String(navigation)}
+  data-resume-after-drag={String(resumeAfterDrag)}
   data-responsive={JSON.stringify(responsive)}
   data-kind={kind}
   data-pause-text={i18n.controls.ticker.pause}
@@ -116,6 +119,7 @@ const i18n = getI18n(Astro)
           speed: Number(this.dataset.speed),
           autoplay: this.dataset.autoplay !== 'false',
           navigation: this.dataset.navigation === 'true',
+          resumeAfterDrag: this.dataset.resumeAfterDrag === 'true',
           responsive: JSON.parse(this.dataset.responsive ?? '[]'),
           pauseOnHover: true,
         })
@@ -172,9 +176,40 @@ const i18n = getI18n(Astro)
         this.addEventListener(
           'ticker:direction',
           event => {
-            const direction = (event as CustomEvent<'left' | 'right'>).detail
+            const direction = (event as CustomEvent<'left' | 'right' | 'up' | 'down'>).detail
             this.dataset.direction = direction
             this.controller?.update({ direction })
+          },
+          { signal }
+        )
+        const contentItems = () =>
+          Array.from(
+            this.controller?.source.querySelectorAll<HTMLElement>(
+              '.ticker-content:not(.ticker-clone) [data-example-item]'
+            ) ?? []
+          )
+        const reportItems = () =>
+          this.dispatchEvent(
+            new CustomEvent('ticker:items', {
+              bubbles: true,
+              detail: contentItems().map(item => ({
+                id: item.dataset.exampleItem!,
+                label: item.textContent ?? '',
+              })),
+            })
+          )
+        this.addEventListener('ticker:list', reportItems, { signal })
+        this.addEventListener(
+          'ticker:remove',
+          event => {
+            const id = (event as CustomEvent<string>).detail
+            const item = contentItems().find(item => item.dataset.exampleItem === id)
+            if (!item) return
+            const separator = item.nextElementSibling
+            if (separator?.classList.contains('sep')) separator.remove()
+            item.remove()
+            this.controller?.refresh()
+            reportItems()
           },
           { signal }
         )
@@ -184,6 +219,7 @@ const i18n = getI18n(Astro)
             if (!this.controller) return
             const item = document.createElement('span')
             item.textContent = (event as CustomEvent<string>).detail
+            item.dataset.exampleItem = crypto.randomUUID()
             const separator = document.createElement('span')
             separator.className = 'sep'
             separator.setAttribute('aria-hidden', 'true')
@@ -192,6 +228,7 @@ const i18n = getI18n(Astro)
             )
             content?.append(item, separator)
             this.controller.refresh()
+            reportItems()
           },
           { signal }
         )
@@ -359,12 +396,14 @@ const i18n = getI18n(Astro)
   }
 
   .ticker-frame[data-axis='vertical'] {
-    height: 10rem;
+    height: 22rem;
   }
   .ticker-frame[data-axis='vertical'] .ticker-content {
-    align-items: flex-start;
+    align-items: stretch;
   }
   .ticker-frame[data-axis='vertical'] .ticker-track {
+    --demo-item-gap: var(--space-md);
+    padding-block: var(--space-xs);
     white-space: normal;
   }
   .ticker-frame[data-axis='vertical']::before,

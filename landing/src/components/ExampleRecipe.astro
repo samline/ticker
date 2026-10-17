@@ -51,20 +51,22 @@ const palette = (theme: 'light' | 'dark') => {
 const rows = await Promise.all(
   recipe.rows.map(async row => {
     const items = await Promise.all(
-      row.items.map(async item => {
+      row.items.map(async (item, index) => {
         if (item.logo) {
           const svg = await readFile(resolve('public/assets/brands', item.logo), 'utf8')
+          if (item.description && item.href)
+            return `<div class="item story-item"><span class="story-image"><img src="data:image/svg+xml,${encodeURIComponent(svg)}" alt=""></span><span class="story-copy"><a href="${e(docsBase + item.href)}">${e(item.label)}</a><span>${e(item.description)}</span></span></div>`
           return `<span class="item"><img src="data:image/svg+xml,${encodeURIComponent(svg)}" alt="">${e(item.label)}</span>`
         }
         if (item.href)
           return `<a class="item" href="${e(docsBase + item.href)}" target="_blank" rel="noopener noreferrer">${e(item.label)}</a>`
         if (item.value)
           return `<span class="item"><strong>${e(item.label)}</strong> ${e(item.value)} <span class="${item.change?.startsWith('+') ? 'up' : 'down'}">${e(item.change ?? '')}</span></span>`
-        return `<span class="item">${e(item.label)}</span>`
+        return `<span class="item"${recipe.kind === 'dynamic' ? ` data-example-item="item-${index}"` : ''}>${e(item.label)}</span>`
       })
     )
     return `<div class="window" dir="${row.rtl ? 'rtl' : 'ltr'}" data-vertical="${row.direction === 'up' || row.direction === 'down'}" tabindex="0" role="region" aria-label="${e(row.label)}" aria-live="off">
-  <div data-row data-duration="${row.duration}" data-direction="${row.direction}" data-speed="${row.speed ?? 0}" data-autoplay="${row.autoplay !== false}" data-navigation="${row.navigation === true}" data-responsive="${e(JSON.stringify(row.responsive ?? []))}">${items.join('\n    ')}</div>
+  <div data-row data-duration="${row.duration}" data-direction="${row.direction}" data-speed="${row.speed ?? 0}" data-autoplay="${row.autoplay !== false}" data-navigation="${row.navigation === true}" data-resume-after-drag="${row.resumeAfterDrag === true}" data-responsive="${e(JSON.stringify(row.responsive ?? []))}">${items.join('\n    ')}</div>
 </div>`
   })
 )
@@ -72,24 +74,31 @@ const controls =
   recipe.kind === 'controls'
     ? `
   <label>${e(t.speed)} <input type="range" min="14" max="60" value="24" aria-label="${e(t.speed)}"><output>24s</output></label>
-  <label>${e(t.direction)} <select aria-label="${e(t.direction)}"><option value="left">${e(t.left)}</option><option value="right">${e(t.right)}</option></select></label>`
+  <label>${e(t.direction)} <select data-example-direction-select aria-label="${e(t.direction)}"><option value="left">${e(t.left)}</option><option value="right">${e(t.right)}</option></select></label>`
     : recipe.rows.some(row => row.navigation)
       ? `
   <button type="button" data-previous>${e(playback.previous)}</button><button type="button" data-next>${e(playback.next)}</button>
   <label>${e(playback.position)} <input type="range" data-position min="0" max="1" value="0"></label>`
       : ''
-const markup = `<ticker-recipe data-pause-text="${e(playback.pause)}" data-play-text="${e(playback.play)}" data-added="${e(t.added)}" data-added-status="${e(t.addedStatus)}">
+const verticalControls = recipe.rows.some(row => row.direction === 'up' || row.direction === 'down')
+  ? `<div role="group" aria-label="${e(t.direction)}"><button type="button" data-example-direction="up" aria-pressed="true">${e(t.up)}</button><button type="button" data-example-direction="down" aria-pressed="false">${e(t.down)}</button></div>`
+  : ''
+const markup = `<ticker-recipe data-pause-text="${e(playback.pause)}" data-play-text="${e(playback.play)}" data-added="${e(t.added)}" data-added-status="${e(t.addedStatus)}" data-removed-status="${e(t.removedStatus)}" data-item-empty="${e(t.itemEmpty)}">
   <h1>${e(recipe.title)}</h1>
   ${rows.join('\n  ')}
   <div class="controls" hidden>
     <button type="button" data-pause>${e(playback.pause)}</button>${
       recipe.kind === 'dynamic'
         ? `
-    <button type="button" data-add>${e(t.add)}</button>`
+    <button type="button" data-add>${e(t.add)}</button>
+    <button type="button" data-remove-first>${e(t.removeFirst)}</button>
+    <button type="button" data-remove-last>${e(t.removeLast)}</button>
+    <label>${e(t.itemLabel)} <select data-item-select></select></label>
+    <button type="button" data-remove-selected>${e(t.removeSelected)}</button>`
         : ''
-    }${controls}
+    }${controls}${verticalControls}
   </div>
-  <p>${e(recipe.note)}</p>${recipe.kind === 'logos' ? `\n  <p><a href="${e(manifest.homepage + '/assets/brands/LICENSE.md')}" target="_blank" rel="noopener noreferrer">${e(t.brandAttribution)}</a></p>` : ''}
+  <p>${e(recipe.note)}</p>${recipe.rows.some(row => row.items.some(item => item.logo)) ? `\n  <p><a href="${e(manifest.homepage + '/assets/brands/LICENSE.md')}" target="_blank" rel="noopener noreferrer">${e(t.brandAttribution)}</a></p>` : ''}
   <p role="status" aria-live="polite"></p>
   <noscript><p>${e(t.noJs)}</p></noscript>
 </ticker-recipe>`
@@ -114,15 +123,23 @@ ticker-recipe {
   .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 1rem; }
   button, select { font: inherit; padding: 0.375rem 0.75rem; background: var(--surface); color: var(--text); border: 0.0625rem solid var(--border); border-radius: 0.5rem; cursor: pointer; }
   @media (hover: hover) { button:hover, select:hover { background: var(--hover); } }
+  select { max-width: 100%; min-width: 0; }
   label { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
   input { accent-color: var(--accent); width: 6rem; } output { font-variant-numeric: tabular-nums; }
   p { margin: 0.75rem 0 0; font-size: 0.8125rem; } p:empty { display: none; }
   [hidden] { display: none !important; }
   :focus-visible { outline: 0.125rem solid var(--accent); outline-offset: 0.1875rem; }
   .window:focus-visible { outline-offset: -0.1875rem; }
-  .window[data-vertical="true"] .ticker-wrapper { height: 10rem; }
-  .window[data-vertical="true"] [data-row] { flex-direction: column; width: 100%; align-items: flex-start; }
+  .window[data-vertical="true"] .ticker-wrapper { height: 22rem; }
+  .window[data-vertical="true"] [data-row] { flex-direction: column; width: 100%; align-items: stretch; gap: 1rem; }
+  .window[data-vertical="true"] .ticker-track { gap: 1rem; padding-block: 0.5rem; }
   .window[data-vertical="true"] .item { white-space: normal; }
+  .story-item { display: grid; grid-template-columns: 3.5rem minmax(0, 1fr); align-items: start; gap: 1rem; width: 100%; box-sizing: border-box; padding: 1rem; border: 0.0625rem solid var(--border); border-radius: 1rem; background: var(--surface); }
+  .story-image { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border: 0.0625rem solid var(--border); border-radius: 0.625rem; }
+  .story-image img { width: 1.75rem; height: 1.75rem; filter: brightness(0.55) saturate(1.3); }
+  .story-copy { display: grid; min-width: 0; gap: 0.5rem; font-size: 0.8125rem; line-height: 1.6; }
+  .story-copy a { font-size: 0.875rem; }
+  @media (prefers-color-scheme: dark) { .story-image img { filter: none; } }
 }
 @media (prefers-reduced-motion: reduce) {
   ticker-recipe [data-pause] { display: none; }
@@ -139,6 +156,7 @@ const behavior = `if (!customElements.get('ticker-recipe')) {
           speed: Number(row.dataset.speed),
           autoplay: row.dataset.autoplay !== 'false',
           navigation: row.dataset.navigation === 'true',
+          resumeAfterDrag: row.dataset.resumeAfterDrag === 'true',
           responsive: JSON.parse(row.dataset.responsive || '[]'),
           pauseOnHover: true,
         });
@@ -167,17 +185,49 @@ const behavior = `if (!customElements.get('ticker-recipe')) {
         this.controllers.forEach(controller => controller.update({ duration: Number(speed.value) }));
         this.querySelector('output').value = speed.value + 's';
       }, { signal });
-      const direction = this.querySelector('select');
+      this.querySelectorAll('button[data-example-direction]').forEach(button => {
+        button.addEventListener('click', () => {
+          this.controllers.forEach(controller => controller.update({ direction: button.dataset.exampleDirection }));
+          this.querySelectorAll('button[data-example-direction]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+        }, { signal });
+      });
+      const direction = this.querySelector('[data-example-direction-select]');
       direction?.addEventListener('change', () => {
         this.controllers.forEach(controller => controller.update({ direction: direction.value }));
       }, { signal });
+      const select = this.querySelector('[data-item-select]');
+      const items = () => Array.from(this.controllers[0]?.source.querySelectorAll('[data-example-item]') ?? []);
+      const removeButtons = this.querySelectorAll('[data-remove-first], [data-remove-last], [data-remove-selected]');
+      const syncItems = () => {
+        if (!select) return;
+        const selected = select.value;
+        const current = items();
+        select.replaceChildren(...current.map(item => new Option(item.textContent, item.dataset.exampleItem)));
+        if (current.some(item => item.dataset.exampleItem === selected)) select.value = selected;
+        if (!current.length) select.add(new Option(this.dataset.itemEmpty, ''));
+        select.disabled = !current.length;
+        removeButtons.forEach(button => { button.disabled = !current.length; });
+      };
+      removeButtons.forEach(button => button.addEventListener('click', () => {
+        const current = items();
+        const item = button.hasAttribute('data-remove-first') ? current[0] : button.hasAttribute('data-remove-last') ? current.at(-1) : current.find(item => item.dataset.exampleItem === select.value);
+        if (!item) return;
+        const label = item.textContent;
+        item.remove();
+        this.controllers[0].refresh();
+        syncItems();
+        this.querySelector('[role=status]').textContent = this.dataset.removedStatus.replace('{item}', label);
+      }, { signal }));
+      syncItems();
       let count = 0;
       this.querySelector('[data-add]')?.addEventListener('click', () => {
         const item = document.createElement('span');
         item.className = 'item';
+        item.dataset.exampleItem = 'added-' + count;
         item.textContent = this.dataset.added.replace('{count}', String(++count));
         this.controllers[0].source.append(item);
         this.controllers[0].refresh();
+        syncItems();
         this.querySelector('[role=status]').textContent = this.dataset.addedStatus.replace('{count}', String(count));
       }, { signal });
       document.fonts.ready.then(() => {

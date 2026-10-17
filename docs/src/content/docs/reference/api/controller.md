@@ -47,7 +47,7 @@ A fresh, read-only snapshot of the normalized options:
 ```ts
 {
   duration: 20, speed: 0, direction: 'left', autoplay: true,
-  pauseOnHover: false, pauseOnFocus: true, navigation: false,
+  pauseOnHover: false, pauseOnFocus: true, navigation: false, resumeAfterDrag: false,
   responsive: [], interactiveClones: false, class: '',
 }
 ```
@@ -95,6 +95,16 @@ const disconnect = news?.connectControls({
 The range spans one repeating sequence, not an infinite scrollbar. Its end wraps to zero; keyboard End selects just before the seam. Home selects zero. Arrow keys follow logical writing order/axis; other inputs in content retain native behavior. The connected rail samples the position every 100ms while playing without public frame events. It updates immediately after seeking and measuring.
 
 With `navigation: true`, Pointer Events support touch and mouse dragging after a six-pixel axis threshold. Perpendicular scrolling remains native (`pan-y` for horizontal and `pan-x` for vertical); input, select, textarea and editable content do not initiate a drag. A tap retains its link action; an actual drag suppresses the resulting click. No inertia or forced smooth animation is applied. Reduced motion disables autoplay but still permits instantaneous navigation with repeated inert copies. Calling `scrollTo`/`scrollBy` also enables those copies when needed under reduced motion.
+
+Set `resumeAfterDrag: true` (or `data-resume-after-drag="true"`) to restore playback intent when a drag ends, including pointer cancellation or capture loss. It defaults to false. The ticker resumes only if playback was requested when dragging began and no explicit playback or navigation command intervened. A ticker paused beforehand stays paused. Hover, focus, reduced motion, visibility and viewport pauses still apply: with hover pause enabled, movement resumes when the pointer leaves. Opt-in mouse gestures preserve the existing focus rather than focusing the dragged region or link; keyboard focus already inside the ticker still pauses playback. Buttons, the rail and `scrollTo`/`scrollBy` continue to pause explicitly.
+
+```ts
+const feed = ticker('#feed', {
+  navigation: true,
+  resumeAfterDrag: true,
+  pauseOnHover: true,
+})
+```
 
 ## Events
 

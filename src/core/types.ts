@@ -12,6 +12,8 @@ export interface TickerOptions {
   autoplay?: boolean
   pauseOnFocus?: boolean
   navigation?: boolean
+  /** Restore prior playback intent after pointer dragging; defaults to false. */
+  resumeAfterDrag?: boolean
   /** Viewport media queries, merged in array order after base options. */
   responsive?: readonly TickerResponsiveRule[]
   direction?: TickerDirection

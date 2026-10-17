@@ -14,10 +14,12 @@ export interface Recipe {
     speed?: number
     autoplay?: boolean
     navigation?: boolean
+    resumeAfterDrag?: boolean
     rtl?: boolean
     responsive?: import('../../../../../src/core/types').TickerResponsiveRule[]
     items: readonly {
       label: string
+      description?: string
       href?: string
       logo?: string
       value?: string
@@ -56,128 +58,25 @@ export default {
   file: 'index.html',
   copy: 'Copy complete {format} example: {title}',
   add: 'Add an update',
+  removeFirst: 'Remove first',
+  removeLast: 'Remove last',
+  removeSelected: 'Remove selected',
+  itemLabel: 'Choose an item',
+  itemEmpty: 'No items left',
+  removedStatus: 'Removed {item}. Visual copies refreshed.',
   added: 'New update {count}',
   addedStatus: 'Added update {count}. Visual copies refreshed.',
   speed: 'Loop duration (seconds)',
   direction: 'Direction',
   left: 'Left',
   right: 'Right',
+  up: 'Up',
+  down: 'Down',
   noJs: 'Motion needs JavaScript. Scroll to read all the original content.',
   sourceNote:
     'Copied code uses the initial settings shown when this page loads. Preview changes are not included.',
   brandAttribution: 'Demo brand marks and attribution',
   recipes: [
-    {
-      id: 'manual-navigation',
-      navigationLabel: 'Manual navigation',
-      kind: 'news',
-      title: 'Read at your own pace',
-      description:
-        'Start paused. Use Previous, Next, the position rail or a pointer gesture to explore a repeating sequence. Navigation leaves playback paused.',
-      docsPath: 'reference/api/controller/#manual-navigation',
-      docsLabel: 'Read the manual navigation contract',
-      note: 'Buttons advance one visible extent. The rail represents one repeated sequence and wraps at its end. Drag horizontally; vertical page scrolling stays available.',
-      rows: [
-        {
-          label: 'Manual news navigation',
-          duration: 20,
-          direction: 'left',
-          autoplay: false,
-          navigation: true,
-          items: news,
-        },
-      ],
-    },
-    {
-      id: 'vertical-news',
-      navigationLabel: 'Vertical news',
-      kind: 'news',
-      title: 'Vertical news',
-      description:
-        'Move a column of links upward at a constant 28 pixels per second. The viewport has a fixed height; original items can have different heights.',
-      docsPath: 'reference/configuration/#vertical-and-writing-direction',
-      docsLabel: 'Configure vertical movement',
-      note: 'Up and down use measured heights and the vertical track gap. Focus pauses the moving links. Buttons, rail and dragging work on the vertical axis.',
-      rows: [
-        {
-          label: 'Vertical ticker resources',
-          duration: 20,
-          speed: 28,
-          direction: 'up',
-          navigation: true,
-          items: news,
-        },
-      ],
-    },
-    {
-      id: 'constant-speed',
-      navigationLabel: 'Constant speed',
-      kind: 'rows',
-      title: 'Duration and constant speed',
-      description:
-        'Compare a fixed 20-second cycle with a longer sequence moving at 40 pixels per second. Speed takes precedence over duration and survives content resizing.',
-      docsPath: 'reference/configuration/#speed',
-      docsLabel: 'Compare speed and duration',
-      note: 'The first row uses duration. The second uses speed, so its duration follows the measured sequence length.',
-      rows: [
-        { label: 'Fixed duration', duration: 20, direction: 'left', items: news },
-        {
-          label: 'Constant pixel speed',
-          duration: 20,
-          speed: 40,
-          direction: 'left',
-          items: [...news, ...news],
-        },
-      ],
-    },
-    {
-      id: 'rtl-content',
-      navigationLabel: 'RTL content',
-      kind: 'news',
-      title: 'RTL content and logical movement',
-      description:
-        'Arabic and Hebrew text retain their writing order alongside numbers and Latin text. Automatic direction follows the inherited writing direction.',
-      docsPath: 'reference/configuration/#vertical-and-writing-direction',
-      docsLabel: 'Read the writing direction contract',
-      note: 'The preview has an explicit RTL region inside this LTR page. Previous and Next follow reading order; left and right remain physical animation directions.',
-      rows: [
-        {
-          label: 'RTL mixed content',
-          duration: 20,
-          direction: 'auto',
-          rtl: true,
-          navigation: true,
-          autoplay: false,
-          items: [
-            { label: 'العربية 123 ABC' },
-            { label: 'עברית 456 XYZ' },
-            { label: 'Release 2.1 — 789' },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'responsive-options',
-      navigationLabel: 'Responsive options',
-      kind: 'news',
-      title: 'Responsive motion',
-      description:
-        'Resize the viewport: the same content uses 45 pixels per second on desktop and 24 on narrow screens. Focus and explicit pause remain independent.',
-      docsPath: 'reference/configuration/#responsive',
-      docsLabel: 'Configure viewport rules',
-      note: 'Below 48rem the viewport rule overrides speed. Leaving the rule restores the current base speed. Reduced motion still prevents autoplay.',
-      rows: [
-        {
-          label: 'Responsive news',
-          duration: 20,
-          direction: 'left',
-          speed: 45,
-          responsive: [{ query: '(width < 48rem)', options: { speed: 24 } }],
-          items: news,
-        },
-      ],
-    },
-
     {
       id: 'announcements',
       navigationLabel: 'Announcements',
@@ -278,14 +177,15 @@ export default {
       kind: 'dynamic',
       title: 'A feed that grows',
       description:
-        'Add a new announcement without rebuilding your ticker. Try the button: the original content and its moving copies update together.',
+        'Add or remove announcements while the feed keeps a constant 40 pixels per second. Try removing the first, last or selected item; the original content and its visual copies stay in sync.',
       docsPath: 'guides/lifecycle/#update-versus-refresh',
       docsLabel: 'Learn when to update() or refresh()',
-      note: 'The application changes the source. Ticker measures it and refreshes its visual copies.',
+      note: 'The application owns the items and calls refresh() after editing the source. Pixel speed keeps the pace steady as the feed grows or shrinks.',
       rows: [
         {
           label: 'Live example updates',
           duration: 28,
+          speed: 40,
           direction: 'left',
           items: [
             { label: 'Project created' },
@@ -316,6 +216,147 @@ export default {
             { label: 'Your pace' },
             { label: 'One small library' },
           ],
+        },
+      ],
+    },
+
+    {
+      id: 'manual-navigation',
+      navigationLabel: 'Manual navigation',
+      kind: 'news',
+      title: 'Read at your own pace',
+      description:
+        'Start paused. Use Previous, Next, the position rail or a pointer gesture to explore a repeating sequence. Press Play, then drag: playback resumes after release when hover and focus pauses clear. Buttons and the rail leave playback paused.',
+      docsPath: 'reference/api/controller/#manual-navigation',
+      docsLabel: 'Read the manual navigation contract',
+      note: 'Buttons advance one visible extent. The rail represents one repeated sequence and wraps at its end. Drag horizontally; vertical page scrolling stays available.',
+      rows: [
+        {
+          label: 'Manual news navigation',
+          duration: 20,
+          direction: 'left',
+          autoplay: false,
+          navigation: true,
+          resumeAfterDrag: true,
+          items: news,
+        },
+      ],
+    },
+    {
+      id: 'vertical-news',
+      navigationLabel: 'Vertical news',
+      kind: 'news',
+      title: 'Vertical news',
+      description:
+        'A scrolling resource feed with illustrated cards, useful links and descriptions. Each card keeps its own height while the column moves at 28 pixels per second.',
+      docsPath: 'reference/configuration/#vertical-and-writing-direction',
+      docsLabel: 'Configure vertical movement',
+      note: 'Illustrative technology marks, not product announcements or endorsements. Choose Up or Down to change movement. Hover or focus a link to read; use Previous, Next, the rail or drag to browse.',
+      rows: [
+        {
+          label: 'Vertical ticker resources',
+          duration: 20,
+          speed: 28,
+          direction: 'up',
+          navigation: true,
+          items: [
+            {
+              label: 'Astro: start with your own markup',
+              description:
+                'Initialize a ticker after the page mounts and keep its original links available.',
+              logo: 'astro.svg',
+              href: 'getting-started/',
+            },
+            {
+              label: 'Vite: choose a steady reading pace',
+              description:
+                'Use pixel speed and viewport rules to keep a feed readable as its layout changes.',
+              logo: 'vite.svg',
+              href: 'reference/configuration/',
+            },
+            {
+              label: 'GitHub: keep live content in sync',
+              description:
+                'Add items to the original source, refresh its copies and release the controller on cleanup.',
+              logo: 'github.svg',
+              href: 'guides/lifecycle/',
+            },
+            {
+              label: 'Figma: make motion accessible',
+              description:
+                'Give keyboard users time to read with focus pause and respect reduced motion preferences.',
+              logo: 'figma.svg',
+              href: 'guides/accessibility/',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'constant-speed',
+      navigationLabel: 'Constant speed',
+      kind: 'rows',
+      title: 'Duration and constant speed',
+      description:
+        'Compare a fixed 20-second cycle with a longer sequence moving at 40 pixels per second. Speed takes precedence over duration and survives content resizing.',
+      docsPath: 'reference/configuration/#speed',
+      docsLabel: 'Compare speed and duration',
+      note: 'The first row uses duration. The second uses speed, so its duration follows the measured sequence length.',
+      rows: [
+        { label: 'Fixed duration', duration: 20, direction: 'left', items: news },
+        {
+          label: 'Constant pixel speed',
+          duration: 20,
+          speed: 40,
+          direction: 'left',
+          items: [...news, ...news],
+        },
+      ],
+    },
+    {
+      id: 'rtl-content',
+      navigationLabel: 'RTL content',
+      kind: 'news',
+      title: 'RTL content and logical movement',
+      description:
+        'Arabic and Hebrew text retain their writing order alongside numbers and Latin text. Automatic direction follows the inherited writing direction.',
+      docsPath: 'reference/configuration/#vertical-and-writing-direction',
+      docsLabel: 'Read the writing direction contract',
+      note: 'The preview has an explicit RTL region inside this LTR page. Previous and Next follow reading order; left and right remain physical animation directions.',
+      rows: [
+        {
+          label: 'RTL mixed content',
+          duration: 20,
+          direction: 'auto',
+          rtl: true,
+          navigation: true,
+          autoplay: false,
+          items: [
+            { label: 'العربية 123 ABC' },
+            { label: 'עברית 456 XYZ' },
+            { label: 'Release 2.1 — 789' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'responsive-options',
+      navigationLabel: 'Responsive options',
+      kind: 'news',
+      title: 'Responsive motion',
+      description:
+        'Resize the viewport: the same content uses 45 pixels per second on desktop and 24 on narrow screens. Focus and explicit pause remain independent.',
+      docsPath: 'reference/configuration/#responsive',
+      docsLabel: 'Configure viewport rules',
+      note: 'Below 48rem the viewport rule overrides speed. Leaving the rule restores the current base speed. Reduced motion still prevents autoplay.',
+      rows: [
+        {
+          label: 'Responsive news',
+          duration: 20,
+          direction: 'left',
+          speed: 45,
+          responsive: [{ query: '(width < 48rem)', options: { speed: 24 } }],
+          items: news,
         },
       ],
     },

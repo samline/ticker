@@ -81,6 +81,117 @@ test('all six previews run actual controllers, pause independently, and expose f
   expect(violations).toEqual([])
 })
 
+test('keeps the original recipes first and edits the dynamic feed at a constant speed', async ({
+  page,
+}) => {
+  await page.goto('examples/')
+  const order = await page
+    .locator('section.recipe')
+    .evaluateAll(elements => elements.map(el => el.id))
+  expect(order).toEqual([
+    ...ids,
+    'manual-navigation',
+    'vertical-news',
+    'constant-speed',
+    'rtl-content',
+    'responsive-options',
+  ])
+  const recipe = page.locator('#dynamic-content')
+  await page
+    .getByRole('navigation', { name: 'Choose an example' })
+    .getByRole('link', { name: 'Dynamic content', exact: true })
+    .click()
+  const add = recipe.getByRole('button', { name: 'Add an update' })
+  await expect(add).toBeVisible()
+  await expect(add).toBeEnabled()
+  const originals = recipe.locator('.ticker-content:not(.ticker-clone) [data-example-item]')
+  const speed = () =>
+    recipe.locator('.ticker-frame').evaluate(frame => {
+      const track = frame.querySelector('.ticker-track')!
+      const content = frame.querySelector('.ticker-content:not(.ticker-clone)')!
+      const styles = getComputedStyle(track)
+      return (
+        (content.getBoundingClientRect().width + parseFloat(styles.columnGap)) /
+        parseFloat(styles.animationDuration)
+      )
+    })
+  await expect.poll(speed).toBeCloseTo(40, 3)
+  await recipe.getByRole('button', { name: /Pause animation:/ }).click()
+  for (let i = 0; i < 3; i++) await add.click()
+  await expect(originals).toHaveCount(6)
+  await expect.poll(speed).toBeCloseTo(40, 3)
+  await recipe.getByRole('button', { name: 'Remove first', exact: true }).click()
+  await expect(originals).toHaveCount(5)
+  await expect(originals.first()).toHaveText('Design approved')
+  await recipe.getByRole('button', { name: 'Remove last', exact: true }).click()
+  await expect(originals).toHaveCount(4)
+  await expect(originals.last()).toHaveText('New update 2')
+  await recipe
+    .getByRole('combobox', { name: 'Choose an item', exact: true })
+    .selectOption({ label: 'New update 1' })
+  await recipe.getByRole('button', { name: 'Remove selected', exact: true }).click()
+  await expect(originals).toHaveCount(3)
+  await expect.poll(speed).toBeCloseTo(40, 3)
+  await expect(
+    recipe.locator('.ticker-clone [data-example-item]').filter({ hasText: 'New update 1' })
+  ).toHaveCount(0)
+  await expect(recipe.locator('.ticker-frame')).toHaveAttribute('data-user-paused', 'true')
+  for (let i = 0; i < 3; i++)
+    await recipe.getByRole('button', { name: 'Remove first', exact: true }).click()
+  await expect(originals).toHaveCount(0)
+  await expect(recipe.locator('.ticker-clone')).toHaveCount(0)
+  await expect(recipe.getByRole('combobox', { name: 'Choose an item', exact: true })).toBeDisabled()
+  await expect(recipe.getByRole('button', { name: 'Remove selected', exact: true })).toBeDisabled()
+  await add.click()
+  await expect(originals).toHaveCount(1)
+  await expect(recipe.locator('.ticker-frame')).toHaveAttribute('data-ready', 'true')
+  await expect.poll(speed).toBeCloseTo(40, 3)
+})
+
+test('vertical feed has readable illustrated cards without horizontal separator rows', async ({
+  page,
+}) => {
+  await page.goto('examples/#vertical-news')
+  const recipe = page.locator('#vertical-news')
+  await expect(recipe.locator('.ticker-frame')).toHaveAttribute('data-ready', 'true')
+  const original = recipe.locator('.ticker-content:not(.ticker-clone)')
+  await expect(original.locator('.story-item')).toHaveCount(4)
+  await expect(original.locator('.sep')).toHaveCount(0)
+  expect(
+    await original
+      .locator('img')
+      .evaluateAll(images =>
+        images.every(
+          img => (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0
+        )
+      )
+  ).toBe(true)
+  for (const theme of ['dark', 'light']) {
+    await page.evaluate(theme => {
+      document.documentElement.dataset.theme = theme
+    }, theme)
+    for (const width of [320, 768, 1440]) {
+      await page.setViewportSize({ width, height: 900 })
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)
+      ).toBe(true)
+      const bounds = await original
+        .locator('.story-item')
+        .first()
+        .evaluate(el => {
+          const card = el.getBoundingClientRect(),
+            image = el.querySelector('img')!.getBoundingClientRect(),
+            copy = el.querySelector('.story-copy')!.getBoundingClientRect()
+          return {
+            imageFits: image.left >= card.left && image.right < copy.left,
+            textFits: copy.right <= card.right + 1,
+          }
+        })
+      expect(bounds).toEqual({ imageFits: true, textFits: true })
+    }
+  }
+})
+
 test('every copied CDN and npm document executes as a standalone example', async ({
   page,
   context,
@@ -181,6 +292,39 @@ test('every copied CDN and npm document executes as a standalone example', async
       ).toBeVisible()
       await standalone.getByRole('button', { name: 'Play animation', exact: true }).click()
       await expect(standalone.locator('ticker-recipe')).toHaveAttribute('data-paused', 'false')
+      if (id === 'dynamic-content') {
+        const originals = standalone.locator(
+          '[data-row]:not(.ticker-clone [data-row]) [data-example-item]'
+        )
+        await standalone.getByRole('button', { name: 'Add an update' }).click()
+        await expect(originals).toHaveCount(4)
+        await standalone.getByRole('button', { name: 'Remove first', exact: true }).click()
+        await expect(originals).toHaveCount(3)
+        await standalone
+          .getByRole('combobox', { name: 'Choose an item', exact: true })
+          .selectOption({ label: 'New update 1' })
+        await standalone.getByRole('button', { name: 'Remove selected', exact: true }).click()
+        await expect(originals).toHaveCount(2)
+      }
+      if (id === 'vertical-news') {
+        for (const direction of ['Down', 'Up']) {
+          await standalone.getByRole('button', { name: direction, exact: true }).click()
+          await expect(standalone.locator('.ticker-wrapper')).toHaveAttribute(
+            'data-motion-direction',
+            direction.toLowerCase()
+          )
+        }
+      }
+      if (id === 'manual-navigation') {
+        const frame = standalone.locator('.ticker-wrapper')
+        const box = (await frame.boundingBox())!
+        await standalone.mouse.move(box.x + 140, box.y + box.height / 2)
+        await standalone.mouse.down()
+        await standalone.mouse.move(box.x + 60, box.y + box.height / 2, { steps: 5 })
+        await standalone.mouse.up()
+        await standalone.mouse.move(0, 0)
+        await expect(frame).toHaveAttribute('data-playing', 'true')
+      }
       expect(errors).toEqual([])
       await standalone.close()
     }
@@ -331,4 +475,41 @@ test('Home keeps three separate demo tabs, remembers per-example speed, and shar
   await expect(examples.locator('h1')).toHaveText('Ticker examples.')
   await expect(examples.locator('iframe')).toHaveCount(0)
   await examples.close()
+})
+
+test('vertical direction controls and manual drag resumption work without console errors', async ({
+  page,
+}) => {
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  page.on('console', message => {
+    if (message.type() === 'error') errors.push(message.text())
+  })
+  await page.goto('examples/')
+  const vertical = page.locator('#vertical-news')
+  await vertical.getByRole('button', { name: 'Down', exact: true }).click()
+  await expect(vertical.locator('.ticker-wrapper')).toHaveAttribute('data-motion-direction', 'down')
+  await expect(vertical.getByRole('button', { name: 'Down', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true'
+  )
+  await vertical.getByRole('button', { name: 'Up', exact: true }).click()
+  await expect(vertical.locator('.ticker-wrapper')).toHaveAttribute('data-motion-direction', 'up')
+  const manual = page.locator('#manual-navigation')
+  await manual
+    .getByRole('button', { name: 'Play animation: Manual news navigation', exact: true })
+    .click()
+  const frame = manual.locator('.ticker-wrapper')
+  await frame.scrollIntoViewIfNeeded()
+  const box = (await frame.boundingBox())!
+  await page.mouse.move(box.x + 150, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(box.x + 60, box.y + box.height / 2, { steps: 5 })
+  await page.mouse.up()
+  await page.mouse.move(5, 5)
+  await expect(frame).toHaveAttribute('data-playing', 'true')
+  await expect(
+    manual.getByRole('button', { name: 'Pause animation: Manual news navigation', exact: true })
+  ).toBeVisible()
+  expect(errors).toEqual([])
 })

@@ -47,6 +47,7 @@ interface TickerOptions {
   autoplay?: boolean
   pauseOnFocus?: boolean
   navigation?: boolean
+  resumeAfterDrag?: boolean
   responsive?: readonly TickerResponsiveRule[]
   direction?: TickerDirection
   pauseOnHover?: boolean

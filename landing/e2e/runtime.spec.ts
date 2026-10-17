@@ -347,3 +347,70 @@ test('ready/measure ordering, late subscriptions, images and content changes ret
   await page.waitForTimeout(180)
   expect(await page.evaluate(() => (window as any).events.length)).toBe(eventCount)
 })
+
+for (const resumeAfterDrag of [false, true]) {
+  test(`drag release restores prior intent only with resumeAfterDrag=${resumeAfterDrag}`, async ({
+    page,
+  }) => {
+    await setup(page, {
+      navigation: true,
+      resumeAfterDrag,
+      pauseOnHover: true,
+      pauseOnFocus: false,
+    })
+    const frame = page.locator('.ticker-wrapper')
+    const box = (await frame.boundingBox())!
+    const drag = async (during?: () => Promise<unknown>) => {
+      await page.mouse.move(box.x + 100, box.y + 20)
+      await page.mouse.down()
+      await page.mouse.move(box.x + 40, box.y + 20, { steps: 4 })
+      expect((await state(page)).requested).toBe(false)
+      await during?.()
+      await page.mouse.up()
+      await page.mouse.move(5, 5)
+    }
+    await drag()
+    expect((await state(page)).requested).toBe(resumeAfterDrag)
+    expect((await state(page)).playing).toBe(resumeAfterDrag)
+    await page.evaluate(() => (window as any).controller.pause())
+    await drag()
+    expect((await state(page)).requested).toBe(false)
+    await page.evaluate(() => (window as any).controller.play())
+    await drag(() => page.evaluate(() => (window as any).controller.pause()))
+    expect((await state(page)).requested).toBe(false)
+    await page.evaluate(() => (window as any).controller.play())
+    await page.getByRole('button', { name: 'Next', exact: true }).click()
+    expect((await state(page)).requested).toBe(false)
+    if (resumeAfterDrag) {
+      await page.evaluate(() =>
+        (window as any).controller.update({ pauseOnFocus: true }).scrollTo(0).play()
+      )
+      const link = page.locator('.ticker-content:not(.ticker-clone) a')
+      await link.focus()
+      await drag()
+      await expect(link).toBeFocused()
+      expect((await state(page)).requested).toBe(true)
+      expect((await state(page)).reasons).toContain('focus')
+      expect((await state(page)).playing).toBe(false)
+    }
+  })
+}
+
+test('resumeAfterDrag restores intent on pointer cancellation while reduced motion stays paused', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await setup(page, { navigation: true, resumeAfterDrag: true })
+  const wrapper = page.locator('.ticker-wrapper')
+  const box = (await wrapper.boundingBox())!
+  for (const end of ['pointercancel', 'lostpointercapture']) {
+    await page.mouse.move(box.x + 100, box.y + 20)
+    await page.mouse.down()
+    await page.mouse.move(box.x + 30, box.y + 20, { steps: 4 })
+    expect((await state(page)).requested).toBe(false)
+    await wrapper.dispatchEvent(end, { pointerId: 1 })
+    expect((await state(page)).requested).toBe(true)
+    expect((await state(page)).playing).toBe(false)
+    await page.mouse.up()
+  }
+})

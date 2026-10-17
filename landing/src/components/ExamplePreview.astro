@@ -5,6 +5,7 @@ import DemoStudio from './DemoStudio.astro'
 import DemoPanel from './DemoPanel.astro'
 import DemoFooter from './DemoFooter.astro'
 import TickerDemo from './TickerDemo.astro'
+import ExampleStory from './ExampleStory.astro'
 import BrandLogo from './BrandLogo.astro'
 import SpeedControl from './SpeedControl.astro'
 import Button from '../../../shared/components/Button.astro'
@@ -14,9 +15,16 @@ interface Props {
 const { recipe } = Astro.props
 const t = getI18n(Astro).examples
 const base = import.meta.env.BASE_URL
+const vertical = recipe.rows.some(row => row.direction === 'up' || row.direction === 'down')
+const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as const)
 ---
 
-<ticker-example-preview data-added={t.added} data-added-status={t.addedStatus}>
+<ticker-example-preview
+  data-added={t.added}
+  data-added-status={t.addedStatus}
+  data-removed-status={t.removedStatus}
+  data-item-empty={t.itemEmpty}
+>
   <DemoStudio>
     {recipe.rows.map(row => (
       <DemoPanel label={row.label}>
@@ -28,11 +36,19 @@ const base = import.meta.env.BASE_URL
           speed={row.speed}
           autoplay={row.autoplay}
           navigation={row.navigation}
+          resumeAfterDrag={row.resumeAfterDrag}
           rtl={row.rtl}
           responsive={row.responsive}
         >
-          {row.items.map(item =>
-            item.logo ? (
+          {row.items.map((item, index) =>
+            item.description && item.logo && item.href ? (
+              <ExampleStory
+                title={item.label}
+                description={item.description}
+                image={`${base}assets/brands/${item.logo}`}
+                href={`${base}docs/${item.href}`}
+              />
+            ) : item.logo ? (
               <BrandLogo src={`${base}assets/brands/${item.logo}`} name={item.label} />
             ) : (
               <>
@@ -47,7 +63,9 @@ const base = import.meta.env.BASE_URL
                     </span>
                   </>
                 ) : (
-                  <span>{item.label}</span>
+                  <span data-example-item={recipe.kind === 'dynamic' ? `item-${index}` : undefined}>
+                    {item.label}
+                  </span>
                 )}
                 <span class:list={['sep']} aria-hidden="true"></span>
               </>
@@ -58,35 +76,45 @@ const base = import.meta.env.BASE_URL
     ))}
     <DemoFooter
       note={recipe.note}
-      controls={recipe.kind === 'dynamic' || recipe.kind === 'controls'}
+      controls={recipe.kind === 'dynamic' || recipe.kind === 'controls' || vertical}
     >
       {recipe.kind === 'dynamic' && (
-        <Button variant="ghost" data-add disabled>
-          {t.add}
-        </Button>
+        <div class:list={['feed-actions']}>
+          <Button variant="ghost" data-add disabled>
+            {t.add}
+          </Button>
+          <Button variant="ghost" data-remove-first disabled>
+            {t.removeFirst}
+          </Button>
+          <Button variant="ghost" data-remove-last disabled>
+            {t.removeLast}
+          </Button>
+          <label class:list={['item-choice']}>
+            {t.itemLabel}
+            <select data-item-select disabled>
+              <option>{t.itemEmpty}</option>
+            </select>
+          </label>
+          <Button variant="ghost" data-remove-selected disabled>
+            {t.removeSelected}
+          </Button>
+        </div>
       )}
-      {recipe.kind === 'controls' && (
+      {(recipe.kind === 'controls' || vertical) && (
         <>
-          <SpeedControl />
+          {recipe.kind === 'controls' && <SpeedControl />}
           <div role="group" aria-label={t.direction} class:list={['direction-controls']}>
-            <Button
-              variant="ghost"
-              context="ticker"
-              data-example-direction="left"
-              aria-pressed="true"
-              disabled
-            >
-              {t.left}
-            </Button>
-            <Button
-              variant="ghost"
-              context="ticker"
-              data-example-direction="right"
-              aria-pressed="false"
-              disabled
-            >
-              {t.right}
-            </Button>
+            {directions.map(direction => (
+              <Button
+                variant="ghost"
+                context="ticker"
+                data-example-direction={direction}
+                aria-pressed={recipe.rows[0].direction === direction}
+                disabled
+              >
+                {t[direction]}
+              </Button>
+            ))}
           </div>
         </>
       )}
@@ -105,9 +133,15 @@ const base = import.meta.env.BASE_URL
       const { signal } = this.lifecycle
       const demo = this.querySelector<HTMLElement>('ticker-demo')
       const add = this.querySelector<HTMLButtonElement>('[data-add]')
+      const select = this.querySelector<HTMLSelectElement>('[data-item-select]')
+      let items: Array<{ id: string; label: string }> = []
+      const removeButtons = this.querySelectorAll<HTMLButtonElement>(
+        'button[data-remove-first], button[data-remove-last], button[data-remove-selected]'
+      )
       const sync = () => {
         const enabled = demo?.dataset.initialized === 'true'
         if (add) add.disabled = !enabled
+        if (enabled && select) demo?.dispatchEvent(new CustomEvent('ticker:list'))
         this.querySelectorAll<HTMLButtonElement>('button[data-example-direction]').forEach(
           button => {
             button.disabled = !enabled
@@ -135,13 +169,53 @@ const base = import.meta.env.BASE_URL
             'button[data-example-direction]'
           )
           const direction = button?.dataset.exampleDirection
-          if (direction !== 'left' && direction !== 'right') return
+          if (
+            direction !== 'left' &&
+            direction !== 'right' &&
+            direction !== 'up' &&
+            direction !== 'down'
+          )
+            return
           demo?.dispatchEvent(new CustomEvent('ticker:direction', { detail: direction }))
           this.querySelectorAll<HTMLButtonElement>('button[data-example-direction]').forEach(item =>
             item.setAttribute('aria-pressed', String(item === button))
           )
         },
         { signal }
+      )
+      this.addEventListener(
+        'ticker:items',
+        event => {
+          if (!select) return
+          items = (event as CustomEvent<Array<{ id: string; label: string }>>).detail
+          const selected = select.value
+          select.replaceChildren(...items.map(item => new Option(item.label, item.id)))
+          if (items.some(item => item.id === selected)) select.value = selected
+          if (!items.length) select.add(new Option(this.dataset.itemEmpty ?? '', ''))
+          select.disabled = !items.length
+          removeButtons.forEach(button => {
+            button.disabled = !items.length
+          })
+        },
+        { signal }
+      )
+      removeButtons.forEach(button =>
+        button.addEventListener(
+          'click',
+          () => {
+            const item = button.hasAttribute('data-remove-first')
+              ? items[0]
+              : button.hasAttribute('data-remove-last')
+                ? items.at(-1)
+                : items.find(item => item.id === select?.value)
+            if (!item) return
+            demo?.dispatchEvent(new CustomEvent('ticker:remove', { detail: item.id }))
+            const status = this.querySelector('[role=status]')
+            if (status)
+              status.textContent = this.dataset.removedStatus?.replace('{item}', item.label) ?? ''
+          },
+          { signal }
+        )
       )
       let count = 0
       add?.addEventListener(
@@ -175,6 +249,37 @@ const base = import.meta.env.BASE_URL
 <style>
   ticker-example-preview {
     display: block;
+  }
+  .feed-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: var(--space-sm);
+    width: 100%;
+    min-width: 0;
+  }
+  .item-choice {
+    display: grid;
+    gap: var(--space-xs);
+    min-width: 0;
+    flex: 1 1 10rem;
+    color: var(--color-text-muted);
+    font-size: var(--text-small);
+  }
+  .item-choice select {
+    width: 100%;
+    min-width: 0;
+    min-height: 2.75rem;
+    padding: 0.5rem;
+    font: inherit;
+    color: var(--color-text);
+    background: var(--color-bg-soft);
+    border: 0.0625rem solid var(--color-border);
+    border-radius: var(--radius-control);
+  }
+  .item-choice select:focus-visible {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.1875rem;
   }
   .direction-controls {
     display: flex;

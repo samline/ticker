@@ -49,6 +49,32 @@ async function create(options: TickerOptions = {}) {
 }
 
 describe('extended controller', () => {
+  it.each(['left', 'up'] as const)(
+    'keeps an empty %s source clone-free despite track gaps and recovers after insertion',
+    async direction => {
+      const c = await create({ direction, speed: 40 })
+      const content = c.element!.querySelector<HTMLElement>('.ticker-content')!
+      c.element!.querySelector<HTMLElement>('.ticker-track')!.style.gap = '10px'
+      c.pause()
+      vi.mocked(content.getBoundingClientRect).mockReturnValue({ width: 0, height: 0 } as DOMRect)
+      c.source.replaceChildren()
+      c.refresh()
+      vi.advanceTimersByTime(16)
+      expect(c.element!.querySelectorAll('.ticker-clone')).toHaveLength(0)
+      expect(c.state).toMatchObject({ ready: false, playing: false, position: 0, distance: 0 })
+      c.source.textContent = 'Restored item'
+      vi.mocked(content.getBoundingClientRect).mockReturnValue({
+        width: 100,
+        height: 80,
+      } as DOMRect)
+      c.refresh()
+      vi.advanceTimersByTime(16)
+      expect(c.state.ready).toBe(true)
+      expect(c.state.requested).toBe(false)
+      expect(c.state.distance / c.state.duration).toBe(40)
+      expect(c.element!.querySelector('.ticker-clone')?.textContent).toBe('Restored item')
+    }
+  )
   it('normalizes speed, keeps duration fallback, returns independent options, and supports every axis', async () => {
     const c = await create({ speed: 50, duration: 9 })
     expect(c.state.duration).toBe(100.25 / 50)
@@ -61,6 +87,9 @@ describe('extended controller', () => {
     vi.advanceTimersByTime(16)
     expect(c.state.direction).toBe('down')
     expect(c.options.pauseOnFocus).toBe(true)
+    expect(c.options.resumeAfterDrag).toBe(false)
+    c.update({ resumeAfterDrag: true })
+    expect(c.options.resumeAfterDrag).toBe(true)
     const options = c.options
     expect(options).not.toBe(c.options)
   })
@@ -159,7 +188,7 @@ describe('extended controller', () => {
   })
   it('reads declarative configuration including responsive JSON and initially paused focus policy', async () => {
     const { ticker, mount } = await import('../src/vanilla/render')
-    document.body.innerHTML = `<div class="ticker-wrapper" data-ticker data-direction="up" data-autoplay="false" data-speed="35" data-pause-on-focus="false" data-navigation="true" data-responsive='[{"query":"(max-width: 500px)","options":{"speed":60}}]'><div class="ticker-track"><div class="ticker-content">News</div></div></div>`
+    document.body.innerHTML = `<div class="ticker-wrapper" data-ticker data-direction="up" data-autoplay="false" data-speed="35" data-pause-on-focus="false" data-navigation="true" data-resume-after-drag="true" data-responsive='[{"query":"(max-width: 500px)","options":{"speed":60}}]'><div class="ticker-track"><div class="ticker-content">News</div></div></div>`
     const c = ticker('.ticker-wrapper')!
     expect(c.options).toMatchObject({
       direction: 'up',
@@ -167,6 +196,7 @@ describe('extended controller', () => {
       speed: 35,
       pauseOnFocus: false,
       navigation: true,
+      resumeAfterDrag: true,
     })
     expect(c.options.responsive).toHaveLength(1)
     c.destroy()

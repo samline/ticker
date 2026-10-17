@@ -67,6 +67,7 @@ interface RuntimeTickerState extends TickerState {
   forceRebuild: boolean
   requested: boolean
   manualOverride: boolean
+  intentRevision: number
   hovered: boolean
   destroyed: boolean
   position: number
@@ -312,7 +313,8 @@ const rebuildTickerState = (state: RuntimeTickerState, force: boolean): void => 
 
   // The animation must travel exactly one content-and-gap period. Rounding
   // fractional layout widths introduces a visible offset when the loop resets.
-  const contentExtent = (state.vertical ? contentRect.height : contentRect.width) + gap
+  const measuredExtent = state.vertical ? contentRect.height : contentRect.width
+  const contentExtent = measuredExtent > 0 ? measuredExtent + gap : 0
   const wrapperExtent = Math.ceil(state.vertical ? wrapperRect.height : wrapperRect.width)
 
   const reducedMotion = getReducedMotionMedia()?.matches ?? false
@@ -334,7 +336,14 @@ const rebuildTickerState = (state: RuntimeTickerState, force: boolean): void => 
   wrapper.dataset.ready = 'false'
   removeClones(state)
   state.measurement = null
-  if (!contentExtent || !wrapperExtent) return
+  if (!contentExtent || !wrapperExtent) {
+    // A gap is not a sequence. Keep empty sources clone-free and let a later
+    // refresh/resize recover when original content becomes measurable again.
+    if (!contentExtent) state.position = 0
+    wrapper.style.setProperty('--ticker-distance', '0px')
+    syncPlayback(state)
+    return
+  }
 
   state.measurement = {
     contentExtent,
@@ -409,10 +418,11 @@ const parseResponsive = (value?: string): NonNullable<TickerOptions['responsive'
   }
 }
 
-const navigate = (state: RuntimeTickerState, position: number): void => {
+const navigate = (state: RuntimeTickerState, position: number, fromDrag = false): void => {
   // Manual navigation is always instantaneous, including reduced motion. It
-  // deliberately leaves autoplay paused until the consumer explicitly plays.
+  // leaves playback paused unless a drag explicitly restores its prior intent.
   const previousPosition = readPosition(state)
+  if (!fromDrag) state.intentRevision++
   state.requested = false
   state.manualOverride = true
   if (getReducedMotionMedia()?.matches && state.wrapper.dataset.navigation !== 'true') {
@@ -464,7 +474,18 @@ const setupInteraction = (state: RuntimeTickerState): void => {
       if (!state.destroyed) scheduleRebuild(state)
     })
     .catch(() => {})
-  let pointer: { id: number; x: number; y: number; start: number; dragging: boolean } | undefined
+  let pointer:
+    | {
+        id: number
+        x: number
+        y: number
+        start: number
+        dragging: boolean
+        requested: boolean
+        manualOverride: boolean
+        revision: number
+      }
+    | undefined
   let suppressClick = false
   wrapper.addEventListener(
     'pointerdown',
@@ -472,12 +493,19 @@ const setupInteraction = (state: RuntimeTickerState): void => {
       if (wrapper.dataset.navigation !== 'true' || event.isPrimary === false || event.button !== 0)
         return
       if ((event.target as Element).closest('input, textarea, select, [contenteditable]')) return
+      // Preserve existing keyboard focus when an opt-in mouse drag begins.
+      // Otherwise pointerdown focuses the region/link and prevents resumption.
+      if (event.pointerType === 'mouse' && wrapper.dataset.resumeAfterDrag === 'true')
+        event.preventDefault()
       pointer = {
         id: event.pointerId,
         x: event.clientX,
         y: event.clientY,
         start: readPosition(state),
         dragging: false,
+        requested: state.requested,
+        manualOverride: state.manualOverride,
+        revision: state.intentRevision,
       }
       suppressClick = false
     },
@@ -495,20 +523,43 @@ const setupInteraction = (state: RuntimeTickerState): void => {
           return
         }
         if (Math.abs(primary) < 6) return
+        pointer.requested = state.requested
+        pointer.manualOverride = state.manualOverride
+        pointer.revision = state.intentRevision
         pointer.dragging = true
         wrapper.setPointerCapture?.(event.pointerId)
       }
       event.preventDefault()
       suppressClick = true
-      navigate(state, pointer.start - primary * (state.rtl && !state.vertical ? -1 : 1))
+      navigate(state, pointer.start - primary * (state.rtl && !state.vertical ? -1 : 1), true)
     },
     { signal }
   )
   const release = (event: PointerEvent) => {
     if (pointer?.id !== event.pointerId) return
-    if (wrapper.hasPointerCapture?.(event.pointerId)) wrapper.releasePointerCapture(event.pointerId)
+    const finished = pointer
     pointer = undefined
+    if (wrapper.hasPointerCapture?.(event.pointerId)) wrapper.releasePointerCapture(event.pointerId)
+    if (
+      !state.destroyed &&
+      finished.dragging &&
+      finished.requested &&
+      finished.revision === state.intentRevision &&
+      wrapper.dataset.resumeAfterDrag === 'true'
+    ) {
+      state.requested = true
+      state.manualOverride = finished.manualOverride
+      syncPlayback(state)
+    }
   }
+  wrapper.addEventListener(
+    'dragstart',
+    event => {
+      // Native HTML link/image dragging must not cancel an active ticker gesture.
+      if (pointer) event.preventDefault()
+    },
+    { signal }
+  )
   wrapper.addEventListener('pointerup', release, { signal })
   wrapper.addEventListener('pointercancel', release, { signal })
   wrapper.addEventListener(
@@ -516,7 +567,7 @@ const setupInteraction = (state: RuntimeTickerState): void => {
     event => {
       // Touch starts with implicit capture on the original target. Transferring
       // it to the wrapper bubbles a lost event from that child.
-      if (event.target === wrapper && pointer?.id === event.pointerId) pointer = undefined
+      if (event.target === wrapper) release(event)
     },
     { signal }
   )
@@ -699,6 +750,7 @@ const initTicker = (wrapper: HTMLElement): void => {
     measurement: null,
     requested: wrapper.dataset.autoplay !== 'false',
     manualOverride: false,
+    intentRevision: 0,
     hovered: false,
     destroyed: false,
     position: 0,
@@ -826,6 +878,7 @@ const normalizeOptions = (options: TickerOptions = {}): NormalizedTickerOptions 
   autoplay: options.autoplay !== false,
   pauseOnFocus: options.pauseOnFocus !== false,
   navigation: options.navigation === true,
+  resumeAfterDrag: options.resumeAfterDrag === true,
   responsive: (Array.isArray(options.responsive) ? options.responsive : []).map(rule => ({
     query: String(rule.query),
     options: { ...rule.options },
@@ -851,6 +904,7 @@ const applyOptions = (
   wrapper.dataset.autoplay = String(next.autoplay)
   wrapper.dataset.pauseOnFocus = String(next.pauseOnFocus)
   wrapper.dataset.navigation = String(next.navigation)
+  wrapper.dataset.resumeAfterDrag = String(next.resumeAfterDrag)
   wrapper.dataset.duration = String(next.duration)
   wrapper.dataset.direction = next.direction
   wrapper.dataset.pauseOnHover = next.pauseOnHover ? 'true' : 'false'
@@ -927,6 +981,7 @@ export const ticker = (
         autoplay: source.dataset.autoplay !== 'false',
         pauseOnFocus: source.dataset.pauseOnFocus !== 'false',
         navigation: source.dataset.navigation === 'true',
+        resumeAfterDrag: source.dataset.resumeAfterDrag === 'true',
         responsive: parseResponsive(source.dataset.responsive),
         direction: validateDirection(source.dataset.direction),
         pauseOnHover: source.dataset.pauseOnHover === 'true',
@@ -1006,6 +1061,7 @@ export const ticker = (
     },
     play() {
       if (!runtime.destroyed) {
+        runtime.intentRevision++
         runtime.requested = true
         runtime.manualOverride = true
         syncPlayback(runtime)
@@ -1014,6 +1070,7 @@ export const ticker = (
     },
     pause() {
       if (!runtime.destroyed) {
+        runtime.intentRevision++
         runtime.requested = false
         runtime.manualOverride = true
         syncPlayback(runtime)
@@ -1043,6 +1100,7 @@ export const ticker = (
       if (!wrapper) return instance
       const nextOptions = normalizeOptions({ ...currentOptions, ...options })
       if ('autoplay' in options) {
+        runtime.intentRevision++
         runtime.requested = nextOptions.autoplay
         runtime.manualOverride = false
       }

@@ -36,3 +36,7 @@ The public Ticker integration skill is maintained in skills/ticker/SKILL.md and 
 ## Ticker 2.1 runtime contract
 
 Playback intent, automatic pause causes, CSS-animation seeking, logical navigation, vertical measurements and viewport rules belong to the package runtime. Site demos call play()/pause(), state/on() and connectControls() rather than implementing pause CSS or gesture/rail controllers. Horizontal left/right stay physical; auto uses inherited writing direction, while next/previous and position are logical. Axis changes reset position; same-axis updates preserve pixels modulo the measured period. Keep pinned versions, public skill, copied recipes and the scoped package CSS adaptation synchronized. Runtime browser tests live in landing/e2e/runtime.spec.ts alongside the site suites.
+
+An empty original sequence has no repeat distance even when the track has a gap. Leave it not ready and clone-free, then recover on refresh/resize after insertion. Dynamic demos use pixel speed to avoid acceleration as items are added or removed, and existing gallery examples keep their original order.
+
+`resumeAfterDrag` defaults to false. Opting in restores playback requested before dragging only when no explicit intent command intervenes; hover/focus and other automatic pauses still apply. Keep its data attribute, types, copied recipes and browser regression coverage synchronized. Vertical example direction controls use the existing shared Button group and update the owning TickerDemo controller.

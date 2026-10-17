@@ -16,6 +16,7 @@ interface TickerOptions {
   pauseOnHover?: boolean
   pauseOnFocus?: boolean
   navigation?: boolean
+  resumeAfterDrag?: boolean
   responsive?: readonly TickerResponsiveRule[]
   interactiveClones?: boolean
   class?: string
@@ -24,18 +25,19 @@ interface TickerOptions {
 
 ## Options table
 
-| Option              | Default  | Normalization and behavior                                                                                     |
-| ------------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
-| `duration`          | `20`     | Positive finite seconds per cycle; invalid values fall back to 20.                                             |
-| `speed`             | `0`      | Positive finite CSS pixels per second overrides duration. Invalid, zero or negative values disable speed mode. |
-| `direction`         | `'left'` | Exact `left`, `right`, `up`, `down`, `auto`; invalid values become `left`.                                     |
-| `autoplay`          | `true`   | Only `false` starts paused. `play()` and `pause()` change intent independently of automatic pause causes.      |
-| `pauseOnHover`      | `false`  | Only `true` enables pointer hover pause.                                                                       |
-| `pauseOnFocus`      | `true`   | Only `false` disables focus pause. Focus moving between descendants never resumes playback.                    |
-| `navigation`        | `false`  | Only `true` enables pointer dragging and manual navigation in reduced motion.                                  |
-| `responsive`        | `[]`     | Ordered viewport media-query rules; see below.                                                                 |
-| `interactiveClones` | `false`  | Only `true` enables interactive repeated copies.                                                               |
-| `class`             | `''`     | Whitespace-separated wrapper classes; excludes reserved `ticker-wrapper`.                                      |
+| Option              | Default  | Normalization and behavior                                                                                           |
+| ------------------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| `duration`          | `20`     | Positive finite seconds per cycle; invalid values fall back to 20.                                                   |
+| `speed`             | `0`      | Positive finite CSS pixels per second overrides duration. Invalid, zero or negative values disable speed mode.       |
+| `direction`         | `'left'` | Exact `left`, `right`, `up`, `down`, `auto`; invalid values become `left`.                                           |
+| `autoplay`          | `true`   | Only `false` starts paused. `play()` and `pause()` change intent independently of automatic pause causes.            |
+| `pauseOnHover`      | `false`  | Only `true` enables pointer hover pause.                                                                             |
+| `pauseOnFocus`      | `true`   | Only `false` disables focus pause. Focus moving between descendants never resumes playback.                          |
+| `resumeAfterDrag`   | `false`  | Only `true` restores pre-drag playback intent on release; existing manual and environmental pauses remain effective. |
+| `navigation`        | `false`  | Only `true` enables pointer dragging and manual navigation in reduced motion.                                        |
+| `responsive`        | `[]`     | Ordered viewport media-query rules; see below.                                                                       |
+| `interactiveClones` | `false`  | Only `true` enables interactive repeated copies.                                                                     |
+| `class`             | `''`     | Whitespace-separated wrapper classes; excludes reserved `ticker-wrapper`.                                            |
 
 ## `duration`
 
@@ -151,6 +153,7 @@ partners?.update({ direction: 'right' })
 | `data-autoplay`           | Exact string `false` starts paused.                                     | `true`  |
 | `data-pause-on-focus`     | Exact string `false` disables focus pause.                              | `true`  |
 | `data-pause-on-hover`     | Exact string `true`.                                                    | `false` |
+| `data-resume-after-drag`  | Exact string `true`; restores pre-drag playback intent.                 | `false` |
 | `data-navigation`         | Exact string `true`.                                                    | `false` |
 | `data-interactive-clones` | Exact string `true`.                                                    | `false` |
 | `data-responsive`         | JSON array of `{ query, options }` rules; malformed input becomes `[]`. | `[]`    |
@@ -177,4 +180,4 @@ The runtime owns `data-ready` (measured), `data-active` (viewport), `data-playin
 
 ## Defaults export
 
-`DEFAULT_OPTIONS` retains the original four fields (`duration`, `direction`, `pauseOnHover`, `interactiveClones`) for compatibility. Controller normalization also supplies speed 0, autoplay true, pauseOnFocus true, navigation false, responsive [] and class ''. See [Core utilities](/ticker/docs/reference/core/).
+`DEFAULT_OPTIONS` retains the original four fields (`duration`, `direction`, `pauseOnHover`, `interactiveClones`) for compatibility. Controller normalization also supplies speed 0, autoplay true, pauseOnFocus true, navigation false, resumeAfterDrag false, responsive [] and class ''. See [Core utilities](/ticker/docs/reference/core/).
