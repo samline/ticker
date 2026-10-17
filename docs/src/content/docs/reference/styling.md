@@ -45,7 +45,7 @@ Application styles should use stable classes or data attributes. Clone count and
 | `--ticker-duration`      | Normalized animation duration.                       |
 | `--ticker-distance`      | Exact content extent plus axis track gap.            |
 | `.ticker-wrapper`        | Clipping container.                                  |
-| `.ticker-track`          | Inline flex row, or full-width vertical column.      |
+| `.ticker-track`          | Physically aligned flex row, or full-width column.   |
 | `.ticker-track > *`      | Non-shrinking content sequences.                     |
 | `.ticker-content`        | Original content sequence.                           |
 | `.ticker-clone`          | Non-selectable generated visual copy.                |
@@ -53,7 +53,7 @@ Application styles should use stable classes or data attributes. Clone count and
 
 `data-active` reports viewport intersection with no extra margin. With `IntersectionObserver`, tickers start paused until the first intersection result; without it, they are treated as active. `data-ready="false"` suppresses animation during measurement.
 
-`data-playing="true"` allows animation only when the ticker is active, the document is visible, and reduced motion is disabled. `pauseOnHover` can still pause it. Automatic checks preserve clones and animation progress when measurements are unchanged.
+`data-playing="true"` reports effective playback: the ticker is ready, playback is requested, and no focus, hover, visibility, viewport or reduced-motion pause cause is active. Automatic checks preserve clones and animation progress when measurements are unchanged.
 
 ## Safe customization
 

@@ -256,9 +256,24 @@ test('touch gestures distinguish taps from drags and leave perpendicular page sc
     viewport: { width: 600, height: 700 },
   })
   const page = await context.newPage()
+  // Keep fragment navigation on an ordinary document URL in every platform.
+  await page.route('https://ticker.test/runtime', route =>
+    route.fulfill({ body: '<!doctype html><html></html>', contentType: 'text/html' })
+  )
+  await page.goto('https://ticker.test/runtime')
   await setup(page, { autoplay: false, navigation: true })
   await page.evaluate(() => {
     document.body.style.minHeight = '2400px'
+  })
+  // Verify a real tap before synthetic drag streams; a following touch stream
+  // can otherwise race Chromium's synthesized click from the previous one.
+  const link = page.locator('.ticker-content:not(.ticker-clone) a')
+  await link.tap()
+  await expect(page).toHaveURL(/#one$/)
+  await page.evaluate(() => {
+    document
+      .querySelector('.ticker-content:not(.ticker-clone) a')!
+      .setAttribute('href', '#drag-target')
   })
   const cdp = await context.newCDPSession(page)
   const box = (await page.locator('.ticker-wrapper').boundingBox())!
@@ -275,7 +290,6 @@ test('touch gestures distinguish taps from drags and leave perpendicular page sc
   expect((await state(page)).position).toBeCloseTo(72)
   expect((await state(page)).requested).toBe(false)
   await page.evaluate(() => (window as any).controller.scrollTo(0))
-  await page.locator('.ticker-content:not(.ticker-clone) a').tap()
   await expect(page).toHaveURL(/#one$/)
   const position = (await state(page)).position
   await cdp.send('Input.dispatchTouchEvent', {
@@ -302,6 +316,7 @@ test('ready/measure ordering, late subscriptions, images and content changes ret
     (window as any).events.map(([event]: any[]) => event)
   )
   expect(initialEvents.indexOf('ready')).toBeLessThan(initialEvents.indexOf('measure'))
+  const previousDistance = (await state(page)).distance
   await page.evaluate(() => {
     const w = window as any
     w.lateReady = 0
@@ -311,7 +326,6 @@ test('ready/measure ordering, late subscriptions, images and content changes ret
     w.controller.source.append(item)
     w.controller.refresh()
   })
-  const previousDistance = (await state(page)).distance
   await expect.poll(async () => (await state(page)).distance).toBeGreaterThan(previousDistance)
   const resized = await state(page)
   expect(resized.distance / resized.duration).toBeCloseTo(40)
