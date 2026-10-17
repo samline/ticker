@@ -4,6 +4,8 @@
 
 > Enhance existing markup, control each ticker through a small lifecycle API, or initialize declarative ticker markup at page level.
 
+[Demo](https://samline.github.io/ticker/)
+
 ---
 
 ## Table of Contents
