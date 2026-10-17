@@ -1,0 +1,10 @@
+---
+import Main from '../layouts/Main.astro'
+import BrandAttribution from '../sections/BrandAttribution.astro'
+import { getI18n } from '../i18n/utils'
+const t = getI18n(Astro).examples
+---
+
+<Main title={t.brandAttribution} description={t.attribution.description}>
+  <BrandAttribution />
+</Main>

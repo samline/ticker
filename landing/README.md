@@ -14,7 +14,7 @@ npm ci --prefix landing
 npm run landing:dev
 ```
 
-Open `http://localhost:4321/ticker/`. The local package API is imported from repository source, so library changes reach the demo without copying a built JavaScript bundle.
+Open `http://localhost:4321/ticker/`. Astro accepts both `/ticker` and `/ticker/` with `trailingSlash: 'ignore'`; the configured base retains its trailing slash for links and assets. The local package API is imported from repository source, so library changes reach the demo without copying a built JavaScript bundle.
 
 ```sh
 npm run landing:check
@@ -266,3 +266,5 @@ The gallery additionally demonstrates manual navigation, vertical news, duration
 Keep the six original recipes first, in their published order; append new recipes after them. The dynamic feed uses speed rather than fixed duration and offers application-owned first/last/selected removal with an empty/repopulate state. TickerDemo remains the controller owner and synchronizes the item picker through instance-local events. Vertical news uses ExampleStory cards composed from Surface, TextLink and compact BrandLogo images; the copied file includes the same content and matching column layout.
 
 The manual-navigation recipe opts into `resumeAfterDrag`: press Play before dragging to demonstrate automatic resumption after pointer release and hover exit. Vertical resources include Up/Down controls using the same direction group as Home-style playback controls.
+
+The gallery and copied logo recipes link to `/ticker/attribution/`, which presents the bundled Simple Icons version and source metadata in the shared site layout. Raw CC0/disclaimer files remain explicitly labelled Markdown downloads; do not use a raw license as an attribution destination.

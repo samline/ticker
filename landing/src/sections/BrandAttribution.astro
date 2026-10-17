@@ -1,0 +1,75 @@
+---
+import Section from '../components/Section.astro'
+import Box from '../../../shared/components/Box.astro'
+import Heading from '../../../shared/components/Heading.astro'
+import TextLink from '../../../shared/components/TextLink.astro'
+import Button from '../../../shared/components/Button.astro'
+import { format } from '../../../shared/i18n/format'
+import { getI18n } from '../i18n/utils'
+import sources from '../../public/assets/brands/sources.json'
+const examples = getI18n(Astro).examples
+const t = examples.attribution
+const base = import.meta.env.BASE_URL
+---
+
+<Section spacing="none" aria-labelledby="attribution-title">
+  <Box size="medium" class:list={['attribution']}>
+    <Heading level={1} id="attribution-title">
+      {examples.brandAttribution}
+    </Heading>
+    <p>{format(t.introduction, { version: sources.version })}</p>
+    <TextLink href={`https://github.com/simple-icons/simple-icons/tree/${sources.version}`}>
+      {t.project}
+    </TextLink>
+    <p>{t.licenseNote}</p>
+    <div class:list={['resources']}>
+      <TextLink href={`${base}assets/brands/LICENSE.md`} download="LICENSE.md">
+        {t.license}
+      </TextLink>
+      <TextLink href={`${base}assets/brands/DISCLAIMER.md`} download="DISCLAIMER.md">
+        {t.disclaimer}
+      </TextLink>
+    </div>
+    <Heading level={2}>{t.sources}</Heading>
+    <p>{t.sourcesNote}</p>
+    <ul>
+      {sources.icons.map(icon => (
+        <li>
+          <TextLink href={icon.source}>{icon.title}</TextLink>
+          {'guidelines' in icon && icon.guidelines && icon.guidelines !== icon.source && (
+            <TextLink href={icon.guidelines} compact>
+              {format(t.guidelines, { brand: icon.title })}
+            </TextLink>
+          )}
+        </li>
+      ))}
+    </ul>
+    <Button variant="secondary" href={`${base}examples/`}>
+      {t.back}
+      <span aria-hidden="true">←</span>
+    </Button>
+  </Box>
+</Section>
+<style>
+  .attribution {
+    display: grid;
+    gap: var(--space-lg);
+    padding-block: 2.5rem 5rem;
+  }
+  p {
+    color: var(--color-text-muted);
+    line-height: 1.75;
+  }
+  .resources,
+  li {
+    display: grid;
+    gap: var(--space-sm);
+  }
+  ul {
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    list-style: none;
+    padding: 0;
+  }
+</style>

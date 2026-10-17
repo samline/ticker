@@ -306,6 +306,10 @@ test('every copied CDN and npm document executes as a standalone example', async
         await standalone.getByRole('button', { name: 'Remove selected', exact: true }).click()
         await expect(originals).toHaveCount(2)
       }
+      if (id === 'brand-logos' || id === 'vertical-news')
+        await expect(
+          standalone.getByRole('link', { name: 'Demo brand marks and attribution', exact: true })
+        ).toHaveAttribute('href', 'https://samline.github.io/ticker/attribution/')
       if (id === 'vertical-news') {
         for (const direction of ['Down', 'Up']) {
           await standalone.getByRole('button', { name: direction, exact: true }).click()
@@ -512,4 +516,36 @@ test('vertical direction controls and manual drag resumption work without consol
     manual.getByRole('button', { name: 'Pause animation: Manual news navigation', exact: true })
   ).toBeVisible()
   expect(errors).toEqual([])
+})
+
+test('brand attribution opens a readable page with sources and explicit Markdown downloads', async ({
+  page,
+}) => {
+  await page.goto('examples/')
+  await page.getByRole('link', { name: 'Demo brand marks and attribution', exact: true }).click()
+  await expect(page).toHaveURL(/\/ticker\/attribution\/$/)
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Demo brand marks and attribution'
+  )
+  await expect(
+    page.getByText('The demo icons come from Simple Icons 16.0.0.', { exact: false })
+  ).toBeVisible()
+  await expect(page.locator('.attribution li')).toHaveCount(12)
+  await expect(
+    page.getByRole('link', { name: 'Download the bundled CC0 license (Markdown)', exact: true })
+  ).toHaveAttribute('download', 'LICENSE.md')
+  await expect(
+    page.getByRole('link', { name: 'Download the bundled icon disclaimer (Markdown)', exact: true })
+  ).toHaveAttribute('download', 'DISCLAIMER.md')
+  for (const theme of ['light', 'dark']) {
+    await page.evaluate(theme => (document.documentElement.dataset.theme = theme), theme)
+    for (const width of [320, 1440]) {
+      await page.setViewportSize({ width, height: 900 })
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true
+      )
+    }
+  }
+  await page.getByRole('link', { name: 'Back to Ticker examples', exact: true }).click()
+  await expect(page).toHaveURL(/\/ticker\/examples\/$/)
 })

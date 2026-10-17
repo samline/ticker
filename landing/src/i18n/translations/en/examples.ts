@@ -76,6 +76,22 @@ export default {
   sourceNote:
     'Copied code uses the initial settings shown when this page loads. Preview changes are not included.',
   brandAttribution: 'Demo brand marks and attribution',
+  attribution: {
+    description:
+      'Sources, licenses and brand guidelines for the illustrative icons used in Ticker demos.',
+    introduction:
+      'The demo icons come from Simple Icons {version}. They illustrate sample content and do not imply endorsement by any brand.',
+    project: 'Simple Icons source collection',
+    licenseNote:
+      'The Simple Icons project is distributed under CC0 1.0. Individual icons may have separate licenses and brand guidelines; the project license does not grant trademark rights.',
+    license: 'Download the bundled CC0 license (Markdown)',
+    disclaimer: 'Download the bundled icon disclaimer (Markdown)',
+    sources: 'Icon sources',
+    sourcesNote:
+      'These links are recorded in the bundled Simple Icons metadata. Check the source and brand guidelines before reusing a mark.',
+    guidelines: '{brand} brand guidelines',
+    back: 'Back to Ticker examples',
+  },
   recipes: [
     {
       id: 'announcements',
