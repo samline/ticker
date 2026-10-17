@@ -9,6 +9,7 @@ interface Props {
   current: string
 }
 const { title, description, current } = Astro.props
+const packageSeparator = current === 'index' ? title.lastIndexOf('/') : -1
 ---
 
 <nav class:list={['breadcrumb']} aria-label={t.breadcrumbLabel} data-pagefind-ignore>
@@ -34,8 +35,19 @@ const { title, description, current } = Astro.props
   <Eyebrow class:list={['article-eyebrow']}>
     {current.startsWith('reference') ? t.apiReading : t.reading}
   </Eyebrow>
-  <h1 id="article-title" data-pagefind-meta="title">
-    {title}
+  <h1
+    id="article-title"
+    class:list={[{ 'package-title': packageSeparator !== -1 }]}
+    data-pagefind-meta="title"
+  >
+    {packageSeparator !== -1 ? (
+      <>
+        {title.slice(0, packageSeparator + 1)}
+        <span class:list={['package-name']}>{title.slice(packageSeparator + 1)}</span>
+      </>
+    ) : (
+      title
+    )}
   </h1>
   <p class:list={['description']}>{description}</p>
 </header>
@@ -83,6 +95,18 @@ const { title, description, current } = Astro.props
     color: var(--palette-heading-accent);
     font-size: clamp(2.75rem, 5vw, 4rem);
     letter-spacing: -0.025em;
+  }
+  .package-title {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    color: var(--color-text);
+  }
+  .package-name {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--palette-heading-accent);
   }
   .description {
     font-size: 1rem;
