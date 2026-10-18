@@ -8,14 +8,24 @@ metadata:
 
 # Ticker
 
-Build against the installed `@samline/ticker` version. This skill describes v2.1.0. Check the dependency version and its exports before applying it to another release. Preserve the host project's components, theme and lifecycle conventions; Ticker supplies movement, not a UI framework or financial data.
+Build against the installed `@samline/ticker` version. This skill describes v2.1.0. Check the dependency version and its exports before applying it to another release. For 2.x, do not use the removed enhance()/createTicker() APIs or the former framework-adapter entrypoints; read the changelog when handling 1.x code. Preserve the host project's components, theme and lifecycle conventions; Ticker supplies movement, not a UI framework or financial data.
 
-## Choose the integration
+## Choose loading, then ownership
 
-- **Bundler / framework:** install `@samline/ticker`, import `{ ticker }` from `@samline/ticker/vanilla` (or the root entry), and import `@samline/ticker/style.css` once. Initialize after the source element exists on the client; release the returned controller on unmount/disconnect. Do not access the DOM during SSR.
-- **Plain HTML / CMS:** load the pinned CSS and global build, then use `window.Ticker.ticker(element, options)`. For v2.1.0 the files are `https://cdn.jsdelivr.net/npm/@samline/ticker@2.1.0/dist/style.css` and `https://cdn.jsdelivr.net/npm/@samline/ticker@2.1.0/dist/browser/global.global.js`. Keep script loading and initialization ordered.
-- **Declarative page ownership:** use `mount()`, module-level `refresh()` and `unmount()` from `/vanilla` when the application deliberately owns a page-wide manager. See the declarative lifecycle reference for its `data-ticker` markup. Do not start competing global managers from repeated components.
-- **Registry ownership:** use `newTicker({ id, options })` and registry destruction only when ID-based lookup is useful. `getTicker()`/`getTickers()` return wrapper elements, not controllers. A directly created `ticker()` controller is not automatically registered.
+Use the site's two loading labels consistently:
+
+- **Package / ESM:** install with npm, pnpm, yarn or bun. Import `{ ticker }` from `@samline/ticker` (or `/vanilla`) and import `@samline/ticker/style.css` once. Initialize in client code after markup exists. ESM/TypeScript and CommonJS are module formats; neither installs `window.Ticker`.
+- **HTML / CDN:** load `dist/style.css` with `<link>` and `dist/browser/global.global.js` with `<script>`, then call `window.Ticker.ticker(target, options)`. A CDN is only file delivery: self-hosting those same files uses the same API. The JavaScript is an IIFE that exposes the global namespace `window.Ticker`; “Global” is not a third setup. Keep both asset versions equal. The script and source markup must exist before initialization; avoid `async` or a deferred script followed by an immediately executed inline initializer.
+
+For v2.1.0, a CDN URL is `https://cdn.jsdelivr.net/npm/@samline/ticker@2.1.0/dist/browser/global.global.js`, with `style.css` at the same version's dist root. Verify that the chosen release/assets actually exist. A repository version, tag or documentation header does not prove npm/CDN availability. If the project uses a local build, load that build; never silently use an older CDN release with newer APIs.
+
+Select ownership separately from loading:
+
+- **Direct controller (default):** `ticker(target, options)` in Package / ESM or `window.Ticker.ticker(target, options)` in HTML / CDN. Retain the controller and call its `destroy()` at the owning lifecycle boundary. Both are the same factory contract, without registration.
+- **Optional ID registry:** import `{ browser }` from `@samline/ticker/browser` (or the root) in Package / ESM; use `window.Ticker` in HTML / CDN. Call `newTicker({ id, options })`, then `destroyTicker(id)` / `destroyTickers()`. `getTicker()`/`getTickers()` return wrappers, not controllers. The `/browser` module does not install a global and is not the CDN script. Direct instance destruction does not remove registry bookkeeping.
+- **Declarative page ownership:** import `mount`, module-level `refresh` and `unmount` from `/vanilla`, with `[data-ticker] > [data-ticker-track] > [data-ticker-content]` markup. These manager helpers are not members of `window.Ticker`; a no-build page can use direct controllers or the registry instead. Do not run competing managers from repeated components or give direct and declarative ownership to the same root.
+
+Load one JavaScript setup for an integration. Do not initialize the same root through both imported and standalone copies. All setups require package CSS; CDN use does not imply registry use. See [loading terminology](https://samline.github.io/ticker/docs/guides/html-and-browser/#loading-terms).
 
 ## Controller contract
 
@@ -62,12 +72,20 @@ Always preserve readable originals and load package CSS. Clones remain nonintera
 - The runtime handles resize observation, document visibility, viewport pausing and reduced motion. Application integration owns useful pause controls, meaningful content and teardown of its own listeners/timers.
 - In Astro, use a processed component script with instance-local queries or a custom element with disconnect cleanup. Do not copy ticker initialization into unrelated page-wide scripts. In other frameworks, use the framework's mount/unmount boundary.
 
+## Write understandable integrations
+
+For standalone examples, use direct calls, descriptive variables and arrow callbacks. Include only the options and handlers needed by the requested case. Do not introduce a custom-element class, this-based shared state or a generic dataset-to-options parser just to initialize a ticker. Complete HTML examples still need real markup, explicit CSS, script ordering, usable controls and cleanup; explain which parts are presentation versus package use. In a real framework/component integration, keep its existing mount/unmount lifecycle rather than imposing a different architecture.
+
+Use a single retained controller for one sequence; use an explicit list only for multiple independent tickers. Updating controls should call package methods rather than recreating measurement, pause CSS, drag handling or rail bookkeeping. Keep arrow callbacks readable; shorter code must not remove null handling, accessible labels or cleanup that the host lifecycle requires.
+
 ## Verify the result
 
 Check a narrow and wide viewport, repeat spacing in both directions, keyboard access, pause/resume of application state, reduced motion, no-JavaScript originals, content refresh and unmount/reinsert. Multiple tickers must remain independently owned. Use the host site's existing controls and colors instead of introducing a separate demo design.
 
 For deeper contracts, read only the relevant maintained reference:
 
+- [Changelog and breaking changes](https://samline.github.io/ticker/docs/changelog/)
+- [Loading modes and terminology](https://samline.github.io/ticker/docs/guides/html-and-browser/#loading-terms)
 - [Installation](https://samline.github.io/ticker/docs/getting-started/)
 - [Options and normalization](https://samline.github.io/ticker/docs/reference/configuration/)
 - [Lifecycle and ownership](https://samline.github.io/ticker/docs/guides/lifecycle/)

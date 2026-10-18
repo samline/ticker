@@ -280,7 +280,7 @@ test('every copied CDN and npm document executes as a standalone example', async
   ]) {
     const recipe = page.locator(`#${id}`)
     await recipe.locator('summary').click()
-    for (const mode of ['HTML / CDN', 'npm / ESM']) {
+    for (const mode of ['HTML / CDN', 'Package / ESM']) {
       await recipe.getByRole('tab', { name: mode, exact: true }).click()
       const panel = recipe.getByRole('tabpanel', { name: mode })
       const code = await panel.locator('code').textContent()
@@ -305,7 +305,7 @@ test('every copied CDN and npm document executes as a standalone example', async
         })
       )
       const executable =
-        mode === 'npm / ESM'
+        mode === 'Package / ESM'
           ? code!
               .replace(/from ['"]@samline\/ticker['"]/g, "from 'https://example.test/module.js'")
               .replace(/import ['"]@samline\/ticker\/style.css['"];?/g, '')

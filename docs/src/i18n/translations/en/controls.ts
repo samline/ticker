@@ -1,3 +1,4 @@
+import sharedControls from '../../../../../shared/i18n/translations/en/controls'
 export default {
   tabs: {
     installation: 'Installation method',
@@ -10,8 +11,8 @@ export default {
     ],
     initialization: 'Initialization format',
     initItems: [
-      { id: 'module', label: 'ESM / TypeScript' },
-      { id: 'global', label: 'Browser global' },
+      { id: 'module', label: sharedControls.integration.package },
+      { id: 'global', label: sharedControls.integration.html },
     ],
     moduleFormat: 'Module format',
     formatItems: [

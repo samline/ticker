@@ -1,3 +1,4 @@
+import sharedControls from '../../../../../shared/i18n/translations/en/controls'
 export interface Recipe {
   id: string
   title: string
@@ -41,19 +42,19 @@ export default {
   heading: 'Ticker',
   headingAccent: 'examples.',
   introduction:
-    'Patterns to try, adjust and copy. Start with a live preview, then open the complete HTML / CDN or npm example below it.',
+    'Patterns to try, adjust and copy. Start with a live preview, then open the complete HTML / CDN or Package / ESM example below it.',
   instructions:
-    'HTML / CDN opens directly as an index.html file with an internet connection. For npm / ESM, install @samline/ticker and use the file in an HTML-entry bundler such as Vite.',
+    'HTML / CDN opens directly as an index.html file with an internet connection; the CDN script exposes window.Ticker. For Package / ESM, install @samline/ticker and use the file in an HTML-entry bundler such as Vite. Both use the same ticker() API; a registry is optional.',
   accessibility:
     'Pause any preview to read at your own pace. Reduced motion and readable static content are built in.',
   gettingStarted: 'New to Ticker? Start with installation',
   skill: 'Building with an AI agent? Download the Ticker skill',
-  code: 'Open code · HTML / CDN or npm',
+  code: 'Open code · HTML / CDN or Package / ESM',
   format: 'Example format',
   navigation: 'Choose an example',
   formats: [
-    { id: 'cdn', label: 'HTML / CDN' },
-    { id: 'npm', label: 'npm / ESM' },
+    { id: 'cdn', label: sharedControls.integration.html },
+    { id: 'npm', label: sharedControls.integration.package },
   ] as const,
   file: 'index.html',
   copy: 'Copy complete {format} example: {title}',

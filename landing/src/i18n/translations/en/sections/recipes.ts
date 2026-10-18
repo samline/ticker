@@ -53,12 +53,12 @@ news?.refresh()`,
       },
     },
     {
-      context: 'Browser global',
+      context: 'Optional registry',
       title: 'Remove the registration, too',
       description: [
         { kind: 'text', value: 'If you created the ticker with ' },
         { kind: 'code', value: 'window.Ticker.newTicker()' },
-        { kind: 'text', value: ', clean it up through ' },
+        { kind: 'text', value: ' in HTML / CDN, clean it up through ' },
         { kind: 'code', value: 'destroyTicker(id)' },
         {
           kind: 'text',
@@ -67,7 +67,7 @@ news?.refresh()`,
         },
       ],
       docsRoute: 'registry',
-      docsLabel: 'Read the browser registry guide',
+      docsLabel: 'Understand registry ownership',
       code: {
         filename: 'cleanup.js',
         language: 'javascript',

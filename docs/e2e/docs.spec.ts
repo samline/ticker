@@ -391,10 +391,10 @@ test('installation reuses accessible tabs with exact copying for each package ma
   await expect(installation.getByRole('tab', { name: 'npm', exact: true })).toBeFocused()
   await page
     .locator('ticker-tabs[data-group="docs-initialization"]')
-    .getByRole('tab', { name: 'Browser global', exact: true })
+    .getByRole('tab', { name: 'HTML / CDN', exact: true })
     .click()
   await expect(
-    page.getByRole('tabpanel', { name: 'Browser global', exact: true }).locator('code')
+    page.getByRole('tabpanel', { name: 'HTML / CDN', exact: true }).locator('code')
   ).toContainText('window.Ticker.ticker')
   await expect(page.getByRole('link', { name: 'Edit this page' })).toHaveCount(0)
   await page.goto('reference/entrypoints/')

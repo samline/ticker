@@ -27,6 +27,8 @@ Landing (`/ticker/`), Examples (`/ticker/examples/`) and Docs (`/ticker/docs/`) 
 
 ## Change discipline
 
+Integration language has two loading modes: Package / ESM (package-manager imports) and HTML / CDN (a script tag, CDN-delivered or self-hosted). Global names the window.Ticker namespace exposed by the standalone IIFE; browser is the environment and /browser is an optional importable ID registry, not a third loading mode. Teach ticker() first in both modes; choose direct, registry or declarative ownership separately. Reuse shared mode labels, preserve public fragments, and explain the distinctions in the HTML/CDN guide. Keep translations, README, docs, gallery, skill and tests aligned. Verify release/CDN availability rather than assuming a version header means a published npm release.
+
 Public copied examples teach direct package use: prefer clear variables, arrow callbacks and per-recipe scripts. Do not wrap standalone examples in custom-element classes, `this`, generic data-option parsers or unused control handlers. Internal site components may retain custom elements for their real mount/disconnect lifecycle. Preserve runtime-owned controls, accessible labels and cleanup, and execute every copied CDN/npm recipe after refactoring.
 
 The root CHANGELOG.md is the single release-note source and is loaded into the docs collection. Mark actual API removals/incompatibilities under Breaking changes and distinguish behavior changes; preserve verified historical notes and label gaps rather than inventing release details. The former migration route redirects to the changelog.
@@ -35,7 +37,7 @@ The root README is the public package guide: installation, usage, API, examples,
 
 Preserve unrelated user edits. Follow the user's Git instructions; a local commit or merge does not publish. Do not leave obsolete adapters, generated preview runtimes, unused files or superseded CSS after a refactor. When package APIs, version, distribution, site routes or shared UI change, update examples, docs, links, metadata, tests and maintenance notes in the same change. These notes capture accepted project decisions, not permission to override future user instructions.
 
-The public Ticker integration skill is maintained in skills/ticker/SKILL.md and downloaded through the landing endpoint. It teaches package use, not this repository's personal design preferences. Update its version/API guidance with package changes and keep the general README's setup, URLs, architecture and agent installation steps current. Docs metadata and accessibility checks cover every article, including structured breadcrumbs and both themes.
+The public Ticker integration skill is maintained in skills/ticker/SKILL.md and downloaded through the landing endpoint. It teaches package use, not this repository's personal design preferences. Update its version/API guidance with package changes and keep the general README's package installation, usage, URLs and agent installation steps current. Docs metadata and accessibility checks cover every article, including structured breadcrumbs and both themes.
 
 ## Ticker 2.1 runtime contract
 

@@ -10,12 +10,12 @@ description: 'Accessible, dependency-free tickers for Vanilla JavaScript, TypeSc
 import CardGrid from '../../../../shared/components/CardGrid.astro'
 import LinkCard from '../../../../shared/components/LinkCard.astro'
 
-`@samline/ticker` enhances existing DOM content, measures it responsively, creates accessible visual clones, and returns a small lifecycle controller. Use the main entrypoint, declarative page manager, browser module, or global IIFE without a framework runtime.
+`@samline/ticker` enhances existing DOM content, measures it responsively, creates accessible visual clones, and returns a small lifecycle controller. Load it through Package / ESM or HTML / CDN; choose controller, registry or declarative ownership to match your application.
 
 ## Why @samline/ticker?
 
 - **Vanilla-first** — Works with native HTML, static sites, CMS templates, and server-rendered applications.
-- **Multiple distribution surfaces** — Main ESM/CJS API, declarative manager, browser registry module, or `window.Ticker` IIFE.
+- **Two loading setups** — Import the package or load an HTML script tag. Both offer the same controller API and an optional ID-based registry.
 - **Accessible defaults** — Visual clones stay out of the accessibility tree and keyboard order unless explicitly enabled.
 - **Responsive lifecycle** — Automatic measurements reuse unchanged clones; animation pauses outside the viewport and in hidden documents.
 - **Zero runtime dependencies** — Ships ESM, CJS, browser bundles, CSS, and TypeScript declarations.
@@ -36,7 +36,7 @@ Controller, declarative manager, browser registry, options, and lifecycle behavi
 
 </LinkCard>
 
-<LinkCard id="browser-global" title="Browser global" href="/ticker/docs/reference/browser/">
+<LinkCard id="browser-global" title="HTML / CDN" href="/ticker/docs/guides/html-and-browser/">
 
 Use `window.Ticker` in WordPress, Shopify, or plain HTML without a bundler.
 

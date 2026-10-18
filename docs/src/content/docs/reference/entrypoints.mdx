@@ -11,7 +11,7 @@ import Tabs from '../../../../../shared/components/Tabs.astro'
 import TabPanel from '../../../../../shared/components/TabPanel.astro'
 import controls from '../../../i18n/translations/en/controls'
 
-Choose one primary JavaScript surface per integration and always load the stylesheet explicitly.
+Choose Package / ESM for imports or HTML / CDN for a standalone script tag. Both expose the same controller; registry and page-manager APIs are ownership choices, not extra loading modes. Always load the stylesheet explicitly. [Loading terms and how they fit together](/ticker/docs/guides/html-and-browser/#loading-terms).
 
 ## Decision table
 
@@ -21,7 +21,7 @@ Choose one primary JavaScript surface per integration and always load the styles
 | Focused Vanilla integration | `@samline/ticker/vanilla`        | None                          | Factory and declarative manager.                |
 | Advanced adapters/tests     | `@samline/ticker/core`           | None                          | Types, defaults, state factories, validators.   |
 | Registry module             | `@samline/ticker/browser`        | None                          | Default/named id-based registry helpers.        |
-| No bundler/CDN              | `@samline/ticker/browser/global` | Installs `globalThis.Ticker`. | Self-contained IIFE registry.                   |
+| HTML / CDN                  | `@samline/ticker/browser/global` | Installs `globalThis.Ticker`. | Self-contained IIFE registry.                   |
 | Runtime styles              | `@samline/ticker/style.css`      | CSS only.                     | Layout, motion, state, reduced motion.          |
 
 ## Root entrypoint
@@ -88,7 +88,7 @@ Default and named registry exports share one module-level registry and do not as
 </script>
 ```
 
-The IIFE cannot be tree-shaken and must run before consumer code.
+This is the HTML / CDN script: its IIFE installs window.Ticker. Load it from a CDN or self-host the same file. It cannot be tree-shaken and must run before consumer code. The /browser module above is an importable registry and does not install that global.
 
 ## CSS is explicit
 

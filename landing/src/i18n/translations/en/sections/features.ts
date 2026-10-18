@@ -46,7 +46,7 @@ export default {
         {
           kind: 'text',
           value:
-            'Main API, vanilla controller, browser registry, IIFE global, core types, and a CSS entry. Pick the surface that fits your build.',
+            'Package imports or an HTML script tag, with the same controller API. Optional registry, page manager and core helpers fit different ownership needs.',
         },
       ],
     },

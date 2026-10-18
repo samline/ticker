@@ -1,3 +1,4 @@
+import sharedControls from '../../../../../../shared/i18n/translations/en/controls'
 export default {
   eyebrow: '02 / Choose your entrypoint',
   heading: [
@@ -6,12 +7,13 @@ export default {
     { kind: 'text', value: '.' },
   ],
   description:
-    'Import the API your stack already uses. No polyfill, no configuration step, no global state you did not ask for.',
+    'Start with the package import or an HTML script tag. The optional registry is available in either setup; CDN describes file delivery, not a different Ticker API.',
   items: {
     main: {
       label: 'Main',
       entrypoint: '@samline/ticker',
-      description: 'Full API plus defaults, the browser singleton, and the registry.',
+      description:
+        'Package / ESM entry: import ticker() and load style.css. Also exports types, defaults and the optional registry.',
     },
     vanilla: {
       label: 'Vanilla',
@@ -20,16 +22,16 @@ export default {
         'Element-scoped controller plus the declarative page manager. Auto-discovers tickers as the DOM changes.',
     },
     browser: {
-      label: 'Browser',
+      label: 'Registry',
       entrypoint: '@samline/ticker/browser',
       description:
-        'ESM/CJS browser registry without installing a window global. Tree-shakable for modern bundles.',
+        'Optional ID-based registry for module imports. This browser subpath does not install window.Ticker and is not the CDN script.',
     },
     global: {
-      label: 'Global',
+      label: sharedControls.integration.html,
       entrypoint: '/browser/global',
       description:
-        'A single IIFE for plain HTML, WordPress, Shopify, and any server-rendered template. Just one script tag.',
+        'Load the script from a CDN or your own server, plus style.css. It exposes window.Ticker for plain HTML, WordPress or Shopify.',
     },
     core: {
       label: 'Core',

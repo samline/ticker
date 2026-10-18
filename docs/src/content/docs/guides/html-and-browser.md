@@ -3,11 +3,27 @@ locale: en
 sidebar:
   group: guides
   order: 2
-title: 'HTML and browser usage'
-description: 'Use @samline/ticker directly from HTML through its dependency-free browser bundle.'
+title: 'HTML / CDN and loading options'
+description: 'Understand package imports, script tags, CDN delivery, window.Ticker and the optional browser registry.'
 ---
 
-Load the stylesheet and version-pinned IIFE, then use `window.Ticker`.
+Ticker has two loading setups. Both run in the browser and return the same controller; choose one for each integration.
+
+## Loading terms
+
+| Term                 | Meaning                                                                     | How it fits                                                                                                                             |
+| -------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Package / ESM**    | Install with npm, pnpm, yarn or bun; import `ticker` in your application.   | Load `@samline/ticker/style.css` once. Use your existing build tool. CommonJS exports are also available.                               |
+| **HTML / CDN**       | Load the standalone JavaScript with a `<script>` tag and CSS with `<link>`. | Initialize through `window.Ticker.ticker(...)`; no bundler is needed.                                                                   |
+| **CDN**              | A server that delivers the package files.                                   | jsDelivr or unpkg can deliver the HTML script and stylesheet. Self-hosting those same files works too.                                  |
+| **Global / IIFE**    | The script format and the object it exposes.                                | The standalone file `dist/browser/global.global.js` installs `window.Ticker`. It is the HTML / CDN build, not another integration mode. |
+| **Browser registry** | Optional ID-based ownership through `newTicker()` and registry helpers.     | Available as an imported `browser` object or through `window.Ticker`. The `/browser` module is not the standalone script.               |
+
+Start with `ticker(target, options)` unless you need ID-based lookup. Do not load both the imported module and the standalone script for the same ticker. Choose controller ownership or the declarative page manager independently of how the files are delivered.
+
+## HTML / CDN setup
+
+Load the stylesheet, source markup and version-pinned script before initialization:
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@samline/ticker@2.1.0/dist/style.css" />
@@ -19,17 +35,25 @@ Load the stylesheet and version-pinned IIFE, then use `window.Ticker`.
 
 <script src="https://cdn.jsdelivr.net/npm/@samline/ticker@2.1.0/dist/browser/global.global.js"></script>
 <script>
-  const news = window.Ticker.newTicker({
-    id: 'news',
-    options: { duration: 24, pauseOnHover: true },
+  const news = window.Ticker.ticker('#news', {
+    duration: 24,
+    pauseOnHover: true,
   })
 
-  news.update({ duration: 30 })
-  window.addEventListener('pagehide', () => window.Ticker.destroyTicker('news'), {
+  news?.update({ duration: 30 })
+  window.addEventListener('pagehide', () => news?.destroy(), {
     once: true,
   })
 </script>
 ```
+
+Use matching pinned versions of both assets. To self-host, copy those two files from the installed package's `dist/` directory to your own server and update the URLs. A CDN is optional; the initialization API stays `window.Ticker.ticker()`.
+
+Keep loading ordered: the standalone script must run before the initializer. Do not add `async` to it or pair a deferred external script with an inline initializer that runs immediately.
+
+## Optional registry
+
+Use `window.Ticker.newTicker({ id: 'news', options })` only when you want a registration addressable by id. Clean it up with `window.Ticker.destroyTicker('news')`. Calling `window.Ticker.ticker()` creates an unregistered controller, so clean that up with its own `destroy()`.
 
 ## Namespace
 
@@ -47,13 +71,14 @@ Load the stylesheet and version-pinned IIFE, then use `window.Ticker`.
 
 ## Browser module
 
-Bundlers can import the same registry without installing a global:
+In Package / ESM, import the same optional registry without installing `window.Ticker`:
 
 ```ts
 import { browser } from '@samline/ticker/browser'
 
 const news = browser.newTicker({ id: 'news' })
 news?.update({ direction: 'right' })
+browser.destroyTicker('news')
 ```
 
 The ESM/CJS module has no `globalThis` side effect. Only `@samline/ticker/browser/global` installs `window.Ticker`.

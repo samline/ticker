@@ -32,7 +32,7 @@ export default {
         {
           kind: 'text',
           value:
-            'Yes. The browser global is a single IIFE you can drop into any plain HTML page, WordPress theme, or Shopify template. There is no build step, no peer dependency, and no ',
+            'Yes. HTML / CDN loads a script that exposes window.Ticker in plain HTML, WordPress or Shopify. Serve it from a CDN or your own server. There is no build step, no peer dependency, and no ',
         },
         {
           kind: 'code',

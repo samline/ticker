@@ -16,10 +16,17 @@ import controls from '../../i18n/translations/en/controls'
 
 This page walks through installing `@samline/ticker`, loading its stylesheet, and controlling a working ticker. By the end you will understand both controller-owned and declarative lifecycles.
 
+## Choose your setup
+
+- **Package / ESM:** install with your package manager, import `ticker` and the stylesheet, then initialize in your application's client code.
+- **HTML / CDN:** load CSS and the standalone script, then call `window.Ticker.ticker()`. A CDN delivers the files; serving them yourself uses the same API.
+
+Both return the same controller. “Global” means the `window.Ticker` object created by the standalone script; the optional `/browser` registry module is a separate import for ID-based ownership. [See how these terms fit together](/ticker/docs/guides/html-and-browser/#loading-terms).
+
 ## Prerequisites
 
-- **Node.js 20+** when bundling.
-- A package manager — npm, pnpm, yarn, or bun.
+- **Node.js 20+** for Package / ESM tooling; HTML / CDN needs no Node.js or build step.
+- A package manager — npm, pnpm, yarn or bun — for Package / ESM.
 - A browser target of **ES2020**.
 
 ## Install
@@ -69,7 +76,7 @@ bun add @samline/ticker
 
 </Tabs>
 
-For package managers, use ESM / TypeScript below. For CDN, load both assets and use Browser global. Both use the same markup and controller.
+Installed with a package manager? Choose Package / ESM below. Loaded the CDN assets? Choose HTML / CDN. Both use the same source markup and controller API.
 
 ## First example
 
@@ -106,7 +113,7 @@ news.refresh()
 
 <TabPanel id="global" anchor="global-example" label={controls.tabs.initItems[1].label}>
 
-Place this script after the source markup and the version-pinned CDN script:
+Place this script after the source markup and standalone script (delivered by CDN or your own server):
 
 ```html title="index.html"
 <script>
@@ -191,7 +198,7 @@ Reduced motion, clone semantics, keyboard behavior, and interactive content.
 
 </LinkCard>
 
-<LinkCard id="browser-global" title="Browser global" href="/ticker/docs/reference/browser/">
+<LinkCard id="browser-global" title="HTML / CDN" href="/ticker/docs/guides/html-and-browser/">
 
 Use the pre-bundled `window.Ticker` registry without a build step.
 

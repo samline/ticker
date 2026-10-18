@@ -1,8 +1,9 @@
+import sharedControls from '../../../../../../shared/i18n/translations/en/controls'
 export default {
   eyebrow: '03 / From zero to rolling',
   heading: [
     { kind: 'text', value: 'Three steps. ' },
-    { kind: 'emphasis', value: 'No build step required.' },
+    { kind: 'emphasis', value: 'Package or script tag.' },
   ],
   steps: {
     install: 'Install',
@@ -14,6 +15,9 @@ export default {
       'This is the minimal setup. Explore duration, direction and hover behavior before adapting the ticker to your design.',
     label: 'Explore configuration options',
   },
+  integrationDescription:
+    'Installed with npm, pnpm or bun? Choose Package / ESM to import Ticker. Loaded the CDN files? Choose HTML / CDN to call window.Ticker. Both return the same controller.',
+  integrationLabel: 'Understand the loading options',
   markupDescription:
     'Write the content as you normally would. The library enhances it, never replaces it.',
   installLabel: 'Installation method',
@@ -39,11 +43,11 @@ export default {
   initTabs: [
     {
       id: 'vanilla',
-      label: 'Vanilla',
+      label: sharedControls.integration.package,
     },
     {
       id: 'global',
-      label: 'Global',
+      label: sharedControls.integration.html,
     },
   ],
   examples: {
@@ -91,9 +95,9 @@ const news = ticker('#news', {
     global: {
       filename: 'inline script',
       language: 'javascript',
-      code: `const news = window.Ticker.newTicker({
-  id: 'news',
-  options: { duration: 24, pauseOnHover: true },
+      code: `const news = window.Ticker.ticker('#news', {
+  duration: 20,
+  pauseOnHover: true,
 })`,
     },
   },

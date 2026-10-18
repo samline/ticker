@@ -11,7 +11,7 @@
 ## Table of Contents
 
 - [Installation](#installation)
-- [CDN / Browser](#cdn--browser)
+- [HTML / CDN](#html--cdn)
 - [Entrypoints](#entrypoints)
 - [Quick Start](#quick-start)
 - [Seamless Loops](#seamless-loops)
@@ -47,9 +47,11 @@ import '@samline/ticker/style.css'
 
 ---
 
-## CDN / Browser
+<a id="cdn--browser"></a>
 
-Use the browser build when you do not have a bundler and need to run the package directly in HTML, WordPress, Shopify, or a traditional server-rendered template.
+## HTML / CDN
+
+Choose **Package / ESM** when installing with npm, pnpm or bun and importing Ticker in your application. Choose **HTML / CDN** when loading the standalone script in plain HTML, WordPress or Shopify without a bundler. Both use the same controller API. A CDN only delivers the files; you can self-host the same script and stylesheet.
 
 ```html
 <link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.1.0/dist/style.css" />
@@ -58,22 +60,22 @@ Use the browser build when you do not have a bundler and need to run the package
 
 > Pin the version in production. Replace `2.1.0` with the version you ship.
 
-The browser bundle exposes a single global: `window.Ticker`.
+The standalone script (an IIFE) exposes `window.Ticker`. “Global” describes this object, not another loading mode. The optional `@samline/ticker/browser` registry module is an ESM/CJS import and does not install that object. See [loading terms](https://samline.github.io/ticker/docs/guides/html-and-browser/#loading-terms).
 
 ```html
 <div id="news"><a href="/news">Latest story</a></div>
 
 <script>
-  const news = window.Ticker.newTicker({
-    id: 'news',
-    options: { duration: 24, pauseOnHover: true },
+  const news = window.Ticker.ticker('#news', {
+    duration: 24,
+    pauseOnHover: true,
   })
 
   news?.update({ duration: 30 })
 </script>
 ```
 
-The browser surface keeps a registry under `Ticker.available`, keyed by the id passed to `newTicker()`. See [Browser integration](docs/src/content/docs/reference/browser.md) for the complete browser API.
+For optional ID-based ownership, `window.Ticker.newTicker({ id, options })` creates a registry entry; `destroyTicker(id)` removes it. A direct `ticker()` controller is unregistered and uses its own `destroy()`. See [Registry reference](docs/src/content/docs/reference/browser.md) for the complete browser API.
 
 ---
 
@@ -177,7 +179,7 @@ news?.scrollBy(120) // Instant logical distance; wraps and leaves playback pause
 const unsubscribe = news?.on('playback', state => console.log(state.playing, state.reasons))
 ```
 
-`direction` also accepts physical `left`/`right` and vertical `up`/`down`. Give vertical wrappers an explicit height. `pauseOnFocus` defaults to true; manual pause survives environmental and breakpoint changes. `play()` respects reduced motion, document visibility and viewport intersection. Attach application-owned native buttons and a labelled range using `connectControls({ previous, next, rail })`; `navigation: true` enables touch/mouse dragging without blocking perpendicular page scroll. Set `resumeAfterDrag: true` to restore prior playback intent on release; a manual pause remains paused and hover/focus pauses still apply. Responsive rules use viewport media queries in array order over the current base configuration. The same typed controller is returned by Vanilla and browser/CDN factories, with equivalent declarative data attributes. Compare enabled/disabled resumption in the [drag example](https://samline.github.io/ticker/examples/#drag-playback); its control calls `update({ resumeAfterDrag })` without changing playback intent.
+`direction` also accepts physical `left`/`right` and vertical `up`/`down`. Give vertical wrappers an explicit height. `pauseOnFocus` defaults to true; manual pause survives environmental and breakpoint changes. `play()` respects reduced motion, document visibility and viewport intersection. Attach application-owned native buttons and a labelled range using `connectControls({ previous, next, rail })`; `navigation: true` enables touch/mouse dragging without blocking perpendicular page scroll. Set `resumeAfterDrag: true` to restore prior playback intent on release; a manual pause remains paused and hover/focus pauses still apply. Responsive rules use viewport media queries in array order over the current base configuration. The same typed controller is returned by Package / ESM and HTML / CDN factories, with equivalent declarative data attributes. Compare enabled/disabled resumption in the [drag example](https://samline.github.io/ticker/examples/#drag-playback); its control calls `update({ resumeAfterDrag })` without changing playback intent.
 
 Content stays application-owned: add or remove original nodes through `source`, then call `refresh()`. Use `speed` to keep a dynamic feed steady as it grows or shrinks; an empty feed can be repopulated and refreshed.
 
@@ -193,7 +195,7 @@ See version history and breaking changes in the **[changelog](https://samline.gi
 | ----------------------------------------------------------------- | -------------------------------------------------------------- |
 | [Installation](docs/src/content/docs/getting-started.mdx)         | Installation, first ticker, ownership, and lifecycle.          |
 | [Configuration](docs/src/content/docs/reference/configuration.md) | Every option, default, normalization rule, and data attribute. |
-| [Browser integration](docs/src/content/docs/reference/browser.md) | Browser global and bundler-friendly registry usage.            |
+| [Browser integration](docs/src/content/docs/reference/browser.md) | Optional ID-based ownership for either loading setup.          |
 | [Entrypoints](docs/src/content/docs/reference/entrypoints.mdx)    | Root, Vanilla, core, browser, global, and CSS exports.         |
 | [Styling](docs/src/content/docs/reference/styling.md)             | Required stylesheet, DOM contract, classes, and CSS variables. |
 | [Accessibility](docs/src/content/docs/guides/accessibility.md)    | Clone behavior, reduced motion, and interactive content.       |
