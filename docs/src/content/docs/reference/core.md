@@ -4,6 +4,7 @@ sidebar:
   group: reference
   order: 8
 title: 'Core utilities'
+titleAccent: 'utilities'
 description: 'Public defaults, state factories, validators, and advanced runtime-state contracts.'
 ---
 

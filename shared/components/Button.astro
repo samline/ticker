@@ -37,8 +37,8 @@ const variants = { primary: 'btn-primary', secondary: 'btn-secondary', ghost: 'b
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    height: 3.125rem;
-    padding: 0 1.4rem;
+    min-height: 3.125rem;
+    padding: 0.5rem 1.4rem;
     border-radius: 0.875rem;
     font-weight: 500;
     font-size: 0.875rem;
@@ -48,7 +48,8 @@ const variants = { primary: 'btn-primary', secondary: 'btn-secondary', ghost: 'b
       border-color var(--duration-ui) var(--ease-ui),
       color var(--duration-ui) var(--ease-ui);
     cursor: pointer;
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
   .btn-primary {
     background: var(--color-accent);
@@ -60,7 +61,7 @@ const variants = { primary: 'btn-primary', secondary: 'btn-secondary', ghost: 'b
     border: 0.0625rem solid var(--palette-button-border);
   }
   .btn-ghost {
-    height: 2.5rem;
+    min-height: 2.5rem;
     padding-inline: 1rem;
     border-radius: var(--radius-pill);
     background: transparent;
@@ -108,8 +109,8 @@ const variants = { primary: 'btn-primary', secondary: 'btn-secondary', ghost: 'b
     color: var(--palette-control-text);
     border-color: var(--palette-control-border);
     background: transparent;
-    height: 2rem;
     min-height: 2rem;
+    padding-block: 0.25rem;
     padding-inline: 0.75rem;
     font-size: 0.65rem;
   }
@@ -162,7 +163,7 @@ const variants = { primary: 'btn-primary', secondary: 'btn-secondary', ghost: 'b
     }
   }
   .btn[data-context='nav'] {
-    height: 2.5rem;
+    min-height: 2.5rem;
   }
   :focus-visible {
     outline: 0.125rem solid var(--color-accent);

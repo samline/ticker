@@ -2,6 +2,7 @@
 import Section from '../components/Section.astro'
 import Box from '../../../shared/components/Box.astro'
 import Heading from '../../../shared/components/Heading.astro'
+import PageTitle from '../../../shared/components/PageTitle.astro'
 import TextLink from '../../../shared/components/TextLink.astro'
 import Button from '../../../shared/components/Button.astro'
 import { format } from '../../../shared/i18n/format'
@@ -14,10 +15,12 @@ const base = import.meta.env.BASE_URL
 
 <Section spacing="none" aria-labelledby="attribution-title">
   <Box size="medium" class:list={['attribution']}>
-    <Heading level={1} id="attribution-title">
-      {examples.brandAttribution}
-    </Heading>
-    <p>{format(t.introduction, { version: sources.version })}</p>
+    <PageTitle
+      headingId="attribution-title"
+      title={examples.brandAttribution}
+      accent={t.titleAccent}
+      description={format(t.introduction, { version: sources.version })}
+    />
     <TextLink href={`https://github.com/simple-icons/simple-icons/tree/${sources.version}`}>
       {t.project}
     </TextLink>

@@ -57,11 +57,14 @@ jobs:
           cache: npm
           cache-dependency-path: |
             landing/package-lock.json
+            docs/package-lock.json
             shared/package-lock.json
       - run: npm ci --prefix shared
       - run: npm ci --prefix landing
+      - run: npm ci --prefix docs
       - run: npm run landing:check
       - run: npm --prefix landing run format:check
-      - run: npm run landing:build
+      - run: npm run site:build
       - run: npm exec --prefix landing -- playwright install --with-deps chromium
       - run: npm --prefix landing run test:browser
+      - run: npm run site:test:browser

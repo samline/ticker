@@ -13,11 +13,12 @@ import { getI18n, getLocale } from '../i18n/utils'
 import type { MarkdownHeading } from 'astro'
 interface Props {
   title: string
+  titleAccent?: string
   description: string
   current: string
   headings: MarkdownHeading[]
 }
-const { title, description, current, headings } = Astro.props
+const { title, titleAccent, description, current, headings } = Astro.props
 const t = getI18n(Astro)
 ---
 
@@ -41,7 +42,12 @@ const t = getI18n(Astro)
     <Box size="wide" class:list={['shell']}>
       <Sidebar current={current} />
       <main id="content" aria-labelledby="article-title" tabindex="-1" data-pagefind-body>
-        <ArticleHeader current={current} title={title} description={description} />
+        <ArticleHeader
+          current={current}
+          title={title}
+          titleAccent={titleAccent}
+          description={description}
+        />
         <div class:list={['mobile-toc']} data-pagefind-ignore>
           <TableOfContents headings={headings} collapsed />
         </div>

@@ -38,6 +38,7 @@ const docs = defineCollection({
   },
   schema: z.object({
     title: z.string().trim().min(1),
+    titleAccent: z.string().trim().min(1).optional(),
     description: z.string().trim().min(1),
     locale: z.enum(['en']),
     sidebar: z.object({

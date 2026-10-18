@@ -75,7 +75,7 @@ The standalone script (an IIFE) exposes `window.Ticker`. “Global” describes 
 </script>
 ```
 
-For optional ID-based ownership, `window.Ticker.newTicker({ id, options })` creates a registry entry; `destroyTicker(id)` removes it. A direct `ticker()` controller is unregistered and uses its own `destroy()`. See [Registry reference](docs/src/content/docs/reference/browser.md) for the complete browser API.
+For optional ID-based ownership, `window.Ticker.newTicker({ id, options })` creates a registry entry; `destroyTicker(id)` removes it. A direct `ticker()` controller is unregistered and uses its own `destroy()`. See [Registry reference](https://samline.github.io/ticker/docs/reference/browser/) for the complete browser API.
 
 ---
 
@@ -90,7 +90,7 @@ For optional ID-based ownership, `window.Ticker.newTicker({ id, options })` crea
 | `@samline/ticker/core`           | Types, defaults, state factories, and validation helpers.     |
 | `@samline/ticker/style.css`      | Required layout, animation, and reduced-motion styles.        |
 
-The main entrypoint also exports `browser`, the same registry singleton used by the browser module, without installing `window.Ticker`. See [Browser integration](docs/src/content/docs/reference/browser.md#module-singleton).
+The main entrypoint also exports `browser`, the same registry singleton used by the browser module, without installing `window.Ticker`. See [Browser integration](https://samline.github.io/ticker/docs/reference/browser/#module-singleton).
 
 ---
 
@@ -131,7 +131,7 @@ What this does:
 
 ## Seamless Loops
 
-The runtime preserves fractional measurements in both directions. Match item spacing to the horizontal track gap and include any decorative separator at the end of the sequence. See [Styling: seamless loops](docs/src/content/docs/reference/styling.md#seamless-loops) for the CSS pattern.
+The runtime preserves fractional measurements in both directions. Match item spacing to the horizontal track gap and include any decorative separator at the end of the sequence. See [Styling: seamless loops](https://samline.github.io/ticker/docs/reference/styling/#seamless-loops) for the CSS pattern.
 
 ---
 
@@ -147,19 +147,19 @@ The runtime preserves fractional measurements in both directions. Match item spa
 
 ## API at a Glance
 
-| Group                 | API                                                                                                                                                                                                                |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Controller factory    | [`ticker()`](docs/src/content/docs/reference/api/ticker.md)                                                                                                                                                        |
-| Controller lifecycle  | [`update()`](docs/src/content/docs/reference/api/update.md) · [`refresh()`](docs/src/content/docs/reference/api/refresh.md) · [`destroy()`](docs/src/content/docs/reference/api/destroy.md)                        |
-| Declarative lifecycle | [`mount()`](docs/src/content/docs/reference/api/mount.md) · [`refresh()`](docs/src/content/docs/reference/api/refresh.md#declarative-page-refresh) · [`unmount()`](docs/src/content/docs/reference/api/unmount.md) |
-| Browser registry      | [`newTicker()` and registry helpers](docs/src/content/docs/reference/api/browser-registry.md)                                                                                                                      |
-| Configuration         | [`TickerOptions`](docs/src/content/docs/reference/configuration.md)                                                                                                                                                |
-| Core utilities        | [Defaults, state factories, and validators](docs/src/content/docs/reference/core.md)                                                                                                                               |
-| Types                 | [TypeScript reference](docs/src/content/docs/reference/typescript.md)                                                                                                                                              |
+| Group                 | API                                                                                                                                                                                                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Controller factory    | [`ticker()`](https://samline.github.io/ticker/docs/reference/api/ticker/)                                                                                                                                                                                    |
+| Controller lifecycle  | [`update()`](https://samline.github.io/ticker/docs/reference/api/update/) · [`refresh()`](https://samline.github.io/ticker/docs/reference/api/refresh/) · [`destroy()`](https://samline.github.io/ticker/docs/reference/api/destroy/)                        |
+| Declarative lifecycle | [`mount()`](https://samline.github.io/ticker/docs/reference/api/mount/) · [`refresh()`](https://samline.github.io/ticker/docs/reference/api/refresh/#declarative-page-refresh) · [`unmount()`](https://samline.github.io/ticker/docs/reference/api/unmount/) |
+| Browser registry      | [`newTicker()` and registry helpers](https://samline.github.io/ticker/docs/reference/api/browser-registry/)                                                                                                                                                  |
+| Configuration         | [`TickerOptions`](https://samline.github.io/ticker/docs/reference/configuration/)                                                                                                                                                                            |
+| Core utilities        | [Defaults, state factories, and validators](https://samline.github.io/ticker/docs/reference/core/)                                                                                                                                                           |
+| Types                 | [TypeScript reference](https://samline.github.io/ticker/docs/reference/typescript/)                                                                                                                                                                          |
 
-The controller exposes `element`, `source`, `state`, and an immutable options snapshot. Playback, navigation, events and viewport rules are documented in the [controller reference](docs/src/content/docs/reference/api/controller.md). `update()` and instance `refresh()` are chainable; `destroy()` owns teardown and restoration.
+The controller exposes `element`, `source`, `state`, and an immutable options snapshot. Playback, navigation, events and viewport rules are documented in the [controller reference](https://samline.github.io/ticker/docs/reference/api/controller/). `update()` and instance `refresh()` are chainable; `destroy()` owns teardown and restoration.
 
-See the complete [API reference](docs/src/content/docs/reference/api.md).
+See the complete [API reference](https://samline.github.io/ticker/docs/reference/api/).
 
 ---
 
@@ -183,7 +183,7 @@ const unsubscribe = news?.on('playback', state => console.log(state.playing, sta
 
 Content stays application-owned: add or remove original nodes through `source`, then call `refresh()`. Use `speed` to keep a dynamic feed steady as it grows or shrinks; an empty feed can be repopulated and refreshed.
 
-See [configuration](docs/src/content/docs/reference/configuration.md) for normalization, RTL and rule precedence, and [controller contracts](docs/src/content/docs/reference/api/controller.md) for events, keyboard controls and cleanup.
+See [configuration](https://samline.github.io/ticker/docs/reference/configuration/) for normalization, RTL and rule precedence, and [controller contracts](https://samline.github.io/ticker/docs/reference/api/controller/) for events, keyboard controls and cleanup.
 
 ---
 
@@ -191,24 +191,24 @@ See [configuration](docs/src/content/docs/reference/configuration.md) for normal
 
 See version history and breaking changes in the **[changelog](https://samline.github.io/ticker/docs/changelog/)**. Read the full guides and API reference in the **[documentation](https://samline.github.io/ticker/docs/)**. Explore **[working examples](https://samline.github.io/ticker/examples/)** with complete HTML / CDN and npm code to copy and adapt.
 
-| Doc                                                               | Purpose                                                        |
-| ----------------------------------------------------------------- | -------------------------------------------------------------- |
-| [Installation](docs/src/content/docs/getting-started.mdx)         | Installation, first ticker, ownership, and lifecycle.          |
-| [Configuration](docs/src/content/docs/reference/configuration.md) | Every option, default, normalization rule, and data attribute. |
-| [Browser integration](docs/src/content/docs/reference/browser.md) | Optional ID-based ownership for either loading setup.          |
-| [Entrypoints](docs/src/content/docs/reference/entrypoints.mdx)    | Root, Vanilla, core, browser, global, and CSS exports.         |
-| [Styling](docs/src/content/docs/reference/styling.md)             | Required stylesheet, DOM contract, classes, and CSS variables. |
-| [Accessibility](docs/src/content/docs/guides/accessibility.md)    | Clone behavior, reduced motion, and interactive content.       |
-| [Core utilities](docs/src/content/docs/reference/core.md)         | Defaults, state factories, validators, and advanced contracts. |
-| [TypeScript](docs/src/content/docs/reference/typescript.md)       | Exported TypeScript types and their roles.                     |
-| [API reference](docs/src/content/docs/reference/api.md)           | Public functions and controller methods.                       |
-| [Recipes](docs/src/content/docs/reference/examples.md)            | Task-oriented integration and lifecycle recipes.               |
+| Doc                                                                             | Purpose                                                        |
+| ------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| [Installation](https://samline.github.io/ticker/docs/getting-started/)          | Installation, first ticker, ownership, and lifecycle.          |
+| [Configuration](https://samline.github.io/ticker/docs/reference/configuration/) | Every option, default, normalization rule, and data attribute. |
+| [Browser integration](https://samline.github.io/ticker/docs/reference/browser/) | Optional ID-based ownership for either loading setup.          |
+| [Entrypoints](https://samline.github.io/ticker/docs/reference/entrypoints/)     | Root, Vanilla, core, browser, global, and CSS exports.         |
+| [Styling](https://samline.github.io/ticker/docs/reference/styling/)             | Required stylesheet, DOM contract, classes, and CSS variables. |
+| [Accessibility](https://samline.github.io/ticker/docs/guides/accessibility/)    | Clone behavior, reduced motion, and interactive content.       |
+| [Core utilities](https://samline.github.io/ticker/docs/reference/core/)         | Defaults, state factories, validators, and advanced contracts. |
+| [TypeScript](https://samline.github.io/ticker/docs/reference/typescript/)       | Exported TypeScript types and their roles.                     |
+| [API reference](https://samline.github.io/ticker/docs/reference/api/)           | Public functions and controller methods.                       |
+| [Recipes](https://samline.github.io/ticker/docs/reference/examples/)            | Task-oriented integration and lifecycle recipes.               |
 
 ---
 
 ## AI agent skill
 
-The public [Ticker skill](skills/ticker/SKILL.md) teaches an agent how to choose a Ticker integration, load CSS, manage controllers, preserve accessible motion and avoid nonexistent APIs. It is self-contained and describes v2.1.0; agents must verify their installed version.
+The public [Ticker skill](https://samline.github.io/ticker/skills/ticker/SKILL.md) teaches an agent how to choose a Ticker integration, load CSS, manage controllers, preserve accessible motion and avoid nonexistent APIs. It is self-contained and describes v2.1.0; agents must verify their installed version.
 
 Download [SKILL.md](https://samline.github.io/ticker/skills/ticker/SKILL.md) into a `ticker/` folder in your agent's supported skill directory. For agents that discover project skills from `.agents/skills/`:
 

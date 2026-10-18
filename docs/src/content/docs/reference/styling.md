@@ -4,6 +4,7 @@ sidebar:
   group: reference
   order: 6
 title: 'Styling and DOM contract'
+titleAccent: 'DOM contract'
 description: 'Generated markup, package-owned attributes, classes, CSS variables, animation behavior, and safe customization.'
 ---
 

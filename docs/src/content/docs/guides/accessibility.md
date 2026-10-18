@@ -4,6 +4,7 @@ sidebar:
   group: guides
   order: 3
 title: 'Accessibility and motion'
+titleAccent: 'motion'
 description: 'Understand clone semantics, keyboard behavior, interactive controls, and reduced-motion handling.'
 ---
 

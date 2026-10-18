@@ -4,6 +4,7 @@ sidebar:
   group: reference
   order: 4
 title: 'Optional browser registry'
+titleAccent: 'registry'
 description: 'Browser registry imports, complete helper behavior, standalone global setup, replacement semantics, and cleanup.'
 ---
 

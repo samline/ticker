@@ -2,6 +2,13 @@
 @custom-variant light (&:where([data-theme=light], [data-theme=light] *));
 
 @theme {
+  --heading-space: 1.125rem;
+  --heading-weight: 500;
+  --heading-tracking: -0.045em;
+  --heading-leading: 1.12;
+  --text-title-display: clamp(2.75rem, 6.2vw, 5rem);
+  --text-title-section: clamp(2rem, 3.6vw, 3rem);
+  --text-article-section: 1.625rem;
   --space-xs: 0.5rem;
   --space-sm: 0.75rem;
   --space-md: 1rem;

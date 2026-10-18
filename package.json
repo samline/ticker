@@ -9,7 +9,7 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
-    "docs/src/content/docs"
+    "CHANGELOG.md"
   ],
   "publishConfig": {
     "access": "public",
