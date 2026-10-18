@@ -26,7 +26,7 @@ From the repository root, install `npm ci --prefix shared`, then the apps' depen
 
 After a shared change, run both app checks/format checks, `npm run site:build`, `npm run site:test:browser`, and the landing browser suite. Check 320–1440, both themes, enlarged text, keyboard, no JavaScript and reduced motion. Inspect the original report visually; automated checks do not establish complete accessibility or visual quality.
 
-CI installs this package before checking either app. Keep its lockfile and the CI/deployment setup synchronized. Root npm packaging must continue to include only the runtime distribution and maintained documentation Markdown, never these components or site dependencies.
+CI installs this package before checking either app. Keep its lockfile and the CI/deployment setup synchronized. Root npm packaging includes only dist/, package.json, README.md, LICENSE.md and CHANGELOG.md. The package files allowlist and .npmignore exclude all three site directories, source, tooling and agent memory. Verify the actual archive with test:package; website documentation and the downloadable skill stay on the website.
 
 ## Content composition
 
@@ -53,3 +53,7 @@ Home's CodeBlock is a small catalog/filename adapter; Examples passes its comple
 The shared integration labels are Package / ESM and HTML / CDN. The HTML/CDN guide explains delivery (CDN or self-hosted), global namespace (window.Ticker) and optional registry ownership separately. Root README, initialization tabs, entrypoint summaries, copied examples and the downloadable skill follow that terminology. Keep technical export paths/legacy anchors intact when adjusting user-facing labels; choose the default direct ticker() factory before teaching optional registry ownership.
 
 CodeFiles composes the shared tabs and highlighted code frame for examples that mix languages. It shows independently copyable HTML/CSS/JavaScript and accepts an optional complete runnable HTML file. The gallery derives both outputs from the same source and references style.css/main.js in its separate HTML; the HTML/CDN guide consumes the same renderer in MDX. Keep small API snippets as normal fences. Preserve exact source copying, no-JavaScript fallback labels and native keyboard selection when nesting file tabs inside loading-mode tabs.
+
+Titles share Heading and PageTitle rather than page-local font rules. Heading separates semantic level from the controlled display/section scale; PageTitle composes the eyebrow, title and description. Keep the approved Home Inter/Instrument Serif pairing, weight, tracking and spacing tokens. Editorial accent text is an explicit trailing part of the translated title (titleAccent in docs frontmatter); never infer the last word or split API identifiers. Keep the full title unchanged in metadata/search and verify compiled whitespace, both themes, responsive sizes and enlarged text. API identifiers and single-word headings can remain entirely in the primary font.
+
+CI builds the combined artifact in the landing job and runs both browser suites, including cross-route typography checks. The standalone Docs suite executes its own three-file starter; Landing tests must not require a sibling Docs build to exist.

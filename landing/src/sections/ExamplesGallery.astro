@@ -2,8 +2,7 @@
 import { getI18n } from '../i18n/utils'
 import Section from '../components/Section.astro'
 import Box from '../../../shared/components/Box.astro'
-import Heading from '../../../shared/components/Heading.astro'
-import Eyebrow from '../../../shared/components/Eyebrow.astro'
+import PageTitle from '../../../shared/components/PageTitle.astro'
 import Button from '../../../shared/components/Button.astro'
 import TextLink from '../../../shared/components/TextLink.astro'
 import ExampleRecipe from '../components/ExampleRecipe.astro'
@@ -12,13 +11,14 @@ const t = getI18n(Astro).examples
 
 <Section spacing="none" aria-labelledby="examples-title">
   <Box size="medium" class:list={['gallery']}>
-    <header class:list={['introduction']}>
-      <Eyebrow>{t.eyebrow}</Eyebrow>
-      <Heading id="examples-title" level={1}>
-        {`${t.heading} `}
-        <span class:list={['serif']}>{t.headingAccent}</span>
-      </Heading>
-      <p>{t.introduction}</p>
+    <div class:list={['introduction']}>
+      <PageTitle
+        headingId="examples-title"
+        title={`${t.heading} ${t.headingAccent}`}
+        accent={t.headingAccent}
+        eyebrow={t.eyebrow}
+        description={t.introduction}
+      />
       <p class:list={['navigation-label']}>{t.navigation}</p>
       <nav aria-label={t.navigation} class:list={['recipe-navigation']}>
         {t.recipes.map(recipe => (
@@ -37,7 +37,7 @@ const t = getI18n(Astro).examples
           {t.skill}
         </TextLink>
       </div>
-    </header>
+    </div>
     {t.recipes.map(recipe => (
       <ExampleRecipe recipe={recipe} />
     ))}

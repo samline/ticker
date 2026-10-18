@@ -4,6 +4,7 @@ sidebar:
   group: reference
   order: 7
 title: 'TypeScript reference'
+titleAccent: 'reference'
 description: 'Every exported public type, controller shape, runtime state, and browser API contract.'
 ---
 

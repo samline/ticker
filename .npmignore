@@ -1,27 +1,36 @@
-# Source & tests
+# Website source, builds, assets and dependencies
+landing/
+docs/
+shared/
+
+# Runtime source and development-only code
 src/
 tests/
+scripts/
+skills/
+coverage/
+test-results/
+playwright-report/
+*.tgz
 
-# Build config
+# Repository memory, automation and configuration
+AGENTS.md
+.agents/
+.codex/
+.github/
+.prettierignore
+.prettierrc.cjs
 tsconfig.json
 tsup.config.ts
 vitest.config.ts
 
-# Marketing landing site
-landing/
-
-# Tooling & lockfiles
-.agents/
-.github/
+# Tooling and lockfiles
 bun.lock
 bun.lockb
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
 skills-lock.json
-
-# Coverage & build artifacts (outside dist)
-coverage/
 
 # Editor / OS junk
 .vscode/

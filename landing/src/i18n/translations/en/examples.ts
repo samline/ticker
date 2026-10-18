@@ -81,6 +81,7 @@ export default {
     'Read or copy HTML, CSS and JavaScript as three files in the same folder. Use Complete file to copy one runnable index.html instead. Copied code uses the initial settings; preview changes are not included.',
   brandAttribution: 'Demo brand marks and attribution',
   attribution: {
+    titleAccent: 'attribution',
     description:
       'Sources, licenses and brand guidelines for the illustrative icons used in Ticker demos.',
     introduction:

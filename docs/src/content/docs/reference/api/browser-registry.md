@@ -4,6 +4,7 @@ sidebar:
   group: api
   order: 8
 title: 'Browser Registry'
+titleAccent: 'Registry'
 description: 'Detailed Ticker API contract: Browser Registry'
 ---
 

@@ -66,12 +66,12 @@ const t = getI18n(Astro)
     color: var(--color-text);
     line-height: 1.35;
     letter-spacing: -0.025em;
-    font-weight: 600;
+    font-weight: var(--heading-weight);
     scroll-margin-top: calc(var(--docs-header-height, 4.5rem) + 2.5rem);
   }
   .article :global(h2:not([data-ui], [data-ui] *)) {
     margin: 3rem 0 var(--space-md);
-    font-size: 1.625rem;
+    font-size: var(--text-article-section);
   }
   .article :global(h3:not([data-ui], [data-ui] *)) {
     margin: var(--space-xl) 0 var(--space-sm);

@@ -36,6 +36,8 @@ const headingId = `recipe-${crypto.randomUUID()}`
   }
   .recipe-copy {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    overflow-wrap: anywhere;
     align-content: start;
     gap: 0.875rem;
     min-width: 0;

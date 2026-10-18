@@ -4,6 +4,7 @@ sidebar:
   group: guides
   order: 1
 title: 'Lifecycle and updates'
+titleAccent: 'updates'
 description: 'Understand controller ownership, normalized options, refresh behavior, declarative mounting, and cleanup.'
 ---
 
