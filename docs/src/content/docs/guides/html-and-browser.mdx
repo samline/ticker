@@ -7,6 +7,51 @@ title: 'HTML / CDN and loading options'
 description: 'Understand package imports, script tags, CDN delivery, window.Ticker and the optional browser registry.'
 ---
 
+import CodeFiles from '../../../../../shared/components/CodeFiles.astro'
+import sharedControls from '../../../../../shared/i18n/translations/en/controls'
+
+export const files = [
+  { id: 'html', label: sharedControls.codeFiles.html, filename: 'index.html', language: 'html', code: `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ticker news</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@samline/ticker@2.1.0/dist/style.css">
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <div id="news">
+      <a href="/one">First story</a>
+      <a href="/two">Second story</a>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@samline/ticker@2.1.0/dist/browser/global.global.js"></script>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>` },
+  { id: 'css', label: sharedControls.codeFiles.css, filename: 'style.css', language: 'css', code: `.ticker-track,
+.ticker-content,
+#news {
+  gap: 1.5rem;
+}
+
+#news {
+display: flex;
+width: max-content;
+}
+
+#news a {
+flex-shrink: 0;
+}`},
+  { id: 'js', label: sharedControls.codeFiles.javascript, filename: 'main.js', language: 'javascript', code:`const news = window.Ticker.ticker('#news', {
+duration: 24,
+pauseOnHover: true,
+})
+
+news?.update({ duration: 30 })
+window.addEventListener('pagehide', () => news?.destroy(), { once: true })` },
+]
+
 Ticker has two loading setups. Both run in the browser and return the same controller; choose one for each integration.
 
 ## Loading terms
@@ -23,31 +68,11 @@ Start with `ticker(target, options)` unless you need ID-based lookup. Do not loa
 
 ## HTML / CDN setup
 
-Load the stylesheet, source markup and version-pinned script before initialization:
+Save these three files in the same folder. The HTML loads package CSS and the standalone script before main.js; style.css contains only the example layout.
 
-```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@samline/ticker@2.1.0/dist/style.css" />
+<CodeFiles files={files} />
 
-<div id="news">
-  <a href="/one">First story</a>
-  <a href="/two">Second story</a>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@2.1.0/dist/browser/global.global.js"></script>
-<script>
-  const news = window.Ticker.ticker('#news', {
-    duration: 24,
-    pauseOnHover: true,
-  })
-
-  news?.update({ duration: 30 })
-  window.addEventListener('pagehide', () => news?.destroy(), {
-    once: true,
-  })
-</script>
-```
-
-Use matching pinned versions of both assets. To self-host, copy those two files from the installed package's `dist/` directory to your own server and update the URLs. A CDN is optional; the initialization API stays `window.Ticker.ticker()`.
+Use matching pinned versions of both assets. To self-host, copy the package stylesheet and standalone script from the installed package's `dist/` directory to your own server and update the URLs. A CDN is optional; the initialization API stays `window.Ticker.ticker()`.
 
 Keep loading ordered: the standalone script must run before the initializer. Do not add `async` to it or pair a deferred external script with an inline initializer that runs immediately.
 

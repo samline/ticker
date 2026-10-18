@@ -469,3 +469,24 @@ test('changelog replaces migration and keeps the historical URL useful', async (
   await expect(page).toHaveURL(/\/changelog\/$/)
   await expect(page.locator('#article-title')).toHaveText('Changelog')
 })
+
+test('HTML/CDN guide reuses file tabs with exact copying and keyboard navigation', async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.goto('guides/html-and-browser/')
+  const files = page.locator('[data-code-files]')
+  for (const name of ['HTML', 'CSS', 'JavaScript']) {
+    await files.getByRole('tab', { name, exact: true }).click()
+    const panel = files.getByRole('tabpanel', { name, exact: true })
+    await panel.getByRole('button', { name: /Copy code from/ }).click()
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      await panel.locator('code').textContent()
+    )
+  }
+  await files.getByRole('tab', { name: 'HTML', exact: true }).focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(files.getByRole('tab', { name: 'CSS', exact: true })).toBeFocused()
+  await expect(files.getByRole('tabpanel', { name: 'CSS', exact: true })).toBeVisible()
+})

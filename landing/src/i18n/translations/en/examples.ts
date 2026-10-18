@@ -78,7 +78,7 @@ export default {
   down: 'Down',
   noJs: 'Motion needs JavaScript. Scroll to read all the original content.',
   sourceNote:
-    'Copied code uses the initial settings shown when this page loads. Preview changes are not included.',
+    'Read or copy HTML, CSS and JavaScript as three files in the same folder. Use Complete file to copy one runnable index.html instead. Copied code uses the initial settings; preview changes are not included.',
   brandAttribution: 'Demo brand marks and attribution',
   attribution: {
     description:

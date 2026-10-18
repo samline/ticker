@@ -283,7 +283,19 @@ test('every copied CDN and npm document executes as a standalone example', async
     for (const mode of ['HTML / CDN', 'Package / ESM']) {
       await recipe.getByRole('tab', { name: mode, exact: true }).click()
       const panel = recipe.getByRole('tabpanel', { name: mode })
-      const code = await panel.locator('code').textContent()
+      const files: Record<string, string> = {}
+      for (const language of ['HTML', 'CSS', 'JavaScript']) {
+        await panel.getByRole('tab', { name: language, exact: true }).click()
+        const file = panel.getByRole('tabpanel', { name: language, exact: true })
+        files[language] = (await file.locator('code').textContent())!
+        await file.getByRole('button', { name: /Copy code from/ }).click()
+        expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(files[language])
+      }
+      await panel.getByRole('tab', { name: 'Complete file', exact: true }).click()
+      const code = await panel
+        .getByRole('tabpanel', { name: 'Complete file', exact: true })
+        .locator('code')
+        .textContent()
       expect(code).toContain('<!doctype html>')
       await panel.getByRole('button', { name: /Copy complete/ }).click()
       expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(code)
@@ -368,11 +380,90 @@ test('every copied CDN and npm document executes as a standalone example', async
       }
       if (id === 'drag-playback')
         await checkDragModes(standalone, standalone.locator('.ticker-recipe'))
+      // The same example must also run when copied into three independent files.
+      const splitHtml =
+        mode === 'Package / ESM'
+          ? files.HTML.replace(
+              '</head>',
+              '<link rel="stylesheet" href="https://example.test/style.css"></head>'
+            )
+          : files.HTML
+      const splitJs =
+        mode === 'Package / ESM'
+          ? files.JavaScript.replace(
+              /from ['"]@samline\/ticker['"]/g,
+              "from 'https://example.test/module.js'"
+            ).replace(/import ['"]@samline\/ticker\/style.css['"];?/g, '')
+          : files.JavaScript
+      await standalone.route('https://recipe.test/**', route => {
+        const path = new URL(route.request().url()).pathname
+        return route.fulfill({
+          body: path.endsWith('main.js')
+            ? splitJs
+            : path.endsWith('style.css')
+              ? files.CSS
+              : splitHtml,
+          contentType: path.endsWith('.js')
+            ? 'text/javascript'
+            : path.endsWith('.css')
+              ? 'text/css'
+              : 'text/html',
+        })
+      })
+      await standalone.goto('https://recipe.test/index.html')
+      await expect(standalone.locator('.ticker-wrapper[data-ready=true]')).toHaveCount(
+        id === 'opposite-rows' || id === 'constant-speed' ? 2 : 1
+      )
+      if (id === 'manual-navigation')
+        await standalone.getByRole('button', { name: 'Play animation', exact: true }).click()
+      await standalone.getByRole('button', { name: 'Pause animation', exact: true }).click()
+      await expect(standalone.locator('button[data-pause]')).toHaveText('Play animation')
       expect(errors).toEqual([])
       await standalone.close()
     }
     await recipe.locator('summary').click()
   }
+  // Execute the documentation's three-file starter with the same real runtime.
+  await page.goto('docs/guides/html-and-browser/')
+  const guideFiles: Record<string, string> = {}
+  const viewer = page.locator('[data-code-files]')
+  for (const name of ['HTML', 'CSS', 'JavaScript']) {
+    await viewer.getByRole('tab', { name, exact: true }).click()
+    guideFiles[name] = (await viewer
+      .getByRole('tabpanel', { name, exact: true })
+      .locator('code')
+      .textContent())!
+  }
+  const guide = await context.newPage()
+  const guideErrors: string[] = []
+  guide.on('pageerror', error => guideErrors.push(error.message))
+  await guide.route('https://cdn.jsdelivr.net/**', route =>
+    route.fulfill({
+      body: assets.get(route.request().url().endsWith('.css') ? 'style.css' : 'global.global.js'),
+      contentType: route.request().url().endsWith('.css') ? 'text/css' : 'text/javascript',
+    })
+  )
+  await guide.route('https://docs-example.test/**', route => {
+    const path = new URL(route.request().url()).pathname
+    return route.fulfill({
+      body: path.endsWith('.js')
+        ? guideFiles.JavaScript
+        : path.endsWith('.css')
+          ? guideFiles.CSS
+          : guideFiles.HTML,
+      contentType: path.endsWith('.js')
+        ? 'text/javascript'
+        : path.endsWith('.css')
+          ? 'text/css'
+          : 'text/html',
+    })
+  })
+  await guide.goto('https://docs-example.test/index.html')
+  await expect(guide.locator('.ticker-wrapper')).toHaveAttribute('data-ready', 'true')
+  await expect(guide.locator('.ticker-wrapper')).toHaveAttribute('data-duration', '30')
+  await expect(guide.locator('.ticker-content:not(.ticker-clone) a')).toHaveCount(2)
+  expect(guideErrors).toEqual([])
+  await guide.close()
 })
 
 test('gallery navigation, metadata and layouts work in both themes from 320 to 1440', async ({
@@ -453,7 +544,7 @@ test('reduced motion and no-JavaScript preserve readable example content and cod
   await fallback.goto('http://127.0.0.1:4324/ticker/examples/')
   const recipe = fallback.locator('#announcements')
   await recipe.locator('summary').click()
-  await expect(recipe.locator('pre')).toHaveCount(2)
+  await expect(recipe.locator('pre')).toHaveCount(8)
   await recipe.locator('ticker-demo').scrollIntoViewIfNeeded()
   await expect(recipe.locator('.ticker-content a')).toHaveCount(3)
   await context.close()

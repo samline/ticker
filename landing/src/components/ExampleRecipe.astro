@@ -12,7 +12,7 @@ import TextLink from '../../../shared/components/TextLink.astro'
 import Disclosure from '../../../shared/components/Disclosure.astro'
 import Tabs from '../../../shared/components/Tabs.astro'
 import TabPanel from '../../../shared/components/TabPanel.astro'
-import CodeFrame from '../../../shared/components/CodeFrame.astro'
+import CodeFiles from '../../../shared/components/CodeFiles.astro'
 import manifest from '../../../package.json'
 interface Props {
   recipe: Recipe
@@ -282,32 +282,59 @@ if (news) {
     ${applyToTickers('news.destroy();')}
   }, { once: true });
 }`
-const documentFor = (mode: 'cdn' | 'npm') => `<!doctype html>
+const scriptFor = (mode: 'cdn' | 'npm') =>
+  `${mode === 'cdn' ? 'const ticker = window.Ticker.ticker;' : `import { ticker } from '${manifest.name}';\nimport '${manifest.name}/style.css';`}\n${behavior}`
+const documentFor = (mode: 'cdn' | 'npm', separate = false) => `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(recipe.title)}</title>
 ${mode === 'cdn' ? `<link rel="stylesheet" href="${cdn}style.css">` : ''}
-<style>
-${css}
-</style>
+${separate ? '<link rel="stylesheet" href="./style.css">' : `<style>\n${css}\n</style>`}
 </head>
 <body>
 <main aria-label="${e(recipe.title)}">
 ${markup}
 </main>
 ${mode === 'cdn' ? `<script src="${cdn}browser/global.global.js"></script>` : ''}
-<script type="module">
-${mode === 'cdn' ? 'const ticker = window.Ticker.ticker;' : `import { ticker } from '${manifest.name}';\nimport '${manifest.name}/style.css';`}
-${behavior}
-</script>
+${separate ? '<script type="module" src="./main.js"></script>' : `<script type="module">\n${scriptFor(mode)}\n</script>`}
 </body>
 </html>`
 const codeOptions = await resolveConfig(resolve('src/components/ExampleRecipe.astro'))
+const fileLabels = i18n.controls.codeFiles
+const filesFor = async (mode: 'cdn' | 'npm') => [
+  {
+    id: 'html',
+    label: fileLabels.html,
+    filename: 'index.html',
+    language: 'html' as const,
+    code: await formatCode(documentFor(mode, true), { ...codeOptions, parser: 'html' }),
+  },
+  {
+    id: 'css',
+    label: fileLabels.css,
+    filename: 'style.css',
+    language: 'css' as const,
+    code: await formatCode(css, { ...codeOptions, parser: 'css' }),
+  },
+  {
+    id: 'js',
+    label: fileLabels.javascript,
+    filename: 'main.js',
+    language: 'javascript' as const,
+    code: await formatCode(scriptFor(mode), { ...codeOptions, parser: 'babel' }),
+  },
+]
 const documents = {
-  cdn: await formatCode(documentFor('cdn'), { ...codeOptions, parser: 'html' }),
-  npm: await formatCode(documentFor('npm'), { ...codeOptions, parser: 'html' }),
+  cdn: {
+    code: await formatCode(documentFor('cdn'), { ...codeOptions, parser: 'html' }),
+    files: await filesFor('cdn'),
+  },
+  npm: {
+    code: await formatCode(documentFor('npm'), { ...codeOptions, parser: 'html' }),
+    files: await filesFor('npm'),
+  },
 }
 ---
 
@@ -334,13 +361,13 @@ const documents = {
       <Tabs id={`example-${recipe.id}`} label={t.format} items={t.formats}>
         {t.formats.map(item => (
           <TabPanel id={item.id} label={item.label} class:list={['example-code-panel']}>
-            <CodeFrame
-              label={t.file}
-              text={documents[item.id]}
-              copyLabel={format(t.copy, { format: item.label, title: recipe.title })}
-              size="comfortable"
-              language="html"
-              class:list={['example-source']}
+            <CodeFiles
+              files={documents[item.id].files}
+              complete={{
+                code: documents[item.id].code,
+                filename: t.file,
+                copyLabel: format(t.copy, { format: item.label, title: recipe.title }),
+              }}
             />
           </TabPanel>
         ))}
@@ -394,8 +421,5 @@ const documents = {
     border: 0.0625rem solid var(--color-border-soft);
     border-radius: var(--radius-panel);
     padding: var(--space-xs);
-  }
-  .example-source {
-    --code-max-height: 28rem;
   }
 </style>

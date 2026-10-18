@@ -104,16 +104,14 @@ Do not also create a controller for a root owned by declarative discovery.
 
 ## Browser registry
 
-```html
-<script>
-  const sponsors = window.Ticker.newTicker({
-    id: 'sponsors',
-    options: { duration: 40 },
-  })
+```js
+const sponsors = window.Ticker.newTicker({
+  id: 'sponsors',
+  options: { duration: 40 },
+})
 
-  sponsors?.update({ pauseOnHover: true })
-  window.Ticker.destroyTicker('sponsors')
-</script>
+sponsors?.update({ pauseOnHover: true })
+window.Ticker.destroyTicker('sponsors')
 ```
 
 Prefer the registry destroy helper over `sponsors.destroy()` so the public `available` entry is also removed.

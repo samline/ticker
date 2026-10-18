@@ -1,5 +1,12 @@
 export default {
   integration: { package: 'Package / ESM', html: 'HTML / CDN' },
+  codeFiles: {
+    label: 'Example files',
+    html: 'HTML',
+    css: 'CSS',
+    javascript: 'JavaScript',
+    complete: 'Complete file',
+  },
   code: { label: 'Code example: {filename}', copyLabel: 'Copy code from {filename}' },
   copy: {
     command: 'npm install @samline/ticker',

@@ -113,21 +113,19 @@ news.refresh()
 
 <TabPanel id="global" anchor="global-example" label={controls.tabs.initItems[1].label}>
 
-Place this script after the source markup and standalone script (delivered by CDN or your own server):
+Put this JavaScript in a script after the source markup and standalone script (delivered by CDN or your own server). See the [three-file setup](/ticker/docs/guides/html-and-browser/#html--cdn-setup) to keep HTML, CSS and JavaScript separate:
 
-```html title="index.html"
-<script>
-  const news = window.Ticker.ticker('#news-ticker', {
-    duration: 24,
-    direction: 'left',
-    pauseOnHover: true,
-  })
+```js title="main.js"
+const news = window.Ticker.ticker('#news-ticker', {
+  duration: 24,
+  direction: 'left',
+  pauseOnHover: true,
+})
 
-  if (!news) throw new Error('Ticker target not found')
+if (!news) throw new Error('Ticker target not found')
 
-  news.update({ duration: 32 })
-  news.refresh()
-</script>
+news.update({ duration: 32 })
+news.refresh()
 ```
 
 </TabPanel>

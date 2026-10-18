@@ -14,7 +14,7 @@
     {
       "source": "example/src/content/docs/guides/html-and-browser.md",
       "sha256": "b5f78f56f52177ed770702a614b096d2e40c29f9d3bef5a7c48ff8511f76a4bb",
-      "destination": "docs/src/content/docs/guides/html-and-browser.md"
+      "destination": "docs/src/content/docs/guides/html-and-browser.mdx"
     },
     {
       "source": "example/src/content/docs/guides/lifecycle.md",
