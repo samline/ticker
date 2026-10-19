@@ -44,7 +44,7 @@ Shared interactive roots mark interface content with `data-ui`; Article's prose 
 
 ## Source hygiene
 
-Before deleting a source, trace imports, Astro/MDX composition, generated DOM hooks, translated data, assets and build/CI entrypoints. Keep package-owned runtime CSS adaptations, no-JavaScript fallbacks, compatibility fragments/redirects, asset licenses and migration evidence. Remove only proven-unused hooks, palette values, retired props and obsolete override rules. Adjacent equivalent media blocks can be consolidated without changing cascade order. Keep final visual values in the owning component rather than layering a retired design underneath. Generated dependency/build directories are not maintained source; never revive the retired Starlight example project.
+Before deleting a source, trace imports, Astro/MDX composition, generated DOM hooks, translated data, assets and build/CI entrypoints. Keep public runtime stylesheet imports, no-JavaScript fallbacks, compatibility fragments/redirects, asset licenses and migration evidence. Remove only proven-unused hooks, palette values, retired props and obsolete override rules. Adjacent equivalent media blocks can be consolidated without changing cascade order. Keep final visual values in the owning component rather than layering a retired design underneath. Generated dependency/build directories are not maintained source; never revive the retired Starlight example project.
 
 ## Code rendering
 
@@ -65,3 +65,5 @@ Titles share Heading and PageTitle rather than page-local font rules. Heading ow
 CI builds the combined artifact in the landing job and runs both browser suites, including cross-route typography checks. The standalone Docs suite executes its own three-file starter; Landing tests must not require a sibling Docs build to exist.
 
 `lib/mount-elements.ts` supplies one shared insertion/removal observer for component setup. Each processed component script registers an arrow function, keeps instance state in its closure and returns cleanup. Reinserted roots get fresh setup. The existing ticker-* tags are DOM scopes; no custom elements, classes or `this` are needed.
+
+Reusable theme ports are tracked in ../package-landing-docs/UPSTREAM.md. Consult its pinned reference before syncing shared UI; preserve package-specific consumer integrations and validate each site independently.

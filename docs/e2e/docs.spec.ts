@@ -490,3 +490,29 @@ test('HTML/CDN guide reuses file tabs with exact copying and keyboard navigation
   await expect(files.getByRole('tab', { name: 'CSS', exact: true })).toBeFocused()
   await expect(files.getByRole('tabpanel', { name: 'CSS', exact: true })).toBeVisible()
 })
+
+for (const control of ['menu', 'search']) {
+  test(`remounted open ${control} resets its trigger and releases modal state`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 900 })
+    await page.goto('./')
+    const root = `ticker-docs-${control}`
+    const trigger = page.locator(`${root} > button`)
+    await trigger.click()
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    await page.evaluate(selector => {
+      const root = document.querySelector(selector)!
+      const parent = root.parentNode!,
+        next = root.nextSibling
+      root.remove()
+      parent.insertBefore(root, next)
+    }, root)
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    expect(await page.evaluate(() => getComputedStyle(document.body).position)).not.toBe('fixed')
+    await trigger.click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(trigger).toBeFocused()
+  })
+}

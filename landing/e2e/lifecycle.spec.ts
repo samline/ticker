@@ -36,3 +36,26 @@ test('demo and recipe functions release removed instances and reconnect once', a
   await expect(recipe.getByRole('button', { name: /Play animation:/ })).toBeVisible()
   await expect(demo.locator('.ticker-frame')).toHaveAttribute('data-user-paused', 'true')
 })
+
+test('remounting an open mobile menu resets its accessible state and releases the lock', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 900 })
+  await page.goto('./')
+  const trigger = page.locator('[data-menu-trigger]')
+  await trigger.click()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  await page.evaluate(() => {
+    const root = document.querySelector('ticker-mobile-menu')!
+    const parent = root.parentNode!,
+      next = root.nextSibling
+    root.remove()
+    parent.insertBefore(root, next)
+  })
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  expect(await page.evaluate(() => getComputedStyle(document.body).position)).not.toBe('fixed')
+  await trigger.click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(trigger).toBeFocused()
+})

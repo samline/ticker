@@ -238,6 +238,7 @@ const id = `docs-search-${crypto.randomUUID()}`
       clearTimeout(timer)
       ++request
       if (element.dataset.id) browser.destroyDrawer(element.dataset.id)
+      trigger.setAttribute('aria-expanded', 'false')
     }
   })
 </script>
