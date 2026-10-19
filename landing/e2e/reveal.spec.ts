@@ -1,5 +1,25 @@
 import { test, expect } from '@playwright/test'
 
+test('initial viewport content stays visible while reveal observers initialize', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const hidden: string[] = []
+    Object.assign(window, { initialHiddenReveals: hidden })
+    new MutationObserver(records => {
+      for (const { target } of records) {
+        if (!(target instanceof HTMLElement) || !target.matches('ticker-reveal[data-pending]'))
+          continue
+        if (target.getBoundingClientRect().top < innerHeight) hidden.push(target.textContent ?? '')
+      }
+    }).observe(document, { attributes: true, attributeFilter: ['data-pending'], subtree: true })
+  })
+  await page.goto('./')
+  await expect(page.locator('ticker-reveal').first()).toHaveAttribute('data-mounted', 'true')
+  await expect(page.locator('ticker-reveal[data-pending]').first()).toBeAttached()
+  expect(await page.evaluate(() => Reflect.get(window, 'initialHiddenReveals'))).toEqual([])
+})
+
 test('a tall block starts fading just before entering the viewport', async ({ page }) => {
   await page.goto('./')
   await expect(page.locator('ticker-reveal').first()).toHaveAttribute('data-mounted', 'true')

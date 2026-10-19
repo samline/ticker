@@ -36,7 +36,7 @@ These instructions apply to the maintained Astro landing. Read README.md for rat
 ## Accessibility and validation
 
 - Main consumes shared Fonts for local WOFF2 faces and selective heading preloads. Preserve the separate social-image TTF inputs and licenses. CopyButton, Tabs and TickerDemo reserve their control space with inert and visibility:hidden until ready; keep unavailable controls out of focus/accessibility while retaining readable no-JavaScript content. Run loading.spec.ts for delayed-script geometry and local-font requests after changing initialization.
-- Both Astro configs share lib/site-build.mjs for the 18 KiB stylesheet inlining threshold; compare cold mobile LCP, HTML size and cacheable CSS before changing it. Preserve Vite's default treatment of non-CSS assets.
+- Both Astro configs share lib/site-build.mjs for the 40 KiB stylesheet inlining threshold; compare cold mobile LCP, HTML size and cacheable CSS before changing it. Preserve Vite's default treatment of non-CSS assets.
 
 - Preserve semantic headings, section labels, skip-link behavior, visible focus and appropriate ARIA. Use native controls. Tabs support arrows/Home/End; modal menus retain focus, restore it on close and dismiss correctly on desktop transitions.
 - Support both light and dark themes, reduced motion, blocked storage and JavaScript-disabled content. Respect hover capability and reduced motion for button feedback. Keep static ticker content and intentional code scrolling keyboard reachable.
@@ -133,6 +133,8 @@ The distributable Ticker integration skill lives in ../skills/ticker/SKILL.md an
 
 Example code disclosures align summary text, notes, tabs and CodeFrame to the same inner inset. Group notes with a single gap, remove the final TabPanel's bottom margin, and keep bottom padding equal to horizontal padding. The body grid needs minmax(0, 1fr) so long source lines scroll inside CodeFrame instead of expanding the document. Responsive checks must include an open code disclosure.
 
+Recipe sections own the single divider between examples. Keep code disclosures borderless so their bottom edge does not duplicate the next section's top border. Use 2.5rem vertical padding per recipe (2rem below 48rem), keeping the combined space between recipes compact and anchor compensation synchronized.
+
 Share syntax rendering as well as the frame. Use CodeFrame text/language with the shared Astro/Shiki theme; CodeBlock only adapts catalog copy/filenames. Preserve whole source strings rather than manual syntax-token arrays. Markdown/MDX in docs uses the same theme and container. Verify computed colors and exact source copying across Home, Examples and Docs in both themes.
 
 CodeFrame emits each snippet once. Shared CopyButton copies the current rendered code at click time unless an explicit text override is supplied; keep the installation command override and avoid duplicating all gallery sources in data-copy-text. Validate exact copied file execution and HTML transfer size when changing this boundary.
@@ -161,6 +163,6 @@ Titles share Heading and PageTitle rather than page-local font rules. Heading se
 
 Examples shares Home’s centered opening, HeroBackdrop, narrow title container and medium demo width. Its compact jump index precedes numbered SectionHeading recipe blocks with Home’s section spacing; code stays in the shared native disclosure. Keep the halo’s containing section tall enough for its gradient to fade naturally. Recipe anchors align the heading group (including its eyebrow) 2.5rem below the sticky header.
 
-Reveal anticipates viewport entry by 64 CSS pixels, regardless of content height (threshold 0), and uses the shared 600ms duration with ease-ui so the fade remains visible. Preserve immediate initial-viewport content, reduced-motion/no-JavaScript readability and observer cleanup.
+Reveal anticipates viewport entry by 64 CSS pixels, regardless of content height (threshold 0), and uses the shared 600ms duration with ease-ui so the fade remains visible. Use the first IntersectionObserver geometry snapshot to arm only offscreen blocks; do not synchronously measure each block during mounting. Preserve immediate initial-viewport content, reduced-motion/no-JavaScript readability and observer cleanup.
 
 Interactive site code uses arrow functions, with named functions only when useful; no classes or `this`. Components register small setup functions with `shared/lib/mount-elements.ts`, keep state in closures and return cleanup. Existing ticker-* tags are scoped DOM roots, not registered custom elements. Call package controllers directly; keep recipe content editing in ExamplePreview and controller setup in TickerDemo. Generate copied files in landing/src/lib/recipes with separate markup, styles, behavior and file assembly. Preserve controllers on persisted pagehide so browser back/forward restoration keeps working; clean up only on a real departure.

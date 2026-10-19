@@ -4,7 +4,7 @@ Read README.md before changing the docs. This site replaces Starlight; `src/cont
 
 DocsLayout consumes shared Fonts for local WOFF2 faces and selective heading preloads; source versions and SIL licenses live in shared/assets/fonts. Do not restore a Google/Bunny font stylesheet. Shared CopyButton and Tabs retain invisible inert control space until initialized, while every fallback example remains readable without JavaScript. Keep fonts.spec.ts and the shared delayed-loading/no-JavaScript checks passing.
 
-Both Astro configs use shared/lib/site-build.mjs for the 18 KiB stylesheet inlining threshold; preserve larger cacheable sheets and Vite's defaults for other assets. Measure mobile loading and HTML transfer size before adjusting this policy.
+Both Astro configs use shared/lib/site-build.mjs for the 40 KiB stylesheet inlining threshold; preserve larger cacheable sheets and Vite's defaults for other assets. Measure mobile loading and HTML transfer size before adjusting this policy.
 
 - Use Astro 7, Tailwind 4, `class:list={[...]}` and rem for fixed authored CSS lengths. Components own scoped styles and processed scripts. Reusable controls belong in components; complete document structure belongs in layouts. Do not add a global component stylesheet or initialization script.
 - Share the shared theme tokens and Box/Theme/ThemeToggle/CopyButton intentionally. Do not fork their palette, clipboard behavior or theme persistence. A shared-control change must be checked in both sites.

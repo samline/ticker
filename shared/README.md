@@ -8,7 +8,7 @@ The landing, examples gallery and documentation are routes of one product websit
 - `styles/theme.css`: the single palette, font families, breakpoints, spacing scale, radii, focus and motion tokens. This is theme configuration, not a global component stylesheet.
 - `components/Fonts.astro` and `assets/fonts/`: shared local WOFF2 faces and selective preloads, with source versions, sizes and licenses in `assets/fonts/README.md`. Both document heads consume the same component; no runtime font service is required.
 - `lib/serialize.ts`: safe JSON-LD and XML serialization shared by metadata and social images.
-- `lib/site-build.mjs`: both apps' CSS inlining policy. Stylesheets below 18 KiB are integrated into HTML to remove small blocking requests; larger shared sheets stay cacheable. Other assets retain Vite's default limit, including external font URLs.
+- `lib/site-build.mjs`: both apps' CSS inlining policy. Stylesheets below 40 KiB are integrated into HTML to remove small blocking requests; larger shared sheets stay cacheable. Other assets retain Vite's default limit, including external font URLs.
 - `i18n/createI18n.ts`: one typed locale resolver and translation-shape contract; each app still owns its catalogs.
 - `i18n/translations/<locale>/`: shared branding and control messages. Each app owns its navigation/article/marketing copy. `i18n/format.ts` interpolates whole translated messages.
 
@@ -34,7 +34,7 @@ CI installs this package before checking either app. Keep its lockfile and the C
 
 CopyButton and Tabs reserve their eventual control geometry with `inert` and `visibility: hidden` before initialization, avoiding layout movement when controls appear. This does not change native `hidden` for inactive panels. Controls stay outside the keyboard/accessibility tree until ready, and no-JavaScript content remains readable. Delayed-script browser tests compare the installation command and demo-header dimensions before and after initialization.
 
-`Tabs` is the same component in landing demos/installers and documentation. `TabPanel` adds readable labels when JavaScript is disabled and preserves stable published fragment IDs. Tabs support roving keyboard focus, Home/End/arrows, independent instances, native hidden panels and fragment activation; do not rebuild tab markup in a Markdown transform. Use tabs for alternatives, while keeping ordered steps and API tables visible.
+`Tabs` is the same component in landing demos/installers and documentation. `TabPanel` adds readable labels when JavaScript is disabled and preserves stable published fragment IDs. Initialize selection and fragment activation before releasing inert; initial selection has no color/background transition. Pointer hover and keyboard focus enable color/background-color feedback, with reduced motion respected. Tabs support roving keyboard focus, Home/End/arrows, independent instances, native hidden panels and fragment activation; do not rebuild tab markup in a Markdown transform. Use tabs for alternatives, while keeping ordered steps and API tables visible.
 
 `CardGrid` lays out landing features and documentation destinations. `LinkCard` owns compact navigation title/body appearance. `Callout` composes Surface for important prose. Documentation uses the official Astro MDX integration only in articles that need components; plain Markdown remains appropriate elsewhere. The collection accepts both formats without changing route IDs. Preserve source file extensions in migration inventory records.
 

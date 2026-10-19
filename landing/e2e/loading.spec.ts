@@ -1,5 +1,34 @@
 import { test, expect } from '@playwright/test'
 
+test('tabs initialize without animating their active color or background', async ({ page }) => {
+  await page.addInitScript(() => {
+    const transitions: string[] = []
+    Object.assign(window, { initialTabTransitions: transitions })
+    document.addEventListener('transitionrun', event => {
+      if (event.target instanceof HTMLElement && event.target.matches('.tab'))
+        transitions.push(event.propertyName)
+    })
+  })
+  await page.goto('./')
+  await expect(page.locator('[data-tabs="demo"]')).toBeVisible()
+  // Allow the UI transition window to elapse so delayed starts are captured.
+  await page.waitForTimeout(250)
+  expect(await page.evaluate(() => Reflect.get(window, 'initialTabTransitions'))).toEqual([])
+  const tabs = page.locator('[data-tabs="demo"]')
+  await tabs.getByRole('tab').nth(1).click()
+  await expect(tabs.getByRole('tab').nth(1)).toHaveAttribute('aria-selected', 'true')
+  await expect
+    .poll(() => page.evaluate(() => Reflect.get(window, 'initialTabTransitions')))
+    .toContain('background-color')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  expect(
+    await tabs
+      .getByRole('tab')
+      .nth(1)
+      .evaluate(el => getComputedStyle(el).transitionDuration)
+  ).toBe('0s')
+})
+
 for (const width of [390, 1350]) {
   test(`initial controls reserve their space with delayed JavaScript at ${width}px`, async ({
     page,

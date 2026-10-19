@@ -10,14 +10,24 @@
     if (
       !target ||
       !('IntersectionObserver' in window) ||
-      matchMedia('(prefers-reduced-motion: reduce)').matches ||
-      target.getBoundingClientRect().top < innerHeight
+      matchMedia('(prefers-reduced-motion: reduce)').matches
     )
       return
-    element.dataset.pending = 'true'
+    let initial = true
     const observer = new IntersectionObserver(
       entries => {
-        if (entries.some(entry => entry.isIntersecting)) {
+        const entry = entries[0]
+        if (!entry) return
+        // Use the observer's layout snapshot instead of synchronously measuring
+        // each block between the other components' initialization writes.
+        if (initial) {
+          initial = false
+          if (!entry.isIntersecting && entry.boundingClientRect.top >= innerHeight) {
+            element.dataset.pending = 'true'
+            return
+          }
+        }
+        if (entry.isIntersecting || !element.hasAttribute('data-pending')) {
           delete element.dataset.pending
           observer.disconnect()
         }

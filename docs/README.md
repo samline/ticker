@@ -76,7 +76,7 @@ CodeFrame no longer duplicates its complete source in a clipboard attribute. Sha
 
 DocsLayout uses shared `Fonts.astro` for the same three local Latin WOFF2 faces as Home and Examples, with only the heading fonts preloaded. Source versions and SIL licenses live in `shared/assets/fonts/`; Google/Bunny font services are no longer requested. CopyButton and Tabs reserve invisible inert control space until initialization without concealing no-JavaScript article examples. `e2e/fonts.spec.ts` checks the actual font requests and loaded faces in standalone and combined builds.
 
-Both Astro configs consume `shared/lib/site-build.mjs` to integrate stylesheets below 18 KiB into HTML; larger common sheets remain cacheable and other assets retain Vite's default inlining limit. Keep the two apps' policy synchronized and measure HTML size and mobile loading when changing it.
+Both Astro configs consume `shared/lib/site-build.mjs` to integrate stylesheets below 40 KiB into HTML; larger common sheets remain cacheable and other assets retain Vite's default inlining limit. Keep the two apps' policy synchronized and measure HTML size and mobile loading when changing it.
 
 Read [shared/README.md](../shared/README.md) for component ownership, tokens, catalog location, setup and cross-site validation. Install shared tooling before either app. Both format commands include shared source and use the root Prettier configuration. The source-copy audit scans landing, docs and shared components. Never recreate a shared primitive here or import its implementation from the sibling app.
 

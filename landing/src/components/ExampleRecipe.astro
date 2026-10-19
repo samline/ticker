@@ -62,7 +62,7 @@ const documents = await createRecipeFiles({ recipe, i18n })
 </section>
 <style>
   .recipe {
-    --recipe-top-space: 5rem;
+    --recipe-top-space: 2.5rem;
     padding-block: var(--recipe-top-space);
     border-top: 0.0625rem solid var(--color-border-soft);
   }
@@ -101,12 +101,11 @@ const documents = await createRecipeFiles({ recipe, i18n })
   }
   .code-disclosure {
     margin-top: var(--space-lg);
-    border-bottom: 0.0625rem solid var(--color-border-soft);
     padding-block: var(--space-xs);
   }
   @media (width < 48rem) {
     .recipe {
-      --recipe-top-space: 3.5rem;
+      --recipe-top-space: 2rem;
     }
   }
 </style>

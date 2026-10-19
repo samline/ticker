@@ -143,7 +143,7 @@ Execute published examples against the package, not just the renderer. The Recip
 
 Main uses shared `Fonts.astro` to load three local Latin WOFF2 files (96.4 KiB total), with variable Inter/JetBrains Mono and Instrument Serif italic. Only Inter and Instrument Serif are preloaded. Source versions and licenses live in `shared/assets/fonts/`; neither app requests a font service. The existing TTF files remain inputs to the social image. CopyButton, Tabs and TickerDemo reserve their control geometry with inert and visibility:hidden until ready; all original content stays readable without JavaScript. `e2e/loading.spec.ts` checks delayed-script dimensions and local font requests.
 
-Both Astro configs share `shared/lib/site-build.mjs`: stylesheets below 18 KiB are integrated into HTML, while larger common styles remain cacheable. Fonts and other assets retain Vite's default inlining limit. Re-measure cold mobile loads and HTML size before adjusting this tradeoff.
+Both Astro configs share `shared/lib/site-build.mjs`: stylesheets below 40 KiB are integrated into HTML, while larger common styles remain cacheable. Fonts and other assets retain Vite's default inlining limit. Re-measure cold mobile loads and HTML size before adjusting this tradeoff.
 
 `SITE_URL` defaults to `https://samline.github.io/ticker/`; `.env.example` documents the override. Its pathname becomes Astro's base path. Canonical, Open Graph, Twitter cards, WebSite/WebPage/SoftwareSourceCode JSON-LD, robots.txt, sitemap and the generated 1200×630 PNG share this public URL. Development is noindex. JSON-LD escapes HTML-sensitive characters; sharing-image text is XML-escaped. Only publish metadata and claims supported by the actual package. The social image reuses the dark palette from shared theme tokens and translated hero copy. Its Inter and Instrument Serif fonts are bundled in `src/assets/fonts/` with their SIL Open Font licenses; Resvg loads those files explicitly so local and CI output match without system fonts or network requests. Keep the 1200×630 output, readable safe margins and shared root image for Home, Examples and Docs.
 
@@ -304,7 +304,9 @@ Validation passed: both Astro checks with zero diagnostics, both format checks, 
 
 Examples shares Home’s centered opening, HeroBackdrop, narrow title container and medium demo width. Its compact jump index precedes numbered SectionHeading recipe blocks with Home’s section spacing; code stays in the shared native disclosure. Keep the halo’s containing section tall enough for its gradient to fade naturally. Recipe anchors align the heading group (including its eyebrow) 2.5rem below the sticky header.
 
-Reveal anticipates viewport entry by 64 CSS pixels, regardless of content height (threshold 0), and uses the shared 600ms duration with ease-ui so the fade remains visible. Preserve immediate initial-viewport content, reduced-motion/no-JavaScript readability and observer cleanup.
+Each recipe section owns its top divider; code disclosures have no bottom border, leaving a single separator between examples. Vertical padding is 2.5rem per side (2rem below 48rem), so adjacent recipes do not accumulate the former 10rem desktop gap.
+
+Reveal anticipates viewport entry by 64 CSS pixels, regardless of content height (threshold 0), and uses the shared 600ms duration with ease-ui so the fade remains visible. Use the first IntersectionObserver geometry snapshot to arm only offscreen blocks; do not synchronously measure each block during mounting. Preserve immediate initial-viewport content, reduced-motion/no-JavaScript readability and observer cleanup.
 
 ### Follow-up after the gallery and Reveal changes
 
@@ -330,3 +332,24 @@ Recipe generation lives in `src/lib/recipes/`: markup, styles, direct controller
 The site now consumes Ticker through its public imports and original stylesheet. Removed all site classes/this, the copied runtime CSS, measurement rewriting and application command-event forwarding. Component setup is functional with explicit cleanup; a single shared observer handles inserted, removed and reinserted roots. ExampleRecipe is presentation, while src/lib/recipes owns the build-time file generator. Complete examples and Astro source keep blank lines between HTML, script and style, and their code is formatted with Prettier.
 
 The source/reference audit found no additional unreferenced maintained components/helpers or empty maintained directories. Keep the social-image TTF fonts, shared WOFF2 assets/licenses, public route compatibility and the existing tests: they are active build/runtime/browser checks, not abandoned fixtures. The root .gitignore replaces redundant app ignore lists and excludes generated reports/caches/archives and environment files; npm packaging excludes the entire site and every development/test source. This review reduces duplication and ownership confusion; it does not establish a measured performance improvement. See the dated root AGENTS audit for evidence and validation results.
+
+### Published PageSpeed follow-up — 2026-10-19
+
+The published `jszyvpap9c` report recorded 97 mobile / 100 desktop performance, with accessibility, best practices and SEO at 100. Mobile FCP was 1.4 s, LCP 1.7 s, TBT 10 ms, CLS 0 and Speed Index 4.4 s. There were no field data. Its remaining blocking CSS, forced Reveal layout and initial tab transitions motivated this follow-up.
+
+Reveal now uses the first IntersectionObserver geometry snapshot to arm offscreen blocks without synchronous per-block measurements. Initial viewport content remains visible; the 64px early entry, 600ms fade and cleanup are retained. Tabs finishes its initial selection before becoming interactive, and only hover/focus enables color/background-color transitions. Reduced motion disables those transitions.
+
+The shared stylesheet threshold increased from 18 to 40 KiB after comparing three cold local mobile runs per configuration (Lighthouse 12.3.0 / Chromium 151, default simulated throttling). Home and Examples now have zero external stylesheets; the larger Docs stylesheet remains external. Home HTML increased from 19,842 to 27,416 gzip bytes; Examples from 275,978 to 283,706. These gzip measurements describe generated files, not production transfer sizes.
+
+| Local mobile median |  Before |   After |
+| ------------------- | ------: | ------: |
+| Performance score   |      96 |      98 |
+| FCP                 |  1.89 s |  1.73 s |
+| LCP                 |  2.41 s |  2.26 s |
+| Speed Index         |  1.89 s |  1.73 s |
+| TBT                 |    0 ms |    0 ms |
+| CLS                 | 0.00002 | 0.00002 |
+
+The local Speed Index does not reproduce the published 4.4 s. Lighthouse's local animation diagnostic also failed internally in both configurations (`RootCauses` / `frame_sequence`); browser regression checks verify initial tab transitions separately. Do not claim that a new production score or all trace diagnostics have been verified. Keep the approved 4.8-second HeroBackdrop entrance and remeasure published HTTPS before making further visual changes. Cache TTLs are unchanged.
+
+Validation passed: both Astro checks with zero diagnostics, 17 landing Node checks, both format checks, the combined build/link audit (1,882 links / 41 pages), 50 landing browser tests, 26 standalone Docs browser tests and 27 combined browser tests. The standalone cross-site title check remains intentionally skipped and is covered by the combined suite. Home, Examples and Docs were reviewed in the browser beside their shared design; automated suites cover both themes, 320–1440 layouts, enlarged text, no JavaScript, keyboard navigation, exact copying and runnable examples. The loading regression also checks that tab feedback becomes instantaneous with reduced motion.
