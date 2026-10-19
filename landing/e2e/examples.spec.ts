@@ -479,7 +479,7 @@ test('gallery navigation, metadata and layouts work in both themes from 320 to 1
     .click()
   const gap = await page.evaluate(
     () =>
-      (document.getElementById('announcements-title')!.getBoundingClientRect().top -
+      (document.querySelector('#announcements .section-heading')!.getBoundingClientRect().top -
         document.querySelector('ticker-header')!.getBoundingClientRect().bottom) /
       parseFloat(getComputedStyle(document.documentElement).fontSize)
   )

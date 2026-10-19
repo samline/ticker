@@ -72,6 +72,12 @@ The collection/i18n design follows the official [Content Collections guide](http
 
 ## Shared site foundations
 
+CodeFrame no longer duplicates its complete source in a clipboard attribute. Shared CopyButton reads the current rendered code from its owning frame at click time; an explicit text prop remains available for commands. Article only frames native Markdown/MDX code and labels its language, without caching another clipboard source. Exact copies, newline preservation and denied-clipboard selection remain covered by the browser suites.
+
+DocsLayout uses shared `Fonts.astro` for the same three local Latin WOFF2 faces as Home and Examples, with only the heading fonts preloaded. Source versions and SIL licenses live in `shared/assets/fonts/`; Google/Bunny font services are no longer requested. CopyButton and Tabs reserve invisible inert control space until initialization without concealing no-JavaScript article examples. `e2e/fonts.spec.ts` checks the actual font requests and loaded faces in standalone and combined builds.
+
+Both Astro configs consume `shared/lib/site-build.mjs` to integrate stylesheets below 18 KiB into HTML; larger common sheets remain cacheable and other assets retain Vite's default inlining limit. Keep the two apps' policy synchronized and measure HTML size and mobile loading when changing it.
+
 Read [shared/README.md](../shared/README.md) for component ownership, tokens, catalog location, setup and cross-site validation. Install shared tooling before either app. Both format commands include shared source and use the root Prettier configuration. The source-copy audit scans landing, docs and shared components. Never recreate a shared primitive here or import its implementation from the sibling app.
 
 Search remains specific to docs: use a content-sized square top Drawer capped at 44rem/viewport minus 1rem, keep intro/input/close fixed and scroll results independently. Query after 300ms, retain previous results while typing/loading and discard stale responses. Clear immediately on empty input. Use the native upward handle with handleOnly, plus close/Escape/backdrop alternatives; do not add height measurement or gesture/focus-trap code. Test focus and unchanged background scroll after close.

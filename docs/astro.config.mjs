@@ -5,6 +5,7 @@ import sitemap from '@astrojs/sitemap'
 import { unified } from '@astrojs/markdown-remark'
 import accessibleOverflow from './scripts/rehype-accessible-code.mjs'
 import { codeTheme } from '../shared/lib/code-theme.mjs'
+import { inlineSmallStylesheets } from '../shared/lib/site-build.mjs'
 export default defineConfig({
   site: 'https://samline.github.io',
   base: '/ticker/docs',
@@ -13,7 +14,10 @@ export default defineConfig({
   i18n: { defaultLocale: 'en', locales: ['en'], routing: { prefixDefaultLocale: false } },
   integrations: [mdx(), sitemap({ filter: page => !page.includes('/guides/migration') })],
   redirects: { '/guides/migration/': '/ticker/docs/changelog/' },
-  vite: { plugins: [tailwindcss()] },
+  vite: {
+    plugins: [tailwindcss()],
+    build: { assetsInlineLimit: inlineSmallStylesheets },
+  },
   markdown: {
     processor: unified({ rehypePlugins: [accessibleOverflow] }),
     syntaxHighlight: 'shiki',

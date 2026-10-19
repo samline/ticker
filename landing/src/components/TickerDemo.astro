@@ -68,7 +68,7 @@ const i18n = getI18n(Astro)
       </div>
     </div>
   </div>
-  <div class:list={['ticker-controls']} hidden>
+  <div class:list={['ticker-controls']} inert>
     {navigation && (
       <>
         <Button variant="ghost" context="ticker" data-previous aria-controls={instanceId}>
@@ -145,7 +145,7 @@ const i18n = getI18n(Astro)
         measurements.observe(frame, { attributes: true, attributeFilter: ['style'] })
         signal.addEventListener('abort', () => measurements.disconnect(), { once: true })
         normalizeDistance()
-        controls.hidden = false
+        controls.inert = false
         const renderPaused = (paused: boolean) => {
           frame.dataset.userPaused = String(paused)
           button.textContent = (paused ? this.dataset.playText : this.dataset.pauseText) ?? ''
@@ -524,6 +524,9 @@ const i18n = getI18n(Astro)
   .ticker-controls button {
     min-height: 2.75rem;
   }
+  .ticker-controls[inert] {
+    visibility: hidden;
+  }
   @media (prefers-reduced-motion: reduce) {
     .ticker-frame {
       overflow-x: auto;
@@ -549,9 +552,6 @@ const i18n = getI18n(Astro)
   }
   ticker-demo {
     display: block;
-  }
-  .ticker-controls[hidden] {
-    display: none;
   }
   .ticker-content :global(a:focus-visible) {
     outline: 0.125rem solid var(--color-accent);

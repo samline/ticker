@@ -4,6 +4,10 @@ Read README.md. Landing and docs consume this single source package. Do not copy
 
 Use Astro 7, scoped component styles/scripts, rem fixed lengths, `class:list`, native attributes and existing palette/spacing/radius/focus/motion tokens. Preserve the user's Box widths and gutters. Do not put component selectors in theme.css. Use typed shared catalogs for control messages; shared UI must remain independent of marketing/docs prose.
 
+Fonts owns the local Latin WOFF2 faces and heading preloads for both apps. Keep versions, sizes and SIL licenses in assets/fonts; do not restore external font stylesheets. CopyButton and Tabs reserve control geometry with inert plus visibility:hidden until initialized. Inactive panels still use native hidden. Verify delayed-script dimensions, no-JavaScript readability and actual local font requests after changing these boundaries; do not override the global hidden contract.
+
+Both Astro configs consume lib/site-build.mjs to inline stylesheets below 18 KiB while retaining larger shared CSS in cacheable files and Vite's defaults for non-CSS assets. Compare HTML transfer size, remaining blocking requests and mobile LCP before changing the threshold; do not inline every page's full CSS by default.
+
 TextLink owns contextual documentation CTAs and their focus/hover. NavLink owns current/hover/focus and symmetric padding; indentation is a separate margin. Surface owns card appearance. Disclosure owns native summary layout. CodeFrame/CopyButton and Theme/ThemeToggle each have one implementation. DrawerStyles owns native scoped CSS normalization, close styling and reduced motion; never implement dependency gestures or focus traps here.
 
 Shared files have their own Astro type tooling. Both app checks and format commands include shared source. Use the root Prettier configuration. A shared change requires both sites' build and browser checks, including both themes, responsive/enlarged text, repeated instances, keyboard and lifecycle cleanup. Keep setup, CI, catalogs and these maintenance notes synchronized.
@@ -13,6 +17,8 @@ Share locale resolution through i18n/createI18n.ts and safe metadata serializati
 Landing, Examples and Docs are one website. Before creating a variant, compare it to existing Home UI and reuse the implementation. Keep visual regression checks against real shared consumers; duplicated tokens or a similar screenshot are not proof of reuse. Root AGENTS.md records the cross-project decisions and previous mistakes to avoid.
 
 CodeFrame owns Astro Code/Shiki rendering for text/language input and shared/lib/code-theme.mjs owns the single syntax configuration. Native Markdown/MDX highlighting consumes that same theme; Article only frames the result. Remove manual syntax-token arrays and separate theme objects. Preserve text exactly: Astro trims one final newline, so CodeFrame restores it through its build-time transformer. Verify actual colors, copied source, no-JavaScript output and both themes, not merely the presence of a toolbar or token spans.
+
+CopyButton resolves code from its nearest data-copy-source frame at click time; its optional text prop is an explicit override for commands. Do not serialize complete highlighted snippets a second time into data-copy-text, or cache a separate clipboard string in Article. Preserve final newlines, literal characters, independent feedback and failure selection, and execute copied gallery files after changes.
 
 RangeControl owns the existing demo range presentation, shared by speed and position controls. It supplies native input/focus styling and a label/slot; the owning application or package supplies behavior.
 

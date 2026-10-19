@@ -4,6 +4,7 @@ import sitemap from '@astrojs/sitemap'
 import { loadEnv } from 'vite'
 import { fileURLToPath } from 'node:url'
 import { getSiteUrl, productionSiteUrl } from './src/lib/site.ts'
+import { inlineSmallStylesheets } from '../shared/lib/site-build.mjs'
 
 const directory = fileURLToPath(new URL('.', import.meta.url))
 const environment = loadEnv(process.env.NODE_ENV ?? 'development', directory, 'SITE_')
@@ -37,6 +38,7 @@ export default defineConfig({
   devToolbar: { enabled: false },
   compressHTML: true,
   vite: {
+    build: { assetsInlineLimit: inlineSmallStylesheets },
     plugins: [tailwindcss()],
     // Keep link/asset composition slash-terminated while routing accepts the bare base.
     define: { 'import.meta.env.BASE_URL': JSON.stringify(base) },

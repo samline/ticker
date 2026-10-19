@@ -19,7 +19,7 @@ const instanceId = `tabs-${crypto.randomUUID()}`
       data-tabs={id}
       data-ui
       data-pagefind-ignore
-      hidden
+      inert
       aria-label={label}
     >
       {items.map(item => (
@@ -52,7 +52,7 @@ const instanceId = `tabs-${crypto.randomUUID()}`
       )
       if (!group || !tabs.length || !panels.length) return
       group.setAttribute('role', 'tablist')
-      group.hidden = false
+      group.inert = false
       const select = (selected: HTMLButtonElement, focus = false) => {
         tabs.forEach(tab => {
           const active = tab === selected
@@ -128,8 +128,8 @@ const instanceId = `tabs-${crypto.randomUUID()}`
 </script>
 
 <style>
-  [hidden] {
-    display: none !important;
+  .tabs[inert] {
+    visibility: hidden;
   }
   .tabs {
     display: inline-flex;

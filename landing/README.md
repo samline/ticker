@@ -141,6 +141,10 @@ Execute published examples against the package, not just the renderer. The Recip
 
 ## SEO and deployment
 
+Main uses shared `Fonts.astro` to load three local Latin WOFF2 files (96.4 KiB total), with variable Inter/JetBrains Mono and Instrument Serif italic. Only Inter and Instrument Serif are preloaded. Source versions and licenses live in `shared/assets/fonts/`; neither app requests a font service. The existing TTF files remain inputs to the social image. CopyButton, Tabs and TickerDemo reserve their control geometry with inert and visibility:hidden until ready; all original content stays readable without JavaScript. `e2e/loading.spec.ts` checks delayed-script dimensions and local font requests.
+
+Both Astro configs share `shared/lib/site-build.mjs`: stylesheets below 18 KiB are integrated into HTML, while larger common styles remain cacheable. Fonts and other assets retain Vite's default inlining limit. Re-measure cold mobile loads and HTML size before adjusting this tradeoff.
+
 `SITE_URL` defaults to `https://samline.github.io/ticker/`; `.env.example` documents the override. Its pathname becomes Astro's base path. Canonical, Open Graph, Twitter cards, WebSite/WebPage/SoftwareSourceCode JSON-LD, robots.txt, sitemap and the generated 1200×630 PNG share this public URL. Development is noindex. JSON-LD escapes HTML-sensitive characters; sharing-image text is XML-escaped. Only publish metadata and claims supported by the actual package. The social image reuses the dark palette from shared theme tokens and translated hero copy. Its Inter and Instrument Serif fonts are bundled in `src/assets/fonts/` with their SIL Open Font licenses; Resvg loads those files explicitly so local and CI output match without system fonts or network requests. Keep the 1200×630 output, readable safe margins and shared root image for Home, Examples and Docs.
 
 The Pages artifact places the landing at `/ticker/` and documentation at `/ticker/docs/`. `include-docs.mjs` copies `docs/dist/` and merges its sitemap entries. Config redirects preserve previous documentation paths. Asset and link construction must use `import.meta.env.BASE_URL` or configured URLs; hardcoded root-relative paths break repository deployments.
@@ -278,3 +282,43 @@ The shared integration labels are Package / ESM and HTML / CDN. The HTML/CDN gui
 CodeFiles composes the shared tabs and highlighted code frame for examples that mix languages. It shows independently copyable HTML/CSS/JavaScript and accepts an optional complete runnable HTML file. The gallery derives both outputs from the same source and references style.css/main.js in its separate HTML; the HTML/CDN guide consumes the same renderer in MDX. Keep small API snippets as normal fences. Preserve exact source copying, no-JavaScript fallback labels and native keyboard selection when nesting file tabs inside loading-mode tabs.
 
 Titles share Heading and PageTitle rather than page-local font rules. Heading separates semantic level from the controlled display/section scale; PageTitle composes the eyebrow, title and description. Keep the approved Home Inter/Instrument Serif pairing, weight, tracking and spacing tokens. Editorial accent text is an explicit trailing part of the translated title (titleAccent in docs frontmatter); never infer the last word or split API identifiers. Keep the full title unchanged in metadata/search and verify compiled whitespace, both themes, responsive sizes and enlarged text. API identifiers and single-word headings can remain entirely in the primary font.
+
+## Performance validation — 2026-10-19
+
+The local production preview was measured with Lighthouse 12.3.0 / Chromium 151, using default simulated throttling. The final mobile result is the median of three cold runs; desktop has one final run. These are local HTTP measurements, not a new published PageSpeed result or field data.
+
+| Metric            | Desktop | Mobile |
+| ----------------- | ------: | -----: |
+| Performance score |     100 |     99 |
+| FCP               |  0.37 s | 1.51 s |
+| LCP               |  0.51 s | 2.11 s |
+| Speed Index       |  0.61 s | 1.51 s |
+| CLS               |  0.0009 |      0 |
+| TBT               |    0 ms |   0 ms |
+
+Compared with the earlier local baseline, Home's external stylesheets fell from four (including Bunny) to one, font requests from six to three, and total recorded transfer from 210,085 to 164,903 bytes. The final HTML compresses to approximately 22 KiB gzip; the added inline CSS trades some cross-page reuse for fewer blocking requests. Larger common CSS remains external and cacheable. No font-service requests remain.
+
+The simulated mobile LCP increased from 1.61 s in the single earlier baseline to 2.11 s, while the unthrottled observed LCP decreased from 228 ms to 155 ms in the first final trace. These signals do not establish a mobile LCP improvement on the deployed site. Re-run PageSpeed on published HTTPS after deployment, compare multiple runs, and inspect the remaining stylesheet/font competition before making a stronger claim. Hosting cache TTLs remain unchanged; no fallback-font metric overrides were introduced because the reproduced large shifts came from control initialization.
+
+Validation passed: both Astro checks with zero diagnostics, both format checks, 16 landing Node tests, the combined build and link audit (1,880 links across 41 pages), 45 landing browser tests, 26 standalone docs browser tests and 27 combined browser tests. The standalone docs suite intentionally skips its one cross-site title check, which passes in the combined suite. The npm archive smoke test also passed. Home, Examples and Docs were reviewed in the browser; suites cover both themes, 320–1440 layouts, enlarged text, exact copying, no JavaScript, accessibility and delayed-control initialization.
+
+Examples shares Home’s centered opening, HeroBackdrop, narrow title container and medium demo width. Its compact jump index precedes numbered SectionHeading recipe blocks with Home’s section spacing; code stays in the shared native disclosure. Keep the halo’s containing section tall enough for its gradient to fade naturally. Recipe anchors align the heading group (including its eyebrow) 2.5rem below the sticky header.
+
+Reveal anticipates viewport entry by 64 CSS pixels, regardless of content height (threshold 0), and uses the shared 600ms duration with ease-ui so the fade remains visible. Preserve immediate initial-viewport content, reduced-motion/no-JavaScript readability and observer cleanup.
+
+### Follow-up after the gallery and Reveal changes
+
+The centered gallery opening, numbered recipe headings, compact index and earlier reveal timing were retained. The code-transfer review found 96 duplicate clipboard source attributes in the gallery. CodeFrame now emits its highlighted source once, and shared CopyButton reads that rendered code at click time. Explicit text remains supported for installation commands; Docs Article only frames native highlighted blocks instead of caching another clipboard string.
+
+With the same gallery design and recipes, this reduced generated HTML from 5,561,837 to 5,106,034 bytes, and gzip size from 378,220 to 277,281 bytes (26.7% less). Home also dropped from 22,184 to 21,924 gzip bytes. These are build measurements using Node's default gzip compression, not assumed production transfer sizes. Keep the exact-copy and runnable-file browser checks when changing this boundary.
+
+One cold mobile Lighthouse run before and after the copy-source change (same local preview, Lighthouse 12.3.0 / Chromium 151, default simulated throttling) gave:
+
+| Examples metric   | Before |  After |
+| ----------------- | -----: | -----: |
+| Performance score |     84 |     89 |
+| FCP               | 3.16 s | 2.71 s |
+| LCP               | 3.53 s | 3.16 s |
+| TBT               |   0 ms |   0 ms |
+
+Home remained at 99 with CLS 0. This is a local comparison of one run per configuration, not a production PageSpeed result or a claim that the remaining gallery LCP is fully optimized. Published HTTPS measurement is still required. All 100 post-change browser checks passed (47 landing, 26 standalone docs, 27 combined), alongside both app checks and format checks, the combined build/link audit (1,882 links) and npm archive smoke test. The standalone docs suite's single cross-site skip remains covered by the combined suite.

@@ -7,6 +7,7 @@ import SEO from '../components/SEO.astro'
 import TableOfContents from '../components/TableOfContents.astro'
 import Article from '../components/Article.astro'
 import Theme from '../../../shared/components/Theme.astro'
+import Fonts from '../../../shared/components/Fonts.astro'
 import Box from '../../../shared/components/Box.astro'
 import '../styles/theme.css'
 import { getI18n, getLocale } from '../i18n/utils'
@@ -26,12 +27,7 @@ const t = getI18n(Astro)
 <html lang={getLocale(Astro.currentLocale)} data-theme="dark">
   <head>
     <SEO title={title} description={description} current={current} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;650;700&family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <Fonts />
     <Theme />
   </head>
   <body>

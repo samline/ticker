@@ -52,6 +52,8 @@ export default {
   code: 'Open code · HTML / CDN or Package / ESM',
   format: 'Example format',
   navigation: 'Choose an example',
+  exploreAction: 'Explore the examples',
+  installAction: 'Get started',
   formats: [
     { id: 'cdn', label: sharedControls.integration.html },
     { id: 'npm', label: sharedControls.integration.package },

@@ -36,7 +36,7 @@ const codeLabel = format(getI18n(Astro).controls.code.label, { filename: label }
       <span class:list={['dot']} aria-hidden="true"></span>
       <span data-code-label>{label}</span>
     </span>
-    <CopyButton text={text} ariaLabel={copyLabel} />
+    <CopyButton ariaLabel={copyLabel} />
   </header>
   <div class:list={['code-content']} data-code-content>
     {Astro.slots.has('default') ? (

@@ -7,7 +7,7 @@ import { format } from '../../../shared/i18n/format'
 import { getI18n } from '../i18n/utils'
 import type { Recipe } from '../i18n/translations/en/examples'
 import ExamplePreview from './ExamplePreview.astro'
-import Heading from '../../../shared/components/Heading.astro'
+import SectionHeading from './SectionHeading.astro'
 import TextLink from '../../../shared/components/TextLink.astro'
 import Disclosure from '../../../shared/components/Disclosure.astro'
 import Tabs from '../../../shared/components/Tabs.astro'
@@ -16,8 +16,9 @@ import CodeFiles from '../../../shared/components/CodeFiles.astro'
 import manifest from '../../../package.json'
 interface Props {
   recipe: Recipe
+  number: number
 }
-const { recipe } = Astro.props
+const { recipe, number } = Astro.props
 const i18n = getI18n(Astro)
 const t = i18n.examples
 const playback = i18n.controls.ticker
@@ -339,12 +340,14 @@ const documents = {
 ---
 
 <section id={recipe.id} class:list={['recipe']} aria-labelledby={`${recipe.id}-title`}>
-  <div class:list={['recipe-heading']}>
-    <Heading level={2} id={`${recipe.id}-title`}>
-      {recipe.title}
-    </Heading>
-    <p>{recipe.description}</p>
-  </div>
+  <SectionHeading
+    headingId={`${recipe.id}-title`}
+    eyebrow={`${t.eyebrow} / ${String(number).padStart(2, '0')}`}
+    class:list={['recipe-heading flex flex-col items-start']}
+  >
+    {recipe.title}
+    <Fragment slot="description">{recipe.description}</Fragment>
+  </SectionHeading>
   <div class:list={['recipe-preview']}>
     <ExamplePreview recipe={recipe} />
     <TextLink compact href={`${base}docs/${recipe.docsPath}`}>
@@ -377,7 +380,7 @@ const documents = {
 </section>
 <style>
   .recipe {
-    --recipe-top-space: 2.5rem;
+    --recipe-top-space: 5rem;
     padding-block: var(--recipe-top-space);
     border-top: 0.0625rem solid var(--color-border-soft);
   }
@@ -385,10 +388,8 @@ const documents = {
     scroll-margin-top: calc(var(--header-offset, 9rem) - var(--recipe-top-space) - 0.0625rem);
   }
   .recipe-heading {
-    display: grid;
     overflow-wrap: anywhere;
-    gap: 0.75rem;
-    margin-bottom: var(--space-lg);
+    margin-bottom: 2rem;
   }
   .recipe-preview {
     display: grid;
@@ -418,8 +419,12 @@ const documents = {
   }
   .code-disclosure {
     margin-top: var(--space-lg);
-    border: 0.0625rem solid var(--color-border-soft);
-    border-radius: var(--radius-panel);
-    padding: var(--space-xs);
+    border-bottom: 0.0625rem solid var(--color-border-soft);
+    padding-block: var(--space-xs);
+  }
+  @media (width < 48rem) {
+    .recipe {
+      --recipe-top-space: 3.5rem;
+    }
   }
 </style>

@@ -35,6 +35,9 @@ These instructions apply to the maintained Astro landing. Read README.md for rat
 
 ## Accessibility and validation
 
+- Main consumes shared Fonts for local WOFF2 faces and selective heading preloads. Preserve the separate social-image TTF inputs and licenses. CopyButton, Tabs and TickerDemo reserve their control space with inert and visibility:hidden until ready; keep unavailable controls out of focus/accessibility while retaining readable no-JavaScript content. Run loading.spec.ts for delayed-script geometry and local-font requests after changing initialization.
+- Both Astro configs share lib/site-build.mjs for the 18 KiB stylesheet inlining threshold; compare cold mobile LCP, HTML size and cacheable CSS before changing it. Preserve Vite's default treatment of non-CSS assets.
+
 - Preserve semantic headings, section labels, skip-link behavior, visible focus and appropriate ARIA. Use native controls. Tabs support arrows/Home/End; modal menus retain focus, restore it on close and dismiss correctly on desktop transitions.
 - Support both light and dark themes, reduced motion, blocked storage and JavaScript-disabled content. Respect hover capability and reduced motion for button feedback. Keep static ticker content and intentional code scrolling keyboard reachable.
 - Check 320 through 1440 and back, both sides of breakpoints, all demo tabs and enlarged root text. Stack narrow actions and allow navigation/tabs to wrap. Do not use overflow clipping to conceal buttons or copy that do not fit.
@@ -132,6 +135,8 @@ Example code disclosures align summary text, notes, tabs and CodeFrame to the sa
 
 Share syntax rendering as well as the frame. Use CodeFrame text/language with the shared Astro/Shiki theme; CodeBlock only adapts catalog copy/filenames. Preserve whole source strings rather than manual syntax-token arrays. Markdown/MDX in docs uses the same theme and container. Verify computed colors and exact source copying across Home, Examples and Docs in both themes.
 
+CodeFrame emits each snippet once. Shared CopyButton copies the current rendered code at click time unless an explicit text override is supplied; keep the installation command override and avoid duplicating all gallery sources in data-copy-text. Validate exact copied file execution and HTML transfer size when changing this boundary.
+
 Pause controls use changing action labels (Pause animation / Play animation) and matching accessible names. Keep per-instance data attributes and state inside TickerDemo. The copied recipe uses the same translated messages. Changing-action buttons do not use aria-pressed; stable-label toggle semantics must not be mixed with this pattern.
 
 ## Ticker 2.1 runtime contract
@@ -153,3 +158,7 @@ Use the shared integration labels Package / ESM and HTML / CDN. CDN is delivery,
 Mixed-language runnable examples use shared CodeFiles (Tabs + TabPanel + CodeFrame), with HTML, CSS and JavaScript files and an optional Complete file tab. Keep single-language API snippets focused. File copies must reference actual sibling filenames and retain package CSS/import/script ordering; the gallery's complete and separate variants share their generator. Test exact copying, nested tab keyboard behavior, no-JavaScript labels, both themes, overflow and execution of both variants. Do not create a second highlighter, clipboard handler or per-page tab controller.
 
 Titles share Heading and PageTitle rather than page-local font rules. Heading separates semantic level from the controlled display/section scale; PageTitle composes the eyebrow, title and description. Keep the approved Home Inter/Instrument Serif pairing, weight, tracking and spacing tokens. Editorial accent text is an explicit trailing part of the translated title (titleAccent in docs frontmatter); never infer the last word or split API identifiers. Keep the full title unchanged in metadata/search and verify compiled whitespace, both themes, responsive sizes and enlarged text. API identifiers and single-word headings can remain entirely in the primary font.
+
+Examples shares Home’s centered opening, HeroBackdrop, narrow title container and medium demo width. Its compact jump index precedes numbered SectionHeading recipe blocks with Home’s section spacing; code stays in the shared native disclosure. Keep the halo’s containing section tall enough for its gradient to fade naturally. Recipe anchors align the heading group (including its eyebrow) 2.5rem below the sticky header.
+
+Reveal anticipates viewport entry by 64 CSS pixels, regardless of content height (threshold 0), and uses the shared 600ms duration with ease-ui so the fade remains visible. Preserve immediate initial-viewport content, reduced-motion/no-JavaScript readability and observer cleanup.

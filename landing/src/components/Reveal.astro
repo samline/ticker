@@ -5,6 +5,7 @@
   class TickerReveal extends HTMLElement {
     private observer?: IntersectionObserver
     connectedCallback() {
+      this.observer?.disconnect()
       const target = this.firstElementChild
       if (
         !target ||
@@ -21,7 +22,7 @@
             this.observer?.disconnect()
           }
         },
-        { threshold: 0.05 }
+        { threshold: 0, rootMargin: '0px 0px 64px 0px' }
       )
       this.observer.observe(target)
     }
@@ -37,8 +38,8 @@
     display: block;
     min-width: 0;
     transition:
-      opacity var(--duration-reveal) var(--ease-out-expo),
-      transform var(--duration-reveal) var(--ease-out-expo);
+      opacity var(--duration-reveal) var(--ease-ui),
+      transform var(--duration-reveal) var(--ease-ui);
   }
   ticker-reveal > :global(*) {
     height: 100%;

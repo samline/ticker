@@ -2,6 +2,10 @@
 
 Read README.md before changing the docs. This site replaces Starlight; `src/content/docs/` owns guides/reference prose; the root CHANGELOG.md is the sole release-note source, loaded into the same collection. Keep user edits. All contributor-facing documentation is in English.
 
+DocsLayout consumes shared Fonts for local WOFF2 faces and selective heading preloads; source versions and SIL licenses live in shared/assets/fonts. Do not restore a Google/Bunny font stylesheet. Shared CopyButton and Tabs retain invisible inert control space until initialized, while every fallback example remains readable without JavaScript. Keep fonts.spec.ts and the shared delayed-loading/no-JavaScript checks passing.
+
+Both Astro configs use shared/lib/site-build.mjs for the 18 KiB stylesheet inlining threshold; preserve larger cacheable sheets and Vite's defaults for other assets. Measure mobile loading and HTML transfer size before adjusting this policy.
+
 - Use Astro 7, Tailwind 4, `class:list={[...]}` and rem for fixed authored CSS lengths. Components own scoped styles and processed scripts. Reusable controls belong in components; complete document structure belongs in layouts. Do not add a global component stylesheet or initialization script.
 - Share the shared theme tokens and Box/Theme/ThemeToggle/CopyButton intentionally. Do not fork their palette, clipboard behavior or theme persistence. A shared-control change must be checked in both sites.
 - Keep shell/interface text in `src/i18n/translations/<locale>/`, article prose and examples in Markdown frontmatter/body. Translate whole messages; never inject translated HTML. Structural identifiers and API syntax are not translations.
@@ -53,6 +57,8 @@ Read the root AGENTS.md project memory. Docs, Examples and Home share one visual
 SEO must remain per article: unique title/description/canonical, social metadata and safe WebPage/TechArticle/BreadcrumbList JSON-LD linked to the root website/software identities. Breadcrumb markup and schema must agree about the current article. Do not invent dates or unsupported rich-result claims. main is named by article-title; TOC navigation has a translated label. Extend the all-article metadata/accessibility browser checks when collection coverage changes.
 
 Native Markdown/MDX fences use Astro/Shiki with the shared code-theme.mjs configuration; do not maintain a docs-specific theme or overwrite highlighted spans when framing them in Article. The same CodeFrame/CopyButton serves Home and Examples. Keep Markdown, MDX and no-JavaScript color checks in both themes alongside exact copying tests.
+
+CopyButton reads live rendered code from the owning frame by default. Article only frames native pre/code and updates the filename label; it must not cache a duplicate clipboard string. Keep exact source/newline copying, explicit command overrides and selection fallback in the shared owner.
 
 ## Ticker 2.1 runtime contract
 

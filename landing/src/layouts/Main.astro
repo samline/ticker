@@ -3,6 +3,7 @@ import { getLocale, getI18n } from '../i18n/utils'
 import '../styles/tailwind.css'
 import SEO from '../components/SEO.astro'
 import Theme from '../../../shared/components/Theme.astro'
+import Fonts from '../../../shared/components/Fonts.astro'
 import Header from './Header.astro'
 import Footer from './Footer.astro'
 interface Props {
@@ -21,11 +22,7 @@ const i18n = getI18n(Astro)
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <SEO title={title} description={description} keywords={keywords} />
 
-    <link rel="preconnect" href="https://fonts.bunny.net" />
-    <link
-      rel="stylesheet"
-      href="https://fonts.bunny.net/css?family=inter:400,500,600,700|instrument-serif:400i|jetbrains-mono:400,500&amp;display=swap"
-    />
+    <Fonts />
     <Theme />
   </head>
   <body>

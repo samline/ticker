@@ -6,7 +6,9 @@ The landing, examples gallery and documentation are routes of one product websit
 
 - `components/`: Box, Button/TextLink, Logo, Theme/ThemeToggle, Heading/Eyebrow, CopyButton/CodeFrame, Icon/IconButton, TextField, NavLink, Disclosure, Surface/LinkCard and DrawerStyles. Components own scoped CSS and processed behavior. Pass native and Astro scope attributes through composed roots.
 - `styles/theme.css`: the single palette, font families, breakpoints, spacing scale, radii, focus and motion tokens. This is theme configuration, not a global component stylesheet.
+- `components/Fonts.astro` and `assets/fonts/`: shared local WOFF2 faces and selective preloads, with source versions, sizes and licenses in `assets/fonts/README.md`. Both document heads consume the same component; no runtime font service is required.
 - `lib/serialize.ts`: safe JSON-LD and XML serialization shared by metadata and social images.
+- `lib/site-build.mjs`: both apps' CSS inlining policy. Stylesheets below 18 KiB are integrated into HTML to remove small blocking requests; larger shared sheets stay cacheable. Other assets retain Vite's default limit, including external font URLs.
 - `i18n/createI18n.ts`: one typed locale resolver and translation-shape contract; each app still owns its catalogs.
 - `i18n/translations/<locale>/`: shared branding and control messages. Each app owns its navigation/article/marketing copy. `i18n/format.ts` interpolates whole translated messages.
 
@@ -30,6 +32,8 @@ CI installs this package before checking either app. Keep its lockfile and the C
 
 ## Content composition
 
+CopyButton and Tabs reserve their eventual control geometry with `inert` and `visibility: hidden` before initialization, avoiding layout movement when controls appear. This does not change native `hidden` for inactive panels. Controls stay outside the keyboard/accessibility tree until ready, and no-JavaScript content remains readable. Delayed-script browser tests compare the installation command and demo-header dimensions before and after initialization.
+
 `Tabs` is the same component in landing demos/installers and documentation. `TabPanel` adds readable labels when JavaScript is disabled and preserves stable published fragment IDs. Tabs support roving keyboard focus, Home/End/arrows, independent instances, native hidden panels and fragment activation; do not rebuild tab markup in a Markdown transform. Use tabs for alternatives, while keeping ordered steps and API tables visible.
 
 `CardGrid` lays out landing features and documentation destinations. `LinkCard` owns compact navigation title/body appearance. `Callout` composes Surface for important prose. Documentation uses the official Astro MDX integration only in articles that need components; plain Markdown remains appropriate elsewhere. The collection accepts both formats without changing route IDs. Preserve source file extensions in migration inventory records.
@@ -43,6 +47,8 @@ Shared interactive roots mark interface content with `data-ui`; Article's prose 
 Before deleting a source, trace imports, Astro/MDX composition, generated DOM hooks, translated data, assets and build/CI entrypoints. Keep package-owned runtime CSS adaptations, no-JavaScript fallbacks, compatibility fragments/redirects, asset licenses and migration evidence. Remove only proven-unused hooks, palette values, retired props and obsolete override rules. Adjacent equivalent media blocks can be consolidated without changing cascade order. Keep final visual values in the owning component rather than layering a retired design underneath. Generated dependency/build directories are not maintained source; never revive the retired Starlight example project.
 
 ## Code rendering
+
+CopyButton reads the current `code.textContent` from its nearest `data-copy-source` frame when no explicit `text` prop is provided. CodeFrame therefore emits the highlighted source once; do not duplicate whole snippets in `data-copy-text`. Explicit text remains available for installation commands and takes precedence, including an intentionally empty string. Docs Article only frames native highlighted blocks; it does not maintain a second clipboard source. Browser checks cover literal characters, final newlines, live source edits, explicit overrides and denied clipboard selection.
 
 `components/CodeFrame.astro` renders source with Astro Code/Shiki when given text and a language, and composes the existing CopyButton. The optional slot accepts already-highlighted native Markdown output. `lib/code-theme.mjs` is the only syntax-theme configuration for both paths, using the existing palette tokens in both themes. App code must not create manual tok-* spans, plain pre alternatives for known languages or another Shiki theme. No highlighter JavaScript is shipped to the client.
 

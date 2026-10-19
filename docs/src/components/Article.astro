@@ -21,8 +21,6 @@ const t = getI18n(Astro)
         if (!code) continue
         const frame = template.content.firstElementChild?.cloneNode(true) as HTMLElement | undefined
         if (!frame) continue
-        const copy = frame.querySelector<HTMLElement>('ticker-copy')
-        if (copy) copy.dataset.copyText = code.textContent ?? ''
         const label = frame.querySelector('[data-code-label]')
         if (label && pre.dataset.language) label.textContent = pre.dataset.language
         pre.before(frame)

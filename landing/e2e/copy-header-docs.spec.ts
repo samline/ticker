@@ -47,6 +47,35 @@ test('every code example copies its exact source with independent feedback', asy
   expect(await page.pageErrors()).toEqual([])
 })
 
+test('code frames copy live rendered text without a duplicate source attribute', async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: async (text: string) => {
+          ;(window as unknown as { copiedText: string }).copiedText = text
+        },
+      },
+    })
+  )
+  await page.goto('./')
+  const frame = page.locator('#recipes .code-frame').first()
+  const copy = frame.locator('ticker-copy')
+  await expect(copy).not.toHaveAttribute('data-copy-text')
+  const source = '<section title="a & b">“café”</section>\n\n'
+  await frame.locator('pre code').evaluate((code, source) => (code.textContent = source), source)
+  await copy.getByRole('button').click()
+  expect(await page.evaluate(() => (window as unknown as { copiedText: string }).copiedText)).toBe(
+    source
+  )
+  await copy.evaluate(element => (element.dataset.copyText = 'Explicit command\n'))
+  await copy.getByRole('button').click()
+  expect(await page.evaluate(() => (window as unknown as { copiedText: string }).copiedText)).toBe(
+    'Explicit command\n'
+  )
+})
+
 test('denied clipboard selects source and announces manual copy without affecting other controls', async ({
   page,
 }) => {
