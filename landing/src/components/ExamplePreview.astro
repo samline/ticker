@@ -148,65 +148,81 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
     <p class:list={['update-status']} role="status" aria-live="polite"></p>
   )}
 </ticker-example-preview>
+
 <script>
-  class TickerExamplePreview extends HTMLElement {
-    private lifecycle?: AbortController
-    connectedCallback() {
-      this.lifecycle?.abort()
-      this.lifecycle = new AbortController()
-      const { signal } = this.lifecycle
-      const demo = this.querySelector<HTMLElement>('ticker-demo')
-      const add = this.querySelector<HTMLButtonElement>('[data-add]')
-      const select = this.querySelector<HTMLSelectElement>('[data-item-select]')
-      const resume = this.querySelector<HTMLButtonElement>('button[data-example-resume]')
-      let items: Array<{ id: string; label: string }> = []
-      const removeButtons = this.querySelectorAll<HTMLButtonElement>(
-        'button[data-remove-first], button[data-remove-last], button[data-remove-selected]'
+  import { mountElements } from '../../../shared/lib/mount-elements'
+  import { getDemoController } from '../lib/demo-controller'
+  import { syncSpeedControl } from '../lib/speed-control'
+
+  mountElements('ticker-example-preview', element => {
+    const lifecycle = new AbortController()
+    const { signal } = lifecycle
+    const demo = element.querySelector<HTMLElement>('ticker-demo')
+    const controller = () => getDemoController(demo)
+    const add = element.querySelector<HTMLButtonElement>('[data-add]')
+    const select = element.querySelector<HTMLSelectElement>('[data-item-select]')
+    const resume = element.querySelector<HTMLButtonElement>('button[data-example-resume]')
+    const directions = element.querySelectorAll<HTMLButtonElement>('button[data-example-direction]')
+    const removeButtons = element.querySelectorAll<HTMLButtonElement>(
+      'button[data-remove-first], button[data-remove-last], button[data-remove-selected]'
+    )
+    const status = element.querySelector('[role=status]')
+    const items = () => [
+      ...(controller()?.source.querySelectorAll<HTMLElement>(
+        '.ticker-content:not(.ticker-clone) [data-example-item]'
+      ) ?? []),
+    ]
+    const syncItems = () => {
+      if (!select) return
+      const selected = select.value
+      const current = items()
+      select.replaceChildren(
+        ...current.map(item => new Option(item.textContent ?? '', item.dataset.exampleItem))
       )
-      const sync = () => {
-        const enabled = demo?.dataset.initialized === 'true'
-        if (add) add.disabled = !enabled
-        if (resume) resume.disabled = !enabled
-        if (enabled && select) demo?.dispatchEvent(new CustomEvent('ticker:list'))
-        this.querySelectorAll<HTMLButtonElement>('button[data-example-direction]').forEach(
-          button => {
-            button.disabled = !enabled
-          }
-        )
-        this.querySelector('ticker-speed')?.dispatchEvent(
-          new CustomEvent('speed:set', {
-            detail: { duration: Number(demo?.dataset.duration), enabled },
-          })
-        )
-      }
-      this.addEventListener('ticker:ready', sync, { signal })
-      resume?.addEventListener(
+      if (current.some(item => item.dataset.exampleItem === selected)) select.value = selected
+      if (!current.length) select.add(new Option(element.dataset.itemEmpty ?? '', ''))
+      select.disabled = !current.length
+      removeButtons.forEach(button => {
+        button.disabled = !current.length
+      })
+    }
+    const sync = () => {
+      const news = controller()
+      if (add) add.disabled = !news
+      if (resume) resume.disabled = !news
+      directions.forEach(button => {
+        button.disabled = !news
+      })
+      syncSpeedControl(element.querySelector('ticker-speed'), news?.options.duration)
+      syncItems()
+    }
+    element.addEventListener('ticker:ready', sync, { signal })
+    element.querySelector('ticker-speed input')?.addEventListener(
+      'input',
+      event => {
+        controller()?.update({ duration: Number((event.target as HTMLInputElement).value) })
+      },
+      { signal }
+    )
+    resume?.addEventListener(
+      'click',
+      () => {
+        const news = controller()
+        if (!news) return
+        const enabled = !news.options.resumeAfterDrag
+        news.update({ resumeAfterDrag: enabled })
+        resume.setAttribute('aria-pressed', String(enabled))
+        const state = resume.querySelector('[data-resume-state]')
+        if (state)
+          state.textContent = (enabled ? element.dataset.resumeOn : element.dataset.resumeOff) ?? ''
+      },
+      { signal }
+    )
+    directions.forEach(button => {
+      button.addEventListener(
         'click',
         () => {
-          const enabled = resume.getAttribute('aria-pressed') !== 'true'
-          demo?.dispatchEvent(new CustomEvent('ticker:resume-after-drag', { detail: enabled }))
-          resume.setAttribute('aria-pressed', String(enabled))
-          const state = resume.querySelector('[data-resume-state]')
-          if (state)
-            state.textContent = (enabled ? this.dataset.resumeOn : this.dataset.resumeOff) ?? ''
-        },
-        { signal }
-      )
-      this.addEventListener(
-        'speed:change',
-        event =>
-          demo?.dispatchEvent(
-            new CustomEvent('ticker:duration', { detail: (event as CustomEvent<number>).detail })
-          ),
-        { signal }
-      )
-      this.addEventListener(
-        'click',
-        event => {
-          const button = (event.target as Element).closest<HTMLButtonElement>(
-            'button[data-example-direction]'
-          )
-          const direction = button?.dataset.exampleDirection
+          const direction = button.dataset.exampleDirection
           if (
             direction !== 'left' &&
             direction !== 'right' &&
@@ -214,76 +230,61 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
             direction !== 'down'
           )
             return
-          demo?.dispatchEvent(new CustomEvent('ticker:direction', { detail: direction }))
-          this.querySelectorAll<HTMLButtonElement>('button[data-example-direction]').forEach(item =>
-            item.setAttribute('aria-pressed', String(item === button))
-          )
+          controller()?.update({ direction })
+          directions.forEach(item => item.setAttribute('aria-pressed', String(item === button)))
         },
         { signal }
       )
-      this.addEventListener(
-        'ticker:items',
-        event => {
-          if (!select) return
-          items = (event as CustomEvent<Array<{ id: string; label: string }>>).detail
-          const selected = select.value
-          select.replaceChildren(...items.map(item => new Option(item.label, item.id)))
-          if (items.some(item => item.id === selected)) select.value = selected
-          if (!items.length) select.add(new Option(this.dataset.itemEmpty ?? '', ''))
-          select.disabled = !items.length
-          removeButtons.forEach(button => {
-            button.disabled = !items.length
-          })
-        },
-        { signal }
-      )
-      removeButtons.forEach(button =>
-        button.addEventListener(
-          'click',
-          () => {
-            const item = button.hasAttribute('data-remove-first')
-              ? items[0]
-              : button.hasAttribute('data-remove-last')
-                ? items.at(-1)
-                : items.find(item => item.id === select?.value)
-            if (!item) return
-            demo?.dispatchEvent(new CustomEvent('ticker:remove', { detail: item.id }))
-            const status = this.querySelector('[role=status]')
-            if (status)
-              status.textContent = this.dataset.removedStatus?.replace('{item}', item.label) ?? ''
-          },
-          { signal }
-        )
-      )
-      let count = 0
-      add?.addEventListener(
+    })
+    removeButtons.forEach(button => {
+      button.addEventListener(
         'click',
         () => {
-          count++
-          demo?.dispatchEvent(
-            new CustomEvent('ticker:append', {
-              detail: this.dataset.added?.replace('{count}', String(count)) ?? '',
-            })
-          )
-          const status = this.querySelector('[role=status]')
+          const current = items()
+          const item = button.hasAttribute('data-remove-first')
+            ? current[0]
+            : button.hasAttribute('data-remove-last')
+              ? current.at(-1)
+              : current.find(item => item.dataset.exampleItem === select?.value)
+          if (!item) return
+          const label = item.textContent ?? ''
+          const separator = item.nextElementSibling
+          if (separator?.classList.contains('sep')) separator.remove()
+          item.remove()
+          controller()?.refresh()
+          syncItems()
           if (status)
-            status.textContent = this.dataset.addedStatus?.replace('{count}', String(count)) ?? ''
+            status.textContent = element.dataset.removedStatus?.replace('{item}', label) ?? ''
         },
         { signal }
       )
-      Promise.all(
-        ['ticker-demo', 'ticker-speed'].map(name => customElements.whenDefined(name))
-      ).then(() => {
-        if (!signal.aborted) sync()
-      })
-    }
-    disconnectedCallback() {
-      this.lifecycle?.abort()
-    }
-  }
-  if (!customElements.get('ticker-example-preview'))
-    customElements.define('ticker-example-preview', TickerExamplePreview)
+    })
+    let count = 0
+    add?.addEventListener(
+      'click',
+      () => {
+        const news = controller()
+        const content = news?.source.querySelector('.ticker-content:not(.ticker-clone)')
+        if (!news || !content) return
+        const item = document.createElement('span')
+        item.textContent = element.dataset.added?.replace('{count}', String(++count)) ?? ''
+        item.dataset.exampleItem = crypto.randomUUID()
+        const separator = document.createElement('span')
+        separator.className = 'sep'
+        separator.setAttribute('aria-hidden', 'true')
+        content.append(item, separator)
+        news.refresh()
+        syncItems()
+        if (status)
+          status.textContent = element.dataset.addedStatus?.replace('{count}', String(count)) ?? ''
+      },
+      { signal }
+    )
+    sync()
+    return () => lifecycle.abort()
+  })
 </script>
+
 <style>
   ticker-example-preview {
     display: block;

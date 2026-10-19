@@ -40,26 +40,24 @@ const repository = manifest.repository.url.replace(/^git\+/, '').replace(/\.git$
     </nav>
   </header>
 </ticker-docs-header>
+
 <script>
-  class DocsHeader extends HTMLElement {
-    private observer?: ResizeObserver
-    connectedCallback() {
-      this.observer?.disconnect()
-      this.observer = new ResizeObserver(() =>
-        document.documentElement.style.setProperty(
-          '--docs-header-height',
-          `${this.getBoundingClientRect().height / parseFloat(getComputedStyle(document.documentElement).fontSize)}rem`
-        )
+  import { mountElements } from '../../../shared/lib/mount-elements'
+
+  mountElements('ticker-docs-header', element => {
+    const observer = new ResizeObserver(() =>
+      document.documentElement.style.setProperty(
+        '--docs-header-height',
+        `${element.getBoundingClientRect().height / parseFloat(getComputedStyle(document.documentElement).fontSize)}rem`
       )
-      this.observer.observe(this)
+    )
+    observer.observe(element)
+    return () => {
+      observer.disconnect()
     }
-    disconnectedCallback() {
-      this.observer?.disconnect()
-    }
-  }
-  if (!customElements.get('ticker-docs-header'))
-    customElements.define('ticker-docs-header', DocsHeader)
+  })
 </script>
+
 <style>
   .header {
     display: block;

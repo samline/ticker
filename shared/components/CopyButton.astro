@@ -32,56 +32,55 @@ const t = getI18n(Astro).controls.copy
     data-copy-status=""
   ></span>
 </ticker-copy>
+
 <script>
-  class TickerCopy extends HTMLElement {
-    private lifecycle?: AbortController
-    private feedbackTimer?: ReturnType<typeof setTimeout>
-    connectedCallback() {
-      this.lifecycle?.abort()
-      this.lifecycle = new AbortController()
-      const { signal } = this.lifecycle
-      const button = this.querySelector<HTMLButtonElement>('button')
-      const label = this.querySelector<HTMLElement>('[data-copy-label]')
-      const status = this.querySelector<HTMLElement>('[data-copy-status]')
-      if (!button || !label || !status) return
-      label.textContent = this.dataset.label ?? ''
-      button.inert = false
-      button.addEventListener(
-        'click',
-        async () => {
-          clearTimeout(this.feedbackTimer)
-          label.textContent = this.dataset.label ?? ''
-          status.textContent = ''
-          const code = this.closest('[data-copy-source]')?.querySelector('code')
-          try {
-            await navigator.clipboard.writeText(this.dataset.copyText ?? code?.textContent ?? '')
-            if (signal.aborted) return
-            label.textContent = this.dataset.copiedLabel ?? ''
-            status.textContent = this.dataset.success ?? ''
-            this.feedbackTimer = setTimeout(() => {
-              if (!signal.aborted) label.textContent = this.dataset.label ?? ''
-            }, 2000)
-          } catch {
-            if (signal.aborted) return
-            if (!code) return
-            const range = document.createRange()
-            range.selectNodeContents(code)
-            const selection = window.getSelection()
-            selection?.removeAllRanges()
-            selection?.addRange(range)
-            status.textContent = this.dataset.fallback ?? ''
-          }
-        },
-        { signal }
-      )
+  import { mountElements } from '../lib/mount-elements'
+
+  mountElements('ticker-copy', element => {
+    let feedbackTimer: ReturnType<typeof setTimeout> | undefined
+    const lifecycle = new AbortController()
+    const { signal } = lifecycle
+    const button = element.querySelector<HTMLButtonElement>('button')
+    const label = element.querySelector<HTMLElement>('[data-copy-label]')
+    const status = element.querySelector<HTMLElement>('[data-copy-status]')
+    if (!button || !label || !status) return
+    label.textContent = element.dataset.label ?? ''
+    button.inert = false
+    button.addEventListener(
+      'click',
+      async () => {
+        clearTimeout(feedbackTimer)
+        label.textContent = element.dataset.label ?? ''
+        status.textContent = ''
+        const code = element.closest('[data-copy-source]')?.querySelector('code')
+        try {
+          await navigator.clipboard.writeText(element.dataset.copyText ?? code?.textContent ?? '')
+          if (signal.aborted) return
+          label.textContent = element.dataset.copiedLabel ?? ''
+          status.textContent = element.dataset.success ?? ''
+          feedbackTimer = setTimeout(() => {
+            if (!signal.aborted) label.textContent = element.dataset.label ?? ''
+          }, 2000)
+        } catch {
+          if (signal.aborted) return
+          if (!code) return
+          const range = document.createRange()
+          range.selectNodeContents(code)
+          const selection = window.getSelection()
+          selection?.removeAllRanges()
+          selection?.addRange(range)
+          status.textContent = element.dataset.fallback ?? ''
+        }
+      },
+      { signal }
+    )
+    return () => {
+      lifecycle.abort()
+      clearTimeout(feedbackTimer)
     }
-    disconnectedCallback() {
-      this.lifecycle?.abort()
-      clearTimeout(this.feedbackTimer)
-    }
-  }
-  if (!customElements.get('ticker-copy')) customElements.define('ticker-copy', TickerCopy)
+  })
 </script>
+
 <style>
   .copy-control {
     display: inline-flex;

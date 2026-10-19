@@ -1,9 +1,22 @@
+# Dependencies and generated builds (all workspaces)
 node_modules/
 dist/
 coverage/
-.bunchee-build-*
+.astro/
+.vite/
+.cache/
+*.tsbuildinfo
+*.tgz
+
+# Browser-test output; keep authored tests and configuration tracked
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Local environment, logs and OS metadata
+.env
+.env.*
+!.env.example
 *.log
 .DS_Store
-
-# Astro generated files
-.astro/

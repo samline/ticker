@@ -10,27 +10,27 @@ const t = getI18n(Astro)
     <CodeFrame size="comfortable" label={t.copy.code} text="" copyLabel={t.copy.aria} />
   </template>
 </ticker-docs-article>
+
 <script>
-  class DocsArticle extends HTMLElement {
-    connectedCallback() {
-      const template = this.querySelector('template')
-      if (!template) return
-      for (const pre of this.querySelectorAll('pre')) {
-        if (pre.closest('[data-copy-source]')) continue
-        const code = pre.querySelector('code')
-        if (!code) continue
-        const frame = template.content.firstElementChild?.cloneNode(true) as HTMLElement | undefined
-        if (!frame) continue
-        const label = frame.querySelector('[data-code-label]')
-        if (label && pre.dataset.language) label.textContent = pre.dataset.language
-        pre.before(frame)
-        frame.querySelector('[data-code-content]')?.append(pre)
-      }
+  import { mountElements } from '../../../shared/lib/mount-elements'
+
+  mountElements('ticker-docs-article', element => {
+    const template = element.querySelector('template')
+    if (!template) return
+    for (const pre of element.querySelectorAll('pre')) {
+      if (pre.closest('[data-copy-source]')) continue
+      const code = pre.querySelector('code')
+      if (!code) continue
+      const frame = template.content.firstElementChild?.cloneNode(true) as HTMLElement | undefined
+      if (!frame) continue
+      const label = frame.querySelector('[data-code-label]')
+      if (label && pre.dataset.language) label.textContent = pre.dataset.language
+      pre.before(frame)
+      frame.querySelector('[data-code-content]')?.append(pre)
     }
-  }
-  if (!customElements.get('ticker-docs-article'))
-    customElements.define('ticker-docs-article', DocsArticle)
+  })
 </script>
+
 <style>
   .article {
     display: block;

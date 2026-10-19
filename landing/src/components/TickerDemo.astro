@@ -8,13 +8,13 @@ interface Props {
   kind: 'news' | 'logos' | 'prices'
   label: string
   duration?: number
-  direction?: import('../../../src/core/types').TickerDirection
+  direction?: import('@samline/ticker').TickerDirection
   speed?: number
   autoplay?: boolean
   navigation?: boolean
   resumeAfterDrag?: boolean
   rtl?: boolean
-  responsive?: import('../../../src/core/types').TickerResponsiveRule[]
+  responsive?: import('@samline/ticker').TickerResponsiveRule[]
 }
 const {
   id = 'ticker',
@@ -100,310 +100,81 @@ const i18n = getI18n(Astro)
 </ticker-demo>
 
 <script>
-  import { ticker, type TickerInstance } from '../../../src/vanilla/index'
-  class TickerDemoElement extends HTMLElement {
-    private controller?: TickerInstance | null
-    private lifecycle?: AbortController
-    connectedCallback() {
-      this.lifecycle?.abort()
-      this.lifecycle = new AbortController()
-      const { signal } = this.lifecycle
-      const frame = this.querySelector<HTMLElement>('.ticker-frame')
-      const controls = this.querySelector<HTMLElement>('.ticker-controls')
-      const button = controls?.querySelector<HTMLButtonElement>('button[data-pause]')
-      if (!frame || !controls || !button) return
-      try {
-        this.controller = ticker(frame, {
-          duration: Number(this.dataset.duration),
-          direction: this.dataset.direction as import('../../../src/core/types').TickerDirection,
-          speed: Number(this.dataset.speed),
-          autoplay: this.dataset.autoplay !== 'false',
-          navigation: this.dataset.navigation === 'true',
-          resumeAfterDrag: this.dataset.resumeAfterDrag === 'true',
-          responsive: JSON.parse(this.dataset.responsive ?? '[]'),
-          pauseOnHover: true,
+  import { mountElements } from '../../../shared/lib/mount-elements'
+
+  import { ticker } from '@samline/ticker'
+  import '@samline/ticker/style.css'
+  import { demoControllers } from '../lib/demo-controller'
+  mountElements('ticker-demo', element => {
+    const lifecycle = new AbortController()
+    const { signal } = lifecycle
+    const frame = element.querySelector<HTMLElement>('.ticker-frame')
+    const controls = element.querySelector<HTMLElement>('.ticker-controls')
+    const button = controls?.querySelector<HTMLButtonElement>('button[data-pause]')
+    if (!frame || !controls || !button) return
+    try {
+      const controller = ticker(frame, {
+        duration: Number(element.dataset.duration),
+        direction: element.dataset.direction as import('@samline/ticker').TickerDirection,
+        speed: Number(element.dataset.speed),
+        autoplay: element.dataset.autoplay !== 'false',
+        navigation: element.dataset.navigation === 'true',
+        resumeAfterDrag: element.dataset.resumeAfterDrag === 'true',
+        responsive: JSON.parse(element.dataset.responsive ?? '[]'),
+        pauseOnHover: true,
+      })
+      if (!controller) return
+      demoControllers.set(element, controller)
+      if (element.dataset.navigation === 'true')
+        controller.connectControls({
+          previous: controls.querySelector<HTMLButtonElement>('[data-previous]')!,
+          next: controls.querySelector<HTMLButtonElement>('[data-next]')!,
+          rail: controls.querySelector<HTMLInputElement>('[data-position]')!,
         })
-        if (!this.controller) return
-        if (this.dataset.navigation === 'true')
-          this.controller.connectControls({
-            previous: controls.querySelector<HTMLButtonElement>('[data-previous]')!,
-            next: controls.querySelector<HTMLButtonElement>('[data-next]')!,
-            rail: controls.querySelector<HTMLInputElement>('[data-position]')!,
-          })
-        // DOM measurements are returned as pixels by the library. Keep this
-        // component's animation distance in rem without changing the library API.
-        const normalizeDistance = () => {
-          const distance = frame.style.getPropertyValue('--ticker-distance').trim()
-          if (!distance.endsWith('px')) return
-          const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
-          frame.style.setProperty(
-            '--ticker-distance',
-            `${Number.parseFloat(distance) / rootSize}rem`
-          )
-        }
-        const measurements = new MutationObserver(normalizeDistance)
-        measurements.observe(frame, { attributes: true, attributeFilter: ['style'] })
-        signal.addEventListener('abort', () => measurements.disconnect(), { once: true })
-        normalizeDistance()
-        controls.inert = false
-        const renderPaused = (paused: boolean) => {
-          frame.dataset.userPaused = String(paused)
-          button.textContent = (paused ? this.dataset.playText : this.dataset.pauseText) ?? ''
-          button.setAttribute(
-            'aria-label',
-            (paused ? this.dataset.playLabel : this.dataset.pauseLabel) ?? ''
-          )
-        }
-        renderPaused(!this.controller.state.requested)
-        this.controller.on('playback', state => renderPaused(!state.requested))
-        button.addEventListener(
-          'click',
-          () => {
-            if (this.controller?.state.requested) this.controller.pause()
-            else this.controller?.play()
-          },
-          { signal }
+      controls.inert = false
+      const renderPaused = (paused: boolean) => {
+        frame.dataset.userPaused = String(paused)
+        button.textContent = (paused ? element.dataset.playText : element.dataset.pauseText) ?? ''
+        button.setAttribute(
+          'aria-label',
+          (paused ? element.dataset.playLabel : element.dataset.pauseLabel) ?? ''
         )
-        this.addEventListener(
-          'ticker:duration',
-          event => {
-            const duration = (event as CustomEvent<number>).detail
-            this.dataset.duration = String(duration)
-            this.controller?.update({ duration })
-          },
-          { signal }
-        )
-        this.addEventListener(
-          'ticker:resume-after-drag',
-          event => {
-            const resumeAfterDrag = (event as CustomEvent<boolean>).detail
-            this.dataset.resumeAfterDrag = String(resumeAfterDrag)
-            this.controller?.update({ resumeAfterDrag })
-          },
-          { signal }
-        )
-        this.addEventListener(
-          'ticker:direction',
-          event => {
-            const direction = (event as CustomEvent<'left' | 'right' | 'up' | 'down'>).detail
-            this.dataset.direction = direction
-            this.controller?.update({ direction })
-          },
-          { signal }
-        )
-        const contentItems = () =>
-          Array.from(
-            this.controller?.source.querySelectorAll<HTMLElement>(
-              '.ticker-content:not(.ticker-clone) [data-example-item]'
-            ) ?? []
-          )
-        const reportItems = () =>
-          this.dispatchEvent(
-            new CustomEvent('ticker:items', {
-              bubbles: true,
-              detail: contentItems().map(item => ({
-                id: item.dataset.exampleItem!,
-                label: item.textContent ?? '',
-              })),
-            })
-          )
-        this.addEventListener('ticker:list', reportItems, { signal })
-        this.addEventListener(
-          'ticker:remove',
-          event => {
-            const id = (event as CustomEvent<string>).detail
-            const item = contentItems().find(item => item.dataset.exampleItem === id)
-            if (!item) return
-            const separator = item.nextElementSibling
-            if (separator?.classList.contains('sep')) separator.remove()
-            item.remove()
-            this.controller?.refresh()
-            reportItems()
-          },
-          { signal }
-        )
-        this.addEventListener(
-          'ticker:append',
-          event => {
-            if (!this.controller) return
-            const item = document.createElement('span')
-            item.textContent = (event as CustomEvent<string>).detail
-            item.dataset.exampleItem = crypto.randomUUID()
-            const separator = document.createElement('span')
-            separator.className = 'sep'
-            separator.setAttribute('aria-hidden', 'true')
-            const content = this.controller.source.querySelector<HTMLElement>(
-              '.ticker-content:not(.ticker-clone)'
-            )
-            content?.append(item, separator)
-            this.controller.refresh()
-            reportItems()
-          },
-          { signal }
-        )
-        this.addEventListener('ticker:refresh', () => this.controller?.refresh(), { signal })
-        document.fonts?.ready
-          .then(() => {
-            if (!signal.aborted) this.controller?.refresh()
-          })
-          .catch(() => {})
-        this.dataset.initialized = 'true'
-        this.dispatchEvent(new CustomEvent('ticker:ready', { bubbles: true }))
-      } catch (error) {
-        frame.dataset.static = 'true'
-        console.error('[ticker-demo] Failed to initialize', error)
       }
+      renderPaused(!controller.state.requested)
+      controller.on('playback', state => renderPaused(!state.requested))
+      button.addEventListener(
+        'click',
+        () => {
+          if (controller.state.requested) controller.pause()
+          else controller.play()
+        },
+        { signal }
+      )
+      document.fonts?.ready
+        .then(() => {
+          if (!signal.aborted) controller.refresh()
+        })
+        .catch(() => {})
+      element.dataset.initialized = 'true'
+      element.dispatchEvent(new CustomEvent('ticker:ready', { bubbles: true }))
+      return () => {
+        lifecycle.abort()
+        controller.destroy()
+        demoControllers.delete(element)
+        controls.inert = true
+        delete element.dataset.initialized
+      }
+    } catch (error) {
+      lifecycle.abort()
+      demoControllers.get(element)?.destroy()
+      demoControllers.delete(element)
+      frame.dataset.static = 'true'
+      console.error('[ticker-demo] Failed to initialize', error)
     }
-    disconnectedCallback() {
-      this.lifecycle?.abort()
-      this.controller?.destroy()
-      this.controller = undefined
-      delete this.dataset.initialized
-    }
-  }
-  if (!customElements.get('ticker-demo')) customElements.define('ticker-demo', TickerDemoElement)
+  })
 </script>
+
 <style>
-  .ticker-wrapper {
-    --ticker-distance: 0rem;
-    --ticker-duration: 20s;
-    width: 100%;
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .ticker-track {
-    display: flex;
-    width: max-content;
-    direction: ltr;
-    justify-self: left;
-    transform: translate3d(0, 0, 0);
-  }
-
-  .ticker-track > * {
-    display: flex;
-    flex: 0 0 auto;
-    min-width: max-content;
-  }
-
-  .ticker-clone {
-    user-select: none;
-  }
-
-  .ticker-wrapper:not([data-interactive-clones='true']) .ticker-clone {
-    pointer-events: none;
-  }
-
-  .ticker-wrapper[data-ready='true'][data-playing='true'] .ticker-track {
-    will-change: transform;
-  }
-
-  .ticker-wrapper[data-ready='false'] .ticker-track {
-    animation: none !important;
-  }
-
-  .ticker-wrapper[data-motion-direction='left'] .ticker-track {
-    animation: ticker-left var(--ticker-duration) linear infinite;
-  }
-
-  .ticker-wrapper[data-motion-direction='right'] .ticker-track {
-    animation: ticker-right var(--ticker-duration) linear infinite;
-  }
-
-  @keyframes ticker-left {
-    0% {
-      transform: translate3d(0, 0, 0);
-    }
-    100% {
-      transform: translate3d(calc(-1 * var(--ticker-distance)), 0, 0);
-    }
-  }
-
-  @keyframes ticker-right {
-    0% {
-      transform: translate3d(calc(-1 * var(--ticker-distance)), 0, 0);
-    }
-    100% {
-      transform: translate3d(0, 0, 0);
-    }
-  }
-
-  .ticker-wrapper[data-writing-direction='rtl'] .ticker-track > * {
-    direction: rtl;
-  }
-
-  .ticker-wrapper[data-axis='vertical'] .ticker-track {
-    flex-direction: column;
-    width: 100%;
-    height: max-content;
-  }
-
-  .ticker-wrapper[data-axis='vertical'] .ticker-track > * {
-    flex-direction: column;
-    min-width: 0;
-    width: 100%;
-  }
-
-  .ticker-wrapper[data-motion-direction='up'] .ticker-track {
-    animation: ticker-up var(--ticker-duration) linear infinite;
-  }
-
-  .ticker-wrapper[data-motion-direction='down'] .ticker-track {
-    animation: ticker-down var(--ticker-duration) linear infinite;
-  }
-
-  /* Pause declarations must follow every animation shorthand. */
-  .ticker-wrapper:not([data-playing='true']) .ticker-track {
-    animation-play-state: paused;
-  }
-
-  .ticker-wrapper[data-navigation='true'] {
-    touch-action: pan-y;
-  }
-
-  .ticker-wrapper[data-navigation='true'][data-axis='vertical'] {
-    touch-action: pan-x;
-  }
-
-  @keyframes ticker-up {
-    from {
-      transform: translate3d(0, 0, 0);
-    }
-    to {
-      transform: translate3d(0, calc(-1 * var(--ticker-distance)), 0);
-    }
-  }
-
-  @keyframes ticker-down {
-    from {
-      transform: translate3d(0, calc(-1 * var(--ticker-distance)), 0);
-    }
-    to {
-      transform: translate3d(0, 0, 0);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .ticker-track {
-      animation: none !important;
-      transform: none !important;
-      will-change: auto !important;
-    }
-
-    .ticker-wrapper:not([data-navigation='true']) .ticker-clone {
-      display: none;
-    }
-
-    .ticker-wrapper[data-navigation='true'] .ticker-track {
-      transform: translate3d(var(--ticker-position, 0rem), 0, 0) !important;
-    }
-
-    .ticker-wrapper[data-navigation='true'][data-axis='vertical'] .ticker-track {
-      transform: translate3d(0, var(--ticker-position, 0rem), 0) !important;
-    }
-  }
-
   .ticker-frame[data-axis='vertical'] {
     height: 22rem;
   }

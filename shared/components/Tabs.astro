@@ -38,93 +38,91 @@ const instanceId = `tabs-${crypto.randomUUID()}`
     <slot />
   </div>
 </ticker-tabs>
+
 <script>
-  class TickerTabs extends HTMLElement {
-    private lifecycle?: AbortController
-    connectedCallback() {
-      this.lifecycle?.abort()
-      this.lifecycle = new AbortController()
-      const { signal } = this.lifecycle
-      const group = this.querySelector<HTMLElement>('[data-tabs]')
-      const tabs = Array.from(group?.querySelectorAll<HTMLButtonElement>('[data-tab]') ?? [])
-      const panels = Array.from(this.querySelectorAll<HTMLElement>('[data-panel]')).filter(
-        panel => panel.closest('ticker-tabs') === this
-      )
-      if (!group || !tabs.length || !panels.length) return
-      group.setAttribute('role', 'tablist')
-      group.inert = false
-      const select = (selected: HTMLButtonElement, focus = false) => {
-        tabs.forEach(tab => {
-          const active = tab === selected
-          tab.setAttribute('aria-selected', String(active))
-          tab.tabIndex = active ? 0 : -1
-        })
-        panels.forEach(panel => {
-          panel.hidden = panel.dataset.panel !== selected.dataset.tab
-        })
-        if (focus) selected.focus()
-        this.dispatchEvent(
-          new CustomEvent('tabs:change', {
-            bubbles: true,
-            detail: { group: this.dataset.group, tab: selected.dataset.tab },
-          })
-        )
-      }
-      tabs.forEach((tab, index) => {
-        const panel = panels.find(panel => panel.dataset.panel === tab.dataset.tab)
-        if (!panel) return
-        panel.id ||= `${tab.id}-panel`
-        tab.setAttribute('role', 'tab')
-        tab.setAttribute('aria-controls', panel.id)
-        panel.setAttribute('role', 'tabpanel')
-        panel.setAttribute('aria-labelledby', tab.id)
-        panel.removeAttribute('aria-label')
-        panel.tabIndex = 0
-        tab.addEventListener('click', () => select(tab), { signal })
-        tab.addEventListener(
-          'keydown',
-          event => {
-            const next =
-              event.key === 'ArrowRight'
-                ? (index + 1) % tabs.length
-                : event.key === 'ArrowLeft'
-                  ? (index - 1 + tabs.length) % tabs.length
-                  : event.key === 'Home'
-                    ? 0
-                    : event.key === 'End'
-                      ? tabs.length - 1
-                      : undefined
-            if (next === undefined) return
-            event.preventDefault()
-            select(tabs[next], true)
-          },
-          { signal }
-        )
+  import { mountElements } from '../lib/mount-elements'
+
+  mountElements('ticker-tabs', element => {
+    const lifecycle = new AbortController()
+    const { signal } = lifecycle
+    const group = element.querySelector<HTMLElement>('[data-tabs]')
+    const tabs = Array.from(group?.querySelectorAll<HTMLButtonElement>('[data-tab]') ?? [])
+    const panels = Array.from(element.querySelectorAll<HTMLElement>('[data-panel]')).filter(
+      panel => panel.closest('ticker-tabs') === element
+    )
+    if (!group || !tabs.length || !panels.length) return
+    group.setAttribute('role', 'tablist')
+    group.inert = false
+    const select = (selected: HTMLButtonElement, focus = false) => {
+      tabs.forEach(tab => {
+        const active = tab === selected
+        tab.setAttribute('aria-selected', String(active))
+        tab.tabIndex = active ? 0 : -1
       })
-      select(tabs[0])
-      const selectFromHash = () => {
-        let target: HTMLElement | null
-        try {
-          target = document.getElementById(decodeURIComponent(location.hash.slice(1)))
-        } catch {
-          return
-        }
-        if (!target) return
-        const panel = panels.find(panel => panel.contains(target))
-        const tab = tabs.find(tab => tab.dataset.tab === panel?.dataset.panel)
-        if (!panel || !tab) return
-        const wasHidden = panel.hidden
-        select(tab)
-        if (wasHidden) target.scrollIntoView({ block: 'start' })
+      panels.forEach(panel => {
+        panel.hidden = panel.dataset.panel !== selected.dataset.tab
+      })
+      if (focus) selected.focus()
+      element.dispatchEvent(
+        new CustomEvent('tabs:change', {
+          bubbles: true,
+          detail: { group: element.dataset.group, tab: selected.dataset.tab },
+        })
+      )
+    }
+    tabs.forEach((tab, index) => {
+      const panel = panels.find(panel => panel.dataset.panel === tab.dataset.tab)
+      if (!panel) return
+      panel.id ||= `${tab.id}-panel`
+      tab.setAttribute('role', 'tab')
+      tab.setAttribute('aria-controls', panel.id)
+      panel.setAttribute('role', 'tabpanel')
+      panel.setAttribute('aria-labelledby', tab.id)
+      panel.removeAttribute('aria-label')
+      panel.tabIndex = 0
+      tab.addEventListener('click', () => select(tab), { signal })
+      tab.addEventListener(
+        'keydown',
+        event => {
+          const next =
+            event.key === 'ArrowRight'
+              ? (index + 1) % tabs.length
+              : event.key === 'ArrowLeft'
+                ? (index - 1 + tabs.length) % tabs.length
+                : event.key === 'Home'
+                  ? 0
+                  : event.key === 'End'
+                    ? tabs.length - 1
+                    : undefined
+          if (next === undefined) return
+          event.preventDefault()
+          select(tabs[next], true)
+        },
+        { signal }
+      )
+    })
+    select(tabs[0])
+    const selectFromHash = () => {
+      let target: HTMLElement | null
+      try {
+        target = document.getElementById(decodeURIComponent(location.hash.slice(1)))
+      } catch {
+        return
       }
-      selectFromHash()
-      window.addEventListener('hashchange', selectFromHash, { signal })
+      if (!target) return
+      const panel = panels.find(panel => panel.contains(target))
+      const tab = tabs.find(tab => tab.dataset.tab === panel?.dataset.panel)
+      if (!panel || !tab) return
+      const wasHidden = panel.hidden
+      select(tab)
+      if (wasHidden) target.scrollIntoView({ block: 'start' })
     }
-    disconnectedCallback() {
-      this.lifecycle?.abort()
+    selectFromHash()
+    window.addEventListener('hashchange', selectFromHash, { signal })
+    return () => {
+      lifecycle.abort()
     }
-  }
-  if (!customElements.get('ticker-tabs')) customElements.define('ticker-tabs', TickerTabs)
+  })
 </script>
 
 <style>

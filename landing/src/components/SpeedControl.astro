@@ -21,54 +21,21 @@ const t = i18n.controls.speed
 </ticker-speed>
 
 <script>
-  class TickerSpeed extends HTMLElement {
-    private lifecycle?: AbortController
-    connectedCallback() {
-      this.lifecycle?.abort()
-      this.lifecycle = new AbortController()
-      const { signal } = this.lifecycle
-      const input = this.querySelector<HTMLInputElement>('input')
-      const output = this.querySelector<HTMLOutputElement>('output')
-      if (!input || !output) return
-      input.id ||= `speed-${crypto.randomUUID()}`
-      output.htmlFor = input.id
-      const display = () => {
-        output.value = (this.dataset.displayTemplate ?? '').replace('{seconds}', input.value)
-        input.setAttribute(
-          'aria-valuetext',
-          (this.dataset.descriptionTemplate ?? '').replace('{seconds}', input.value)
-        )
-      }
-      this.addEventListener(
-        'speed:set',
-        event => {
-          const { duration, enabled } = (
-            event as CustomEvent<{ duration: number; enabled: boolean }>
-          ).detail
-          input.disabled = !enabled
-          input.value = String(duration)
-          display()
-        },
-        { signal }
-      )
-      input.addEventListener(
-        'input',
-        () => {
-          display()
-          this.dispatchEvent(
-            new CustomEvent('speed:change', { bubbles: true, detail: Number(input.value) })
-          )
-        },
-        { signal }
-      )
-      display()
-    }
-    disconnectedCallback() {
-      this.lifecycle?.abort()
-    }
-  }
-  if (!customElements.get('ticker-speed')) customElements.define('ticker-speed', TickerSpeed)
+  import { mountElements } from '../../../shared/lib/mount-elements'
+  import { syncSpeedControl } from '../lib/speed-control'
+
+  mountElements('ticker-speed', element => {
+    const lifecycle = new AbortController()
+    const input = element.querySelector<HTMLInputElement>('input')
+    input?.addEventListener('input', () => syncSpeedControl(element, Number(input.value)), {
+      signal: lifecycle.signal,
+    })
+    // The owning demo supplies its duration and enables the input.
+    syncSpeedControl(element, input?.disabled ? undefined : Number(input?.value))
+    return () => lifecycle.abort()
+  })
 </script>
+
 <style>
   ticker-speed output {
     color: var(--color-text);

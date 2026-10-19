@@ -11,10 +11,17 @@ skills/
 coverage/
 test-results/
 playwright-report/
+blob-report/
+.astro/
+.vite/
+.cache/
+*.tsbuildinfo
 *.tgz
 
 # Repository memory, automation and configuration
 AGENTS.md
+.gitignore
+.npmignore
 .agents/
 .codex/
 .github/

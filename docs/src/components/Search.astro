@@ -67,7 +67,10 @@ const id = `docs-search-${crypto.randomUUID()}`
     </div>
   </template>
 </ticker-docs-search>
+
 <script>
+  import { mountElements } from '../../../shared/lib/mount-elements'
+
   import { browser } from '@samline/drawer/browser'
   type Result = {
     url: string
@@ -79,165 +82,164 @@ const id = `docs-search-${crypto.randomUUID()}`
     options: (config: { baseUrl: string }) => Promise<void>
     search: (query: string) => Promise<{ results: { data: () => Promise<Result> }[] }>
   }
-  class DocsSearch extends HTMLElement {
-    private lifecycle?: AbortController
-    private pagefind?: Promise<Pagefind>
-    private request = 0
-    private timer?: ReturnType<typeof setTimeout>
-    connectedCallback() {
-      this.lifecycle?.abort()
-      this.lifecycle = new AbortController()
-      const { signal } = this.lifecycle
-      const trigger = this.querySelector<HTMLButtonElement>('[data-search-trigger]'),
-        template = this.querySelector('template'),
-        id = this.dataset.id
-      if (!trigger || !template?.content.firstElementChild || !id) return
-      const load = () => {
-        if (!this.pagefind) {
-          const base = (this.dataset.base ?? '/').replace(/\/$/, '') + '/'
-          this.pagefind = import(
-            /* @vite-ignore */ new URL(`${base}pagefind/pagefind.js`, location.origin).href
-          )
-            .then(async module => {
-              const api = module as Pagefind
-              await api.options({ baseUrl: base })
-              return api
-            })
-            .catch(error => {
-              this.pagefind = undefined
-              throw error
-            })
-        }
-        return this.pagefind
+  mountElements('ticker-docs-search', element => {
+    let pagefind: Promise<Pagefind> | undefined
+    let request = 0
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const lifecycle = new AbortController()
+    const { signal } = lifecycle
+    const trigger = element.querySelector<HTMLButtonElement>('[data-search-trigger]'),
+      template = element.querySelector('template'),
+      id = element.dataset.id
+    if (!trigger || !template?.content.firstElementChild || !id) return
+    const load = () => {
+      if (!pagefind) {
+        const base = (element.dataset.base ?? '/').replace(/\/$/, '') + '/'
+        pagefind = import(
+          /* @vite-ignore */ new URL(`${base}pagefind/pagefind.js`, location.origin).href
+        )
+          .then(async module => {
+            const api = module as Pagefind
+            await api.options({ baseUrl: base })
+            return api
+          })
+          .catch(error => {
+            pagefind = undefined
+            throw error
+          })
       }
-      const drawer = browser.newDrawer({
-        id,
-        html: template.content.firstElementChild.outerHTML,
-        options: {
-          container: this,
-          triggerElement: trigger,
-          direction: 'top',
-          showHandle: true,
-          handleOnly: true,
-          handleAriaLabel: this.dataset.handle,
-          handleClassName: 'docs-search-handle',
-          autoFocus: true,
-          ariaLabel: this.dataset.title,
-          contentClassName: 'docs-search-panel',
-          overlayClassName: 'docs-search-overlay',
-          closeButton: { icon: '×', className: 'docs-search-close', ariaLabel: this.dataset.close },
-          onOpenChange: open => {
-            trigger.setAttribute('aria-expanded', String(open))
-            if (!open) {
-              ++this.request
-              clearTimeout(this.timer)
-              return
-            }
-            // The native handle precedes the field; search should start ready to type.
-            queueMicrotask(() => {
-              if (!signal.aborted && trigger.getAttribute('aria-expanded') === 'true')
-                this.querySelector<HTMLInputElement>('[role=searchbox]')?.focus({
-                  preventScroll: true,
-                })
-            })
-            load().catch(() => {
-              if (!signal.aborted) {
-                const status = this.querySelector('[role=status]')
-                if (status) status.textContent = this.dataset.error ?? ''
-              }
-            })
-          },
+      return pagefind
+    }
+    const drawer = browser.newDrawer({
+      id,
+      html: template.content.firstElementChild.outerHTML,
+      options: {
+        container: element,
+        triggerElement: trigger,
+        direction: 'top',
+        showHandle: true,
+        handleOnly: true,
+        handleAriaLabel: element.dataset.handle,
+        handleClassName: 'docs-search-handle',
+        autoFocus: true,
+        ariaLabel: element.dataset.title,
+        contentClassName: 'docs-search-panel',
+        overlayClassName: 'docs-search-overlay',
+        closeButton: {
+          icon: '×',
+          className: 'docs-search-close',
+          ariaLabel: element.dataset.close,
         },
-      })
-      trigger.hidden = false
-      document.addEventListener(
-        'keydown',
-        event => {
-          const activeSearch = document.activeElement?.closest('ticker-docs-search')
-          if (event.defaultPrevented || (activeSearch && activeSearch !== this)) return
-          if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
-            event.preventDefault()
-            drawer?.setOpen(trigger.getAttribute('aria-expanded') !== 'true')
-          }
-        },
-        { signal }
-      )
-      this.addEventListener(
-        'input',
-        event => {
-          if (!(event.target instanceof HTMLInputElement)) return
-          const input = event.target,
-            status = this.querySelector('[role=status]'),
-            list = this.querySelector('ul')
-          if (!status || !list) return
-          clearTimeout(this.timer)
-          const request = ++this.request
-          const query = input.value.trim()
-          if (!query) {
-            list.replaceChildren()
-            status.textContent = ''
+        onOpenChange: open => {
+          trigger.setAttribute('aria-expanded', String(open))
+          if (!open) {
+            ++request
+            clearTimeout(timer)
             return
           }
-          this.timer = setTimeout(async () => {
-            status.textContent = this.dataset.loading ?? ''
-            try {
-              const api = await load(),
-                found = await api.search(query)
-              const results = await Promise.all(
-                found.results.slice(0, 12).map(result => result.data())
-              )
-              if (signal.aborted || request !== this.request) return
-              const cardTemplate = this.querySelector<HTMLTemplateElement>('[data-result-template]')
-              if (!cardTemplate?.content.firstElementChild) return
-              list.replaceChildren()
-              for (const result of results) {
-                const li = document.createElement('li')
-                const link = cardTemplate.content.firstElementChild.cloneNode(
-                  true
-                ) as HTMLAnchorElement
-                const title = link.querySelector('[data-result-title]'),
-                  excerpt = link.querySelector('[data-result-excerpt]'),
-                  match = result.sub_results?.[0]
-                link.href = match?.url ?? result.url
-                if (title) title.textContent = result.meta.title ?? match?.title ?? ''
-                if (excerpt)
-                  excerpt.textContent =
-                    new DOMParser().parseFromString(match?.excerpt ?? result.excerpt, 'text/html')
-                      .body.textContent ?? ''
-                li.append(link)
-                list.append(li)
-              }
-              status.textContent = results.length
-                ? (this.dataset.count ?? '')
-                    .replace('{count}', String(found.results.length))
-                    .replace('{shown}', String(results.length))
-                : (this.dataset.empty ?? '')
-            } catch {
-              if (!signal.aborted && request === this.request)
-                status.textContent = this.dataset.error ?? ''
+          // The native handle precedes the field; search should start ready to type.
+          queueMicrotask(() => {
+            if (!signal.aborted && trigger.getAttribute('aria-expanded') === 'true')
+              element.querySelector<HTMLInputElement>('[role=searchbox]')?.focus({
+                preventScroll: true,
+              })
+          })
+          load().catch(() => {
+            if (!signal.aborted) {
+              const status = element.querySelector('[role=status]')
+              if (status) status.textContent = element.dataset.error ?? ''
             }
-          }, 300)
+          })
         },
-        { signal }
-      )
-      this.addEventListener(
-        'click',
-        event => {
-          if (event.target instanceof Element && event.target.closest('.docs-search-panel a'))
-            drawer?.setOpen(false)
-        },
-        { signal }
-      )
+      },
+    })
+    trigger.hidden = false
+    document.addEventListener(
+      'keydown',
+      event => {
+        const activeSearch = document.activeElement?.closest('ticker-docs-search')
+        if (event.defaultPrevented || (activeSearch && activeSearch !== element)) return
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+          event.preventDefault()
+          drawer?.setOpen(trigger.getAttribute('aria-expanded') !== 'true')
+        }
+      },
+      { signal }
+    )
+    element.addEventListener(
+      'input',
+      event => {
+        if (!(event.target instanceof HTMLInputElement)) return
+        const input = event.target,
+          status = element.querySelector('[role=status]'),
+          list = element.querySelector('ul')
+        if (!status || !list) return
+        clearTimeout(timer)
+        const currentRequest = ++request
+        const query = input.value.trim()
+        if (!query) {
+          list.replaceChildren()
+          status.textContent = ''
+          return
+        }
+        timer = setTimeout(async () => {
+          status.textContent = element.dataset.loading ?? ''
+          try {
+            const api = await load(),
+              found = await api.search(query)
+            const results = await Promise.all(
+              found.results.slice(0, 12).map(result => result.data())
+            )
+            if (signal.aborted || currentRequest !== request) return
+            const cardTemplate =
+              element.querySelector<HTMLTemplateElement>('[data-result-template]')
+            if (!cardTemplate?.content.firstElementChild) return
+            list.replaceChildren()
+            for (const result of results) {
+              const li = document.createElement('li')
+              const link = cardTemplate.content.firstElementChild.cloneNode(
+                true
+              ) as HTMLAnchorElement
+              const title = link.querySelector('[data-result-title]'),
+                excerpt = link.querySelector('[data-result-excerpt]'),
+                match = result.sub_results?.[0]
+              link.href = match?.url ?? result.url
+              if (title) title.textContent = result.meta.title ?? match?.title ?? ''
+              if (excerpt)
+                excerpt.textContent =
+                  new DOMParser().parseFromString(match?.excerpt ?? result.excerpt, 'text/html')
+                    .body.textContent ?? ''
+              li.append(link)
+              list.append(li)
+            }
+            status.textContent = results.length
+              ? (element.dataset.count ?? '')
+                  .replace('{count}', String(found.results.length))
+                  .replace('{shown}', String(results.length))
+              : (element.dataset.empty ?? '')
+          } catch {
+            if (!signal.aborted && currentRequest === request)
+              status.textContent = element.dataset.error ?? ''
+          }
+        }, 300)
+      },
+      { signal }
+    )
+    element.addEventListener(
+      'click',
+      event => {
+        if (event.target instanceof Element && event.target.closest('.docs-search-panel a'))
+          drawer?.setOpen(false)
+      },
+      { signal }
+    )
+    return () => {
+      lifecycle.abort()
+      clearTimeout(timer)
+      ++request
+      if (element.dataset.id) browser.destroyDrawer(element.dataset.id)
     }
-    disconnectedCallback() {
-      this.lifecycle?.abort()
-      clearTimeout(this.timer)
-      ++this.request
-      if (this.dataset.id) browser.destroyDrawer(this.dataset.id)
-    }
-  }
-  if (!customElements.get('ticker-docs-search'))
-    customElements.define('ticker-docs-search', DocsSearch)
+  })
 </script>
 <DrawerStyles scope="ticker-docs-search" css={drawerCss} />
 <style>

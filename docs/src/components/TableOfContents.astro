@@ -32,64 +32,60 @@ const items = headings.filter(h => h.depth === 2 || h.depth === 3)
     </aside>
   </ticker-docs-toc>
 )}
+
 <script>
-  class DocsTableOfContents extends HTMLElement {
-    private lifecycle?: AbortController
-    private observer?: ResizeObserver
-    private frame = 0
-    connectedCallback() {
-      this.lifecycle?.abort()
-      this.observer?.disconnect()
-      this.lifecycle = new AbortController()
-      const { signal } = this.lifecycle
-      const entries = Array.from(this.querySelectorAll<HTMLAnchorElement>('a[href^="#"]'))
-        .map(link => ({
-          link,
-          heading: document.getElementById(decodeURIComponent(link.hash.slice(1))),
-        }))
-        .filter(entry => entry.heading)
-      const header = document.querySelector('ticker-docs-header')
-      const update = () => {
-        this.frame = 0
-        const offset =
-          (header?.getBoundingClientRect().bottom ?? 0) +
-          2.5 * parseFloat(getComputedStyle(document.documentElement).fontSize) +
-          // Native anchor rounding and fractional font metrics can differ by
-          // slightly more than one CSS pixel after layout settles.
-          2
-        const atEnd =
-          scrollY > 0 && scrollY + innerHeight >= document.documentElement.scrollHeight - 1
-        const current = atEnd
-          ? entries.at(-1)
-          : entries.findLast(entry => entry.heading!.getBoundingClientRect().top <= offset)
-        for (const entry of entries) {
-          if (entry === current) entry.link.setAttribute('aria-current', 'location')
-          else entry.link.removeAttribute('aria-current')
-        }
+  import { mountElements } from '../../../shared/lib/mount-elements'
+
+  mountElements('ticker-docs-toc', element => {
+    let frame = 0
+    const lifecycle = new AbortController()
+    const { signal } = lifecycle
+    const entries = Array.from(element.querySelectorAll<HTMLAnchorElement>('a[href^="#"]'))
+      .map(link => ({
+        link,
+        heading: document.getElementById(decodeURIComponent(link.hash.slice(1))),
+      }))
+      .filter(entry => entry.heading)
+    const header = document.querySelector('ticker-docs-header')
+    const update = () => {
+      frame = 0
+      const offset =
+        (header?.getBoundingClientRect().bottom ?? 0) +
+        2.5 * parseFloat(getComputedStyle(document.documentElement).fontSize) +
+        // Native anchor rounding and fractional font metrics can differ by
+        // slightly more than one CSS pixel after layout settles.
+        2
+      const atEnd =
+        scrollY > 0 && scrollY + innerHeight >= document.documentElement.scrollHeight - 1
+      const current = atEnd
+        ? entries.at(-1)
+        : entries.findLast(entry => entry.heading!.getBoundingClientRect().top <= offset)
+      for (const entry of entries) {
+        if (entry === current) entry.link.setAttribute('aria-current', 'location')
+        else entry.link.removeAttribute('aria-current')
       }
-      const schedule = () => {
-        if (!this.frame) this.frame = requestAnimationFrame(update)
-      }
-      window.addEventListener('scroll', schedule, { passive: true, signal })
-      window.addEventListener('resize', schedule, { signal })
-      window.addEventListener('hashchange', schedule, { signal })
-      window.addEventListener('load', schedule, { signal })
-      this.observer = new ResizeObserver(schedule)
-      if (header) this.observer.observe(header)
-      const article = document.querySelector('ticker-docs-article')
-      if (article) this.observer.observe(article)
-      schedule()
     }
-    disconnectedCallback() {
-      this.lifecycle?.abort()
-      this.observer?.disconnect()
-      cancelAnimationFrame(this.frame)
-      this.frame = 0
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update)
     }
-  }
-  if (!customElements.get('ticker-docs-toc'))
-    customElements.define('ticker-docs-toc', DocsTableOfContents)
+    window.addEventListener('scroll', schedule, { passive: true, signal })
+    window.addEventListener('resize', schedule, { signal })
+    window.addEventListener('hashchange', schedule, { signal })
+    window.addEventListener('load', schedule, { signal })
+    const observer = new ResizeObserver(schedule)
+    if (header) observer.observe(header)
+    const article = document.querySelector('ticker-docs-article')
+    if (article) observer.observe(article)
+    schedule()
+    return () => {
+      lifecycle.abort()
+      observer.disconnect()
+      cancelAnimationFrame(frame)
+      frame = 0
+    }
+  })
 </script>
+
 <style>
   .toc {
     display: block;

@@ -166,7 +166,9 @@ import { mount, unmount } from '@samline/ticker/vanilla'
 import '@samline/ticker/style.css'
 
 mount()
-window.addEventListener('pagehide', unmount, { once: true })
+window.addEventListener('pagehide', event => {
+  if (!event.persisted) unmount()
+})
 ```
 
 <Callout title="Keep one lifecycle owner">

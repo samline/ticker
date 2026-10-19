@@ -66,6 +66,15 @@ test('the HTML/CDN guide runs when copied into three files', async ({ page, cont
   await expect(guide.locator('.ticker-wrapper')).toHaveAttribute('data-ready', 'true')
   await expect(guide.locator('.ticker-wrapper')).toHaveAttribute('data-duration', '30')
   await expect(guide.locator('.ticker-content:not(.ticker-clone) a')).toHaveCount(2)
+  await guide.evaluate(() => {
+    dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true }))
+    dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }))
+  })
+  await expect(guide.locator('.ticker-wrapper')).toHaveAttribute('data-ready', 'true')
+  await guide.evaluate(() =>
+    dispatchEvent(new PageTransitionEvent('pagehide', { persisted: false }))
+  )
+  await expect(guide.locator('.ticker-wrapper')).toHaveCount(0)
   expect(guideErrors).toEqual([])
   await guide.close()
 })

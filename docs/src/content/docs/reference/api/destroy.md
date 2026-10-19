@@ -40,8 +40,12 @@ The stable `instance.source` reference and last normalized `instance.options` sn
 ```ts
 const news = ticker('#news')
 
-window.addEventListener('pagehide', () => news?.destroy(), { once: true })
+window.addEventListener('pagehide', event => {
+  if (!event.persisted) news?.destroy()
+})
 ```
+
+A persisted `pagehide` means the browser is keeping the page for back/forward restoration. Preserve its controller and controls; destroy only on a non-persisted departure or when your application removes the integration.
 
 ## Registry cleanup
 

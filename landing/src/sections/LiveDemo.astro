@@ -92,76 +92,63 @@ const t = i18n.sections.liveDemo
 </ticker-live-demo>
 
 <script>
-  class TickerLiveDemo extends HTMLElement {
-    private lifecycle?: AbortController
-    connectedCallback() {
-      this.lifecycle?.abort()
-      this.lifecycle = new AbortController()
-      const { signal } = this.lifecycle
-      let current = 'news'
-      const active = () =>
-        Array.from(this.querySelectorAll<HTMLElement>('ticker-demo')).find(
-          demo => demo.dataset.kind === current && demo.closest('ticker-live-demo') === this
-        )
-      const sync = () => {
-        const demo = active()
-        this.querySelector('ticker-speed')?.dispatchEvent(
-          new CustomEvent('speed:set', {
-            detail: {
-              duration: Number(demo?.dataset.duration ?? 38),
-              enabled: demo?.dataset.initialized === 'true',
-            },
-          })
-        )
-        demo?.dispatchEvent(new Event('ticker:refresh'))
-      }
-      this.addEventListener(
-        'tabs:change',
-        event => {
-          if ((event.target as Element).closest('ticker-live-demo') !== this) return
-          const detail = (event as CustomEvent<{ group: string; tab: string }>).detail
-          if (detail.group !== 'demo') return
-          current = detail.tab
-          sync()
-        },
-        { signal }
+  import { mountElements } from '../../../shared/lib/mount-elements'
+
+  import { getDemoController } from '../lib/demo-controller'
+  import { syncSpeedControl } from '../lib/speed-control'
+  mountElements('ticker-live-demo', element => {
+    const lifecycle = new AbortController()
+    const { signal } = lifecycle
+    let current = 'news'
+    const active = () =>
+      Array.from(element.querySelectorAll<HTMLElement>('ticker-demo')).find(
+        demo => demo.dataset.kind === current && demo.closest('ticker-live-demo') === element
       )
-      this.addEventListener('ticker:ready', sync, { signal })
-      this.addEventListener(
-        'speed:change',
-        event => {
-          if ((event.target as Element).closest('ticker-live-demo') !== this) return
-          active()?.dispatchEvent(
-            new CustomEvent('ticker:duration', { detail: (event as CustomEvent<number>).detail })
-          )
-        },
-        { signal }
-      )
-      this.addEventListener(
-        'click',
-        event => {
-          const link = (event.target as Element).closest<HTMLElement>('[data-open-demo]')
-          if (!link || link.closest('ticker-live-demo') !== this) return
-          const tab = Array.from(this.querySelectorAll<HTMLButtonElement>('[data-tab]')).find(
-            tab => tab.dataset.tab === link.dataset.openDemo
-          )
-          tab?.click()
-        },
-        { signal }
-      )
-      Promise.all(
-        ['ticker-tabs', 'ticker-demo', 'ticker-speed'].map(name => customElements.whenDefined(name))
-      ).then(() => {
-        if (!signal.aborted) sync()
-      })
+    const sync = () => {
+      const controller = getDemoController(active())
+      syncSpeedControl(element.querySelector('ticker-speed'), controller?.options.duration)
+      controller?.refresh()
     }
-    disconnectedCallback() {
-      this.lifecycle?.abort()
+    element.addEventListener(
+      'tabs:change',
+      event => {
+        if ((event.target as Element).closest('ticker-live-demo') !== element) return
+        const detail = (event as CustomEvent<{ group: string; tab: string }>).detail
+        if (detail.group !== 'demo') return
+        current = detail.tab
+        sync()
+      },
+      { signal }
+    )
+    element.addEventListener('ticker:ready', sync, { signal })
+    element.addEventListener(
+      'input',
+      event => {
+        if (!(event.target instanceof HTMLInputElement) || !event.target.closest('ticker-speed'))
+          return
+        getDemoController(active())?.update({ duration: Number(event.target.value) })
+      },
+      { signal }
+    )
+    element.addEventListener(
+      'click',
+      event => {
+        const link = (event.target as Element).closest<HTMLElement>('[data-open-demo]')
+        if (!link || link.closest('ticker-live-demo') !== element) return
+        const tab = Array.from(element.querySelectorAll<HTMLButtonElement>('[data-tab]')).find(
+          tab => tab.dataset.tab === link.dataset.openDemo
+        )
+        tab?.click()
+      },
+      { signal }
+    )
+    sync()
+    return () => {
+      lifecycle.abort()
     }
-  }
-  if (!customElements.get('ticker-live-demo'))
-    customElements.define('ticker-live-demo', TickerLiveDemo)
+  })
 </script>
+
 <style>
   .studio-title {
     font-family: var(--font-mono);

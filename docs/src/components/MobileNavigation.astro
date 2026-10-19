@@ -35,58 +35,56 @@ const id = `docs-menu-${crypto.randomUUID()}`
     </div>
   </details>
 </ticker-docs-menu>
+
 <script>
+  import { mountElements } from '../../../shared/lib/mount-elements'
+
   import { browser } from '@samline/drawer/browser'
-  class DocsMenu extends HTMLElement {
-    private lifecycle?: AbortController
-    connectedCallback() {
-      this.lifecycle?.abort()
-      const button = this.querySelector('button'),
-        fallback = this.querySelector('details'),
-        content = this.querySelector('[data-content]'),
-        id = this.dataset.id
-      if (!button || !fallback || !content || !id) return
-      this.lifecycle = new AbortController()
-      const { signal } = this.lifecycle
-      const drawer = browser.newDrawer({
-        id,
-        html: content.outerHTML,
-        options: {
-          container: this,
-          triggerElement: button,
-          direction: 'right',
-          autoFocus: true,
-          ariaLabel: this.dataset.label,
-          contentClassName: 'docs-menu-panel',
-          overlayClassName: 'docs-menu-overlay',
-          closeButton: { icon: '×', ariaLabel: this.dataset.close, className: 'docs-menu-close' },
-          onOpenChange: open => button.setAttribute('aria-expanded', String(open)),
-        },
-      })
-      this.addEventListener(
-        'click',
-        event => {
-          if (event.target instanceof Element && event.target.closest('.docs-menu-panel a'))
-            drawer?.setOpen(false)
-        },
-        { signal }
-      )
-      matchMedia('(width >= 64rem)').addEventListener(
-        'change',
-        event => {
-          if (event.matches) drawer?.setOpen(false)
-        },
-        { signal }
-      )
-      button.hidden = false
-      fallback.hidden = true
+  mountElements('ticker-docs-menu', element => {
+    const button = element.querySelector('button'),
+      fallback = element.querySelector('details'),
+      content = element.querySelector('[data-content]'),
+      id = element.dataset.id
+    if (!button || !fallback || !content || !id) return
+    const lifecycle = new AbortController()
+    const { signal } = lifecycle
+    const drawer = browser.newDrawer({
+      id,
+      html: content.outerHTML,
+      options: {
+        container: element,
+        triggerElement: button,
+        direction: 'right',
+        autoFocus: true,
+        ariaLabel: element.dataset.label,
+        contentClassName: 'docs-menu-panel',
+        overlayClassName: 'docs-menu-overlay',
+        closeButton: { icon: '×', ariaLabel: element.dataset.close, className: 'docs-menu-close' },
+        onOpenChange: open => button.setAttribute('aria-expanded', String(open)),
+      },
+    })
+    element.addEventListener(
+      'click',
+      event => {
+        if (event.target instanceof Element && event.target.closest('.docs-menu-panel a'))
+          drawer?.setOpen(false)
+      },
+      { signal }
+    )
+    matchMedia('(width >= 64rem)').addEventListener(
+      'change',
+      event => {
+        if (event.matches) drawer?.setOpen(false)
+      },
+      { signal }
+    )
+    button.hidden = false
+    fallback.hidden = true
+    return () => {
+      lifecycle.abort()
+      if (element.dataset.id) browser.destroyDrawer(element.dataset.id)
     }
-    disconnectedCallback() {
-      this.lifecycle?.abort()
-      if (this.dataset.id) browser.destroyDrawer(this.dataset.id)
-    }
-  }
-  if (!customElements.get('ticker-docs-menu')) customElements.define('ticker-docs-menu', DocsMenu)
+  })
 </script>
 <DrawerStyles scope="ticker-docs-menu" css={drawerCss} />
 <style>

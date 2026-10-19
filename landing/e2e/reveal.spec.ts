@@ -2,8 +2,8 @@ import { test, expect } from '@playwright/test'
 
 test('a tall block starts fading just before entering the viewport', async ({ page }) => {
   await page.goto('./')
-  await page.evaluate(async () => {
-    await customElements.whenDefined('ticker-reveal')
+  await expect(page.locator('ticker-reveal').first()).toHaveAttribute('data-mounted', 'true')
+  await page.evaluate(() => {
     const reveal = document.createElement('ticker-reveal')
     reveal.id = 'tall-reveal'
     const block = document.createElement('div')

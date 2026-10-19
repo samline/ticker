@@ -48,41 +48,39 @@ const t = i18n.controls.theme
     </svg>
   </Button>
 </ticker-theme>
+
 <script>
-  class TickerTheme extends HTMLElement {
-    private lifecycle?: AbortController
-    connectedCallback() {
-      this.lifecycle?.abort()
-      this.lifecycle = new AbortController()
-      const { signal } = this.lifecycle
-      const button = this.querySelector<HTMLButtonElement>('button')
-      if (!button) return
-      const sync = () => {
-        const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
-        this.dataset.theme = theme
-        button.setAttribute('aria-pressed', String(theme === 'dark'))
-        button.setAttribute('aria-label', this.dataset.toggleLabel ?? '')
-        button.setAttribute(
-          'title',
-          (theme === 'dark' ? this.dataset.lightLabel : this.dataset.darkLabel) ?? ''
-        )
-      }
-      button.addEventListener(
-        'click',
-        () => {
-          const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
-          document.dispatchEvent(new CustomEvent('ticker:theme-request', { detail: theme }))
-        },
-        { signal }
+  import { mountElements } from '../lib/mount-elements'
+
+  mountElements('ticker-theme', element => {
+    const lifecycle = new AbortController()
+    const { signal } = lifecycle
+    const button = element.querySelector<HTMLButtonElement>('button')
+    if (!button) return
+    const sync = () => {
+      const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
+      element.dataset.theme = theme
+      button.setAttribute('aria-pressed', String(theme === 'dark'))
+      button.setAttribute('aria-label', element.dataset.toggleLabel ?? '')
+      button.setAttribute(
+        'title',
+        (theme === 'dark' ? element.dataset.lightLabel : element.dataset.darkLabel) ?? ''
       )
-      document.addEventListener('ticker:theme-change', sync, { signal })
-      sync()
     }
-    disconnectedCallback() {
-      this.lifecycle?.abort()
+    button.addEventListener(
+      'click',
+      () => {
+        const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
+        document.dispatchEvent(new CustomEvent('ticker:theme-request', { detail: theme }))
+      },
+      { signal }
+    )
+    document.addEventListener('ticker:theme-change', sync, { signal })
+    sync()
+    return () => {
+      lifecycle.abort()
     }
-  }
-  if (!customElements.get('ticker-theme')) customElements.define('ticker-theme', TickerTheme)
+  })
 </script>
 
 <style>

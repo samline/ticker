@@ -45,14 +45,11 @@ removeOffer(offers?.source.querySelector('[data-offer="sale"]'))
 const headlines = ticker('#headlines', { duration: 20 })
 const partners = ticker('#partners', { duration: 45, direction: 'right' })
 
-window.addEventListener(
-  'pagehide',
-  () => {
-    headlines?.destroy()
-    partners?.destroy()
-  },
-  { once: true }
-)
+window.addEventListener('pagehide', event => {
+  if (event.persisted) return
+  headlines?.destroy()
+  partners?.destroy()
+})
 ```
 
 ## Update a theme class

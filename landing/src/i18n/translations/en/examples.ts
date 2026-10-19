@@ -11,13 +11,13 @@ export interface Recipe {
   rows: readonly {
     label: string
     duration: number
-    direction: import('../../../../../src/core/types').TickerDirection
+    direction: import('@samline/ticker').TickerDirection
     speed?: number
     autoplay?: boolean
     navigation?: boolean
     resumeAfterDrag?: boolean
     rtl?: boolean
-    responsive?: import('../../../../../src/core/types').TickerResponsiveRule[]
+    responsive?: import('@samline/ticker').TickerResponsiveRule[]
     items: readonly {
       label: string
       description?: string

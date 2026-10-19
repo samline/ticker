@@ -20,7 +20,7 @@ TextLink owns contextual underlined links, arrows, focus and closing-theme color
 
 Surface owns card background, border, radius and optional hover. Consumers own layout and content padding. Disclosure owns native details/summary layout, indicator and keyboard focus; consumers own panel/FAQ boundaries and content spacing. CodeFrame owns the code toolbar, typography variant and build-time Astro/Shiki renderer for source passed as text; CopyButton owns exact copying, failure selection, independent feedback/reset and cleanup.
 
-DrawerStyles receives the installed vendor stylesheet from each consuming app, normalizes fixed lengths to rem and scopes it to the owning custom element. It owns common native close appearance and reduced-motion overrides. Drawer owns animations, gestures, focus trapping, scroll locking and dismissal; app integrations own configuration and meaningful content only.
+DrawerStyles receives the installed vendor stylesheet from each consuming app, normalizes fixed lengths to rem and scopes it to the owning DOM root. It owns common native close appearance and reduced-motion overrides. Drawer owns animations, gestures, focus trapping, scroll locking and dismissal; app integrations own configuration and meaningful content only.
 
 ## Setup and checks
 
@@ -63,3 +63,5 @@ CodeFiles composes the shared tabs and highlighted code frame for examples that 
 Titles share Heading and PageTitle rather than page-local font rules. Heading owns the closing title’s width, centered margins and top spacing; keep these together in its closing context because unlayered heading resets override Tailwind margin utilities. Browser checks must assert centered geometry as well as typography and overflow. Heading separates semantic level from the controlled display/section scale; PageTitle composes the eyebrow, title and description. Keep the approved Home Inter/Instrument Serif pairing, weight, tracking and spacing tokens. Editorial accent text is an explicit trailing part of the translated title (titleAccent in docs frontmatter); never infer the last word or split API identifiers. Keep the full title unchanged in metadata/search and verify compiled whitespace, both themes, responsive sizes and enlarged text. API identifiers and single-word headings can remain entirely in the primary font.
 
 CI builds the combined artifact in the landing job and runs both browser suites, including cross-route typography checks. The standalone Docs suite executes its own three-file starter; Landing tests must not require a sibling Docs build to exist.
+
+`lib/mount-elements.ts` supplies one shared insertion/removal observer for component setup. Each processed component script registers an arrow function, keeps instance state in its closure and returns cleanup. Reinserted roots get fresh setup. The existing ticker-* tags are DOM scopes; no custom elements, classes or `this` are needed.

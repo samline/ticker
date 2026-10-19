@@ -13,6 +13,26 @@ const ids = [
   'playback-controls',
 ]
 
+async function checkCachedPageLifecycle(page: Page) {
+  const wrappers = await page.locator('.ticker-wrapper').count()
+  const pause = page.locator('button[data-pause]')
+  const label = await pause.textContent()
+  // Repeat the persisted transition: cleanup must remain registered for a later departure.
+  await page.evaluate(() => {
+    for (let i = 0; i < 2; i++) {
+      dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true }))
+      dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }))
+    }
+  })
+  await expect(page.locator('.ticker-wrapper')).toHaveCount(wrappers)
+  await pause.click()
+  await expect(pause).not.toHaveText(label!)
+  await page.evaluate(() =>
+    dispatchEvent(new PageTransitionEvent('pagehide', { persisted: false }))
+  )
+  await expect(page.locator('.ticker-wrapper')).toHaveCount(0)
+}
+
 async function checkDragModes(page: Page, recipe: Locator) {
   const frame = recipe.locator('.ticker-wrapper')
   const resume = recipe.getByRole('button', { name: 'Resume after drag', exact: true })
@@ -297,6 +317,7 @@ test('every copied CDN and npm document executes as a standalone example', async
         .locator('code')
         .textContent()
       expect(code).toContain('<!doctype html>')
+      expect(code).not.toMatch(/\bclass\s+\w+|\bthis\./)
       await panel.getByRole('button', { name: /Copy complete/ }).click()
       expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(code)
       const standalone = await context.newPage()
@@ -380,6 +401,7 @@ test('every copied CDN and npm document executes as a standalone example', async
       }
       if (id === 'drag-playback')
         await checkDragModes(standalone, standalone.locator('.ticker-recipe'))
+      await checkCachedPageLifecycle(standalone)
       // The same example must also run when copied into three independent files.
       const splitHtml =
         mode === 'Package / ESM'
@@ -418,6 +440,7 @@ test('every copied CDN and npm document executes as a standalone example', async
         await standalone.getByRole('button', { name: 'Play animation', exact: true }).click()
       await standalone.getByRole('button', { name: 'Pause animation', exact: true }).click()
       await expect(standalone.locator('button[data-pause]')).toHaveText('Play animation')
+      await checkCachedPageLifecycle(standalone)
       expect(errors).toEqual([])
       await standalone.close()
     }
@@ -526,17 +549,23 @@ test('Home keeps three separate demo tabs, remembers per-example speed, and shar
   const speed = studio.getByRole('slider')
   await speed.press('Home')
   await speed.press('ArrowRight')
-  await expect(studio.locator('ticker-demo[data-kind=news]')).toHaveAttribute('data-duration', '15')
+  await expect(studio.locator('ticker-demo[data-kind=news] .ticker-frame')).toHaveAttribute(
+    'data-duration',
+    '15'
+  )
   await studio.locator('[data-tab=logos]').click()
   await expect(studio.locator('[data-panel=news]')).toBeHidden()
   await expect(studio.locator('[data-panel=logos]')).toBeVisible()
   await expect(speed).toHaveValue('48')
   await speed.press('End')
-  await expect(studio.locator('ticker-demo[data-kind=logos]')).toHaveAttribute(
+  await expect(studio.locator('ticker-demo[data-kind=logos] .ticker-frame')).toHaveAttribute(
     'data-duration',
     '60'
   )
-  await expect(studio.locator('ticker-demo[data-kind=news]')).toHaveAttribute('data-duration', '15')
+  await expect(studio.locator('ticker-demo[data-kind=news] .ticker-frame')).toHaveAttribute(
+    'data-duration',
+    '15'
+  )
   await studio.locator('[data-tab=prices]').click()
   await expect(speed).toHaveValue('34')
   await studio.locator('[data-tab=news]').click()

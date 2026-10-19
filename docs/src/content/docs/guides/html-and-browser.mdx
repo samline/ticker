@@ -50,7 +50,9 @@ pauseOnHover: true,
 })
 
 news?.update({ duration: 30 })
-window.addEventListener('pagehide', () => news?.destroy(), { once: true })` },
+window.addEventListener('pagehide', event => {
+if (!event.persisted) news?.destroy()
+})` },
 ]
 
 Ticker has two loading setups. Both run in the browser and return the same controller; choose one for each integration.

@@ -38,6 +38,19 @@ export default defineConfig({
   devToolbar: { enabled: false },
   compressHTML: true,
   vite: {
+    // Develop against this checkout through the same public imports consumers use.
+    resolve: {
+      alias: [
+        {
+          find: '@samline/ticker/style.css',
+          replacement: fileURLToPath(new URL('../src/style.css', import.meta.url)),
+        },
+        {
+          find: /^@samline\/ticker$/,
+          replacement: fileURLToPath(new URL('../src/index.ts', import.meta.url)),
+        },
+      ],
+    },
     build: { assetsInlineLimit: inlineSmallStylesheets },
     plugins: [tailwindcss()],
     // Keep link/asset composition slash-terminated while routing accepts the bare base.

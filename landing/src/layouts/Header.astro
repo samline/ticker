@@ -85,26 +85,24 @@ const i18n = getI18n(Astro)
 </ticker-header>
 
 <script>
-  class TickerHeader extends HTMLElement {
-    private observer?: ResizeObserver
-    connectedCallback() {
-      this.observer?.disconnect()
-      this.observer = new ResizeObserver(() => {
-        const root = document.documentElement
-        const rootSize = Number.parseFloat(getComputedStyle(root).fontSize)
-        root.style.setProperty(
-          '--header-offset',
-          `${this.getBoundingClientRect().height / rootSize + 2.5}rem`
-        )
-      })
-      this.observer.observe(this)
+  import { mountElements } from '../../../shared/lib/mount-elements'
+
+  mountElements('ticker-header', element => {
+    const observer = new ResizeObserver(() => {
+      const root = document.documentElement
+      const rootSize = Number.parseFloat(getComputedStyle(root).fontSize)
+      root.style.setProperty(
+        '--header-offset',
+        `${element.getBoundingClientRect().height / rootSize + 2.5}rem`
+      )
+    })
+    observer.observe(element)
+    return () => {
+      observer.disconnect()
     }
-    disconnectedCallback() {
-      this.observer?.disconnect()
-    }
-  }
-  if (!customElements.get('ticker-header')) customElements.define('ticker-header', TickerHeader)
+  })
 </script>
+
 <style>
   ticker-header {
     display: block;

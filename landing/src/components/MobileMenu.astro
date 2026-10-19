@@ -98,89 +98,84 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
 </ticker-mobile-menu>
 
 <script>
+  import { mountElements } from '../../../shared/lib/mount-elements'
+
   import { browser } from '@samline/drawer/browser'
 
-  class TickerMobileMenu extends HTMLElement {
-    private lifecycle?: AbortController
-    private drawer?: ReturnType<typeof browser.newDrawer>
-    connectedCallback() {
-      const trigger = this.querySelector<HTMLButtonElement>('[data-menu-trigger]')
-      const fallback = this.querySelector<HTMLDetailsElement>('details')
-      const content = this.querySelector<HTMLElement>('[data-menu-content]')
-      const id = this.dataset.instanceId
-      if (!trigger || !fallback || !content || !id) return
-      this.lifecycle = new AbortController()
-      const { signal } = this.lifecycle
-      const syncCurrentSection = () => {
-        const headerBottom =
-          document.querySelector('ticker-header')?.getBoundingClientRect().bottom ?? 0
-        const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
-        const readingPosition = Math.min(headerBottom + rootSize * 1.5, innerHeight - 1)
-        const section = Array.from(document.querySelectorAll<HTMLElement>('main > section')).find(
-          element => {
-            const bounds = element.getBoundingClientRect()
-            return bounds.top <= readingPosition && bounds.bottom > readingPosition
-          }
-        )
-        for (const link of this.querySelectorAll<HTMLAnchorElement>('.menu-link')) {
-          const target = new URL(link.href)
-          if (
-            target.pathname.replace(/\/$/, '') === location.pathname.replace(/\/$/, '') &&
-            !target.hash
-          )
-            link.setAttribute('aria-current', 'page')
-          else if (section?.id && link.getAttribute('href') === `#${section.id}`)
-            link.setAttribute('aria-current', 'location')
-          else link.removeAttribute('aria-current')
+  mountElements('ticker-mobile-menu', element => {
+    const trigger = element.querySelector<HTMLButtonElement>('[data-menu-trigger]')
+    const fallback = element.querySelector<HTMLDetailsElement>('details')
+    const content = element.querySelector<HTMLElement>('[data-menu-content]')
+    const id = element.dataset.instanceId
+    if (!trigger || !fallback || !content || !id) return
+    const lifecycle = new AbortController()
+    const { signal } = lifecycle
+    const syncCurrentSection = () => {
+      const headerBottom =
+        document.querySelector('ticker-header')?.getBoundingClientRect().bottom ?? 0
+      const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
+      const readingPosition = Math.min(headerBottom + rootSize * 1.5, innerHeight - 1)
+      const section = Array.from(document.querySelectorAll<HTMLElement>('main > section')).find(
+        element => {
+          const bounds = element.getBoundingClientRect()
+          return bounds.top <= readingPosition && bounds.bottom > readingPosition
         }
+      )
+      for (const link of element.querySelectorAll<HTMLAnchorElement>('.menu-link')) {
+        const target = new URL(link.href)
+        if (
+          target.pathname.replace(/\/$/, '') === location.pathname.replace(/\/$/, '') &&
+          !target.hash
+        )
+          link.setAttribute('aria-current', 'page')
+        else if (section?.id && link.getAttribute('href') === `#${section.id}`)
+          link.setAttribute('aria-current', 'location')
+        else link.removeAttribute('aria-current')
       }
-      this.drawer = browser.newDrawer({
-        id,
-        html: content.outerHTML,
-        options: {
-          container: this,
-          triggerElement: trigger,
-          direction: 'right',
-          autoFocus: true,
-          ariaLabel: this.dataset.dialogLabel,
-          contentClassName: 'mobile-menu-panel',
-          overlayClassName: 'mobile-menu-overlay',
-          closeButton: { className: 'menu-close', icon: '×', ariaLabel: this.dataset.closeLabel },
-          onOpenChange: open => {
-            trigger.setAttribute('aria-expanded', String(open))
-            if (open)
-              queueMicrotask(() => {
-                if (!signal.aborted) syncCurrentSection()
-              })
-          },
-        },
-      })
-      this.addEventListener(
-        'click',
-        event => {
-          if (event.target instanceof Element && event.target.closest('.mobile-menu-panel a[href]'))
-            this.drawer?.setOpen(false)
-        },
-        { signal }
-      )
-      matchMedia('(width >= 64rem)').addEventListener(
-        'change',
-        event => {
-          if (event.matches) this.drawer?.setOpen(false)
-        },
-        { signal }
-      )
-      fallback.hidden = true
-      trigger.hidden = false
     }
-    disconnectedCallback() {
-      this.lifecycle?.abort()
-      if (this.dataset.instanceId) browser.destroyDrawer(this.dataset.instanceId)
-      this.drawer = undefined
+    const drawer = browser.newDrawer({
+      id,
+      html: content.outerHTML,
+      options: {
+        container: element,
+        triggerElement: trigger,
+        direction: 'right',
+        autoFocus: true,
+        ariaLabel: element.dataset.dialogLabel,
+        contentClassName: 'mobile-menu-panel',
+        overlayClassName: 'mobile-menu-overlay',
+        closeButton: { className: 'menu-close', icon: '×', ariaLabel: element.dataset.closeLabel },
+        onOpenChange: open => {
+          trigger.setAttribute('aria-expanded', String(open))
+          if (open)
+            queueMicrotask(() => {
+              if (!signal.aborted) syncCurrentSection()
+            })
+        },
+      },
+    })
+    element.addEventListener(
+      'click',
+      event => {
+        if (event.target instanceof Element && event.target.closest('.mobile-menu-panel a[href]'))
+          drawer?.setOpen(false)
+      },
+      { signal }
+    )
+    matchMedia('(width >= 64rem)').addEventListener(
+      'change',
+      event => {
+        if (event.matches) drawer?.setOpen(false)
+      },
+      { signal }
+    )
+    fallback.hidden = true
+    trigger.hidden = false
+    return () => {
+      lifecycle.abort()
+      if (element.dataset.instanceId) browser.destroyDrawer(element.dataset.instanceId)
     }
-  }
-  if (!customElements.get('ticker-mobile-menu'))
-    customElements.define('ticker-mobile-menu', TickerMobileMenu)
+  })
 </script>
 
 <DrawerStyles scope="ticker-mobile-menu" css={drawerCss} />

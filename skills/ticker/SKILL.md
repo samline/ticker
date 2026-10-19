@@ -95,3 +95,5 @@ For deeper contracts, read only the relevant maintained reference:
 - [Working examples with complete copyable files](https://samline.github.io/ticker/examples/)
 
 If the package or documentation changes, verify these contracts against that release instead of inventing APIs from another ticker or drawer library.
+
+Write integrations with direct controller calls, clear variables and arrow callbacks; do not introduce classes, `this` or command-event layers around the API. Keep application content editing outside reusable controller setup. In pagehide cleanup, preserve the controller when `event.persisted` is true so back/forward restoration keeps working; destroy on non-persisted departure or application unmount.

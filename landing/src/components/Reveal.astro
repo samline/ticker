@@ -1,38 +1,37 @@
 <ticker-reveal>
   <slot />
 </ticker-reveal>
+
 <script>
-  class TickerReveal extends HTMLElement {
-    private observer?: IntersectionObserver
-    connectedCallback() {
-      this.observer?.disconnect()
-      const target = this.firstElementChild
-      if (
-        !target ||
-        !('IntersectionObserver' in window) ||
-        matchMedia('(prefers-reduced-motion: reduce)').matches ||
-        target.getBoundingClientRect().top < innerHeight
-      )
-        return
-      this.dataset.pending = 'true'
-      this.observer = new IntersectionObserver(
-        entries => {
-          if (entries.some(entry => entry.isIntersecting)) {
-            delete this.dataset.pending
-            this.observer?.disconnect()
-          }
-        },
-        { threshold: 0, rootMargin: '0px 0px 64px 0px' }
-      )
-      this.observer.observe(target)
+  import { mountElements } from '../../../shared/lib/mount-elements'
+
+  mountElements('ticker-reveal', element => {
+    const target = element.firstElementChild
+    if (
+      !target ||
+      !('IntersectionObserver' in window) ||
+      matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      target.getBoundingClientRect().top < innerHeight
+    )
+      return
+    element.dataset.pending = 'true'
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries.some(entry => entry.isIntersecting)) {
+          delete element.dataset.pending
+          observer.disconnect()
+        }
+      },
+      { threshold: 0, rootMargin: '0px 0px 64px 0px' }
+    )
+    observer.observe(target)
+    return () => {
+      observer.disconnect()
+      delete element.dataset.pending
     }
-    disconnectedCallback() {
-      this.observer?.disconnect()
-      delete this.dataset.pending
-    }
-  }
-  if (!customElements.get('ticker-reveal')) customElements.define('ticker-reveal', TickerReveal)
+  })
 </script>
+
 <style>
   ticker-reveal {
     display: block;
