@@ -23,7 +23,7 @@ const headingId = `section-heading-${crypto.randomUUID()}`
     <Reveal>
       <div class:list={['cta-card text-center']}>
         <Eyebrow context="closing">{t.eyebrow}</Eyebrow>
-        <Heading id={headingId} context="closing" class:list={['mx-auto mt-5 max-w-xl']}>
+        <Heading id={headingId} context="closing">
           <RichText parts={t.heading} />
         </Heading>
         <p class:list={['mx-auto mt-4 max-w-md text-text-muted']}>{t.description}</p>
