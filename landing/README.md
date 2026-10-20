@@ -285,6 +285,8 @@ Titles share Heading and PageTitle rather than page-local font rules. Heading se
 
 ## Performance validation — 2026-10-19
 
+Follow the root [PageSpeed performance contract](../AGENTS.md#pagespeed-performance-contract) for current targets, loading conventions, before/after measurement and publication verification. The records below are dated evidence, not a guarantee for future builds.
+
 The local production preview was measured with Lighthouse 12.3.0 / Chromium 151, using default simulated throttling. The final mobile result is the median of three cold runs; desktop has one final run. These are local HTTP measurements, not a new published PageSpeed result or field data.
 
 | Metric            | Desktop | Mobile |

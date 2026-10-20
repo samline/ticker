@@ -1,0 +1,54 @@
+---
+locale: en
+title: Framework integrations
+titleAccent: integrations
+description: Use Ticker in React, Vue, Svelte, Astro, Shopify and WordPress with accessible playback controls and explicit client lifecycle ownership.
+sidebar:
+  group: guides
+  order: 5
+---
+
+import FrameworkExamples from '../../../../../shared/components/FrameworkExamples.astro'
+import CmsExamples from '../../../../../shared/components/CmsExamples.astro'
+import { frameworkFiles } from '../../../../../shared/lib/framework-files'
+import t from '../../../../../shared/i18n/translations/en/frameworks'
+
+Ticker uses the same browser API in each host; there is no framework adapter or peer dependency to install. **Package / ESM** imports `ticker()` and its stylesheet. **HTML / CDN** calls `window.Ticker.ticker()` after loading the standalone script and stylesheet. Keep delivery separate from ownership; see [loading terms](../html-and-browser/#loading-terms).
+
+## JavaScript and TypeScript
+
+Start with [installation](../../getting-started/). JavaScript uses the same calls without type annotations. TypeScript can import `TickerOptions` and `TickerInstance` from the root; use `satisfies TickerOptions` to check reusable settings. The [TypeScript reference](../../reference/typescript/) lists every exported type.
+
+## React, Vue and Svelte
+
+Install Ticker in an existing framework project, save the component and its CSS sibling, then render `NewsTicker`. These examples include a Pause/Play action that follows requested playback, including reduced-motion or other automatic pauses. They create after client mount and destroy before the component leaves. React's example also supports its development setup/cleanup cycle.
+
+<FrameworkExamples label={t.label} groups={frameworkFiles} />
+
+The enhanced source DOM belongs to Ticker until `destroy()` restores it. Keep this subtree stable while mounted: use a component ref for the controller, `update()` for settings, and `refresh()` after application-owned source edits. Do not replace the runtime's track/clones from a framework render. For reactive item lists, tear down before the framework replaces the original nodes, then initialize the new source. Do not place framework components in generated clones.
+
+The lifecycle hooks follow [React Effects](https://react.dev/reference/react/useEffect), [Vue mount/unmount hooks](https://vuejs.org/api/composition-api-lifecycle.html) and [Svelte onMount cleanup](https://svelte.dev/docs/svelte/lifecycle-hooks).
+
+## Astro
+
+Import and call `ticker()` inside a processed client `<script>`, not frontmatter. The [first integration](../../getting-started/) is ordinary browser JavaScript and needs no hydrated framework component. With Astro client navigation, initialize the current page after `astro:page-load` and destroy the owning instances on `astro:before-swap`; keep document listeners registered once. Full-page examples preserve instances on persisted `pagehide` and clean up on a real departure.
+
+## Shopify
+
+Use a theme section and theme assets. Copy the published **2.1.0** `dist/browser/global.global.js` as `assets/ticker.global.js` and `dist/style.css` as `assets/ticker.css`; save the JavaScript and CSS below beside them. Add the loader once in `layout/theme.liquid`, then add `sections/ticker-strip.liquid` in the theme editor. The section itself contains no extra runtime script tags.
+
+<CmsExamples host="shopify" />
+
+The loader creates independent instances for repeated sections, handles `shopify:section:load`, and destroys only the removed section on `shopify:section:unload`. Static content remains readable without JavaScript. [Shopify's section lifecycle](https://shopify.dev/docs/storefronts/themes/best-practices/editor/integrate-sections-and-blocks) and [asset loading](https://shopify.dev/docs/storefronts/themes/best-practices/javascript-and-stylesheet-tags) describe this host contract.
+
+## WordPress
+
+Create `wp-content/plugins/ticker-example/` with the plugin PHP file below and an `assets/` folder. Save the same pinned runtime files there as `ticker.global.js` and `ticker.css`, plus the provided `integration.js` and `integration.css`. Activate **Ticker example**, then put `[ticker_strip]` in a Shortcode block on a normal post or page.
+
+<CmsExamples host="wordpress" />
+
+This example targets WordPress 6.3+ deferred-script arguments. Runtime and integration scripts are queued with explicit dependencies, so markup is present before initialization. The sample loads assets for ordinary singular content containing the shortcode; widgets, page builders and AJAX navigation need their own enqueue/mount policy. Do not paste a second IIFE into each shortcode. See [wp_enqueue_script](https://developer.wordpress.org/reference/functions/wp_enqueue_script/) and [frontend asset hooks](https://developer.wordpress.org/reference/hooks/wp_enqueue_scripts/).
+
+## Ownership and accessibility
+
+Keep original content meaningful and provide a pause action for moving content. Ticker owns clones, measurements, reduced-motion handling and automatic pause causes. Each host owns its original DOM, labels, subscriptions and teardown. Closing a page widget is not permission to destroy unrelated registry entries; see [lifecycle ownership](../lifecycle/) and [accessibility](../accessibility/).

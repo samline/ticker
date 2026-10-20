@@ -25,7 +25,7 @@ test('every article has unique route metadata, meaningful breadcrumbs and valid 
   page,
 }) => {
   const paths = await articlePaths()
-  expect(paths).toHaveLength(23)
+  expect(paths).toHaveLength(24)
   const titles = new Set<string>(),
     descriptions = new Set<string>()
   for (const path of paths) {

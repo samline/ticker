@@ -349,7 +349,7 @@ test('all documentation pages fit narrow and desktop layouts in both themes', as
   const urls = await page
     .locator('.sidebar nav a')
     .evaluateAll(links => links.map(link => (link as HTMLAnchorElement).href))
-  expect(urls).toHaveLength(23)
+  expect(urls).toHaveLength(24)
   for (const url of urls) {
     await page.goto(url)
     for (const theme of ['light', 'dark']) {

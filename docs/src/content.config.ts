@@ -19,7 +19,7 @@ const docs = defineCollection({
         const body = (await readFile(source, 'utf8')).replace(/^# Changelog\s*\n/, '')
         const data = await context.parseData({
           id: 'changelog',
-          data: { ...en.changelog, locale: 'en', sidebar: { group: 'guides', order: 5 } },
+          data: { ...en.changelog, locale: 'en', sidebar: { group: 'guides', order: 6 } },
         })
         context.store.set({
           id: 'changelog',

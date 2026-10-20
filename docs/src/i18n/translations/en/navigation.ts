@@ -18,6 +18,7 @@ export default {
   pageLabels: {
     index: 'Overview',
     'getting-started': 'Installation',
+    'guides/frameworks': 'Framework integrations',
     'guides/lifecycle': 'Lifecycle & ownership',
     'guides/html-and-browser': 'HTML / CDN',
     'guides/accessibility': 'Accessibility & motion',

@@ -14,6 +14,8 @@ The landing, examples gallery and documentation are routes of one product websit
 
 Keep complete sections, content collections, search integration and package demos in the app that owns them. Share genuine UI roles; do not force every distinct section into the same layout or add props for hypothetical variants.
 
+The root [PageSpeed performance contract](../AGENTS.md#pagespeed-performance-contract) owns cross-site performance targets, asset/loading conventions and the measurement/deployment workflow. Follow it before changing fonts, CSS inlining, shared controls or initialization; dated evidence lives in the landing README.
+
 ## Visual contracts
 
 TextLink owns contextual underlined links, arrows, focus and closing-theme colors. NavLink owns navigation padding, nested indentation, hover, background-only current state and focus. Nest by margin rather than asymmetric padding. Lists own their gaps and rail inset; current backgrounds must leave room on both sides of a divider. Do not style NavLink internals from a page.

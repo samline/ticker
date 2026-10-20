@@ -97,3 +97,9 @@ For deeper contracts, read only the relevant maintained reference:
 If the package or documentation changes, verify these contracts against that release instead of inventing APIs from another ticker or drawer library.
 
 Write integrations with direct controller calls, clear variables and arrow callbacks; do not introduce classes, `this` or command-event layers around the API. Keep application content editing outside reusable controller setup. In pagehide cleanup, preserve the controller when `event.persisted` is true so back/forward restoration keeps working; destroy on non-persisted departure or application unmount.
+
+## Framework and CMS hosts
+
+Use the [framework integrations guide](https://samline.github.io/ticker/docs/guides/frameworks/) for React, Vue, Svelte, Astro, Shopify and WordPress examples. These hosts use the ordinary public browser API, not adapter entrypoints. Initialize after client mount and destroy before the framework replaces the enhanced subtree. Keep source DOM stable, action labels synchronized through playback state, and component cleanup local. React development effects must survive setup/cleanup/setup.
+
+For Shopify, load shared runtime assets once from the layout, initialize each section independently and handle section load/unload events. For WordPress, enqueue runtime and integration assets with explicit dependencies; the sample shortcode plugin covers ordinary singular content and WordPress 6.3+ deferred scripts. Builders, widgets and dynamic navigation need their own mount/enqueue policy. Preserve package CSS, pinned matching assets and readable source markup. CMS fixture execution is not proof of a live store/plugin deployment.

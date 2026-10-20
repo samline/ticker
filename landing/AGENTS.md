@@ -1,5 +1,7 @@
 # Landing implementation and maintenance contract
 
+Follow the root [PageSpeed performance contract](../AGENTS.md#pagespeed-performance-contract) for targets, loading conventions, measurement evidence and deployment verification. Keep route-specific implementation details here.
+
 These instructions apply to the maintained Astro landing. Read README.md for rationale, commands, project-specific integration details and the replication checklist. Preserve the user's choices and edits; adapt the architecture to another package rather than copying Ticker claims or application internals.
 
 ## Architecture and layout

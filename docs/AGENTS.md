@@ -1,5 +1,7 @@
 # Documentation implementation and maintenance contract
 
+Follow the root [PageSpeed performance contract](../AGENTS.md#pagespeed-performance-contract) for targets, loading conventions, measurement evidence and deployment verification. Keep route-specific implementation details here.
+
 Read README.md before changing the docs. This site replaces Starlight; `src/content/docs/` owns guides/reference prose; the root CHANGELOG.md is the sole release-note source, loaded into the same collection. Keep user edits. All contributor-facing documentation is in English.
 
 DocsLayout consumes shared Fonts for local WOFF2 faces and selective heading preloads; source versions and SIL licenses live in shared/assets/fonts. Do not restore a Google/Bunny font stylesheet. Shared CopyButton and Tabs retain invisible inert control space until initialized, while every fallback example remains readable without JavaScript. Keep fonts.spec.ts and the shared delayed-loading/no-JavaScript checks passing.

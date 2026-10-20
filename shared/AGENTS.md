@@ -1,5 +1,7 @@
 # Shared site UI contract
 
+Follow the root [PageSpeed performance contract](../AGENTS.md#pagespeed-performance-contract) for targets, loading conventions, measurement evidence and deployment verification. Keep route-specific implementation details here.
+
 Read README.md. Landing and docs consume this single source package. Do not copy primitives back into app folders or import app content/catalogs into shared UI. Keep app-specific composition in app components/sections/layouts.
 
 Use Astro 7, scoped component styles/scripts, rem fixed lengths, `class:list`, native attributes and existing palette/spacing/radius/focus/motion tokens. Preserve the user's Box widths and gutters. Do not put component selectors in theme.css. Use typed shared catalogs for control messages; shared UI must remain independent of marketing/docs prose.
