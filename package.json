@@ -67,7 +67,8 @@
     "landing:dev": "npm --prefix landing run dev -- --host 127.0.0.1",
     "landing:check": "npm --prefix landing run check",
     "landing:preview": "npm --prefix landing run preview -- --host 127.0.0.1",
-    "site:build": "npm run docs:build && npm run landing:build && node landing/scripts/check-site.mjs --docs",
+    "site:assets": "node scripts/site-assets.mjs",
+    "site:build": "npm run site:assets && npm run docs:build && npm run landing:build && node landing/scripts/check-site.mjs --docs",
     "docs:test:browser": "npm --prefix docs run test:browser",
     "site:test:browser": "npm --prefix docs run test:combined"
   },
