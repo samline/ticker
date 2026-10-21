@@ -100,7 +100,7 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
 <script>
   import { mountElements } from '../../../shared/lib/mount-elements'
 
-  import { browser } from '@samline/drawer/browser'
+  import { createDrawer } from '@samline/drawer'
 
   mountElements('ticker-mobile-menu', element => {
     const trigger = element.querySelector<HTMLButtonElement>('[data-menu-trigger]')
@@ -133,39 +133,37 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
         else link.removeAttribute('aria-current')
       }
     }
-    const drawer = browser.newDrawer({
+    const drawer = createDrawer({
       id,
-      html: content.outerHTML,
-      options: {
-        container: element,
-        triggerElement: trigger,
-        direction: 'right',
-        autoFocus: true,
-        ariaLabel: element.dataset.dialogLabel,
-        contentClassName: 'mobile-menu-panel',
-        overlayClassName: 'mobile-menu-overlay',
-        closeButton: { className: 'menu-close', icon: '×', ariaLabel: element.dataset.closeLabel },
-        onOpenChange: open => {
-          trigger.setAttribute('aria-expanded', String(open))
-          if (open)
-            queueMicrotask(() => {
-              if (!signal.aborted) syncCurrentSection()
-            })
-        },
+      content: () => content.cloneNode(true) as HTMLElement,
+      container: element,
+      triggerElement: trigger,
+      direction: 'right',
+      autoFocus: true,
+      ariaLabel: element.dataset.dialogLabel,
+      contentClassName: 'mobile-menu-panel',
+      overlayClassName: 'mobile-menu-overlay',
+      closeButton: { className: 'menu-close', icon: '×', ariaLabel: element.dataset.closeLabel },
+      onOpenChange: open => {
+        trigger.setAttribute('aria-expanded', String(open))
+        if (open)
+          queueMicrotask(() => {
+            if (!signal.aborted) syncCurrentSection()
+          })
       },
     })
     element.addEventListener(
       'click',
       event => {
         if (event.target instanceof Element && event.target.closest('.mobile-menu-panel a[href]'))
-          drawer?.setOpen(false)
+          drawer.setOpen(false)
       },
       { signal }
     )
     matchMedia('(width >= 64rem)').addEventListener(
       'change',
       event => {
-        if (event.matches) drawer?.setOpen(false)
+        if (event.matches) drawer.setOpen(false)
       },
       { signal }
     )
@@ -173,7 +171,7 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
     trigger.hidden = false
     return () => {
       lifecycle.abort()
-      if (element.dataset.instanceId) browser.destroyDrawer(element.dataset.instanceId)
+      drawer.destroy()
       trigger.setAttribute('aria-expanded', 'false')
     }
   })

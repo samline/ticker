@@ -71,7 +71,7 @@ const id = `docs-search-${crypto.randomUUID()}`
 <script>
   import { mountElements } from '../../../shared/lib/mount-elements'
 
-  import { browser } from '@samline/drawer/browser'
+  import { createDrawer } from '@samline/drawer'
   type Result = {
     url: string
     meta: { title?: string }
@@ -110,47 +110,45 @@ const id = `docs-search-${crypto.randomUUID()}`
       }
       return pagefind
     }
-    const drawer = browser.newDrawer({
+    const drawer = createDrawer({
       id,
-      html: template.content.firstElementChild.outerHTML,
-      options: {
-        container: element,
-        triggerElement: trigger,
-        direction: 'top',
-        showHandle: true,
-        handleOnly: true,
-        handleAriaLabel: element.dataset.handle,
-        handleClassName: 'docs-search-handle',
-        autoFocus: true,
-        ariaLabel: element.dataset.title,
-        contentClassName: 'docs-search-panel',
-        overlayClassName: 'docs-search-overlay',
-        closeButton: {
-          icon: '×',
-          className: 'docs-search-close',
-          ariaLabel: element.dataset.close,
-        },
-        onOpenChange: open => {
-          trigger.setAttribute('aria-expanded', String(open))
-          if (!open) {
-            ++request
-            clearTimeout(timer)
-            return
+      content: () => template.content.firstElementChild!.cloneNode(true) as HTMLElement,
+      container: element,
+      triggerElement: trigger,
+      direction: 'top',
+      showHandle: true,
+      handleOnly: true,
+      handleAriaLabel: element.dataset.handle,
+      handleClassName: 'docs-search-handle',
+      autoFocus: true,
+      ariaLabel: element.dataset.title,
+      contentClassName: 'docs-search-panel',
+      overlayClassName: 'docs-search-overlay',
+      closeButton: {
+        icon: '×',
+        className: 'docs-search-close',
+        ariaLabel: element.dataset.close,
+      },
+      onOpenChange: open => {
+        trigger.setAttribute('aria-expanded', String(open))
+        if (!open) {
+          ++request
+          clearTimeout(timer)
+          return
+        }
+        // The native handle precedes the field; search should start ready to type.
+        queueMicrotask(() => {
+          if (!signal.aborted && trigger.getAttribute('aria-expanded') === 'true')
+            element.querySelector<HTMLInputElement>('[role=searchbox]')?.focus({
+              preventScroll: true,
+            })
+        })
+        load().catch(() => {
+          if (!signal.aborted) {
+            const status = element.querySelector('[role=status]')
+            if (status) status.textContent = element.dataset.error ?? ''
           }
-          // The native handle precedes the field; search should start ready to type.
-          queueMicrotask(() => {
-            if (!signal.aborted && trigger.getAttribute('aria-expanded') === 'true')
-              element.querySelector<HTMLInputElement>('[role=searchbox]')?.focus({
-                preventScroll: true,
-              })
-          })
-          load().catch(() => {
-            if (!signal.aborted) {
-              const status = element.querySelector('[role=status]')
-              if (status) status.textContent = element.dataset.error ?? ''
-            }
-          })
-        },
+        })
       },
     })
     trigger.hidden = false
@@ -161,7 +159,7 @@ const id = `docs-search-${crypto.randomUUID()}`
         if (event.defaultPrevented || (activeSearch && activeSearch !== element)) return
         if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
           event.preventDefault()
-          drawer?.setOpen(trigger.getAttribute('aria-expanded') !== 'true')
+          drawer.setOpen(trigger.getAttribute('aria-expanded') !== 'true')
         }
       },
       { signal }
@@ -229,7 +227,7 @@ const id = `docs-search-${crypto.randomUUID()}`
       'click',
       event => {
         if (event.target instanceof Element && event.target.closest('.docs-search-panel a'))
-          drawer?.setOpen(false)
+          drawer.setOpen(false)
       },
       { signal }
     )
@@ -237,7 +235,7 @@ const id = `docs-search-${crypto.randomUUID()}`
       lifecycle.abort()
       clearTimeout(timer)
       ++request
-      if (element.dataset.id) browser.destroyDrawer(element.dataset.id)
+      drawer.destroy()
       trigger.setAttribute('aria-expanded', 'false')
     }
   })

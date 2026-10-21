@@ -39,7 +39,7 @@ const id = `docs-menu-${crypto.randomUUID()}`
 <script>
   import { mountElements } from '../../../shared/lib/mount-elements'
 
-  import { browser } from '@samline/drawer/browser'
+  import { createDrawer } from '@samline/drawer'
   mountElements('ticker-docs-menu', element => {
     const button = element.querySelector('button'),
       fallback = element.querySelector('details'),
@@ -48,33 +48,31 @@ const id = `docs-menu-${crypto.randomUUID()}`
     if (!button || !fallback || !content || !id) return
     const lifecycle = new AbortController()
     const { signal } = lifecycle
-    const drawer = browser.newDrawer({
+    const drawer = createDrawer({
       id,
-      html: content.outerHTML,
-      options: {
-        container: element,
-        triggerElement: button,
-        direction: 'right',
-        autoFocus: true,
-        ariaLabel: element.dataset.label,
-        contentClassName: 'docs-menu-panel',
-        overlayClassName: 'docs-menu-overlay',
-        closeButton: { icon: '×', ariaLabel: element.dataset.close, className: 'docs-menu-close' },
-        onOpenChange: open => button.setAttribute('aria-expanded', String(open)),
-      },
+      content: () => content.cloneNode(true) as HTMLElement,
+      container: element,
+      triggerElement: button,
+      direction: 'right',
+      autoFocus: true,
+      ariaLabel: element.dataset.label,
+      contentClassName: 'docs-menu-panel',
+      overlayClassName: 'docs-menu-overlay',
+      closeButton: { icon: '×', ariaLabel: element.dataset.close, className: 'docs-menu-close' },
+      onOpenChange: open => button.setAttribute('aria-expanded', String(open)),
     })
     element.addEventListener(
       'click',
       event => {
         if (event.target instanceof Element && event.target.closest('.docs-menu-panel a'))
-          drawer?.setOpen(false)
+          drawer.setOpen(false)
       },
       { signal }
     )
     matchMedia('(width >= 64rem)').addEventListener(
       'change',
       event => {
-        if (event.matches) drawer?.setOpen(false)
+        if (event.matches) drawer.setOpen(false)
       },
       { signal }
     )
@@ -82,7 +80,7 @@ const id = `docs-menu-${crypto.randomUUID()}`
     fallback.hidden = true
     return () => {
       lifecycle.abort()
-      if (element.dataset.id) browser.destroyDrawer(element.dataset.id)
+      drawer.destroy()
       button.setAttribute('aria-expanded', 'false')
     }
   })
