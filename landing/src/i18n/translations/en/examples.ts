@@ -47,6 +47,8 @@ export default {
     'HTML / CDN opens directly as an index.html file with an internet connection; the CDN script exposes window.Ticker. For Package / ESM, install @samline/ticker and use the file in an HTML-entry bundler such as Vite. Both use the same ticker() API; a registry is optional.',
   accessibility:
     'Pause any preview to read at your own pace. Reduced motion and readable static content are built in.',
+  possibilities:
+    'These examples show a few possibilities. The next ideas are yours: combine the package’s capabilities with your own content, design and interactions to create the experience your project needs.',
   gettingStarted: 'New to Ticker? Start with installation',
   skill: 'Building with an AI agent? Download the Ticker skill',
   code: 'Open code · HTML / CDN or Package / ESM',
