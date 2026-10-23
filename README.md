@@ -1,27 +1,22 @@
-# Ticker
+# @samline/ticker
 
-> An accessible, dependency-free ticker for Vanilla JavaScript, TypeScript, and plain HTML.
+<a id="ticker"></a>
 
-> Enhance existing markup, control each ticker through a small lifecycle API, or initialize declarative ticker markup at page level.
+An accessible, dependency-free ticker for JavaScript, TypeScript and plain HTML. Enhance existing markup with an owned controller or initialize declarative tickers at page level.
 
-[Demo](https://samline.github.io/ticker/)
+[Demo](https://samline.github.io/ticker/) · [Examples](https://samline.github.io/ticker/examples/) · [Documentation](https://samline.github.io/ticker/docs/) · [Changelog](CHANGELOG.md)
 
----
-
-## Table of Contents
+## Table of contents
 
 - [Installation](#installation)
+- [Quick start](#quick-start)
 - [HTML / CDN](#html--cdn)
-- [Entrypoints](#entrypoints)
-- [Quick Start](#quick-start)
-- [Seamless Loops](#seamless-loops)
-- [What You Can Build](#what-you-can-build)
-- [API at a Glance](#api-at-a-glance)
+- [Capabilities](#capabilities)
+- [API at a glance](#api-at-a-glance)
 - [Documentation](#documentation)
+- [Changelog](#changelog)
 - [AI agent skill](#ai-agent-skill)
 - [License](#license)
-
----
 
 ## Installation
 
@@ -45,56 +40,7 @@ Import the stylesheet once in your application entrypoint:
 import '@samline/ticker/style.css'
 ```
 
----
-
-<a id="cdn--browser"></a>
-
-## HTML / CDN
-
-Choose **Package / ESM** when installing with npm, pnpm or bun and importing Ticker in your application. Choose **HTML / CDN** when loading the standalone script in plain HTML, WordPress or Shopify without a bundler. Both use the same controller API. A CDN only delivers the files; you can self-host the same script and stylesheet.
-
-```html
-<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.1.0/dist/style.css" />
-<script src="https://unpkg.com/@samline/ticker@2.1.0/dist/browser/global.global.js"></script>
-```
-
-> Pin the version in production. Replace `2.1.0` with the version you ship.
-
-The standalone script (an IIFE) exposes `window.Ticker`. “Global” describes this object, not another loading mode. The optional `@samline/ticker/browser` registry module is an ESM/CJS import and does not install that object. See [loading terms](https://samline.github.io/ticker/docs/guides/html-and-browser/#loading-terms).
-
-```html
-<div id="news"><a href="/news">Latest story</a></div>
-
-<script>
-  const news = window.Ticker.ticker('#news', {
-    duration: 24,
-    pauseOnHover: true,
-  })
-
-  news?.update({ duration: 30 })
-</script>
-```
-
-For optional ID-based ownership, `window.Ticker.newTicker({ id, options })` creates a registry entry; `destroyTicker(id)` removes it. A direct `ticker()` controller is unregistered and uses its own `destroy()`. See [Registry reference](https://samline.github.io/ticker/docs/reference/browser/) for the complete browser API.
-
----
-
-## Entrypoints
-
-| Entrypoint                       | When to use                                                   |
-| -------------------------------- | ------------------------------------------------------------- |
-| `@samline/ticker`                | Main API, browser singleton, types, defaults, and validators. |
-| `@samline/ticker/vanilla`        | `ticker()` plus declarative page lifecycle helpers.           |
-| `@samline/ticker/browser`        | ESM/CJS browser registry without a global side effect.        |
-| `@samline/ticker/browser/global` | Pre-bundled IIFE that installs `window.Ticker`.               |
-| `@samline/ticker/core`           | Types, defaults, state factories, and validation helpers.     |
-| `@samline/ticker/style.css`      | Required layout, animation, and reduced-motion styles.        |
-
-The main entrypoint also exports `browser`, the same registry singleton used by the browser module, without installing `window.Ticker`. See [Browser integration](https://samline.github.io/ticker/docs/reference/browser/#module-singleton).
-
----
-
-## Quick Start
+## Quick start
 
 ```html
 <div id="news-ticker">
@@ -127,15 +73,43 @@ What this does:
 - Reuses visual clones when responsive measurements are unchanged and pauses animation outside the viewport or while the document is hidden.
 - Restores the original source element when `destroy()` runs.
 
----
-
-## Seamless Loops
+### Seamless loops
 
 The runtime preserves fractional measurements in both directions. Match item spacing to the horizontal track gap and include any decorative separator at the end of the sequence. See [Styling: seamless loops](https://samline.github.io/ticker/docs/reference/styling/#seamless-loops) for the CSS pattern.
 
----
+## HTML / CDN
 
-## What You Can Build
+<a id="cdn--browser"></a>
+
+Choose **Package / ESM** when installing with npm, pnpm or bun and importing Ticker in your application. Choose **HTML / CDN** when loading the standalone script in plain HTML, WordPress or Shopify without a bundler. Both use the same controller API. A CDN only delivers the files; you can self-host the same script and stylesheet.
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.1.0/dist/style.css" />
+<script src="https://unpkg.com/@samline/ticker@2.1.0/dist/browser/global.global.js"></script>
+```
+
+> Pin the version in production. Replace `2.1.0` with the version you ship.
+
+The standalone script (an IIFE) exposes `window.Ticker`. “Global” describes this object, not another loading mode. The optional `@samline/ticker/browser` registry module is an ESM/CJS import and does not install that object. See [loading terms](https://samline.github.io/ticker/docs/guides/html-and-browser/#loading-terms).
+
+```html
+<div id="news"><a href="/news">Latest story</a></div>
+
+<script>
+  const news = window.Ticker.ticker('#news', {
+    duration: 24,
+    pauseOnHover: true,
+  })
+
+  news?.update({ duration: 30 })
+</script>
+```
+
+For optional ID-based ownership, `window.Ticker.newTicker({ id, options })` creates a registry entry; `destroyTicker(id)` removes it. A direct `ticker()` controller is unregistered and uses its own `destroy()`. See [Registry reference](https://samline.github.io/ticker/docs/reference/browser/) for the complete browser API.
+
+## Capabilities
+
+<a id="what-you-can-build"></a>
 
 - News, announcement, logo, sponsor, and promotion tickers.
 - Progressive enhancement for server-rendered or CMS-owned markup.
@@ -143,9 +117,7 @@ The runtime preserves fractional measurements in both directions. Match item spa
 - Browser-global integrations for WordPress, Shopify, and plain HTML.
 - Declarative tickers that are discovered as the DOM changes.
 
----
-
-## API at a Glance
+## API at a glance
 
 | Group                 | API                                                                                                                                                                                                                                                          |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -161,9 +133,20 @@ The controller exposes `element`, `source`, `state`, and an immutable options sn
 
 See the complete [API reference](https://samline.github.io/ticker/docs/reference/api/).
 
----
+### Entrypoints
 
-## Playback, navigation and responsive motion
+| Entrypoint                       | When to use                                                   |
+| -------------------------------- | ------------------------------------------------------------- |
+| `@samline/ticker`                | Main API, browser singleton, types, defaults, and validators. |
+| `@samline/ticker/vanilla`        | `ticker()` plus declarative page lifecycle helpers.           |
+| `@samline/ticker/browser`        | ESM/CJS browser registry without a global side effect.        |
+| `@samline/ticker/browser/global` | Pre-bundled IIFE that installs `window.Ticker`.               |
+| `@samline/ticker/core`           | Types, defaults, state factories, and validation helpers.     |
+| `@samline/ticker/style.css`      | Required layout, animation, and reduced-motion styles.        |
+
+The main entrypoint also exports `browser`, the same registry singleton used by the browser module, without installing `window.Ticker`. See [Browser integration](https://samline.github.io/ticker/docs/reference/browser/#module-singleton).
+
+### Playback, navigation and responsive motion
 
 ```ts
 const news = ticker('#news', {
@@ -185,11 +168,9 @@ Content stays application-owned: add or remove original nodes through `source`, 
 
 See [configuration](https://samline.github.io/ticker/docs/reference/configuration/) for normalization, RTL and rule precedence, and [controller contracts](https://samline.github.io/ticker/docs/reference/api/controller/) for events, keyboard controls and cleanup.
 
----
-
 ## Documentation
 
-See version history and breaking changes in the **[changelog](https://samline.github.io/ticker/docs/changelog/)**. Read the full guides and API reference in the **[documentation](https://samline.github.io/ticker/docs/)**. Explore **[working examples](https://samline.github.io/ticker/examples/)** with complete HTML / CDN and npm code to copy and adapt.
+Read the full guides and API reference in the **[documentation](https://samline.github.io/ticker/docs/)**. Explore **[working examples](https://samline.github.io/ticker/examples/)** with complete HTML / CDN and npm code to copy and adapt.
 
 | Doc                                                                             | Purpose                                                        |
 | ------------------------------------------------------------------------------- | -------------------------------------------------------------- |
@@ -204,7 +185,9 @@ See version history and breaking changes in the **[changelog](https://samline.gi
 | [API reference](https://samline.github.io/ticker/docs/reference/api/)           | Public functions and controller methods.                       |
 | [Recipes](https://samline.github.io/ticker/docs/reference/examples/)            | Task-oriented integration and lifecycle recipes.               |
 
----
+## Changelog
+
+Read [CHANGELOG.md](CHANGELOG.md) or the [published changelog](https://samline.github.io/ticker/docs/changelog/) for release history and explicitly marked breaking changes. Review the notes before upgrading.
 
 ## AI agent skill
 
@@ -220,8 +203,6 @@ curl --fail --location https://samline.github.io/ticker/skills/ticker/SKILL.md \
 
 When working from this repository, copy `skills/ticker/SKILL.md` instead. Keep the filename `SKILL.md`; ask the agent to use the Ticker skill to implement a marquee, announcement strip, logo row or another supported pattern. Discovery paths and explicit invocation syntax depend on the agent.
 
----
-
 ## License
 
-MIT
+MIT — [LICENSE.md](LICENSE.md).
