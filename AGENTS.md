@@ -132,3 +132,32 @@ Validation for this dependency migration: clean npm ci installs resolved 5.0.2 i
 ## Public README structure
 
 Keep sibling READMEs aligned around identity and resource links, a table of contents, Installation, Quick start, optional HTML / CDN, Capabilities, API at a glance, Documentation, Changelog, AI agent skill and License. Package-specific lifecycle, entrypoint and TypeScript details remain subsections; preserve meaningful public anchors. Runtime READMEs teach the actual package, not website internals. The template uses the same progression but describes its configuration/commands and adaptation workflow rather than inventing a runtime API or npm installation. Keep release notes in CHANGELOG.md and link to them. Keep skills discoverable with a real source/download path and agent-dependent installation guidance. Review snippets, local/external links and formatting after documentation changes; no browser or performance run is needed for README-only edits.
+
+## Documentation navigation visibility — 2026-10-26
+
+The human reported that deep active sidebar links were hidden below the menu
+viewport in Astro, Ticker, Drawer and the package landing/docs template. Keep the
+current page visible within the menu on mounting/navigation/resize, without
+scrolling the article or stealing focus. Preserve manual menu exploration and
+clean up observers through mountElements. Mobile menus let Drawer focus their
+dialog rather than an offscreen first link. Regression tests cover direct deep
+URLs, actual navigation, resize, same-batch remount and repeated mobile opening.
+Validation: Docs and Landing checks passed with zero Astro diagnostics;
+combined build verified 2,013 links across 42 pages. An initial broad Docs run
+passed 31 tests with five optional host-fixture skips. After the final mobile
+body correction, all three selected browser tests passed: desktop current-page
+visibility, mobile/enlarged-text/close behavior and all-article accessibility.
+The combined artifact was refreshed from those final Docs. This does not claim
+new runtime/package publication validation.
+
+The human clarified active-page placement: try to bring it toward the top
+using the menu's natural scroll range. Do not add margins, padding, pseudo
+spacers or any artificial blank space to force final items upward. Native
+scrollTop clamping is intentional. Preserve the article position, manual menu
+scrolling and the reachable mobile close control. The temporary spacer approach
+was rejected and removed from all four projects.
+
+Natural-scroll correction validated: both targeted browser regressions pass in
+each of the four projects (eight total). All combined artifacts rebuilt and
+passed their link audits. The SEO preview was inspected: article scroll remains
+0, the sidebar has no generated ::after content and no trailing-space variable.
