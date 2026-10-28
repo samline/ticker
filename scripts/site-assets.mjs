@@ -19,7 +19,8 @@ const theme = await readFile(new URL('../shared/styles/theme.css', import.meta.u
 const accent = readDarkAccent(theme)
 const template = await readFile(new URL('../shared/assets/favicon.svg', import.meta.url), 'utf8')
 
-if (!template.includes('{accent}')) throw new Error('favicon.svg is missing the {accent} placeholder')
+if (!template.includes('{accent}'))
+  throw new Error('favicon.svg is missing the {accent} placeholder')
 const filled = template.replace('{accent}', accent)
 // Keep the committed convention of a trailing newline so regenerating never
 // shows up as a spurious diff on the checked-in copies.

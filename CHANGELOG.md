@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.2.0] - 2026-10-28
+
+### Added
+
+- Opt-in smooth navigation with duration and playback-intent preservation on controller methods and connected controls. Retain manual pauses, respect reduced motion and cancel on competing commands, drag, rebuild and destroy.
+- Navigation event source identifies API, arrows, range, keyboard and drag without application replay handlers.
+- Document deferred Astro mounting, delegated clone actions and equal sequence/track spacing.
+
+### Maintenance
+
+- Update vulnerable website transitive dependencies without relaxing CI audits. npm publication is a separate maintainer action.
+
 ## [2.1.0] - 2026-10-17
 
 ### Behavior changes

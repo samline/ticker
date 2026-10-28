@@ -18,6 +18,7 @@ import type {
   TickerAvailable,
   TickerDirection,
   TickerInstance,
+  TickerNavigationOptions,
   TickerManagerState,
   TickerOptions,
   TickerState,
@@ -77,8 +78,8 @@ interface TickerInstance {
   readonly state: Readonly<TickerSnapshot>
   play: () => TickerInstance
   pause: () => TickerInstance
-  scrollTo: (position: number) => TickerInstance
-  scrollBy: (distance: number) => TickerInstance
+  scrollTo: (position: number, options?: TickerNavigationOptions) => TickerInstance
+  scrollBy: (distance: number, options?: TickerNavigationOptions) => TickerInstance
   connectControls: (controls: TickerControls) => () => void
   on: <K extends keyof TickerEventMap>(
     event: K,
@@ -94,7 +95,7 @@ interface TickerInstance {
 
 ## State, events, controls and viewport rules
 
-`TickerSnapshot` describes frozen ready/destroyed/requested/playing state, pause `reasons`, logical `position`, measured `distance`, effective `duration` and resolved physical `direction`. `TickerPauseReason` is the union of manual, hover, focus, hidden, offscreen and reduced-motion causes. `TickerEventMap` maps ready/playback/update/measure/navigate/destroy to that snapshot. `TickerControls` accepts optional native previous/next buttons, a range `rail` and a CSS-pixel `step`. `TickerResponsiveRule` supplies a viewport `query` and partial `options` excluding class and recursive responsive rules. These types are exported from root, core, vanilla and browser. See the [controller contract](/ticker/docs/reference/api/controller/) for ordering, cancellation, navigation and cleanup, and [configuration](/ticker/docs/reference/configuration/#responsive) for rule precedence.
+`TickerSnapshot` describes frozen ready/destroyed/requested/playing state, pause `reasons`, logical `position`, measured `distance`, effective `duration` and resolved physical `direction`. `TickerPauseReason` is the union of manual, hover, focus, hidden, offscreen, reduced-motion and transient navigation causes. `TickerEventMap` maps ready/playback/update/measure/navigate/destroy to that snapshot. `TickerControls` accepts optional native previous/next buttons, a range `rail` and a CSS-pixel `step`. `TickerResponsiveRule` supplies a viewport `query` and partial `options` excluding class and recursive responsive rules. These types are exported from root, core, vanilla and browser. See the [controller contract](/ticker/docs/reference/api/controller/) for ordering, cancellation, navigation and cleanup, and [configuration](/ticker/docs/reference/configuration/#responsive) for rule precedence.
 
 ## Browser registry types
 
@@ -161,3 +162,18 @@ if (!instance) throw new Error('Expected #partners to exist')
 
 instance.update({ duration: 24 })
 ```
+
+## `TickerNavigationOptions`
+
+```ts
+interface TickerNavigationOptions {
+  behavior?: 'instant' | 'smooth'
+  duration?: number
+  preservePlayback?: boolean
+}
+```
+
+`TickerControls` extends these options. Navigate event snapshots additionally
+expose optional `navigationSource: 'api' | 'control' | 'rail' | 'keyboard' | 'drag'`.
+The transient `navigation` pause reason prevents CSS autoplay competing with a
+smooth seek. See the [controller reference](../api/controller/#smooth-steps-and-playback-intent).

@@ -251,10 +251,10 @@ export default {
       kind: 'news',
       title: 'Read at your own pace',
       description:
-        'Start paused. Use Previous, Next, the position rail or a pointer gesture to explore a repeating sequence. Press Play, then drag: playback resumes after release when hover and focus pauses clear. Buttons and the rail leave playback paused.',
+        'Start paused. Use Previous, Next, the position rail or a pointer gesture to explore a repeating sequence. Press Play, then drag: playback resumes after release when hover and focus pauses clear. Smooth arrow steps and the rail preserve your current playback choice, including a manual pause.',
       docsPath: 'reference/api/controller/#manual-navigation',
       docsLabel: 'Read the manual navigation contract',
-      note: 'Buttons advance one visible extent. The rail represents one repeated sequence and wraps at its end. Drag horizontally; vertical page scrolling stays available.',
+      note: 'Arrow buttons ease through one visible extent over 300 ms and respect reduced motion. The rail represents one repeated sequence and wraps at its end. Drag horizontally; vertical page scrolling stays available.',
       rows: [
         {
           label: 'Manual news navigation',

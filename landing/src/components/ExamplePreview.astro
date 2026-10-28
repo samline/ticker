@@ -38,6 +38,7 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
           speed={row.speed}
           autoplay={row.autoplay}
           navigation={row.navigation}
+          smoothNavigation={recipe.id === 'manual-navigation'}
           resumeAfterDrag={row.resumeAfterDrag}
           rtl={row.rtl}
           responsive={row.responsive}

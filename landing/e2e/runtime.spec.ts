@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { build } from 'vite'
+import ts from 'typescript'
 
 let script: string
 let css: string
@@ -414,3 +415,126 @@ test('resumeAfterDrag restores intent on pointer cancellation while reduced moti
     await page.mouse.up()
   }
 })
+
+test('smooth arrow navigation retains autoplay, respects pause, and reports control intent', async ({
+  page,
+}) => {
+  await setup(page, { navigation: true, pauseOnFocus: false, speed: 0.1 })
+  await page.evaluate(() => {
+    const w = window as any
+    w.disconnect()
+    w.disconnect = w.controller.connectControls({
+      next: document.querySelector('#next'),
+      step: 80,
+      behavior: 'smooth',
+      duration: 240,
+      preservePlayback: true,
+    })
+  })
+  await page.click('#next')
+  await expect.poll(async () => (await state(page)).reasons.includes('navigation')).toBe(true)
+  const start = (await state(page)).position
+  await page.waitForTimeout(70)
+  const middle = (await state(page)).position
+  expect(middle).toBeGreaterThan(start)
+  await expect.poll(async () => (await state(page)).playing).toBe(true)
+  expect((await state(page)).requested).toBe(true)
+  expect(
+    await page.evaluate(
+      () =>
+        (window as any).events.filter((e: any[]) => e[0] === 'navigate').at(-1)[1].navigationSource
+    )
+  ).toBe('control')
+  await page.evaluate(() => (window as any).controller.pause())
+  await page.click('#next')
+  await expect.poll(async () => (await state(page)).reasons.includes('navigation')).toBe(false)
+  expect((await state(page)).requested).toBe(false)
+})
+
+test('copied Astro host waits for deferred content, delegates clone actions and disposes its owner', async ({
+  page,
+}) => {
+  const markdown = await readFile(
+    new URL('../../docs/src/content/docs/guides/frameworks.mdx', import.meta.url),
+    'utf8'
+  )
+  const host = [...markdown.matchAll(/```astro\n([\s\S]*?)\n```/g)].find(match =>
+    match[1].includes('<ticker-feed')
+  )![1]
+  const client = host
+    .match(/<script>([\s\S]*?)<\/script>/)![1]
+    .replace(
+      /import \{ ticker \} from ['"]@samline\/ticker['"]/g,
+      'const ticker = window.Ticker.ticker'
+    )
+    .replace(/import ['"]@samline\/ticker\/style.css['"]/g, '')
+  const styles = host.match(/<style is:global>([\s\S]*?)<\/style>/)![1]
+  await page.setContent(
+    `<style>${css} ${styles}</style><ticker-feed data-play="Play" data-pause="Pause"><button type="button" data-feed-toggle disabled>Pause</button><output data-feed-status></output></ticker-feed>`
+  )
+  await page.addScriptTag({ content: script })
+  await page.addScriptTag({
+    content: ts.transpileModule(client, { compilerOptions: { target: ts.ScriptTarget.ES2020 } })
+      .outputText,
+  })
+  await expect(page.locator('[data-feed-toggle]')).toBeDisabled()
+  await page
+    .locator('ticker-feed')
+    .evaluate(root =>
+      root.insertAdjacentHTML(
+        'afterbegin',
+        '<div data-feed-source><button type="button" data-feed-select="one" data-message="Selected one">One</button><button type="button" data-feed-select="two" data-message="Selected two">Two</button></div>'
+      )
+    )
+  await expect(page.locator('[data-feed-toggle]')).toBeEnabled()
+  await expect(page.locator('.ticker-wrapper')).toHaveAttribute('data-ready', 'true')
+  await page
+    .locator('.ticker-clone [data-feed-select="two"]')
+    .first()
+    .evaluate((button: HTMLButtonElement) => button.click())
+  await expect(page.locator('[data-feed-status]')).toHaveText('Selected two')
+  await page.locator('[data-feed-toggle]').click()
+  await expect(page.locator('[data-feed-toggle]')).toHaveText('Play')
+  await page.evaluate(() =>
+    window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true }))
+  )
+  await expect(page.locator('.ticker-wrapper')).toHaveCount(1)
+  await page.evaluate(() =>
+    window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: false }))
+  )
+  await expect(page.locator('.ticker-wrapper')).toHaveCount(0)
+  await expect(page.locator('[data-feed-source]')).toHaveCount(1)
+})
+
+for (const direction of ['left', 'right', 'up', 'down', 'auto']) {
+  test(`${direction}: smooth steps wrap and explicit pause cancels without stale playback`, async ({
+    page,
+  }) => {
+    await setup(
+      page,
+      { direction, autoplay: false, navigation: true },
+      direction === 'auto' ? 'rtl' : 'ltr'
+    )
+    await page.evaluate(() => {
+      const c = (window as any).controller
+      c.scrollTo(c.state.distance - 5)
+      c.scrollBy(20, { behavior: 'smooth', duration: 100, preservePlayback: true })
+    })
+    await expect.poll(async () => (await state(page)).reasons.includes('navigation')).toBe(false)
+    expect((await state(page)).position).toBeCloseTo(15, 2)
+    expect((await state(page)).requested).toBe(false)
+    await page.evaluate(() =>
+      (window as any).controller.scrollBy(40, {
+        behavior: 'smooth',
+        duration: 500,
+        preservePlayback: true,
+      })
+    )
+    await page.waitForTimeout(60)
+    await page.evaluate(() => (window as any).controller.pause())
+    const paused = (await state(page)).position
+    await page.waitForTimeout(550)
+    expect((await state(page)).position).toBeCloseTo(paused, 3)
+    expect((await state(page)).requested).toBe(false)
+  })
+}

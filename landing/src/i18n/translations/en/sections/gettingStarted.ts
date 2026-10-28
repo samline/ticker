@@ -69,8 +69,8 @@ export default {
     cdn: {
       filename: 'index.html',
       language: 'html',
-      code: `<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.1.0/dist/style.css">
-<script src="https://unpkg.com/@samline/ticker@2.1.0/dist/browser/global.global.js"></script>`,
+      code: `<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.2.0/dist/style.css">
+<script src="https://unpkg.com/@samline/ticker@2.2.0/dist/browser/global.global.js"></script>`,
     },
     markup: {
       filename: 'index.html',

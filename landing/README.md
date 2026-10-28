@@ -137,7 +137,7 @@ Use semantic headings and section associations, an effective skip link, visible 
 
 Do not let overflow clipping conceal broken layouts. Stack narrow hero actions, allow navigation/tab groups to wrap with enlarged text, and test the 320 viewport explicitly. Code examples and static tickers can intentionally scroll; those regions must remain keyboard reachable. Test menu focus, close-button hover, focus restoration, desktop transitions and no-JavaScript navigation in both themes.
 
-Execute published examples against the package, not just the renderer. The Recipes examples were verified for preserved options/wrapper identity, updated source/clones and complete registry cleanup. Recheck them when API contracts change. Brand marks are illustrative Simple Icons v16.0.0 assets with attribution; prices are sample data, not a market feed or endorsements. Bundle-size statements are measurements, not permanent promises: the FAQ currently cites the v2.1.0 browser build (remeasured during runtime changes) and must be remeasured after relevant changes.
+Execute published examples against the package, not just the renderer. The Recipes examples were verified for preserved options/wrapper identity, updated source/clones and complete registry cleanup. Recheck them when API contracts change. Brand marks are illustrative Simple Icons v16.0.0 assets with attribution; prices are sample data, not a market feed or endorsements. Bundle-size statements are measurements, not permanent promises: the FAQ currently cites the v2.2.0 browser build (remeasured during runtime changes) and must be remeasured after relevant changes.
 
 ## SEO and deployment
 

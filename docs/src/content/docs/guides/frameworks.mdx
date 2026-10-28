@@ -33,9 +33,147 @@ The lifecycle hooks follow [React Effects](https://react.dev/reference/react/use
 
 Import and call `ticker()` inside a processed client `<script>`, not frontmatter. The [first integration](../../getting-started/) is ordinary browser JavaScript and needs no hydrated framework component. With Astro client navigation, initialize the current page after `astro:page-load` and destroy the owning instances on `astro:before-swap`; keep document listeners registered once. Full-page examples preserve instances on persisted `pagehide` and clean up on a real departure.
 
+### Deferred Astro content and interactive copies
+
+Keep the browser setup in the host component so it is present before deferred
+HTML arrives. This complete `TickerFeed.astro` wrapper accepts translated action
+labels and a deferred source through its default slot. It waits for the source,
+uses one gap for items and loop boundaries, and delegates selection from both
+originals and interactive copies. It does not fetch a CMS or invent data.
+
+```astro
+---
+interface Props {
+  playLabel: string
+  pauseLabel: string
+}
+const { playLabel, pauseLabel } = Astro.props
+---
+
+<ticker-feed data-play={playLabel} data-pause={pauseLabel}>
+  <slot />
+  <button type="button" data-feed-toggle disabled>
+    {pauseLabel}
+  </button>
+  <output data-feed-status aria-live="polite"></output>
+</ticker-feed>
+
+<script>
+  import { ticker } from '@samline/ticker'
+  import '@samline/ticker/style.css'
+
+  const owners = new Map<HTMLElement, () => void>()
+  const setup = () => {
+    document.querySelectorAll<HTMLElement>('ticker-feed').forEach(root => {
+      if (owners.has(root)) return
+      const toggle = root.querySelector<HTMLButtonElement>('[data-feed-toggle]')!
+      const status = root.querySelector<HTMLOutputElement>('[data-feed-status]')!
+      const listeners = new AbortController()
+      let controller: ReturnType<typeof ticker> = null
+      const observer = new MutationObserver(() => mount())
+      const mount = () => {
+        const source = root.querySelector<HTMLElement>('[data-feed-source]')
+        if (!source || controller) return
+        controller = ticker(source, { interactiveClones: true, pauseOnHover: false })
+        if (!controller) return
+        observer.disconnect()
+        const render = () => {
+          toggle.textContent = controller!.state.requested
+            ? root.dataset.pause!
+            : root.dataset.play!
+        }
+        controller.on('playback', render)
+        render()
+        toggle.disabled = false
+      }
+      owners.set(root, () => {
+        observer.disconnect()
+        listeners.abort()
+        controller?.destroy()
+        owners.delete(root)
+      })
+      toggle.addEventListener(
+        'click',
+        () => {
+          if (controller?.state.requested) controller.pause()
+          else controller?.play()
+        },
+        { signal: listeners.signal }
+      )
+      root.addEventListener(
+        'click',
+        event => {
+          const target = event.target instanceof Element ? event.target : null
+          const action = target?.closest<HTMLButtonElement>('[data-feed-select]')
+          if (action && root.contains(action)) status.textContent = action.dataset.message ?? ''
+        },
+        { signal: listeners.signal }
+      )
+      observer.observe(root, { childList: true, subtree: true })
+      mount()
+    })
+  }
+  const cleanup = () => [...owners.values()].forEach(dispose => dispose())
+  setup()
+  document.addEventListener('astro:page-load', setup)
+  document.addEventListener('astro:before-swap', cleanup)
+  window.addEventListener('pagehide', event => {
+    if (!event.persisted) cleanup()
+  })
+</script>
+
+<style is:global>
+  ticker-feed [data-feed-source],
+  ticker-feed .ticker-track {
+    gap: 1.5rem;
+  }
+  ticker-feed [data-feed-source] {
+    display: flex;
+    width: max-content;
+  }
+  ticker-feed [data-feed-select] {
+    flex: none;
+  }
+</style>
+```
+
+The deferred `FeedItems.astro` supplies the ready source. The `items` prop here is
+already translated public data; replace its source inside this component with
+your validated provider loader if request-time data is needed:
+
+```astro
+---
+interface Props {
+  items: readonly { id: string; label: string; selectionMessage: string }[]
+}
+const { items } = Astro.props
+---
+
+<div data-feed-source>
+  {items.map(item => (
+    <button type="button" data-feed-select={item.id} data-message={item.selectionMessage}>
+      {item.label}
+    </button>
+  ))}
+</div>
+```
+
+The owning page/section composes
+`<TickerFeed playLabel={copy.play} pauseLabel={copy.pause}><FeedItems server:defer items={items} /></TickerFeed>`
+with those components imported, a configured adapter and actual translated copy.
+Do not put `data-feed-source` on fallback markup: initialization must wait for
+the real source. Keep setup in the host, rather than relying on scripts inserted
+with deferred HTML. A production provider failure needs translated error UI.
+
+Focus still pauses playback; the explicit button retains manual pause. Clones
+share delegated actions, so do not bind listeners separately to original cards.
+Do not put unique IDs, hydrated framework components or stateful forms in these
+copies. This wrapper owns normal document/Astro navigation cleanup; applications
+that independently replace its root must dispose that owner before replacement.
+
 ## Shopify
 
-Use a theme section and theme assets. Copy the published **2.1.0** `dist/browser/global.global.js` as `assets/ticker.global.js` and `dist/style.css` as `assets/ticker.css`; save the JavaScript and CSS below beside them. Add the loader once in `layout/theme.liquid`, then add `sections/ticker-strip.liquid` in the theme editor. The section itself contains no extra runtime script tags.
+Use a theme section and theme assets. Copy the matching published release `dist/browser/global.global.js` as `assets/ticker.global.js` and `dist/style.css` as `assets/ticker.css`; save the JavaScript and CSS below beside them. Add the loader once in `layout/theme.liquid`, then add `sections/ticker-strip.liquid` in the theme editor. The section itself contains no extra runtime script tags.
 
 <CmsExamples host="shopify" />
 

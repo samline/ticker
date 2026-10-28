@@ -50,8 +50,8 @@ import { browser, Ticker } from '@samline/ticker'
 ## Standalone global
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@samline/ticker@2.1.0/dist/style.css" />
-<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@2.1.0/dist/browser/global.global.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@samline/ticker@2.2.0/dist/style.css" />
+<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@2.2.0/dist/browser/global.global.js"></script>
 ```
 
 The IIFE installs the same singleton as `window.Ticker` / `globalThis.Ticker`. CSS is a separate explicit asset. Pin versions and self-host both files when Content Security Policy does not permit the CDN.

@@ -6,6 +6,7 @@ export type {
   TickerSnapshot,
   TickerEventMap,
   TickerControls,
+  TickerNavigationOptions,
   NormalizedTickerOptions,
   TickerInstance,
   TickerOptions,

@@ -8,6 +8,7 @@ import type {
   TickerSnapshot,
   TickerEventMap,
   TickerControls,
+  TickerNavigationOptions,
   TickerPauseReason,
 } from '../core/types'
 import {
@@ -64,6 +65,9 @@ const getReducedMotionMedia = (): ReducedMotionMedia | null => {
 }
 
 interface RuntimeTickerState extends TickerState {
+  navigationFrame: number
+  navigating: boolean
+  navigationRevision: number
   forceRebuild: boolean
   requested: boolean
   manualOverride: boolean
@@ -132,6 +136,7 @@ const seek = (state: RuntimeTickerState, position: number): void => {
 const snapshot = (state: RuntimeTickerState): TickerSnapshot => {
   const reasons: TickerPauseReason[] = []
   if (!state.requested) reasons.push('manual')
+  if (state.navigating) reasons.push('navigation')
   if (state.hovered && state.wrapper.dataset.pauseOnHover === 'true') reasons.push('hover')
   if (
     state.wrapper.dataset.pauseOnFocus === 'true' &&
@@ -155,9 +160,15 @@ const snapshot = (state: RuntimeTickerState): TickerSnapshot => {
   })
 }
 
-const emit = (state: RuntimeTickerState, event: keyof TickerEventMap): void => {
+const emit = (
+  state: RuntimeTickerState,
+  event: keyof TickerEventMap,
+  navigationSource?: TickerSnapshot['navigationSource']
+): void => {
   if (state.destroyed && event !== 'destroy') return
-  const value = snapshot(state)
+  const value = navigationSource
+    ? Object.freeze({ ...snapshot(state), navigationSource })
+    : snapshot(state)
   // Snapshot iteration: newly registered listeners wait until the next event;
   // cancellation/destruction during dispatch prevents subsequent callbacks.
   for (const listener of [...(state.listeners.get(event) ?? [])]) {
@@ -185,6 +196,7 @@ const handleVisibilityChange = (): void => tickersState.forEach(syncPlayback)
 
 const handleMotionChange = (): void => {
   tickersState.forEach(state => {
+    cancelNavigation(state)
     syncPlayback(state)
     scheduleRebuild(state)
   })
@@ -333,6 +345,10 @@ const rebuildTickerState = (state: RuntimeTickerState, force: boolean): void => 
     return
   }
 
+  const wasNavigating = state.navigating
+  cancelNavigation(state)
+  if (wasNavigating) syncPlayback(state)
+  if (state.destroyed) return
   wrapper.dataset.ready = 'false'
   removeClones(state)
   state.measurement = null
@@ -418,20 +434,66 @@ const parseResponsive = (value?: string): NonNullable<TickerOptions['responsive'
   }
 }
 
-const navigate = (state: RuntimeTickerState, position: number, fromDrag = false): void => {
-  // Manual navigation is always instantaneous, including reduced motion. It
-  // leaves playback paused unless a drag explicitly restores its prior intent.
+const cancelNavigation = (state: RuntimeTickerState): void => {
+  state.navigationRevision++
+  cancelFrame(state.navigationFrame)
+  state.navigationFrame = 0
+  state.navigating = false
+}
+
+const navigate = (
+  state: RuntimeTickerState,
+  position: number,
+  fromDrag = false,
+  options: TickerNavigationOptions = {},
+  source: TickerSnapshot['navigationSource'] = fromDrag ? 'drag' : 'api'
+): void => {
   const previousPosition = readPosition(state)
+  cancelNavigation(state)
   if (!fromDrag) state.intentRevision++
-  state.requested = false
-  state.manualOverride = true
+  if (!options.preservePlayback || fromDrag) {
+    state.requested = false
+    state.manualOverride = true
+  }
   if (getReducedMotionMedia()?.matches && state.wrapper.dataset.navigation !== 'true') {
     state.wrapper.dataset.navigation = 'true'
     rebuildTickerState(state, true)
   }
+  const duration = options.duration === undefined ? 300 : options.duration
+  const smooth =
+    !fromDrag &&
+    options.behavior === 'smooth' &&
+    Number.isFinite(duration) &&
+    duration > 0 &&
+    !getReducedMotionMedia()?.matches &&
+    typeof window.requestAnimationFrame === 'function' &&
+    (state.measurement?.contentExtent ?? 0) > 0 &&
+    position !== previousPosition
+  state.navigating = smooth
+  const revision = state.navigationRevision
   syncPlayback(state)
-  seek(state, position)
-  if (Math.abs(state.position - previousPosition) > 0.000001) emit(state, 'navigate')
+  if (state.destroyed || revision !== state.navigationRevision) return
+  if (!smooth) {
+    seek(state, position)
+    if (Math.abs(state.position - previousPosition) > 0.000001) emit(state, 'navigate', source)
+    return
+  }
+  let started: number | undefined
+  const frame = (time: number) => {
+    if (state.destroyed || revision !== state.navigationRevision) return
+    started ??= time
+    const progress = Math.min(1, Math.max(0, (time - started) / duration))
+    seek(state, previousPosition + (position - previousPosition) * (1 - (1 - progress) ** 3))
+    if (progress < 1) {
+      state.navigationFrame = requestFrame(frame)
+      return
+    }
+    state.navigationFrame = 0
+    state.navigating = false
+    syncPlayback(state)
+    if (!state.destroyed && revision === state.navigationRevision) emit(state, 'navigate', source)
+  }
+  state.navigationFrame = requestFrame(frame)
 }
 
 const setupInteraction = (state: RuntimeTickerState): void => {
@@ -493,6 +555,8 @@ const setupInteraction = (state: RuntimeTickerState): void => {
       if (wrapper.dataset.navigation !== 'true' || event.isPrimary === false || event.button !== 0)
         return
       if ((event.target as Element).closest('input, textarea, select, [contenteditable]')) return
+      cancelNavigation(state)
+      syncPlayback(state)
       // Preserve existing keyboard focus when an opt-in mouse drag begins.
       // Otherwise pointerdown focuses the region/link and prevents resumption.
       if (event.pointerType === 'mouse' && wrapper.dataset.resumeAfterDrag === 'true')
@@ -603,12 +667,20 @@ const connectControls = (state: RuntimeTickerState, controls: TickerControls): (
     Number.isFinite(controls.step) && Number(controls.step) > 0
       ? Number(controls.step)
       : state.measurement?.wrapperExtent || 1
-  previous?.addEventListener('click', () => navigate(state, readPosition(state) - distance()), {
-    signal,
-  })
-  next?.addEventListener('click', () => navigate(state, readPosition(state) + distance()), {
-    signal,
-  })
+  previous?.addEventListener(
+    'click',
+    () => navigate(state, readPosition(state) - distance(), false, controls, 'control'),
+    {
+      signal,
+    }
+  )
+  next?.addEventListener(
+    'click',
+    () => navigate(state, readPosition(state) + distance(), false, controls, 'control'),
+    {
+      signal,
+    }
+  )
   const sync = () => {
     if (!rail) return
     rail.min = '0'
@@ -623,7 +695,18 @@ const connectControls = (state: RuntimeTickerState, controls: TickerControls): (
     )
     if (state.wrapper.id) rail.setAttribute('aria-controls', state.wrapper.id)
   }
-  rail?.addEventListener('input', () => navigate(state, Number(rail.value)), { signal })
+  rail?.addEventListener(
+    'input',
+    () =>
+      navigate(
+        state,
+        Number(rail.value),
+        false,
+        { preservePlayback: controls.preservePlayback ?? false },
+        'rail'
+      ),
+    { signal }
+  )
   // Native range keyboard behavior differs across browser RTL/vertical modes;
   // make logical previous/next explicit, without intercepting content inputs.
   rail?.addEventListener(
@@ -644,7 +727,7 @@ const connectControls = (state: RuntimeTickerState, controls: TickerControls): (
           : event.key === 'End'
             ? Math.max(0, period - 0.001)
             : readPosition(state) + (forward ? 1 : -1) * distance()
-      navigate(state, target)
+      navigate(state, target, false, controls, 'keyboard')
     },
     { signal }
   )
@@ -714,6 +797,7 @@ const destroyTicker = (wrapper: HTMLElement): void => {
   if (state.resizeTimeout) clearTimeout(state.resizeTimeout)
 
   state.position = readPosition(state)
+  cancelNavigation(state)
   state.destroyed = true
   state.cleanup.splice(0).forEach(cleanup => cleanup())
   state.resizeObserver?.disconnect()
@@ -746,6 +830,9 @@ const initTicker = (wrapper: HTMLElement): void => {
     track,
     content,
     ...createEmptyTickerState(),
+    navigationFrame: 0,
+    navigating: false,
+    navigationRevision: 0,
     forceRebuild: false,
     measurement: null,
     requested: wrapper.dataset.autoplay !== 'false',
@@ -1061,6 +1148,7 @@ export const ticker = (
     },
     play() {
       if (!runtime.destroyed) {
+        cancelNavigation(runtime)
         runtime.intentRevision++
         runtime.requested = true
         runtime.manualOverride = true
@@ -1070,6 +1158,7 @@ export const ticker = (
     },
     pause() {
       if (!runtime.destroyed) {
+        cancelNavigation(runtime)
         runtime.intentRevision++
         runtime.requested = false
         runtime.manualOverride = true
@@ -1077,13 +1166,14 @@ export const ticker = (
       }
       return instance
     },
-    scrollTo(position) {
-      if (!runtime.destroyed && Number.isFinite(position)) navigate(runtime, position)
+    scrollTo(position, options) {
+      if (!runtime.destroyed && Number.isFinite(position))
+        navigate(runtime, position, false, options)
       return instance
     },
-    scrollBy(distance) {
+    scrollBy(distance, options) {
       if (!runtime.destroyed && Number.isFinite(distance))
-        navigate(runtime, readPosition(runtime) + distance)
+        navigate(runtime, readPosition(runtime) + distance, false, options)
       return instance
     },
     connectControls(controls) {
@@ -1098,8 +1188,11 @@ export const ticker = (
     },
     update(options = {}) {
       if (!wrapper) return instance
+      if (runtime.destroyed) return instance
+      cancelNavigation(runtime)
       const nextOptions = normalizeOptions({ ...currentOptions, ...options })
       if ('autoplay' in options) {
+        cancelNavigation(runtime)
         runtime.intentRevision++
         runtime.requested = nextOptions.autoplay
         runtime.manualOverride = false

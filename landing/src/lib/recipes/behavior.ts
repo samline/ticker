@@ -46,6 +46,7 @@ if (news) {
     recipe.rows.some(row => row.navigation)
       ? `
   news.connectControls({
+    ${recipe.id === 'manual-navigation' ? "behavior: 'smooth', duration: 300, preservePlayback: true," : ''}
     previous: example.querySelector('[data-previous]'),
     next: example.querySelector('[data-next]'),
     rail: example.querySelector('[data-position]'),

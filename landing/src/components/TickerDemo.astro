@@ -12,6 +12,7 @@ interface Props {
   speed?: number
   autoplay?: boolean
   navigation?: boolean
+  smoothNavigation?: boolean
   resumeAfterDrag?: boolean
   rtl?: boolean
   responsive?: import('@samline/ticker').TickerResponsiveRule[]
@@ -25,6 +26,7 @@ const {
   speed,
   autoplay = true,
   navigation = false,
+  smoothNavigation = false,
   resumeAfterDrag = false,
   responsive = [],
   rtl = false,
@@ -42,6 +44,7 @@ const i18n = getI18n(Astro)
   data-speed={speed}
   data-autoplay={String(autoplay)}
   data-navigation={String(navigation)}
+  data-smooth-navigation={String(smoothNavigation)}
   data-resume-after-drag={String(resumeAfterDrag)}
   data-responsive={JSON.stringify(responsive)}
   data-kind={kind}
@@ -127,6 +130,8 @@ const i18n = getI18n(Astro)
       demoControllers.set(element, controller)
       if (element.dataset.navigation === 'true')
         controller.connectControls({
+          behavior: element.dataset.smoothNavigation === 'true' ? 'smooth' : 'instant',
+          preservePlayback: element.dataset.smoothNavigation === 'true',
           previous: controls.querySelector<HTMLButtonElement>('[data-previous]')!,
           next: controls.querySelector<HTMLButtonElement>('[data-next]')!,
           rail: controls.querySelector<HTMLInputElement>('[data-position]')!,

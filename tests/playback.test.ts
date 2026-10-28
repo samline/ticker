@@ -310,4 +310,93 @@ describe('ticker playback and measurement', () => {
     expect(wrapper.dataset.ready).toBe('true')
     expect(wrapper.querySelectorAll('.ticker-clone')).toHaveLength(2)
   })
+  it('smooth controls preserve autoplay and distinguish navigation intent without replay handlers', async () => {
+    const { instance } = await createTicker()
+    intersect(true)
+    // Existing fixture timers use timestamp zero; smooth frames need elapsed time.
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>
+      window.setTimeout(() => callback(Date.now()), 16)
+    )
+    const next = document.createElement('button')
+    document.body.append(next)
+    const events: string[] = []
+    instance.on('navigate', value => events.push(value.navigationSource!))
+    const disconnect = instance.connectControls({
+      next,
+      step: 30,
+      behavior: 'smooth',
+      duration: 96,
+      preservePlayback: true,
+    })
+    next.click()
+    expect(instance.state.requested).toBe(true)
+    expect(instance.state.reasons).toContain('navigation')
+    vi.advanceTimersByTime(48)
+    expect(instance.state.position).toBeGreaterThan(0)
+    expect(instance.state.position).toBeLessThan(30)
+    vi.advanceTimersByTime(100)
+    expect(instance.state.position).toBeCloseTo(30)
+    expect(instance.state.playing).toBe(true)
+    expect(events).toEqual(['control'])
+    instance.pause()
+    next.click()
+    vi.advanceTimersByTime(140)
+    expect(instance.state.position).toBeCloseTo(60)
+    expect(instance.state.requested).toBe(false)
+    disconnect()
+  })
+
+  it('cancels a smooth step on explicit pause, repeated commands, rebuild and destroy', async () => {
+    const { instance } = await createTicker()
+    intersect(true)
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>
+      window.setTimeout(() => callback(Date.now()), 16)
+    )
+    const options = { behavior: 'smooth' as const, duration: 96, preservePlayback: true }
+    instance.scrollBy(30, options)
+    vi.advanceTimersByTime(48)
+    instance.pause()
+    const paused = instance.state.position
+    vi.advanceTimersByTime(160)
+    expect(instance.state.position).toBe(paused)
+    expect(instance.state.reasons).not.toContain('navigation')
+    instance.scrollBy(20, options)
+    vi.advanceTimersByTime(48)
+    instance.scrollTo(5, options)
+    vi.advanceTimersByTime(140)
+    expect(instance.state.position).toBeCloseTo(5)
+    instance.scrollTo(40, options)
+    vi.advanceTimersByTime(48)
+    instance.refresh()
+    vi.advanceTimersByTime(140)
+    expect(instance.state.reasons).not.toContain('navigation')
+    instance.scrollTo(60, options)
+    instance.destroy()
+    vi.advanceTimersByTime(140)
+    expect(instance.state.destroyed).toBe(true)
+  })
+
+  it('seeks instantly under reduced motion and keeps preserved manual pause', async () => {
+    const { instance } = await createTicker()
+    media.matches = true
+    media.dispatchEvent(new Event('change'))
+    vi.advanceTimersByTime(16)
+    instance.pause().scrollTo(25, { behavior: 'smooth', preservePlayback: true })
+    expect(instance.state.position).toBeCloseTo(25)
+    expect(instance.state.requested).toBe(false)
+    expect(instance.state.reasons).not.toContain('navigation')
+  })
+  it('does not cancel a smooth step for an unchanged automatic resize measurement', async () => {
+    const { instance } = await createTicker()
+    intersect(true)
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>
+      window.setTimeout(() => callback(Date.now()), 16)
+    )
+    instance.scrollBy(30, { behavior: 'smooth', duration: 500, preservePlayback: true })
+    resize()
+    expect(instance.state.reasons).toContain('navigation')
+    vi.advanceTimersByTime(500)
+    expect(instance.state.position).toBeCloseTo(30)
+    expect(instance.state.playing).toBe(true)
+  })
 })

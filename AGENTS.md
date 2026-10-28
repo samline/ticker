@@ -75,7 +75,7 @@ Preserve unrelated user edits. Follow the user's Git instructions; a local commi
 
 The public Ticker integration skill is maintained in skills/ticker/SKILL.md and downloaded through the landing endpoint. It teaches package use, not this repository's personal design preferences. Update its version/API guidance with package changes and keep the general README's package installation, usage, URLs and agent installation steps current. Docs metadata and accessibility checks cover every article, including structured breadcrumbs and both themes.
 
-## Ticker 2.1 runtime contract
+## Ticker 2.2 runtime contract
 
 Playback intent, automatic pause causes, CSS-animation seeking, logical navigation, vertical measurements and viewport rules belong to the package runtime. Site demos call play()/pause(), state/on() and connectControls() rather than implementing pause CSS or gesture/rail controllers. Horizontal left/right stay physical; auto uses inherited writing direction, while next/previous and position are logical. Axis changes reset position; same-axis updates preserve pixels modulo the measured period. Keep pinned versions, public skill and copied recipes synchronized. Site demos import the public package stylesheet directly; do not copy its runtime rules into component CSS. Runtime browser tests live in landing/e2e/runtime.spec.ts alongside the site suites.
 
@@ -87,7 +87,7 @@ Mixed-language runnable examples use shared CodeFiles (Tabs + TabPanel + CodeFra
 
 Titles share Heading and PageTitle rather than page-local font rules. Heading separates semantic level from the controlled display/section scale; PageTitle composes the eyebrow, title and description. Keep the approved Home Inter/Instrument Serif pairing, weight, tracking and spacing tokens. Editorial accent text is an explicit trailing part of the translated title (titleAccent in docs frontmatter); never infer the last word or split API identifiers. Keep the full title unchanged in metadata/search and verify compiled whitespace, both themes, responsive sizes and enlarged text. API identifiers and single-word headings can remain entirely in the primary font.
 
-Npm publication is runtime-only: package.json files allows dist/ and CHANGELOG.md; npm also includes package.json, README.md and LICENSE.md. Explicitly exclude landing/, docs/, shared/, development scripts, source, tests and agent memory in .npmignore. Test the actual npm pack manifest, not just ignore patterns: test:package rejects any file outside that contract. Keep 2.1.0 references while preparing its release; publication is the maintainer's action.
+Npm publication is runtime-only: package.json files allows dist/ and CHANGELOG.md; npm also includes package.json, README.md and LICENSE.md. Explicitly exclude landing/, docs/, shared/, development scripts, source, tests and agent memory in .npmignore. Test the actual npm pack manifest, not just ignore patterns: test:package rejects any file outside that contract. Keep 2.2.0 references while preparing its release; publication is the maintainer's action.
 
 Enlarged text must be tested against the full rendered page, not just the new heading. Shared text buttons use min-height and allow wrapping; fixed heights/nowrap can push their arrows outside mobile gutters. Grid copy columns use minmax(0, 1fr) and allow long inline API identifiers to wrap. Do not clip these defects. Keep single-app browser tests independent of sibling output; CI also builds and tests the combined artifact for cross-route contracts.
 
@@ -161,3 +161,14 @@ Natural-scroll correction validated: both targeted browser regressions pass in
 each of the four projects (eight total). All combined artifacts rebuilt and
 passed their link audits. The SEO preview was inspected: article scroll remains
 0, the sidebar has no generated ::after content and no trailing-space variable.
+
+## Navigation integration contract
+
+Ticker owns smooth seeking and the transient navigation pause cause. Controller
+methods and connected controls accept behavior/duration/preservePlayback, with
+instant/pause as compatible defaults. Preserve requested intent rather than
+resuming from every navigate event; navigationSource distinguishes controls,
+range, keyboard, API and drag. Cancel pending transitions on competing commands,
+drag, changed geometry, explicit refresh, reduced motion and destruction. An
+unchanged automatic measurement must not cancel a running step. Keep the live
+manual-navigation example, copied files, public skill and API types aligned.

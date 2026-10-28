@@ -3,12 +3,12 @@ name: ticker
 description: Integrate @samline/ticker marquees into websites, plain HTML, CMS templates or framework components. Use for ticker installation, styling, options, accessible motion and lifecycle; not financial market data or unrelated slider libraries.
 metadata:
   package: '@samline/ticker'
-  package-version: '2.1.0'
+  package-version: '2.2.0'
 ---
 
 # Ticker
 
-Build against the installed `@samline/ticker` version. This skill describes v2.1.0. Check the dependency version and its exports before applying it to another release. For 2.x, do not use the removed enhance()/createTicker() APIs or the former framework-adapter entrypoints; read the changelog when handling 1.x code. Preserve the host project's components, theme and lifecycle conventions; Ticker supplies movement, not a UI framework or financial data.
+Build against the installed `@samline/ticker` version. This skill describes v2.2.0. Check the dependency version and its exports before applying it to another release. For 2.x, do not use the removed enhance()/createTicker() APIs or the former framework-adapter entrypoints; read the changelog when handling 1.x code. Preserve the host project's components, theme and lifecycle conventions; Ticker supplies movement, not a UI framework or financial data.
 
 ## Choose loading, then ownership
 
@@ -17,7 +17,7 @@ Use the site's two loading labels consistently:
 - **Package / ESM:** install with npm, pnpm, yarn or bun. Import `{ ticker }` from `@samline/ticker` (or `/vanilla`) and import `@samline/ticker/style.css` once. Initialize in client code after markup exists. ESM/TypeScript and CommonJS are module formats; neither installs `window.Ticker`.
 - **HTML / CDN:** load `dist/style.css` with `<link>` and `dist/browser/global.global.js` with `<script>`, then call `window.Ticker.ticker(target, options)`. A CDN is only file delivery: self-hosting those same files uses the same API. The JavaScript is an IIFE that exposes the global namespace `window.Ticker`; “Global” is not a third setup. Keep both asset versions equal. The script and source markup must exist before initialization; avoid `async` or a deferred script followed by an immediately executed inline initializer.
 
-For v2.1.0, a CDN URL is `https://cdn.jsdelivr.net/npm/@samline/ticker@2.1.0/dist/browser/global.global.js`, with `style.css` at the same version's dist root. Verify that the chosen release/assets actually exist. A repository version, tag or documentation header does not prove npm/CDN availability. If the project uses a local build, load that build; never silently use an older CDN release with newer APIs.
+For v2.2.0, a CDN URL is `https://cdn.jsdelivr.net/npm/@samline/ticker@2.2.0/dist/browser/global.global.js`, with `style.css` at the same version's dist root. Verify that the chosen release/assets actually exist. A repository version, tag or documentation header does not prove npm/CDN availability. If the project uses a local build, load that build; never silently use an older CDN release with newer APIs.
 
 Select ownership separately from loading:
 
@@ -53,11 +53,11 @@ Options include positive `duration` (seconds per cycle, default 20), `speed` (po
 
 ## Accessible motion and controls
 
-Use `controller.pause()` / `play()` for persistent intent. Read `controller.state` and subscribe with `on('playback', listener)`; the unsubscribe function and `connectControls()` cleanup are idempotent. State distinguishes requested from effective playback and reports manual, hover, focus, hidden, offscreen and reduced-motion reasons. `play()` never bypasses those environmental causes. Methods after destroy are inert.
+Use `controller.pause()` / `play()` for persistent intent. Read `controller.state` and subscribe with `on('playback', listener)`; the unsubscribe function and `connectControls()` cleanup are idempotent. State distinguishes requested from effective playback and reports manual, hover, focus, hidden, offscreen, reduced-motion and transient navigation reasons. `play()` never bypasses those environmental causes. Methods after destroy are inert.
 
 For changing action labels, display Pause when playback is requested and Play when explicitly paused; update the accessible name with the text. Do not mix changing labels with `aria-pressed`. Focus pause is automatic by default. Do not recreate pause ownership with application CSS.
 
-`scrollTo(px)` / `scrollBy(px)` seek instantly in logical reading order, wrap modulo one sequence and leave playback paused. `navigation: true` enables axis-aware pointer gestures, preserves perpendicular page scrolling and permits instant navigation with reduced motion. Set `resumeAfterDrag: true` to restore pre-drag playback intent on release; preserve prior manual pause and all environmental pause causes. Buttons, rail and programmatic navigation still pause. Change the drag option with `update({ resumeAfterDrag })`; this does not start playback. A complete toggle recipe is at https://samline.github.io/ticker/examples/#drag-playback. Supply native named buttons and a labelled range with `connectControls({ previous, next, rail, step })`; use the host project's existing components and focus styles. The rail spans one repeated period. Do not intercept keys in content inputs.
+By default, `scrollTo(px)` / `scrollBy(px)` seek instantly in logical reading order, wrap modulo one sequence and leave playback paused. `navigation: true` enables axis-aware pointer gestures, preserves perpendicular page scrolling and permits instant navigation with reduced motion. Set `resumeAfterDrag: true` to restore pre-drag playback intent on release; preserve prior manual pause and all environmental pause causes. Buttons, rail and programmatic navigation pause by default; use preservePlayback to retain intent. Change the drag option with `update({ resumeAfterDrag })`; this does not start playback. A complete toggle recipe is at https://samline.github.io/ticker/examples/#drag-playback. Supply native named buttons and a labelled range with `connectControls({ previous, next, rail, step })`; use the host project's existing components and focus styles. The rail spans one repeated period. Do not intercept keys in content inputs.
 
 `on()` supports ready, playback, update, measure, navigate and destroy; no replay or per-frame public events. Read state for late subscriptions. Destroy clears subscriptions and owned runtime resources. `responsive: [{ query, options }]` uses viewport media queries merged in order after base options; `update()` modifies that base. Explicit pause survives rule changes. Axis changes reset position; same-axis changes preserve pixel distance modulo the new period.
 
@@ -103,3 +103,19 @@ Write integrations with direct controller calls, clear variables and arrow callb
 Use the [framework integrations guide](https://samline.github.io/ticker/docs/guides/frameworks/) for React, Vue, Svelte, Astro, Shopify and WordPress examples. These hosts use the ordinary public browser API, not adapter entrypoints. Initialize after client mount and destroy before the framework replaces the enhanced subtree. Keep source DOM stable, action labels synchronized through playback state, and component cleanup local. React development effects must survive setup/cleanup/setup.
 
 For Shopify, load shared runtime assets once from the layout, initialize each section independently and handle section load/unload events. For WordPress, enqueue runtime and integration assets with explicit dependencies; the sample shortcode plugin covers ordinary singular content and WordPress 6.3+ deferred scripts. Builders, widgets and dynamic navigation need their own mount/enqueue policy. Preserve package CSS, pinned matching assets and readable source markup. CMS fixture execution is not proof of a live store/plugin deployment.
+
+## Smooth navigation and deferred content
+
+For v2.2+, `scrollTo`/`scrollBy` accept `{ behavior: 'smooth', duration: 300,
+preservePlayback: true }`; the same options belong to `connectControls`.
+Defaults remain instant and pause-on-navigation. Preservation retains a manual
+pause too. Never resume from every `navigate` event; inspect `navigationSource`
+(`api`, `control`, `rail`, `keyboard`, `drag`) or use the package policy. Smooth
+steps honor reduced motion and cancel when an explicit command, drag, rebuild or
+destroy takes ownership. `navigation` is a transient pause reason.
+
+With Astro deferred HTML, mount after the source exists, delegate app actions
+from a stable owner, and destroy the exact controller before replacing its DOM.
+Apply the same CSS gap to the source sequence and generated track. Refresh after
+editing originals. Interactive clones need delegation and cannot duplicate
+framework component hydration, IDs or stateful form controls.

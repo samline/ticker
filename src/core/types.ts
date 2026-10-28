@@ -27,9 +27,11 @@ export type NormalizedTickerOptions = Required<TickerOptions>
 export type TickerTarget = string | HTMLElement
 
 export type TickerPauseReason =
-  'manual' | 'hover' | 'focus' | 'hidden' | 'offscreen' | 'reduced-motion'
+  'manual' | 'hover' | 'focus' | 'hidden' | 'offscreen' | 'reduced-motion' | 'navigation'
 
 export interface TickerSnapshot {
+  /** Present on navigate events; distinguishes pointer gestures from controls. */
+  readonly navigationSource?: 'api' | 'control' | 'rail' | 'keyboard' | 'drag'
   readonly ready: boolean
   readonly destroyed: boolean
   readonly requested: boolean
@@ -51,7 +53,16 @@ export interface TickerEventMap {
   destroy: TickerSnapshot
 }
 
-export interface TickerControls {
+export interface TickerNavigationOptions {
+  /** Instant by default. Smooth uses a package-owned cubic ease-out. */
+  behavior?: 'instant' | 'smooth'
+  /** Smooth step duration in milliseconds; defaults to 300. */
+  duration?: number
+  /** Retain requested playback, including a manual pause; defaults to false. */
+  preservePlayback?: boolean
+}
+
+export interface TickerControls extends TickerNavigationOptions {
   previous?: HTMLButtonElement
   next?: HTMLButtonElement
   rail?: HTMLInputElement
@@ -66,8 +77,8 @@ export interface TickerInstance {
   readonly state: Readonly<TickerSnapshot>
   play: () => TickerInstance
   pause: () => TickerInstance
-  scrollTo: (position: number) => TickerInstance
-  scrollBy: (distance: number) => TickerInstance
+  scrollTo: (position: number, options?: TickerNavigationOptions) => TickerInstance
+  scrollBy: (distance: number, options?: TickerNavigationOptions) => TickerInstance
   connectControls: (controls: TickerControls) => () => void
   on: <K extends keyof TickerEventMap>(
     event: K,

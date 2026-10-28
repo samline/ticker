@@ -17,8 +17,8 @@ interface TickerInstance {
   readonly state: Readonly<TickerSnapshot>
   play(): TickerInstance
   pause(): TickerInstance
-  scrollTo(position: number): TickerInstance
-  scrollBy(distance: number): TickerInstance
+  scrollTo(position: number, options?: TickerNavigationOptions): TickerInstance
+  scrollBy(distance: number, options?: TickerNavigationOptions): TickerInstance
   connectControls(controls: TickerControls): () => void
   on<K extends keyof TickerEventMap>(
     event: K,
@@ -58,7 +58,7 @@ Mutating a returned snapshot does not affect the controller. Use [`update()`](/t
 
 `play()` and `pause()` are chainable, idempotent and preserve visual position. Explicit pause persists through refresh, resize, hover, focus, visibility, intersection and responsive rules. `play()` records intent but still respects automatic causes.
 
-`TickerSnapshot` is a frozen snapshot containing `ready`, `destroyed`, `requested`, `playing`, `reasons`, `position`, `distance`, `duration` and resolved physical `direction`. Position and distance are CSS pixels; duration is measured seconds per cycle. Read `state` whenever the current position is needed. `TickerPauseReason` is `manual`, `hover`, `focus`, `hidden`, `offscreen` or `reduced-motion`. The reasons array is also frozen.
+`TickerSnapshot` is a frozen snapshot containing `ready`, `destroyed`, `requested`, `playing`, `reasons`, `position`, `distance`, `duration` and resolved physical `direction`. Position and distance are CSS pixels; duration is measured seconds per cycle. Read `state` whenever the current position is needed. `TickerPauseReason` is `manual`, `hover`, `focus`, `hidden`, `offscreen`, `reduced-motion` or transient `navigation`. The reasons array is also frozen.
 
 ```ts
 const news = ticker('#news', { autoplay: false })
@@ -78,7 +78,7 @@ Use changing action labels as above without `aria-pressed`. Environmental pauses
 
 ## Manual navigation
 
-`scrollTo(position)` seeks to a logical CSS-pixel distance; `scrollBy(distance)` adds to the current logical position. Both wrap modulo one complete content-and-gap period, act instantly, and leave playback explicitly paused. Negative values wrap backward. Nonfinite values are ignored. Buttons default to one visible extent per click; provide a positive `step` to use a fixed distance. There is no item snapping.
+`scrollTo(position)` seeks to a logical CSS-pixel distance; `scrollBy(distance)` adds to the current logical position. Both wrap modulo one complete content-and-gap period. By default they act instantly and leave playback explicitly paused. Negative values wrap backward. Nonfinite values are ignored. Buttons default to one visible extent per click; provide a positive `step` to use a fixed distance. There is no item snapping.
 
 ```ts
 const news = ticker('#news', { autoplay: false, navigation: true })
@@ -135,3 +135,38 @@ One controller owns one active wrapper, its generated clones, scheduled frame, r
 - [`update()`](/ticker/docs/reference/api/update/)
 - [`refresh()`](/ticker/docs/reference/api/refresh/)
 - [`destroy()`](/ticker/docs/reference/api/destroy/)
+
+## Smooth steps and playback intent
+
+`scrollTo`, `scrollBy` and `connectControls` accept `TickerNavigationOptions`:
+
+```ts
+const disconnect = news?.connectControls({
+  previous: document.querySelector<HTMLButtonElement>('#previous')!,
+  next: document.querySelector<HTMLButtonElement>('#next')!,
+  behavior: 'smooth',
+  duration: 300,
+  preservePlayback: true,
+})
+```
+
+`behavior` defaults to `instant`, `duration` defaults to 300 milliseconds, and
+`preservePlayback` defaults to false. Smooth steps use a cubic ease-out and pause
+continuous CSS playback while seeking. `reasons` contains `navigation` during the
+step. `requested` retains the existing intent when preservation is enabled,
+including an explicit manual pause. Focus, hover and all automatic pause causes
+still govern continuous playback after completion. Range input seeks remain
+instant to follow the pointer; keyboard steps can be smooth.
+
+Repeated commands restart from the current position. Drag starts, explicit
+play/pause, refresh/resize, option updates, reduced-motion changes and destroy
+cancel an unfinished step. No canceled completion can restore obsolete playback
+intent. Reduced motion always seeks instantly. Invalid/nonpositive durations
+also seek instantly. Loop arithmetic keeps the requested direction across a
+sequence boundary.
+
+Only `navigate` event snapshots include `navigationSource`: `api`, `control`,
+`rail`, `keyboard` or `drag`. Smooth commands emit it on completion; pointer drag
+emits during movement. Do not call `play()` on every `navigate` event: that can
+interrupt a gesture or override a manual pause. Use `preservePlayback` for arrows
+and `resumeAfterDrag` for the separate drag policy.

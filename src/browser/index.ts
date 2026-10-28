@@ -17,6 +17,7 @@ export type {
   TickerSnapshot,
   TickerEventMap,
   TickerControls,
+  TickerNavigationOptions,
   TickerPauseReason,
   TickerResponsiveRule,
   TickerDirection,

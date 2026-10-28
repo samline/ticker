@@ -84,11 +84,11 @@ The runtime preserves fractional measurements in both directions. Match item spa
 Choose **Package / ESM** when installing with npm, pnpm or bun and importing Ticker in your application. Choose **HTML / CDN** when loading the standalone script in plain HTML, WordPress or Shopify without a bundler. Both use the same controller API. A CDN only delivers the files; you can self-host the same script and stylesheet.
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.1.0/dist/style.css" />
-<script src="https://unpkg.com/@samline/ticker@2.1.0/dist/browser/global.global.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.2.0/dist/style.css" />
+<script src="https://unpkg.com/@samline/ticker@2.2.0/dist/browser/global.global.js"></script>
 ```
 
-> Pin the version in production. Replace `2.1.0` with the version you ship.
+> Pin the version in production. Replace `2.2.0` with the version you ship.
 
 The standalone script (an IIFE) exposes `window.Ticker`. “Global” describes this object, not another loading mode. The optional `@samline/ticker/browser` registry module is an ESM/CJS import and does not install that object. See [loading terms](https://samline.github.io/ticker/docs/guides/html-and-browser/#loading-terms).
 
@@ -168,6 +168,30 @@ Content stays application-owned: add or remove original nodes through `source`, 
 
 See [configuration](https://samline.github.io/ticker/docs/reference/configuration/) for normalization, RTL and rule precedence, and [controller contracts](https://samline.github.io/ticker/docs/reference/api/controller/) for events, keyboard controls and cleanup.
 
+### Smooth arrow steps
+
+Create native `#previous` and `#next` buttons beside the Quick start source.
+This is an alternative setup; do not initialize that source twice.
+
+```ts
+import { ticker } from '@samline/ticker'
+import '@samline/ticker/style.css'
+
+const strip = ticker('#news-ticker', { navigation: true, autoplay: true })
+const disconnect = strip?.connectControls({
+  previous: document.querySelector<HTMLButtonElement>('#previous')!,
+  next: document.querySelector<HTMLButtonElement>('#next')!,
+  behavior: 'smooth',
+  duration: 300,
+  preservePlayback: true,
+})
+```
+
+Use your existing controller instead of resuming on every `navigate` event.
+`preservePlayback` retains manual pause as well as autoplay. Instant navigation
+that pauses playback remains the default. Reduced motion always seeks instantly.
+See the controller documentation for cancellation and `navigationSource` events.
+
 ## Documentation
 
 Read the full guides and API reference in the **[documentation](https://samline.github.io/ticker/docs/)**. Explore **[working examples](https://samline.github.io/ticker/examples/)** with complete HTML / CDN and npm code to copy and adapt.
@@ -191,7 +215,7 @@ Read [CHANGELOG.md](CHANGELOG.md) or the [published changelog](https://samline.g
 
 ## AI agent skill
 
-The public [Ticker skill](https://samline.github.io/ticker/skills/ticker/SKILL.md) teaches an agent how to choose a Ticker integration, load CSS, manage controllers, preserve accessible motion and avoid nonexistent APIs. It is self-contained and describes v2.1.0; agents must verify their installed version.
+The public [Ticker skill](https://samline.github.io/ticker/skills/ticker/SKILL.md) teaches an agent how to choose a Ticker integration, load CSS, manage controllers, preserve accessible motion and avoid nonexistent APIs. It is self-contained and describes v2.2.0; agents must verify their installed version.
 
 Download [SKILL.md](https://samline.github.io/ticker/skills/ticker/SKILL.md) into a `ticker/` folder in your agent's supported skill directory. For agents that discover project skills from `.agents/skills/`:
 
