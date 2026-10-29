@@ -791,28 +791,38 @@ test('manual arrows reveal the entire incoming link outside both edge fades', as
         await recipe
           .getByRole('button', { name: forward ? 'Next items' : 'Previous items', exact: true })
           .click()
-        await page.waitForTimeout(380)
-        const fullyVisible = await recipe.locator('.ticker-frame').evaluate((frame, target) => {
-          const viewport = frame.getBoundingClientRect()
-          const left = viewport.left + parseFloat(getComputedStyle(frame, '::before').width)
-          const right = viewport.right - parseFloat(getComputedStyle(frame, '::after').width)
-          const links = [...frame.querySelectorAll('.ticker-content > a')]
-            .filter(link => link.textContent === target)
-            .map(link => {
-              const r = link.getBoundingClientRect()
-              return { left: r.left, right: r.right, width: r.width }
-            })
-          return {
-            left,
-            right,
-            links,
-            fits: links.some(r => r.left >= left - 0.5 && r.right <= right + 0.5),
-          }
-        }, target)
-        expect(
-          fullyVisible.fits,
-          `${theme}/${width}/${textSize}/${forward}: ${target}: ${JSON.stringify(fullyVisible)}`
-        ).toBe(true)
+        await expect
+          .poll(
+            () =>
+              recipe.locator('.ticker-frame').evaluate(async (frame, target) => {
+                const track = frame.querySelector('.ticker-track')!
+                const before = getComputedStyle(track).transform
+                // Wait for real frames: slow runners may not finish a 300ms step
+                // within a fixed wall-clock delay after the click.
+                await new Promise<void>(resolve =>
+                  requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+                )
+                const settled = before === getComputedStyle(track).transform
+                const viewport = frame.getBoundingClientRect()
+                const left = viewport.left + parseFloat(getComputedStyle(frame, '::before').width)
+                const right = viewport.right - parseFloat(getComputedStyle(frame, '::after').width)
+                const links = [...frame.querySelectorAll('.ticker-content > a')]
+                  .filter(link => link.textContent === target)
+                  .map(link => {
+                    const r = link.getBoundingClientRect()
+                    return { left: r.left, right: r.right, width: r.width }
+                  })
+                return {
+                  settled,
+                  left,
+                  right,
+                  links,
+                  fits: links.some(r => r.left >= left - 0.5 && r.right <= right + 0.5),
+                }
+              }, target),
+            { message: `${theme}/${width}/${textSize}/${forward}: ${target}`, intervals: [50, 100] }
+          )
+          .toMatchObject({ settled: true, fits: true })
       }
     }
   }
