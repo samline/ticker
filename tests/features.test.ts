@@ -217,3 +217,148 @@ describe('extended controller', () => {
     expect(source.innerHTML).toBe(original)
   })
 })
+
+describe('item navigation decisions', () => {
+  const fixture = async (
+    direction: 'left' | 'up' | 'auto' = 'left',
+    sizes = [80, 110, 60, 140]
+  ) => {
+    const c = await create({ direction, autoplay: false, navigation: true })
+    const wrapper = c.element!
+    const vertical = direction === 'up'
+    const rtl = direction === 'auto'
+    if (rtl) wrapper.dir = 'rtl'
+    const period = sizes.reduce((sum, size) => sum + size + 10, 0)
+    const rect = (start: number, size: number, cross = 320): DOMRect =>
+      ({
+        left: vertical ? 0 : start,
+        right: vertical ? cross : start + size,
+        top: vertical ? start : 0,
+        bottom: vertical ? start + size : cross,
+        width: vertical ? cross : size,
+        height: vertical ? size : cross,
+      }) as DOMRect
+    vi.mocked(wrapper.getBoundingClientRect).mockReturnValue(rect(0, 324))
+    wrapper.style.border = '2px solid'
+    wrapper.style[vertical ? 'scrollPaddingTop' : 'scrollPaddingLeft'] = '24px'
+    wrapper.style[vertical ? 'scrollPaddingBottom' : 'scrollPaddingRight'] = '10%'
+    const content = wrapper.querySelector<HTMLElement>('.ticker-content')!
+    vi.mocked(content.getBoundingClientRect).mockReturnValue(rect(0, period - 10))
+    wrapper.querySelector<HTMLElement>('.ticker-track')!.style.gap = '10px'
+    let start = 0
+    const children = sizes.map(size => {
+      const item = document.createElement('span')
+      const base = rtl ? period - 10 - start - size : start
+      start += size + 10
+      vi.spyOn(item, 'getBoundingClientRect').mockImplementation(() => {
+        const position = c.state.position
+        const offset = rtl ? (period - position) % period : position
+        return rect(2 + base - offset, size)
+      })
+      return item
+    })
+    c.source.replaceChildren(...children)
+    c.refresh()
+    vi.advanceTimersByTime(16)
+    return { c, wrapper, children, period }
+  }
+
+  it.each([
+    [undefined, 132],
+    [1, 132],
+    [2, 222],
+    [3, 256],
+    [100, 256],
+    [0, 132],
+    [-1, 132],
+    [1.5, 132],
+    [NaN, 132],
+    [Infinity, 132],
+  ])(
+    'reveals the requested items or retains the first incoming item for count %s',
+    async (count, target) => {
+      const { c } = await fixture()
+      c.connectControls({
+        next: document.querySelector('#next')!,
+        itemsPerStep: count,
+        behavior: 'instant',
+      })
+      document.querySelector<HTMLButtonElement>('#next')!.click()
+      expect(c.state.position).toBe(target)
+      expect(c.state.requested).toBe(false)
+    }
+  )
+
+  it.each(['left', 'up', 'auto'] as const)(
+    'reveals both incoming edges with borders and insets for %s',
+    async direction => {
+      const { c, period } = await fixture(direction)
+      c.connectControls({
+        previous: document.querySelector('#prev')!,
+        next: document.querySelector('#next')!,
+        behavior: 'instant',
+      })
+      document.querySelector<HTMLButtonElement>('#next')!.click()
+      // RTL enters from the left: the first item is clipped by the 24px inset.
+      expect(c.state.position).toBe(direction === 'auto' ? 24 : 132)
+      c.scrollTo(0)
+      document.querySelector<HTMLButtonElement>('#prev')!.click()
+      // In RTL, item 1 ends at 332px: 42px beyond the readable right edge at 290px.
+      expect(c.state.position).toBe(direction === 'auto' ? period - 42 : period - 24)
+    }
+  )
+
+  it('skips decorative/unmeasurable items and reveals an oversized item without extra steps', async () => {
+    const { c, children } = await fixture('left', [100, 40, 450])
+    children[1].setAttribute('aria-hidden', 'true')
+    const hidden = document.createElement('span')
+    c.source.append(hidden)
+    c.connectControls({
+      next: document.querySelector('#next')!,
+      itemsPerStep: 3,
+      behavior: 'instant',
+    })
+    document.querySelector<HTMLButtonElement>('#next')!.click()
+    expect(c.state.position).toBe(322)
+    c.source.replaceChildren(hidden)
+    document.querySelector<HTMLButtonElement>('#next')!.click()
+    expect(c.state.position).toBe(322)
+  })
+
+  it('uses the full clipping area if scroll padding leaves no readable area, and preserves pixel overrides', async () => {
+    const { c, wrapper } = await fixture()
+    wrapper.style.scrollPaddingLeft = wrapper.style.scrollPaddingRight = '50%'
+    const disconnect = c.connectControls({
+      next: document.querySelector('#next')!,
+      behavior: 'instant',
+    })
+    document.querySelector<HTMLButtonElement>('#next')!.click()
+    expect(c.state.position).toBe(100)
+    disconnect()
+    c.scrollTo(0)
+    c.connectControls({ next: document.querySelector('#next')!, itemsPerStep: 3, step: 25 })
+    document.querySelector<HTMLButtonElement>('#next')!.click()
+    expect(c.state.position).toBe(25)
+  })
+
+  it('smooths item controls by default and treats an empty source as a no-op', async () => {
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>
+      window.setTimeout(() => callback(Date.now()), 16)
+    )
+    const { c } = await fixture()
+    c.connectControls({ next: document.querySelector('#next')! })
+    document.querySelector<HTMLButtonElement>('#next')!.click()
+    expect(c.state.reasons).toContain('navigation')
+    vi.advanceTimersByTime(336)
+    expect(c.state.position).toBe(132)
+    expect(c.state.reasons).not.toContain('navigation')
+    c.source.replaceChildren()
+    vi.mocked(
+      c.element!.querySelector<HTMLElement>('.ticker-content')!.getBoundingClientRect
+    ).mockReturnValue({ width: 0, height: 0 } as DOMRect)
+    c.refresh()
+    vi.advanceTimersByTime(16)
+    document.querySelector<HTMLButtonElement>('#next')!.click()
+    expect(c.state).toMatchObject({ position: 0, ready: false })
+  })
+})
