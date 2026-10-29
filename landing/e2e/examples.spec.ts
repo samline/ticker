@@ -720,11 +720,14 @@ test('drag recipe switches resume behavior without clearing a manual pause', asy
 })
 
 test('mixed RTL characters start in autoplay with inherited direction', async ({ page }) => {
-  await page.goto('examples/#rtl-content')
+  await page.goto('examples/')
   const recipe = page.locator('#rtl-content')
   const frame = recipe.locator('.ticker-wrapper')
+  await expect(recipe.locator('ticker-demo')).toHaveAttribute('data-initialized', 'true')
+  await page.evaluate(() => document.fonts.ready.then(() => undefined))
   await frame.scrollIntoViewIfNeeded()
   await page.mouse.move(5, 5)
+  await expect(frame).toBeInViewport()
   await expect(frame).toHaveAttribute('data-autoplay', 'true')
   await expect(frame).toHaveAttribute('data-motion-direction', 'right')
   await expect(frame).toHaveAttribute('data-playing', 'true')
