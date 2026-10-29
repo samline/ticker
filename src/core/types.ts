@@ -1,5 +1,8 @@
 export type TickerDirection = 'left' | 'right' | 'up' | 'down' | 'auto'
 
+export type TickerFeaturedPosition =
+  'start' | 'center' | 'end' | 'left' | 'right' | 'top' | 'bottom'
+
 export interface TickerResponsiveRule {
   query: string
   options: Omit<TickerOptions, 'responsive' | 'class'>
@@ -8,6 +11,8 @@ export interface TickerResponsiveRule {
 export interface TickerOptions {
   /** Seconds per cycle; speed takes precedence when positive. */
   duration?: number
+  /** Fixed original item alignment; defaults to center. */
+  featuredPosition?: TickerFeaturedPosition
   speed?: number
   autoplay?: boolean
   pauseOnFocus?: boolean
@@ -74,6 +79,8 @@ export interface TickerControls extends TickerNavigationOptions {
 
 export interface TickerInstance {
   readonly element: HTMLElement | null
+  readonly featured: HTMLElement | null
+  setFeatured: (element: HTMLElement | null) => TickerInstance
   readonly source: HTMLElement
   readonly options: Readonly<NormalizedTickerOptions>
   readonly state: Readonly<TickerSnapshot>

@@ -1,6 +1,7 @@
 export { mount, refresh, ticker, unmount } from './render'
 export type {
   TickerDirection,
+  TickerFeaturedPosition,
   TickerResponsiveRule,
   TickerPauseReason,
   TickerSnapshot,

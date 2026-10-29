@@ -4,7 +4,7 @@ export interface Recipe {
   title: string
   navigationLabel: string
   description: string
-  kind: 'news' | 'logos' | 'prices' | 'rows' | 'dynamic' | 'controls' | 'drag'
+  kind: 'news' | 'logos' | 'prices' | 'rows' | 'dynamic' | 'controls' | 'drag' | 'featured-menu'
   docsPath: string
   docsLabel: string
   note: string
@@ -12,14 +12,18 @@ export interface Recipe {
     label: string
     duration: number
     direction: import('@samline/ticker').TickerDirection
+    featuredPosition?: import('@samline/ticker').TickerFeaturedPosition
     speed?: number
     autoplay?: boolean
+    interactiveClones?: boolean
+    pauseOnHover?: boolean
     navigation?: boolean
     resumeAfterDrag?: boolean
     rtl?: boolean
     responsive?: import('@samline/ticker').TickerResponsiveRule[]
     items: readonly {
       label: string
+      featured?: boolean
       description?: string
       href?: string
       logo?: string
@@ -68,6 +72,15 @@ export default {
   removeSelected: 'Remove selected',
   removeAtPosition: 'Remove at position',
   positionLabel: 'Choose a position',
+  featuredPositionLabel: 'Featured position',
+  featuredAxisLabel: 'Motion axis',
+  horizontal: 'Horizontal',
+  vertical: 'Vertical',
+  center: 'Center',
+  top: 'Top',
+  bottom: 'Bottom',
+  selectedCategory: 'Selected category',
+  featuredPartner: 'Featured partner',
   itemLabel: 'Choose an item',
   itemEmpty: 'No items left',
   removedStatus: 'Removed {item}. Visual copies refreshed.',
@@ -410,6 +423,81 @@ export default {
             { label: 'Drag to explore' },
             { label: 'Release to compare' },
             { label: 'Switch resume on or off' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'featured-menu',
+      navigationLabel: 'Featured menu',
+      kind: 'featured-menu',
+      title: 'Keep the selected item visible',
+      description:
+        'Browse a category menu that is wider than its container. Your selection stays visible with its associated content while the other categories move behind it. Try another position, switch axes or drag the moving items.',
+      docsPath: 'reference/configuration/#featured-items',
+      docsLabel: 'Read the featured item contract',
+      note: 'Requires version 2.4.0 or later; verify npm/CDN publication or use a matching local build. Every visible category button selects its original, including repeated copies. The selected category is fixed and never cloned. Drag the moving items; playback resumes after release. Hover does not pause this example; keyboard focus pauses it with a visible explanation. The fixed selection remains clickable. Category buttons update the content below without navigating away.',
+      rows: [
+        {
+          label: 'Choose a category',
+          interactiveClones: true,
+          duration: 25,
+          direction: 'left',
+          featuredPosition: 'start',
+          navigation: true,
+          pauseOnHover: false,
+          resumeAfterDrag: true,
+          speed: 35,
+          items: [
+            {
+              label: 'Overview',
+              featured: true,
+              description: 'Explore the collection and find the right starting point.',
+            },
+            {
+              label: 'Components',
+              description: 'Browse reusable building blocks for your next interface.',
+            },
+            {
+              label: 'Integrations',
+              description: 'Connect the tools and frameworks your project already uses.',
+            },
+            {
+              label: 'Examples',
+              description: 'Try complete recipes and adapt them to your own content.',
+            },
+            {
+              label: 'Resources',
+              description: 'Find reference material and practical implementation guides.',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'featured-logo',
+      navigationLabel: 'Featured logo',
+      kind: 'logos',
+      title: 'A principal brand at the center',
+      description:
+        'Give a principal partner its own labeled card while the other logos move behind it. Move the featured card, switch to a vertical layout or drag the surrounding logos.',
+      docsPath: 'reference/configuration/#featured-items',
+      docsLabel: 'Configure a fixed original item',
+      note: 'Requires version 2.4.0 or later; verify npm/CDN publication or use a matching local build. The principal card stays fixed while you drag the moving logos. Playback resumes after release. Hover does not pause this example; keyboard focus still pauses it with a visible explanation. Only the first marked original is featured. Brand marks are illustrative and do not imply endorsement.',
+      rows: [
+        {
+          label: 'Featured technology mark',
+          duration: 36,
+          direction: 'left',
+          featuredPosition: 'center',
+          navigation: true,
+          pauseOnHover: false,
+          resumeAfterDrag: true,
+          items: [
+            { label: 'Astro', logo: 'astro.svg' },
+            { label: 'Vite', logo: 'vite.svg', featured: true },
+            { label: 'GitHub', logo: 'github.svg' },
+            { label: 'Figma', logo: 'figma.svg' },
           ],
         },
       ],

@@ -1,3 +1,4 @@
+import { createFeatured, featuredViewport, normalizeFeaturedPosition } from './featured'
 import type {
   NormalizedTickerOptions,
   TickerInstance,
@@ -65,6 +66,8 @@ const getReducedMotionMedia = (): ReducedMotionMedia | null => {
 }
 
 interface RuntimeTickerState extends TickerState {
+  revealingFocus: boolean
+  featured: ReturnType<typeof createFeatured>
   itemRoot: HTMLElement
   navigationFrame: number
   navigating: boolean
@@ -317,6 +320,7 @@ const rebuildTickerState = (state: RuntimeTickerState, force: boolean): void => 
 
   const position = readPosition(state)
   syncConfig(state)
+  force = state.featured.sync() || force
   const contentRect = content.getBoundingClientRect()
   const wrapperRect = wrapper.getBoundingClientRect()
 
@@ -327,7 +331,13 @@ const rebuildTickerState = (state: RuntimeTickerState, force: boolean): void => 
 
   // The animation must travel exactly one content-and-gap period. Rounding
   // fractional layout widths introduces a visible offset when the loop resets.
-  const measuredExtent = state.vertical ? contentRect.height : contentRect.width
+  const hasItems =
+    !state.featured.element ||
+    Array.from(state.itemRoot.childNodes).some(
+      node =>
+        node instanceof Element || (node.nodeType === Node.TEXT_NODE && !!node.textContent?.trim())
+    )
+  const measuredExtent = hasItems ? (state.vertical ? contentRect.height : contentRect.width) : 0
   const contentExtent = measuredExtent > 0 ? measuredExtent + gap : 0
   const wrapperExtent = Math.ceil(state.vertical ? wrapperRect.height : wrapperRect.width)
 
@@ -397,6 +407,8 @@ const rebuildTickerState = (state: RuntimeTickerState, force: boolean): void => 
 
 const finishMeasurement = (state: RuntimeTickerState, position: number): void => {
   seek(state, position)
+  // A rebuild removes repeated slots; keep any focused original exposed after resize.
+  revealFocused(state)
   if (!state.initialized) {
     state.initialized = true
     emit(state, 'ready')
@@ -505,6 +517,53 @@ const navigate = (
   state.navigationFrame = requestFrame(frame)
 }
 
+const revealFocused = (state: RuntimeTickerState): void => {
+  const target = document.activeElement
+  if (
+    state.revealingFocus ||
+    !state.featured.element ||
+    !(target instanceof HTMLElement) ||
+    !state.itemRoot.contains(target)
+  )
+    return
+  const rect = target.getBoundingClientRect()
+  const viewport = state.wrapper.getBoundingClientRect()
+  const [start, end] = featuredViewport(
+    state.featured.element,
+    state.vertical,
+    state.vertical ? viewport.top : viewport.left,
+    state.vertical ? viewport.bottom : viewport.right,
+    rect
+  )
+  const from = state.vertical ? rect.top : rect.left
+  const size = state.vertical ? rect.height : rect.width
+  const desired = Math.max(start, Math.min(from, end - size))
+  const distance = (from - desired) * (state.rtl && !state.vertical ? -1 : 1)
+  if (distance) navigate(state, readPosition(state) + distance, false, { preservePlayback: true })
+  // Seeking wraps modulo a period. Move the original sequence into the
+  // equivalent repeated slot so the focused ORIGINAL (not a hidden clone)
+  // occupies the uncovered area, including across a cycle boundary.
+  const period = state.measurement?.contentExtent ?? 0
+  if (period > 0) {
+    const after = target.getBoundingClientRect()
+    const actual = state.vertical ? after.top : after.left
+    const sequences = Array.from(state.track.children)
+    const current = sequences.indexOf(state.content)
+    const next = Math.max(
+      0,
+      Math.min(sequences.length - 1, current + Math.round((desired - actual) / period))
+    )
+    if (next !== current) {
+      sequences.splice(current, 1)
+      sequences.splice(next, 0, state.content)
+      state.revealingFocus = true
+      state.track.insertBefore(state.content, sequences[next + 1] ?? null)
+      target.focus({ preventScroll: true })
+      state.revealingFocus = false
+    }
+  }
+}
+
 const setupInteraction = (state: RuntimeTickerState): void => {
   const { wrapper, content } = state
   const abort = new AbortController()
@@ -526,7 +585,14 @@ const setupInteraction = (state: RuntimeTickerState): void => {
     },
     { signal }
   )
-  wrapper.addEventListener('focusin', () => syncPlayback(state), { signal })
+  wrapper.addEventListener(
+    'focusin',
+    () => {
+      syncPlayback(state)
+      revealFocused(state)
+    },
+    { signal }
+  )
   wrapper.addEventListener(
     'focusout',
     event => {
@@ -563,13 +629,15 @@ const setupInteraction = (state: RuntimeTickerState): void => {
     event => {
       if (wrapper.dataset.navigation !== 'true' || event.isPrimary === false || event.button !== 0)
         return
+      suppressClick = false
       if ((event.target as Element).closest('input, textarea, select, [contenteditable]')) return
-      cancelNavigation(state)
-      syncPlayback(state)
-      // Preserve existing keyboard focus when an opt-in mouse drag begins.
-      // Otherwise pointerdown focuses the region/link and prevents resumption.
+      // Preserve focus for opt-in mouse actions on both moving and fixed items.
+      // Fixed content stays clickable, but must not begin a drag controller.
       if (event.pointerType === 'mouse' && wrapper.dataset.resumeAfterDrag === 'true')
         event.preventDefault()
+      if ((event.target as Element).closest('[data-ticker-featured]')) return
+      cancelNavigation(state)
+      syncPlayback(state)
       pointer = {
         id: event.pointerId,
         x: event.clientX,
@@ -580,7 +648,6 @@ const setupInteraction = (state: RuntimeTickerState): void => {
         manualOverride: state.manualOverride,
         revision: state.intentRevision,
       }
-      suppressClick = false
     },
     { signal }
   )
@@ -691,9 +758,14 @@ const itemStep = (
   let trailing = padding(vertical ? styles.scrollPaddingBottom : styles.scrollPaddingRight)
   // Ignore an empty requested viewing area rather than trapping the controls.
   if (leading + trailing >= clipExtent) leading = trailing = 0
-  const extent = clipExtent - leading - trailing
-  const startEdge = (vertical ? viewport.top : viewport.left) + leadingBorder + leading
-  const endEdge = (vertical ? viewport.bottom : viewport.right) - trailingBorder - trailing
+  const [startEdge, endEdge] = featuredViewport(
+    state.featured.element,
+    vertical,
+    (vertical ? viewport.top : viewport.left) + leadingBorder + leading,
+    (vertical ? viewport.bottom : viewport.right) - trailingBorder - trailing
+  )
+  const extent = endEdge - startEdge
+  if (extent <= 0) return 0
   const candidates = Array.from(state.itemRoot.children)
     .flatMap(item => {
       if (item.getAttribute('aria-hidden') === 'true') return []
@@ -899,6 +971,7 @@ const destroyTicker = (wrapper: HTMLElement): void => {
   state.resizeObserver?.disconnect()
   state.intersectionObserver?.disconnect()
   removeClones(state)
+  state.featured.destroy()
 
   tickersState.delete(wrapper)
   wrapper.dataset.active = 'false'
@@ -909,7 +982,7 @@ const destroyTicker = (wrapper: HTMLElement): void => {
   if (!tickersState.size) removePlaybackListeners()
 }
 
-const initTicker = (wrapper: HTMLElement): void => {
+const initTicker = (wrapper: HTMLElement, itemRoot?: HTMLElement): void => {
   if (tickersState.has(wrapper)) return
 
   const track =
@@ -925,7 +998,9 @@ const initTicker = (wrapper: HTMLElement): void => {
     wrapper,
     track,
     content,
-    itemRoot: content,
+    itemRoot: itemRoot ?? content,
+    featured: createFeatured(itemRoot ?? content, wrapper),
+    revealingFocus: false,
     ...createEmptyTickerState(),
     navigationFrame: 0,
     navigating: false,
@@ -1058,6 +1133,7 @@ const normalizeClassName = (className = ''): string =>
 
 const normalizeOptions = (options: TickerOptions = {}): NormalizedTickerOptions => ({
   duration: validateDuration(options.duration),
+  featuredPosition: normalizeFeaturedPosition(options.featuredPosition),
   speed: Number.isFinite(options.speed) && Number(options.speed) > 0 ? Number(options.speed) : 0,
   autoplay: options.autoplay !== false,
   pauseOnFocus: options.pauseOnFocus !== false,
@@ -1084,6 +1160,7 @@ const applyOptions = (
   if (previousClasses.length) wrapper.classList.remove(...previousClasses)
   if (nextClasses.length) wrapper.classList.add(...nextClasses)
 
+  wrapper.dataset.featuredPosition = next.featuredPosition
   wrapper.dataset.speed = String(next.speed)
   wrapper.dataset.autoplay = String(next.autoplay)
   wrapper.dataset.pauseOnFocus = String(next.pauseOnFocus)
@@ -1133,9 +1210,7 @@ const enhanceElement = (element: HTMLElement, options: NormalizedTickerOptions):
   if (parent) parent.insertBefore(wrapper, nextSibling)
   if (element !== content && element.isConnected) element.remove()
 
-  initTicker(wrapper)
-  const state = tickersState.get(wrapper)
-  if (state) state.itemRoot = content
+  initTicker(wrapper, content)
   return wrapper
 }
 
@@ -1160,9 +1235,10 @@ export const ticker = (
   const hadContentClass = markedContent?.classList.contains('ticker-content') ?? false
   const contentMarker = markedContent?.getAttribute('data-ticker-content') ?? null
   const markupOptions: TickerOptions = ownsWrapper
-    ? {}
+    ? { featuredPosition: normalizeFeaturedPosition(source.dataset.featuredPosition) }
     : {
         duration: validateDuration(source.dataset.duration),
+        featuredPosition: normalizeFeaturedPosition(source.dataset.featuredPosition),
         speed: Number(source.dataset.speed),
         autoplay: source.dataset.autoplay !== 'false',
         pauseOnFocus: source.dataset.pauseOnFocus !== 'false',
@@ -1233,6 +1309,16 @@ export const ticker = (
       return wrapper
     },
     source,
+    get featured() {
+      return runtime.destroyed ? null : runtime.featured.element
+    },
+    setFeatured(element) {
+      if (runtime.destroyed) return instance
+      runtime.featured.set(element)
+      rebuildTickerState(runtime, true)
+      emit(runtime, 'update')
+      return instance
+    },
     get options() {
       return {
         ...currentOptions,

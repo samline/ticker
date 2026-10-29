@@ -10,6 +10,7 @@ description: 'Every TickerOptions field, default, normalization rule, data attri
 ```ts
 interface TickerOptions {
   duration?: number
+  featuredPosition?: TickerFeaturedPosition // Since 2.4.0
   speed?: number
   direction?: 'left' | 'right' | 'up' | 'down' | 'auto'
   autoplay?: boolean
@@ -25,19 +26,20 @@ interface TickerOptions {
 
 ## Options table
 
-| Option              | Default  | Normalization and behavior                                                                                           |
-| ------------------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
-| `duration`          | `20`     | Positive finite seconds per cycle; invalid values fall back to 20.                                                   |
-| `speed`             | `0`      | Positive finite CSS pixels per second overrides duration. Invalid, zero or negative values disable speed mode.       |
-| `direction`         | `'left'` | Exact `left`, `right`, `up`, `down`, `auto`; invalid values become `left`.                                           |
-| `autoplay`          | `true`   | Only `false` starts paused. `play()` and `pause()` change intent independently of automatic pause causes.            |
-| `pauseOnHover`      | `false`  | Only `true` enables pointer hover pause.                                                                             |
-| `pauseOnFocus`      | `true`   | Only `false` disables focus pause. Focus moving between descendants never resumes playback.                          |
-| `resumeAfterDrag`   | `false`  | Only `true` restores pre-drag playback intent on release; existing manual and environmental pauses remain effective. |
-| `navigation`        | `false`  | Only `true` enables pointer dragging and manual navigation in reduced motion.                                        |
-| `responsive`        | `[]`     | Ordered viewport media-query rules; see below.                                                                       |
-| `interactiveClones` | `false`  | Only `true` enables interactive repeated copies.                                                                     |
-| `class`             | `''`     | Whitespace-separated wrapper classes; excludes reserved `ticker-wrapper`.                                            |
+| Option              | Default    | Normalization and behavior                                                                                           |
+| ------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------- |
+| `duration`          | `20`       | Positive finite seconds per cycle; invalid values fall back to 20.                                                   |
+| `featuredPosition`  | `'center'` | Since 2.4.0: fixed original alignment; invalid values become `center`. See [Featured items](#featured-items).        |
+| `speed`             | `0`        | Positive finite CSS pixels per second overrides duration. Invalid, zero or negative values disable speed mode.       |
+| `direction`         | `'left'`   | Exact `left`, `right`, `up`, `down`, `auto`; invalid values become `left`.                                           |
+| `autoplay`          | `true`     | Only `false` starts paused. `play()` and `pause()` change intent independently of automatic pause causes.            |
+| `pauseOnHover`      | `false`    | Only `true` enables pointer hover pause.                                                                             |
+| `pauseOnFocus`      | `true`     | Only `false` disables focus pause. Focus moving between descendants never resumes playback.                          |
+| `resumeAfterDrag`   | `false`    | Only `true` restores pre-drag playback intent on release; existing manual and environmental pauses remain effective. |
+| `navigation`        | `false`    | Only `true` enables pointer dragging and manual navigation in reduced motion.                                        |
+| `responsive`        | `[]`       | Ordered viewport media-query rules; see below.                                                                       |
+| `interactiveClones` | `false`    | Only `true` enables interactive repeated copies.                                                                     |
+| `class`             | `''`       | Whitespace-separated wrapper classes; excludes reserved `ticker-wrapper`.                                            |
 
 ## `duration`
 
@@ -145,18 +147,19 @@ partners?.update({ direction: 'right' })
 
 ## Declarative attributes
 
-| Attribute                 | Accepted value                                                          | Default |
-| ------------------------- | ----------------------------------------------------------------------- | ------- |
-| `data-duration`           | Positive numeric text, parsed with `parseFloat`.                        | `20`    |
-| `data-speed`              | Positive finite numeric text, parsed with `Number`.                     | `0`     |
-| `data-direction`          | `left`, `right`, `up`, `down`, `auto`.                                  | `left`  |
-| `data-autoplay`           | Exact string `false` starts paused.                                     | `true`  |
-| `data-pause-on-focus`     | Exact string `false` disables focus pause.                              | `true`  |
-| `data-pause-on-hover`     | Exact string `true`.                                                    | `false` |
-| `data-resume-after-drag`  | Exact string `true`; restores pre-drag playback intent.                 | `false` |
-| `data-navigation`         | Exact string `true`.                                                    | `false` |
-| `data-interactive-clones` | Exact string `true`.                                                    | `false` |
-| `data-responsive`         | JSON array of `{ query, options }` rules; malformed input becomes `[]`. | `[]`    |
+| Attribute                 | Accepted value                                                           | Default  |
+| ------------------------- | ------------------------------------------------------------------------ | -------- |
+| `data-duration`           | Positive numeric text, parsed with `parseFloat`.                         | `20`     |
+| `data-featured-position`  | Since 2.4.0: `start`, `center`, `end`, `left`, `right`, `top`, `bottom`. | `center` |
+| `data-speed`              | Positive finite numeric text, parsed with `Number`.                      | `0`      |
+| `data-direction`          | `left`, `right`, `up`, `down`, `auto`.                                   | `left`   |
+| `data-autoplay`           | Exact string `false` starts paused.                                      | `true`   |
+| `data-pause-on-focus`     | Exact string `false` disables focus pause.                               | `true`   |
+| `data-pause-on-hover`     | Exact string `true`.                                                     | `false`  |
+| `data-resume-after-drag`  | Exact string `true`; restores pre-drag playback intent.                  | `false`  |
+| `data-navigation`         | Exact string `true`.                                                     | `false`  |
+| `data-interactive-clones` | Exact string `true`.                                                     | `false`  |
+| `data-responsive`         | JSON array of `{ query, options }` rules; malformed input becomes `[]`.  | `[]`     |
 
 ```html
 <div
@@ -181,3 +184,48 @@ The runtime owns `data-ready` (measured), `data-active` (viewport), `data-playin
 ## Defaults export
 
 `DEFAULT_OPTIONS` retains the original four fields (`duration`, `direction`, `pauseOnHover`, `interactiveClones`) for compatibility. Controller normalization also supplies speed 0, autoplay true, pauseOnFocus true, navigation false, resumeAfterDrag false, responsive [] and class ''. See [Core utilities](/ticker/docs/reference/core/).
+
+## Featured items
+
+Featured support requires **2.4.0 or later** and matching JavaScript and stylesheet. Verify npm/CDN availability before using a prepared release; use a matching local build while publication is pending.
+
+Mark one **direct item** of the original sequence with `data-featured`. Ticker moves that original into a fixed `.ticker-featured` layer inside the wrapper. It never clones the selected original, leaves no moving gap, and excludes it from the repeat distance and item navigation. Other items pass behind it. This works with enhanced sources and explicit track/content markup.
+
+```html
+<div id="partners" data-featured-position="center">
+  <span class="brand">Partner A</span>
+  <span class="brand" data-featured>Main brand</span>
+  <span class="brand">Partner B</span>
+</div>
+```
+
+```js
+import { ticker } from '@samline/ticker'
+import '@samline/ticker/style.css'
+
+const partners = ticker('#partners', { featuredPosition: 'center' })
+```
+
+`featuredPosition` defaults to `center`, accepts responsive overrides, and can be changed with `update()`. `data-featured-position` is also read on enhanced sources and declarative wrappers; an explicit JavaScript option takes precedence.
+
+| Value           | Horizontal                | Vertical      |
+| --------------- | ------------------------- | ------------- |
+| `start`         | Left in LTR; right in RTL | Top           |
+| `center`        | Center                    | Center        |
+| `end`           | Right in LTR; left in RTL | Bottom        |
+| `left`, `right` | Physical edge             | Center        |
+| `top`, `bottom` | Center                    | Physical edge |
+
+Invalid positions normalize to `center`. Motion direction does not reverse the featured position. `TickerFeaturedPosition` describes the accepted values.
+
+There is **at most one** featured item. If several direct originals have `data-featured`, the first in original DOM order wins, including on refresh. Other marked items move and clone normally. Nested markers are ignored. Changing markers requires `refresh()`; no attribute observer is installed.
+
+`setFeatured(element)` selects a direct original explicitly, replacing the current selection. `setFeatured(null)` clears it and suppresses authored markers for the rest of that controller's lifetime. An explicit selection remains authoritative on refresh. A foreign element, nested descendant or generated clone throws `RangeError` without changing the selection. See the [controller reference](../api/controller/#featured-selection).
+
+Style items through classes scoped to an application-owned ancestor outside the moving source: the featured node no longer matches selectors such as `#partners > .brand` while fixed. The application owns background, border and padding; use an opaque surface when moving content must not show through it. Keep the featured item small enough to leave a readable area for other content. Oversized content cannot be guaranteed to fit beside an overlay.
+
+Focus pauses still apply. Keyboard focus reveals original content in an uncovered segment beside the featured item; item steps use the largest uncovered segment and honor scroll padding. The featured layer receives pointer actions normally and does not initiate ticker dragging. For selection menus, let the application own selection semantics (`aria-pressed` for category buttons or `aria-current` for a real current-page link), and keep an accessible pause control.
+
+A featured-only sequence remains visible but not ready and clone-free; adding moving content and refreshing recovers normal playback. Removing the featured node and refreshing clears the overlay without resurrecting it. Destruction restores a retained original to its comment-marked position and removes the layer. The operation preserves requested playback and native element identity/listeners, and restores focus when moving the focused original.
+
+Try the [selected-category example](/ticker/examples/#featured-menu) and [centered-logo example](/ticker/examples/#featured-logo). Copied files pin the prepared release; verify its npm/CDN publication or self-host a matching build.

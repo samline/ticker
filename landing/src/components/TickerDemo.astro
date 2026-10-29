@@ -9,8 +9,11 @@ interface Props {
   label: string
   duration?: number
   direction?: import('@samline/ticker').TickerDirection
+  featuredPosition?: import('@samline/ticker').TickerFeaturedPosition
   speed?: number
   autoplay?: boolean
+  interactiveClones?: boolean
+  pauseOnHover?: boolean
   navigation?: boolean
   preserveNavigationPlayback?: boolean
   resumeAfterDrag?: boolean
@@ -24,7 +27,10 @@ const {
   duration,
   direction,
   speed,
+  featuredPosition = 'center',
   autoplay = true,
+  interactiveClones = false,
+  pauseOnHover = true,
   navigation = false,
   preserveNavigationPlayback = false,
   resumeAfterDrag = false,
@@ -41,8 +47,13 @@ const i18n = getI18n(Astro)
 ---
 
 <ticker-demo
+  data-featured-position={featuredPosition}
   data-speed={speed}
   data-autoplay={String(autoplay)}
+  data-interactive-clones={String(interactiveClones)}
+  data-pause-on-hover={String(pauseOnHover)}
+  data-paused-focus={i18n.controls.ticker.pausedFocus}
+  data-paused-hover={i18n.controls.ticker.pausedHover}
   data-navigation={String(navigation)}
   data-preserve-navigation-playback={String(preserveNavigationPlayback)}
   data-resume-after-drag={String(resumeAfterDrag)}
@@ -72,6 +83,11 @@ const i18n = getI18n(Astro)
     </div>
   </div>
   <div class:list={['ticker-controls']} inert>
+    <span class:list={['playback-feedback']} role="status" aria-live="polite">
+      <span aria-hidden="true">{i18n.controls.ticker.pausedFocus}</span>
+      <span aria-hidden="true">{i18n.controls.ticker.pausedHover}</span>
+      <span data-playback-status></span>
+    </span>
     {navigation && (
       <>
         <Button variant="ghost" context="ticker" data-previous aria-controls={instanceId}>
@@ -120,11 +136,14 @@ const i18n = getI18n(Astro)
         duration: Number(element.dataset.duration),
         direction: element.dataset.direction as import('@samline/ticker').TickerDirection,
         speed: Number(element.dataset.speed),
+        featuredPosition: element.dataset
+          .featuredPosition as import('@samline/ticker').TickerFeaturedPosition,
         autoplay: element.dataset.autoplay !== 'false',
+        interactiveClones: element.dataset.interactiveClones === 'true',
         navigation: element.dataset.navigation === 'true',
         resumeAfterDrag: element.dataset.resumeAfterDrag === 'true',
         responsive: JSON.parse(element.dataset.responsive ?? '[]'),
-        pauseOnHover: true,
+        pauseOnHover: element.dataset.pauseOnHover !== 'false',
       })
       if (!controller) return
       demoControllers.set(element, controller)
@@ -138,7 +157,18 @@ const i18n = getI18n(Astro)
           rail: controls.querySelector<HTMLInputElement>('[data-position]')!,
         })
       controls.inert = false
-      const renderPaused = (paused: boolean) => {
+      const status = controls.querySelector<HTMLElement>('[data-playback-status]')
+      const renderPlayback = (state: import('@samline/ticker').TickerSnapshot) => {
+        const paused = !state.requested
+        if (status)
+          status.textContent =
+            state.requested && !state.playing
+              ? state.reasons.includes('focus')
+                ? (element.dataset.pausedFocus ?? '')
+                : state.reasons.includes('hover')
+                  ? (element.dataset.pausedHover ?? '')
+                  : ''
+              : ''
         frame.dataset.userPaused = String(paused)
         button.textContent = (paused ? element.dataset.playText : element.dataset.pauseText) ?? ''
         button.setAttribute(
@@ -146,8 +176,8 @@ const i18n = getI18n(Astro)
           (paused ? element.dataset.playLabel : element.dataset.pauseLabel) ?? ''
         )
       }
-      renderPaused(!controller.state.requested)
-      controller.on('playback', state => renderPaused(!state.requested))
+      renderPlayback(controller.state)
+      controller.on('playback', renderPlayback)
       button.addEventListener(
         'click',
         () => {
@@ -182,6 +212,7 @@ const i18n = getI18n(Astro)
 
 <style>
   .ticker-frame[data-axis='vertical'] {
+    white-space: normal;
     scroll-padding-inline: 0;
     height: 22rem;
   }
@@ -202,9 +233,19 @@ const i18n = getI18n(Astro)
     scroll-padding-inline: var(--ticker-edge-fade);
     position: relative;
     background: transparent;
+    font-size: 1.03rem;
+    color: var(--palette-ticker-text);
+    white-space: nowrap;
     border: 0;
     border-radius: 0;
     overflow: hidden;
+  }
+  .ticker-frame :global(.ticker-featured) {
+    z-index: 3;
+    background: var(--palette-specimen-surface);
+  }
+  .ticker-frame :global(.ticker-featured > :focus-visible) {
+    outline-offset: -0.1875rem;
   }
   .ticker-frame::before {
     content: '';
@@ -238,9 +279,6 @@ const i18n = getI18n(Astro)
     align-items: center;
     gap: var(--demo-item-gap);
     padding: 1.0625rem 0;
-    font-size: 1.03rem;
-    color: var(--palette-ticker-text);
-    white-space: nowrap;
   }
 
   .ticker-content {
@@ -301,6 +339,20 @@ const i18n = getI18n(Astro)
     gap: var(--space-sm);
     margin-top: 0.625rem;
   }
+  .playback-feedback {
+    display: grid;
+    flex-basis: 100%;
+    font-size: var(--text-small);
+    color: var(--color-text-muted);
+    margin-inline-end: auto;
+    max-width: 100%;
+  }
+  .playback-feedback > span {
+    grid-area: 1 / 1;
+  }
+  .playback-feedback > [aria-hidden] {
+    visibility: hidden;
+  }
   .ticker-controls button {
     min-height: 2.75rem;
   }
@@ -322,7 +374,7 @@ const i18n = getI18n(Astro)
     }
   }
   @media (width < 48rem) {
-    .ticker-track {
+    .ticker-frame {
       font-size: 0.9rem;
     }
   }
@@ -333,7 +385,7 @@ const i18n = getI18n(Astro)
   ticker-demo {
     display: block;
   }
-  .ticker-content :global(a:focus-visible) {
+  .ticker-frame :global(a:focus-visible) {
     outline: 0.125rem solid var(--color-accent);
     outline-offset: 0.25rem;
   }

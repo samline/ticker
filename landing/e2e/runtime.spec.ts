@@ -950,3 +950,161 @@ test('removes a desired original by stable identifier and current item position,
   await expect(page.locator('.ticker-clone [data-item-id="c"]')).toHaveCount(0)
   await expect.poll(async () => (await state(page)).distance).toBeCloseTo(201, 4)
 })
+
+test('features one original, replaces it without losing identity/focus, and restores authored order', async ({
+  page,
+}) => {
+  await setup(page, { autoplay: false, featuredPosition: 'left' })
+  await page.evaluate(() => {
+    const w = window as any
+    const items = [...w.controller.source.children]
+    w.originalItems = items
+    items[0].setAttribute('data-featured', '')
+    items[1].setAttribute('data-featured', '')
+    w.controller.refresh()
+  })
+  await expect(page.locator('.ticker-featured')).toHaveCount(1)
+  await expect(page.locator('.ticker-featured a')).toHaveCount(1)
+  expect(await page.locator('.ticker-clone a').count()).toBe(0)
+  const fixed = await page.locator('.ticker-featured').boundingBox()
+  await page.evaluate(() => (window as any).controller.scrollBy(50))
+  const after = await page.locator('.ticker-featured').boundingBox()
+  expect(after!.x).toBeCloseTo(fixed!.x, 1)
+  await page.evaluate(() => {
+    const w = window as any
+    const button = w.originalItems[1]
+    button.focus()
+    w.controller.setFeatured(button)
+  })
+  await expect(page.locator('.ticker-featured button')).toBeFocused()
+  expect(
+    await page.evaluate(
+      () => (window as any).controller.featured === (window as any).originalItems[1]
+    )
+  ).toBe(true)
+  expect(await page.locator('.ticker-clone button').count()).toBe(0)
+  await page.evaluate(() => (window as any).controller.setFeatured(null))
+  await expect(page.locator('.ticker-featured')).toHaveCount(0)
+  await page.evaluate(() => (window as any).controller.destroy())
+  expect(
+    await page.evaluate(() =>
+      [...document.querySelector('#source')!.children].every(
+        (item, i) => item === (window as any).originalItems[i]
+      )
+    )
+  ).toBe(true)
+})
+
+test('aligns featured items in both axes and writing directions and keeps them fixed during playback', async ({
+  page,
+}) => {
+  for (const dir of ['ltr', 'rtl']) {
+    for (const direction of ['left', 'right', 'up', 'down']) {
+      await setup(page, { direction, autoplay: false }, dir)
+      await page.evaluate(() =>
+        (window as any).controller.setFeatured((window as any).controller.source.firstElementChild)
+      )
+      const vertical = direction === 'up' || direction === 'down'
+      for (const position of [
+        'start',
+        'center',
+        'end',
+        ...(vertical ? ['top', 'bottom'] : ['left', 'right']),
+      ]) {
+        await page.evaluate(
+          position => (window as any).controller.update({ featuredPosition: position }),
+          position
+        )
+        await expect(page.locator('.ticker-wrapper')).toHaveAttribute(
+          'data-featured-position',
+          position
+        )
+        const wrapper = (await page.locator('.ticker-wrapper').boundingBox())!
+        const featured = (await page.locator('.ticker-featured').boundingBox())!
+        const from = vertical ? featured.y - wrapper.y : featured.x - wrapper.x
+        const free = vertical ? wrapper.height - featured.height : wrapper.width - featured.width
+        const end =
+          position === 'bottom' ||
+          position === 'right' ||
+          (position === 'end' && (vertical || dir === 'ltr')) ||
+          (position === 'start' && !vertical && dir === 'rtl')
+        const expected = position === 'center' ? free / 2 : end ? free : 0
+        expect(from, `${dir}/${direction}/${position}`).toBeCloseTo(expected, 0)
+      }
+      const before = (await page.locator('.ticker-featured').boundingBox())!
+      await page.evaluate(() => (window as any).controller.play())
+      await expect.poll(() => offset(page)).not.toBe(0)
+      const after = (await page.locator('.ticker-featured').boundingBox())!
+      expect(after.x).toBeCloseTo(before.x, 1)
+      expect(after.y).toBeCloseTo(before.y, 1)
+      await page.evaluate(() => (window as any).controller.destroy())
+    }
+  }
+})
+
+test('reveals keyboard focus outside the featured overlay, ignores featured drag, and respects reduced motion', async ({
+  page,
+}) => {
+  await setup(page, { navigation: true, autoplay: false, featuredPosition: 'left' })
+  await page.evaluate(() => {
+    const w = window as any
+    w.controller.setFeatured(w.controller.source.firstElementChild)
+    w.controller.scrollTo(0)
+  })
+  await page.locator('.ticker-content:not(.ticker-clone) #source button').focus()
+  const overlay = (await page.locator('.ticker-featured').boundingBox())!
+  const button = (await page
+    .locator('.ticker-content:not(.ticker-clone) #source button')
+    .boundingBox())!
+  expect(button.x).toBeGreaterThanOrEqual(overlay.x + overlay.width - 1)
+  const before = await state(page)
+  await page.mouse.move(overlay.x + 5, overlay.y + 5)
+  await page.mouse.down()
+  await page.mouse.move(overlay.x + 65, overlay.y + 5, { steps: 5 })
+  await page.mouse.up()
+  expect((await state(page)).position).toBeCloseTo(before.position, 1)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.evaluate(() => (window as any).controller.play())
+  expect((await state(page)).playing).toBe(false)
+  await expect(page.locator('.ticker-featured a')).toBeVisible()
+})
+
+test('keeps focused originals in an uncovered segment across cycle boundaries on either axis and in RTL', async ({
+  page,
+}) => {
+  for (const dir of ['ltr', 'rtl']) {
+    for (const direction of ['left', 'right', 'up', 'down']) {
+      await setup(page, { direction, autoplay: false, featuredPosition: 'start' }, dir)
+      await page.evaluate(() => {
+        const w = window as any
+        w.controller.setFeatured(w.controller.source.firstElementChild)
+        w.controller.scrollTo(w.controller.state.distance - 1)
+      })
+      for (const selector of ['button', 'input', 'button']) {
+        const original = page.locator(`.ticker-content:not(.ticker-clone) #source ${selector}`)
+        await original.focus()
+        await page.evaluate(() => {
+          ;(window as any).controller.refresh()
+          return new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+        })
+        await expect(original).toBeFocused()
+        const feature = (await page.locator('.ticker-featured').boundingBox())!
+        const item = (await original.boundingBox())!
+        const wrapper = (await page.locator('.ticker-wrapper').boundingBox())!
+        if (direction === 'up' || direction === 'down') {
+          expect(item.y, `${direction}/${dir}`).toBeGreaterThanOrEqual(
+            feature.y + feature.height - 1
+          )
+          expect(item.y + item.height).toBeLessThanOrEqual(wrapper.y + wrapper.height + 1)
+        } else if (dir === 'ltr') {
+          expect(item.x).toBeGreaterThanOrEqual(feature.x + feature.width - 1)
+          expect(item.x + item.width).toBeLessThanOrEqual(wrapper.x + wrapper.width + 1)
+        } else {
+          expect(item.x + item.width).toBeLessThanOrEqual(feature.x + 1)
+          expect(item.x).toBeGreaterThanOrEqual(wrapper.x - 1)
+        }
+      }
+      await page.evaluate(() => (window as any).controller.destroy())
+    }
+  }
+})

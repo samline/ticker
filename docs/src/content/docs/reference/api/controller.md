@@ -185,3 +185,21 @@ Only `navigate` event snapshots include `navigationSource`: `api`, `control`,
 emits during movement. Do not call `play()` on every `navigate` event: that can
 interrupt a gesture or override a manual pause. Use `preservePlayback` for arrows
 and `resumeAfterDrag` for the separate drag policy.
+
+## Featured selection
+
+Since 2.4.0; requires matching runtime and stylesheet. Verify npm/CDN publication before using a prepared release.
+
+- `featured: HTMLElement | null` returns the current fixed original, or `null` after clearing/destruction. Initial markup selection completes during initialization measurement.
+- `setFeatured(element: HTMLElement | null): TickerInstance` replaces the single featured original synchronously and remeasures the moving sequence. The element must be a direct original item of this controller, or its current featured original; invalid targets throw `RangeError` without changing it.
+- `setFeatured(null)` returns the original to its place and overrides all authored markers for this controller. Repeated refreshes retain that explicit choice. Methods after destruction are inert.
+
+Keep a reference before selecting an item: the featured node lives outside the original moving source until released. Application listeners and focus survive that move. Changing selection emits `update` with the usual state snapshot after measurement; requested playback is preserved. This does not assign application selection ARIA. `update({ featuredPosition: 'start' })` changes alignment. See [featured configuration](../../configuration/#featured-items) for multiple-marker resolution, physical/logical positions, removal, styles and accessibility.
+
+```js
+const menu = ticker('#categories', { featuredPosition: 'start' })
+const category = menu?.source.querySelector('button')
+if (menu && category) menu.setFeatured(category)
+// Later, return every original to the moving sequence.
+menu?.setFeatured(null)
+```

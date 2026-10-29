@@ -137,3 +137,48 @@
     transform: translate3d(0, var(--ticker-position, 0px), 0) !important;
   }
 }
+
+/* Overlay the single original item without changing the track's repeat period. */
+.ticker-wrapper:has(> .ticker-featured) {
+  grid-template-rows: minmax(0, 1fr);
+  isolation: isolate;
+}
+
+.ticker-wrapper:has(> .ticker-featured) > .ticker-track,
+.ticker-featured {
+  grid-area: 1 / 1;
+}
+
+.ticker-featured {
+  display: flex;
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  justify-self: center;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.ticker-wrapper[data-featured-position='start'] > .ticker-featured {
+  justify-self: start;
+}
+.ticker-wrapper[data-featured-position='end'] > .ticker-featured {
+  justify-self: end;
+}
+.ticker-wrapper[data-featured-position='left'] > .ticker-featured {
+  justify-self: left;
+}
+.ticker-wrapper[data-featured-position='right'] > .ticker-featured {
+  justify-self: right;
+}
+.ticker-wrapper[data-axis='vertical'] > .ticker-featured {
+  justify-self: stretch;
+}
+.ticker-wrapper[data-axis='vertical'][data-featured-position='start'] > .ticker-featured,
+.ticker-wrapper[data-axis='vertical'][data-featured-position='top'] > .ticker-featured {
+  align-self: start;
+}
+.ticker-wrapper[data-axis='vertical'][data-featured-position='end'] > .ticker-featured,
+.ticker-wrapper[data-axis='vertical'][data-featured-position='bottom'] > .ticker-featured {
+  align-self: end;
+}

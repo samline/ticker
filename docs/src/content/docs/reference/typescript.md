@@ -17,6 +17,7 @@ import type {
   TickerApi,
   TickerAvailable,
   TickerDirection,
+  TickerFeaturedPosition,
   TickerInstance,
   TickerNavigationOptions,
   TickerManagerState,
@@ -45,6 +46,7 @@ Strings are CSS selectors resolved once with `document.querySelector`.
 ```ts
 interface TickerOptions {
   duration?: number
+  featuredPosition?: TickerFeaturedPosition
   speed?: number
   autoplay?: boolean
   pauseOnFocus?: boolean
@@ -73,6 +75,8 @@ Every controller options snapshot includes all normalized fields, including `cla
 ```ts
 interface TickerInstance {
   readonly element: HTMLElement | null
+  readonly featured: HTMLElement | null
+  setFeatured: (element: HTMLElement | null) => TickerInstance
   readonly source: HTMLElement
   readonly options: Readonly<NormalizedTickerOptions>
   readonly state: Readonly<TickerSnapshot>
@@ -177,3 +181,13 @@ interface TickerNavigationOptions {
 expose optional `navigationSource: 'api' | 'control' | 'rail' | 'keyboard' | 'drag'`.
 The transient `navigation` pause reason prevents CSS autoplay competing with a
 smooth seek. See the [controller reference](../api/controller/#smooth-steps-and-playback-intent).
+
+## `TickerFeaturedPosition`
+
+Since 2.4.0, exported from root, core, vanilla and browser alongside the featured controller API.
+
+```ts
+type TickerFeaturedPosition = 'start' | 'center' | 'end' | 'left' | 'right' | 'top' | 'bottom'
+```
+
+See [featured configuration](../configuration/#featured-items) for axis mappings and single-item precedence.

@@ -4,6 +4,22 @@
 
 No unreleased changes.
 
+## [2.4.0] - 2026-10-29
+
+### Added
+
+- One fixed featured original per ticker, marked with `data-featured` or selected with `setFeatured(element)`. The first marked direct item wins; other marked items remain ordinary moving items. `setFeatured(null)` clears the selection, and `featured` exposes the current original.
+- `featuredPosition` / `data-featured-position` align the overlay at logical start/center/end or axis-specific physical edges. The original is excluded from clones, repeat distance and item steps, with order/focus restoration and keyboard reveal beside the overlay. Playback intent is preserved.
+
+### Behavior changes
+
+- Preserve opt-in mouse focus handling on fixed actions without allowing them to start a drag. Keyboard focus pause and explicit playback intent remain effective.
+
+### Examples
+
+- Explain temporary hover/focus pauses in live and copied examples, with configuration guidance for changing those policies. Reserve message geometry so clearing focus does not move controls and lose a pointer click.
+- Add selected-category and centered-logo recipes with position/orientation controls, drag navigation, associated category content and a labeled partner card. Every visible category button, including repeated copies, selects the original through stable keys. Complete and split files pin the prepared release; npm publication remains a separate maintainer action.
+
 ## [2.3.0] - 2026-10-29
 
 ### Added

@@ -68,6 +68,91 @@ async function checkDragModes(page: Page, recipe: Locator) {
   await expect(frame).toHaveAttribute('data-playing', 'false')
 }
 
+async function checkRepeatedCategory(recipe: Locator) {
+  const pause = recipe.locator('button[data-pause]')
+  if ((await pause.textContent())?.includes('Pause')) await pause.click()
+  await expect(recipe.locator('.ticker-wrapper')).toHaveAttribute('data-playing', 'false')
+  const rail = recipe.locator('[data-position]')
+  await rail.press('End')
+  await expect
+    .poll(async () => Number(await rail.inputValue()))
+    .toBeCloseTo(Number(await rail.getAttribute('max')) - 0.001, 2)
+  await recipe.locator('.ticker-wrapper').scrollIntoViewIfNeeded()
+  const visible = await recipe.locator('.ticker-wrapper').evaluate(frame => {
+    const viewport = frame.getBoundingClientRect()
+    const button = Array.from(
+      frame.querySelectorAll<HTMLElement>('.ticker-clone button[data-example-feature]')
+    ).find(button => {
+      const rect = button.getBoundingClientRect()
+      const x = rect.x + rect.width / 2
+      const y = rect.y + rect.height / 2
+      return (
+        x > viewport.left &&
+        x < viewport.right &&
+        y > viewport.top &&
+        y < viewport.bottom &&
+        button.contains(document.elementFromPoint(x, y))
+      )
+    })
+    if (!button) return null
+    const rect = button.getBoundingClientRect()
+    return {
+      key: button.dataset.exampleFeature,
+      label: button.textContent!.trim(),
+      x: rect.x + rect.width / 2,
+      y: rect.y + rect.height / 2,
+    }
+  })
+  expect(visible).toBeTruthy()
+  const { key, label, x, y } = visible!
+  await recipe.page().mouse.click(x, y)
+  await expect(recipe.locator('.ticker-featured button')).toHaveText(label)
+  await expect(recipe.locator('[data-featured-selection]')).toHaveText(label)
+  await expect(recipe.locator('.ticker-featured')).toHaveCount(1)
+  await expect(recipe.locator(`.ticker-clone button[data-example-feature="${key}"]`)).toHaveCount(0)
+}
+
+async function checkFeaturedControls(page: Page, recipe: Locator) {
+  const frame = recipe.locator('.ticker-wrapper')
+  const positions = recipe.getByRole('group', { name: 'Featured position', exact: true })
+  const axes = recipe.getByRole('group', { name: 'Motion axis', exact: true })
+  const pause = recipe.locator('button[data-pause]')
+  for (const axis of ['Horizontal', 'Vertical']) {
+    await axes.getByRole('button', { name: axis, exact: true }).click()
+    await expect(frame).toHaveAttribute('data-axis', axis.toLowerCase())
+    for (const [position, label] of [
+      ['start', axis === 'Vertical' ? 'Top' : 'Left'],
+      ['center', 'Center'],
+      ['end', axis === 'Vertical' ? 'Bottom' : 'Right'],
+    ]) {
+      const button = positions.getByRole('button', { name: label, exact: true })
+      await button.click()
+      await expect(button).toHaveAttribute('aria-pressed', 'true')
+      await expect(frame).toHaveAttribute('data-featured-position', position)
+      await expect(recipe.locator('.ticker-featured')).toHaveCount(1)
+    }
+  }
+  await axes.getByRole('button', { name: 'Horizontal', exact: true }).click()
+  await positions.getByRole('button', { name: 'Center', exact: true }).click()
+  if ((await pause.textContent())?.includes('Pause')) await pause.click()
+  await frame.scrollIntoViewIfNeeded()
+  const before = (await frame.boundingBox())!
+  const fixed = (await recipe.locator('.ticker-featured').boundingBox())!
+  const rail = recipe.locator('[data-position]')
+  const value = await rail.inputValue()
+  await page.mouse.move(before.x + before.width - 12, before.y + before.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(before.x + before.width - 102, before.y + before.height / 2, { steps: 5 })
+  await page.mouse.up()
+  await expect.poll(() => rail.inputValue()).not.toBe(value)
+  const after = (await recipe.locator('.ticker-featured').boundingBox())!
+  expect(after.x).toBeCloseTo(fixed.x, 1)
+  expect(after.y).toBeCloseTo(fixed.y, 1)
+  await expect(pause).toContainText('Play')
+  await pause.click()
+  await expect(frame).toHaveAttribute('data-playing', 'true')
+}
+
 test('all six previews run actual controllers, pause independently, and expose functional controls', async ({
   page,
 }) => {
@@ -110,7 +195,7 @@ test('all six previews run actual controllers, pause independently, and expose f
   await dynamic.locator('ticker-demo').scrollIntoViewIfNeeded()
   const updates = dynamic
   await updates.getByRole('button', { name: 'Add an update' }).click()
-  await expect(updates.getByRole('status')).toContainText('Added update 1')
+  await expect(updates.locator('.update-status')).toContainText('Added update 1')
   await expect(updates.locator('.ticker-content:not(.ticker-clone) > span:not(.sep)')).toHaveCount(
     4
   )
@@ -151,6 +236,8 @@ test('keeps the original recipes first and edits the dynamic feed at a constant 
     'rtl-content',
     'responsive-options',
     'drag-playback',
+    'featured-menu',
+    'featured-logo',
   ])
   const recipe = page.locator('#dynamic-content')
   await page
@@ -314,6 +401,8 @@ test('every copied CDN and npm document executes as a standalone example', async
     'rtl-content',
     'responsive-options',
     'drag-playback',
+    'featured-menu',
+    'featured-logo',
   ]) {
     const recipe = page.locator(`#${id}`)
     await recipe.locator('summary').click()
@@ -379,6 +468,24 @@ test('every copied CDN and npm document executes as a standalone example', async
       ).toBeVisible()
       await standalone.getByRole('button', { name: 'Play animation', exact: true }).click()
       await expect(standalone.locator('.ticker-recipe')).toHaveAttribute('data-paused', 'false')
+      if (id === 'featured-menu') {
+        await expect(standalone.locator('.ticker-featured')).toHaveText('Overview')
+        await standalone
+          .locator('.ticker-content:not(.ticker-clone) button[data-example-feature]')
+          .first()
+          .focus()
+        await standalone
+          .locator('.ticker-content:not(.ticker-clone) button[data-example-feature]')
+          .first()
+          .click()
+        await expect(standalone.locator('.ticker-featured')).toHaveText('Components')
+        await expect(standalone.locator('.ticker-featured')).toHaveCount(1)
+        await checkRepeatedCategory(standalone.locator('.ticker-recipe'))
+      }
+      if (id === 'featured-logo') {
+        await expect(standalone.locator('.ticker-featured strong')).toHaveText('Vite')
+        await expect(standalone.locator('.ticker-clone [data-featured]')).toHaveCount(0)
+      }
       if (id === 'dynamic-content') {
         const originals = standalone.locator(
           '[data-row]:not(.ticker-clone [data-row]) [data-example-item]'
@@ -426,6 +533,8 @@ test('every copied CDN and npm document executes as a standalone example', async
       }
       if (id === 'drag-playback')
         await checkDragModes(standalone, standalone.locator('.ticker-recipe'))
+      if (id === 'featured-menu' || id === 'featured-logo')
+        await checkFeaturedControls(standalone, standalone.locator('.ticker-recipe'))
       await checkCachedPageLifecycle(standalone)
       // The same example must also run when copied into three independent files.
       const splitHtml =
@@ -465,6 +574,24 @@ test('every copied CDN and npm document executes as a standalone example', async
         await standalone.getByRole('button', { name: 'Play animation', exact: true }).click()
       await standalone.getByRole('button', { name: 'Pause animation', exact: true }).click()
       await expect(standalone.locator('button[data-pause]')).toHaveText('Play animation')
+      if (id === 'featured-menu') {
+        await expect(standalone.locator('.ticker-featured')).toHaveText('Overview')
+        await standalone
+          .locator('.ticker-content:not(.ticker-clone) button[data-example-feature]')
+          .first()
+          .focus()
+        await standalone
+          .locator('.ticker-content:not(.ticker-clone) button[data-example-feature]')
+          .first()
+          .click()
+        await expect(standalone.locator('.ticker-featured')).toHaveText('Components')
+        await expect(standalone.locator('.ticker-featured')).toHaveCount(1)
+        await checkRepeatedCategory(standalone.locator('.ticker-recipe'))
+      }
+      if (id === 'featured-logo') {
+        await expect(standalone.locator('.ticker-featured strong')).toHaveText('Vite')
+        await expect(standalone.locator('.ticker-clone [data-featured]')).toHaveCount(0)
+      }
       if (id === 'dynamic-content') {
         const originals = standalone.locator(
           '[data-row]:not(.ticker-clone [data-row]) [data-example-item]'
@@ -483,6 +610,8 @@ test('every copied CDN and npm document executes as a standalone example', async
           0
         )
       }
+      if (id === 'featured-menu' || id === 'featured-logo')
+        await checkFeaturedControls(standalone, standalone.locator('.ticker-recipe'))
       await checkCachedPageLifecycle(standalone)
       expect(errors).toEqual([])
       await standalone.close()
@@ -828,5 +957,144 @@ test('manual arrows reveal the entire incoming link outside both edge fades', as
           .toMatchObject({ settled: true, fits: true })
       }
     }
+  }
+})
+
+test('featured previews share Home components, preserve selection, and remain readable in both themes', async ({
+  page,
+  browser,
+}, testInfo) => {
+  await page.goto('./')
+  await page.screenshot({ path: testInfo.outputPath('home.png') })
+  await page.goto('docs/reference/configuration/#featured-items')
+  await page.screenshot({ path: testInfo.outputPath('docs-featured.png') })
+  await page.goto('examples/')
+  for (const theme of ['light', 'dark']) {
+    await page.evaluate(theme => {
+      document.documentElement.dataset.theme = theme
+    }, theme)
+    const menu = page.locator('#featured-menu')
+    await menu.scrollIntoViewIfNeeded()
+    const category = menu
+      .locator('.ticker-content:not(.ticker-clone) button[data-example-feature]')
+      .first()
+    await category.focus()
+    const title = await category.textContent()
+    await expect(category).toBeInViewport()
+    await category.click()
+    await expect(menu.locator('.ticker-featured')).toHaveText(title!.trim())
+    await expect(menu.locator('.ticker-featured button')).toHaveAttribute('aria-pressed', 'true')
+    await expect(menu.locator('.ticker-featured button')).toBeFocused()
+    await menu
+      .locator('ticker-demo')
+      .screenshot({ path: testInfo.outputPath(`featured-menu-${theme}.png`) })
+    await page.locator('#featured-logo').scrollIntoViewIfNeeded()
+    await expect(page.locator('#featured-logo .ticker-featured .brand-logo')).toHaveCount(1)
+    await page
+      .locator('#featured-logo ticker-demo')
+      .screenshot({ path: testInfo.outputPath(`featured-logo-${theme}.png`) })
+    for (const width of [320, 1440]) {
+      await page.setViewportSize({ width, height: 900 })
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)
+      ).toBe(true)
+    }
+    await page.setViewportSize({ width: 320, height: 900 })
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = '24px'
+    })
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
+      true
+    )
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = ''
+    })
+  }
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect(page.locator('#featured-logo .ticker-featured')).toBeVisible()
+  const context = await browser.newContext({ javaScriptEnabled: false })
+  const fallback = await context.newPage()
+  await fallback.goto('http://127.0.0.1:4324/ticker/examples/')
+  await expect(fallback.locator('#featured-menu .ticker-content button')).toHaveCount(5)
+  await expect(fallback.locator('#featured-logo .ticker-content .brand-logo')).toHaveCount(4)
+  await context.close()
+})
+
+test('every gallery preview explains hover/focus pauses without overwriting manual intent', async ({
+  page,
+}) => {
+  await page.goto('examples/')
+  const demos = page.locator('ticker-demo')
+  for (let i = 0; i < (await demos.count()); i++) {
+    const demo = demos.nth(i)
+    const frame = demo.locator('.ticker-frame')
+    const pause = demo.locator('button[data-pause]')
+    const status = demo.locator('[data-playback-status]')
+    await frame.scrollIntoViewIfNeeded()
+    if ((await pause.textContent())?.includes('Play')) await pause.click()
+    await page.mouse.move(0, 0)
+    await frame.hover()
+    if ((await frame.getAttribute('data-pause-on-hover')) === 'true') {
+      await expect(frame).toHaveAttribute('data-playing', 'false')
+      await expect(status).toContainText('pointer')
+      await expect(pause).toContainText('Pause')
+    } else {
+      await expect(frame).toHaveAttribute('data-playing', 'true')
+      await expect(status).toBeEmpty()
+    }
+    await page.mouse.move(0, 0)
+    await frame.focus()
+    await expect(status).toContainText('focus')
+    await expect(frame).toHaveAttribute('data-playing', 'false')
+    await expect(pause).toContainText('Pause')
+    await pause.click()
+    await expect(pause).toContainText('Play')
+    await expect(status).toBeEmpty()
+    await frame.hover()
+    await expect(frame).toHaveAttribute('data-playing', 'false')
+    await pause.click()
+    await page.mouse.move(0, 0)
+    await expect(frame).toHaveAttribute('data-playing', 'true')
+  }
+})
+
+test('featured selection keeps mouse playback, explains keyboard pauses, and exposes positions and drag', async ({
+  page,
+}) => {
+  await page.goto('examples/#featured-menu')
+  const menu = page.locator('#featured-menu')
+  await menu.locator('.ticker-frame').scrollIntoViewIfNeeded()
+  await menu.locator('.ticker-featured button').click()
+  await expect(menu.locator('.ticker-frame')).toHaveAttribute('data-playing', 'true')
+  const category = menu
+    .locator('.ticker-content:not(.ticker-clone) button[data-example-feature]')
+    .first()
+  await category.focus()
+  await expect(menu.locator('[data-playback-status]')).toContainText('focus')
+  const label = await category.textContent()
+  await category.press('Enter')
+  await expect(menu.locator('[data-featured-selection]')).toHaveText(label!.trim())
+  await expect(menu.locator('[data-featured-description]:not(button)')).not.toBeEmpty()
+  const pause = menu.locator('button[data-pause]')
+  const before = (await pause.boundingBox())!
+  await pause.click()
+  await expect(menu.locator('.ticker-frame')).toHaveAttribute('data-playing', 'false')
+  await expect(pause).toContainText('Play')
+  const after = (await pause.boundingBox())!
+  expect(after.y).toBeCloseTo(before.y, 1)
+  await checkFeaturedControls(page, menu)
+  const logo = page.locator('#featured-logo')
+  await expect(logo.locator('.ticker-featured .featured-badge')).toHaveText('Featured partner')
+  await checkFeaturedControls(page, logo)
+})
+
+test('visible repeated featured categories respond to pointer selection on both axes', async ({
+  page,
+}) => {
+  await page.goto('examples/#featured-menu')
+  const menu = page.locator('#featured-menu')
+  for (const axis of ['horizontal', 'vertical']) {
+    await menu.locator(`button[data-example-featured-axis="${axis}"]`).click()
+    await checkRepeatedCategory(menu)
   }
 })

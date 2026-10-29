@@ -121,3 +121,7 @@ Call the controller's `refresh()` after changing content or loading fonts when n
 ## Vertical, logical direction and manual position
 
 `data-axis` selects a row or column, `data-motion-direction` holds the resolved physical direction and `data-writing-direction` preserves LTR/RTL content ordering. Give vertical wrappers a definite height. `--ticker-position` holds the instantaneous physical offset for manual navigation with reduced motion. Regular playback and seeking share the CSS animation timeline, preserving position across duration/speed updates and same-axis rebuilds. Use the controller rather than overriding transforms or animation time. See [configuration](/ticker/docs/reference/configuration/) and [manual navigation](/ticker/docs/reference/api/controller/#manual-navigation).
+
+## Featured overlay
+
+Since 2.4.0, `.ticker-featured[data-ticker-featured]` is a sibling of the animated track, with exactly one original item. It occupies the same grid area, stays fixed and intercepts pointer actions only in its own box. Ticker owns alignment and stacking; the application owns its surface and item presentation. It is not a clone. Moving the original changes its ancestors, so scope item styles to an outer application component rather than only `.ticker-content`. No placeholder element or moving gap is emitted. See [featured configuration](../configuration/#featured-items).

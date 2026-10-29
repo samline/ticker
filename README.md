@@ -84,11 +84,11 @@ The runtime preserves fractional measurements in both directions. Match item spa
 Choose **Package / ESM** when installing with npm, pnpm or bun and importing Ticker in your application. Choose **HTML / CDN** when loading the standalone script in plain HTML, WordPress or Shopify without a bundler. Both use the same controller API. A CDN only delivers the files; you can self-host the same script and stylesheet.
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.3.0/dist/style.css" />
-<script src="https://unpkg.com/@samline/ticker@2.3.0/dist/browser/global.global.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.4.0/dist/style.css" />
+<script src="https://unpkg.com/@samline/ticker@2.4.0/dist/browser/global.global.js"></script>
 ```
 
-> Pin the version in production. Replace `2.3.0` with the version you ship.
+> Pin the version in production. Replace `2.4.0` with the version you ship. Verify that it is published before using npm/CDN URLs; preparing a release does not publish it.
 
 The standalone script (an IIFE) exposes `window.Ticker`. “Global” describes this object, not another loading mode. The optional `@samline/ticker/browser` registry module is an ESM/CJS import and does not install that object. See [loading terms](https://samline.github.io/ticker/docs/guides/html-and-browser/#loading-terms).
 
@@ -117,6 +117,12 @@ For optional ID-based ownership, `window.Ticker.newTicker({ id, options })` crea
 - Browser-global integrations for WordPress, Shopify, and plain HTML.
 - Declarative tickers that are discovered as the DOM changes.
 
+### Featured items
+
+Keep one original fixed while the remaining sequence passes behind it. Mark a direct item with `data-featured`; when several are marked, the first in original DOM order wins and the rest move normally. Configure `featuredPosition` (`start`, `center`, `end`, or axis-specific physical edges). `controller.setFeatured(item)` replaces it; `setFeatured(null)` clears it; `controller.featured` exposes the original. Featured items are excluded from clones and repeat distance, retain identity/focus and return to their original position on release/destroy.
+
+Featured items require version 2.4.0 or later and matching JavaScript and stylesheet. Verify npm/CDN availability before using a prepared release; a Git tag does not publish the package. See [featured configuration](https://samline.github.io/ticker/docs/reference/configuration/#featured-items) and the [gallery](https://samline.github.io/ticker/examples/#featured-menu) for the complete contract and runnable examples.
+
 ## API at a glance
 
 | Group                 | API                                                                                                                                                                                                                                                          |
@@ -125,6 +131,7 @@ For optional ID-based ownership, `window.Ticker.newTicker({ id, options })` crea
 | Controller lifecycle  | [`update()`](https://samline.github.io/ticker/docs/reference/api/update/) · [`refresh()`](https://samline.github.io/ticker/docs/reference/api/refresh/) · [`destroy()`](https://samline.github.io/ticker/docs/reference/api/destroy/)                        |
 | Declarative lifecycle | [`mount()`](https://samline.github.io/ticker/docs/reference/api/mount/) · [`refresh()`](https://samline.github.io/ticker/docs/reference/api/refresh/#declarative-page-refresh) · [`unmount()`](https://samline.github.io/ticker/docs/reference/api/unmount/) |
 | Browser registry      | [`newTicker()` and registry helpers](https://samline.github.io/ticker/docs/reference/api/browser-registry/)                                                                                                                                                  |
+| Featured              | [`featured` and `setFeatured()`](https://samline.github.io/ticker/docs/reference/api/controller/#featured-selection)                                                                                                                                         |
 | Configuration         | [`TickerOptions`](https://samline.github.io/ticker/docs/reference/configuration/)                                                                                                                                                                            |
 | Core utilities        | [Defaults, state factories, and validators](https://samline.github.io/ticker/docs/reference/core/)                                                                                                                                                           |
 | Types                 | [TypeScript reference](https://samline.github.io/ticker/docs/reference/typescript/)                                                                                                                                                                          |
@@ -226,7 +233,7 @@ Read [CHANGELOG.md](CHANGELOG.md) or the [published changelog](https://samline.g
 
 ## AI agent skill
 
-The public [Ticker skill](https://samline.github.io/ticker/skills/ticker/SKILL.md) teaches an agent how to choose a Ticker integration, load CSS, manage controllers, preserve accessible motion and avoid nonexistent APIs. It is self-contained and describes v2.3.0; agents must verify their installed version.
+The public [Ticker skill](https://samline.github.io/ticker/skills/ticker/SKILL.md) teaches an agent how to choose a Ticker integration, load CSS, manage controllers, preserve accessible motion and avoid nonexistent APIs. It is self-contained and describes v2.4.0; agents must verify their installed version.
 
 Download [SKILL.md](https://samline.github.io/ticker/skills/ticker/SKILL.md) into a `ticker/` folder in your agent's supported skill directory. For agents that discover project skills from `.agents/skills/`:
 

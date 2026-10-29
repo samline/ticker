@@ -21,4 +21,5 @@ export type {
   TickerPauseReason,
   TickerResponsiveRule,
   TickerDirection,
+  TickerFeaturedPosition,
 } from '../core/types'

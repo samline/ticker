@@ -11,6 +11,9 @@ export const createRecipeMarkup = async ({ recipe, i18n }: RecipeContext) => {
     recipe.rows.map(async (row, rowIndex) => {
       const items = await Promise.all(
         row.items.map(async (item, index) => {
+          const featured = item.featured ? ' data-featured' : ''
+          if (recipe.kind === 'featured-menu')
+            return `<button type="button" class="item" data-example-feature="category-${index}" data-featured-description="${e(item.description ?? '')}"${featured} aria-pressed="${!!item.featured}">${e(item.label)}</button>`
           if (item.logo) {
             const svg = await readFile(
               new URL(`../../../public/assets/brands/${item.logo}`, import.meta.url),
@@ -18,7 +21,9 @@ export const createRecipeMarkup = async ({ recipe, i18n }: RecipeContext) => {
             )
             if (item.description && item.href)
               return `<div class="item story-item"><span class="story-image"><img src="data:image/svg+xml,${encodeURIComponent(svg)}" alt=""></span><span class="story-copy"><a href="${e(docsBase + item.href)}">${e(item.label)}</a><span>${e(item.description)}</span></span></div>`
-            return `<span class="item"><img src="data:image/svg+xml,${encodeURIComponent(svg)}" alt="">${e(item.label)}</span>`
+            if (item.featured)
+              return `<span class="item featured-partner" data-featured><span class="featured-badge">${e(t.featuredPartner)}</span><img src="data:image/svg+xml,${encodeURIComponent(svg)}" alt=""><strong>${e(item.label)}</strong></span>`
+            return `<span class="item"${featured}><img src="data:image/svg+xml,${encodeURIComponent(svg)}" alt="">${e(item.label)}</span>`
           }
           if (item.href)
             return `<a class="item" href="${e(docsBase + item.href)}" target="_blank" rel="noopener noreferrer">${e(item.label)}</a>`
@@ -29,6 +34,7 @@ export const createRecipeMarkup = async ({ recipe, i18n }: RecipeContext) => {
       )
       return `<div class="window" dir="${row.rtl ? 'rtl' : 'ltr'}" data-vertical="${row.direction === 'up' || row.direction === 'down'}" tabindex="0" role="region" aria-label="${e(row.label)}" aria-live="off">
   <div id="ticker-${rowIndex + 1}" data-row>${items.join('\n    ')}</div>
+  <p class="playback-feedback" role="status" aria-live="polite"><span aria-hidden="true">${e(playback.pausedFocus)}</span><span aria-hidden="true">${e(playback.pausedHover)}</span><span data-playback-status></span></p>
 </div>`
     })
   )
@@ -51,9 +57,19 @@ export const createRecipeMarkup = async ({ recipe, i18n }: RecipeContext) => {
     recipe.kind === 'drag'
       ? `<button type="button" data-example-resume aria-label="${e(t.resumeAfterDrag)}" aria-pressed="${recipe.rows[0].resumeAfterDrag === true}">${e(t.resumeAfterDrag)} <span data-resume-state aria-hidden="true">${e(recipe.rows[0].resumeAfterDrag ? t.enabled : t.disabled)}</span></button>`
       : ''
-  const markup = `<section class="ticker-recipe">
+  const isFeatured = recipe.rows.some(row => row.featuredPosition)
+  const featuredControls = isFeatured
+    ? `<div class="featured-controls"><div role="group" aria-label="${e(t.featuredPositionLabel)}"><span>${e(t.featuredPositionLabel)}</span>${(['start', 'center', 'end'] as const).map(position => `<button type="button" data-example-featured-position="${position}" aria-pressed="${recipe.rows[0].featuredPosition === position}">${e(position === 'start' ? t.left : position === 'end' ? t.right : t.center)}</button>`).join('')}</div><div role="group" aria-label="${e(t.featuredAxisLabel)}"><span>${e(t.featuredAxisLabel)}</span><button type="button" data-example-featured-axis="horizontal" aria-pressed="true">${e(t.horizontal)}</button><button type="button" data-example-featured-axis="vertical" aria-pressed="false">${e(t.vertical)}</button></div></div>`
+    : ''
+  const selected = recipe.rows[0].items.find(item => item.featured)
+  const selection =
+    recipe.kind === 'featured-menu'
+      ? `<div class="selected-category" role="status" aria-live="polite"><span class="featured-badge">${e(t.selectedCategory)}</span><strong data-featured-selection>${e(selected?.label ?? '')}</strong><p data-featured-description>${e(selected?.description ?? '')}</p></div>`
+      : ''
+  const markup = `<section class="ticker-recipe"${isFeatured ? ` data-featured-example="${recipe.kind}"` : ''}>
   <h1>${e(recipe.title)}</h1>
   ${rows.join('\n  ')}
+  ${selection}
   <div class="controls" hidden>
     <button type="button" data-pause>${e(playback.pause)}</button>${
       recipe.kind === 'dynamic'
@@ -66,10 +82,10 @@ export const createRecipeMarkup = async ({ recipe, i18n }: RecipeContext) => {
     <label>${e(t.positionLabel)} <select data-item-position></select></label>
     <button type="button" data-remove-position>${e(t.removeAtPosition)}</button>`
         : ''
-    }${controls}${verticalControls}${dragControls}
+    }${controls}${verticalControls}${dragControls}${featuredControls}
   </div>
   <p>${e(recipe.note)}</p>${recipe.rows.some(row => row.items.some(item => item.logo)) ? `\n  <p><a href="${e(manifest.homepage + '/attribution/')}" target="_blank" rel="noopener noreferrer">${e(t.brandAttribution)}</a></p>` : ''}
-  <p role="status" aria-live="polite"></p>
+  <p data-example-updates role="status" aria-live="polite"></p>
   <noscript><p>${e(t.noJs)}</p></noscript>
 </section>`
 

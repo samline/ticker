@@ -13,7 +13,7 @@ export const createRecipeScript = ({ recipe, i18n }: RecipeContext, mode: 'cdn' 
   const multiple = recipe.rows.length > 1
   const createTicker = (row: RecipeContext['recipe']['rows'][number], index: number) => {
     const { items, label, rtl, ...options } = row
-    return `ticker('#ticker-${index + 1}', ${js({ ...options, pauseOnHover: true })})`
+    return `ticker('#ticker-${index + 1}', ${js({ pauseOnHover: true, ...options })})`
   }
   const applyToTickers = (statement: string) =>
     multiple ? `tickers.forEach(news => { ${statement} });` : statement
@@ -34,6 +34,14 @@ if (news) {
     const playing = ${multiple ? 'tickers.some(item => item.state.requested)' : 'news.state.requested'};
     example.dataset.paused = String(!playing);
     pauseButton.textContent = playing ? ${js(playback.pause)} : ${js(playback.play)};
+    ${applyToTickers(`
+    const state = news.state;
+    const status = news.element.closest('.window').querySelector('[data-playback-status]');
+    status.textContent = state.requested && !state.playing
+      ? state.reasons.includes('focus') ? ${js(playback.pausedFocus)}
+        : state.reasons.includes('hover') ? ${js(playback.pausedHover)} : ''
+      : '';
+`)}
   };
   ${applyToTickers("news.on('playback', renderPlayback);")}
   renderPlayback();
@@ -47,11 +55,55 @@ if (news) {
       ? `
   news.connectControls({
     itemsPerStep: 1,
-    ${recipe.id === 'manual-navigation' ? "behavior: 'smooth', duration: 300, preservePlayback: true," : ''}
+    ${recipe.id === 'manual-navigation' || recipe.rows.some(row => row.featuredPosition) ? "behavior: 'smooth', duration: 300, preservePlayback: true," : ''}
     previous: example.querySelector('[data-previous]'),
     next: example.querySelector('[data-next]'),
     rail: example.querySelector('[data-position]'),
   });`
+      : ''
+  }
+  ${
+    recipe.kind === 'featured-menu'
+      ? `
+  example.addEventListener('click', event => {
+    const button = event.target.closest('button[data-example-feature]');
+    if (!button) return;
+    const original = [...example.querySelectorAll('button[data-example-feature]')].find(item => !item.closest('.ticker-clone') && item.dataset.exampleFeature === button.dataset.exampleFeature);
+    if (!original) return;
+    example.querySelectorAll('button[data-example-feature]').forEach(item => {
+      item.setAttribute('aria-pressed', String(item.dataset.exampleFeature === original.dataset.exampleFeature));
+    });
+    news.setFeatured(original);
+    example.querySelector('[data-featured-selection]').textContent = button.textContent;
+    example.querySelector('.selected-category [data-featured-description]').textContent = button.dataset.featuredDescription;
+  }, { signal });`
+      : ''
+  }
+  ${
+    recipe.rows.some(row => row.featuredPosition)
+      ? `
+  const positions = example.querySelectorAll('button[data-example-featured-position]');
+  const axes = example.querySelectorAll('button[data-example-featured-axis]');
+  const syncFeatured = () => {
+    const vertical = news.options.direction === 'up';
+    positions.forEach(button => {
+      const position = button.dataset.exampleFeaturedPosition;
+      button.setAttribute('aria-pressed', String(news.options.featuredPosition === position));
+      if (position === 'start') button.textContent = vertical ? ${js(t.top)} : ${js(t.left)};
+      if (position === 'end') button.textContent = vertical ? ${js(t.bottom)} : ${js(t.right)};
+    });
+    axes.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.exampleFeaturedAxis === (vertical ? 'vertical' : 'horizontal'))));
+    example.querySelector('.window').dataset.vertical = String(vertical);
+  };
+  positions.forEach(button => button.addEventListener('click', () => {
+    news.update({ featuredPosition: button.dataset.exampleFeaturedPosition });
+    syncFeatured();
+  }, { signal }));
+  axes.forEach(button => button.addEventListener('click', () => {
+    news.update({ direction: button.dataset.exampleFeaturedAxis === 'vertical' ? 'up' : 'left' });
+    syncFeatured();
+  }, { signal }));
+  syncFeatured();`
       : ''
   }
   ${
@@ -98,7 +150,7 @@ if (news) {
       ? `
   const select = example.querySelector('[data-item-select]');
   const position = example.querySelector('[data-item-position]');
-  const status = example.querySelector('[role=status]');
+  const status = example.querySelector('[data-example-updates]');
   const items = () => [...news.source.querySelectorAll('[data-example-item]')];
   const removeButtons = example.querySelectorAll('[data-remove-first], [data-remove-last], [data-remove-selected], [data-remove-position]');
   const syncItems = () => {

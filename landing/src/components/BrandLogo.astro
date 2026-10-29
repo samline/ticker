@@ -1,13 +1,14 @@
 ---
-interface Props {
+import type { HTMLAttributes } from 'astro/types'
+interface Props extends HTMLAttributes<'span'> {
   name: string
   src: string
   size?: 'default' | 'compact'
 }
-const { name, src, size = 'default' } = Astro.props
+const { name, src, size = 'default', ...attributes } = Astro.props
 ---
 
-<span class:list={['brand-logo', { compact: size === 'compact' }]}>
+<span {...attributes} class:list={['brand-logo', { compact: size === 'compact' }]}>
   <img src={src} alt={name} decoding="async" />
 </span>
 

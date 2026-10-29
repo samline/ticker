@@ -16,10 +16,16 @@ const { recipe } = Astro.props
 const t = getI18n(Astro).examples
 const base = import.meta.env.BASE_URL
 const vertical = recipe.rows.some(row => row.direction === 'up' || row.direction === 'down')
+const featured = recipe.rows.some(row => row.featuredPosition)
 const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as const)
 ---
 
 <ticker-example-preview
+  data-featured-example={featured ? recipe.kind : undefined}
+  data-featured-left={t.left}
+  data-featured-right={t.right}
+  data-featured-top={t.top}
+  data-featured-bottom={t.bottom}
   data-added={t.added}
   data-added-status={t.addedStatus}
   data-removed-status={t.removedStatus}
@@ -36,23 +42,47 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
           duration={row.duration}
           direction={row.direction}
           speed={row.speed}
+          featuredPosition={row.featuredPosition}
           autoplay={row.autoplay}
+          interactiveClones={row.interactiveClones}
+          pauseOnHover={row.pauseOnHover}
           navigation={row.navigation}
-          preserveNavigationPlayback={recipe.id === 'manual-navigation'}
+          preserveNavigationPlayback={recipe.id === 'manual-navigation' || featured}
           resumeAfterDrag={row.resumeAfterDrag}
           rtl={row.rtl}
           responsive={row.responsive}
         >
           {row.items.map((item, index) =>
-            item.description && item.logo && item.href ? (
+            recipe.kind === 'featured-menu' ? (
+              <Button
+                variant="secondary"
+                context="ticker"
+                data-example-feature={`category-${index}`}
+                data-featured-description={item.description}
+                data-featured={item.featured}
+                aria-pressed={!!item.featured}
+              >
+                {item.label}
+              </Button>
+            ) : item.description && item.logo && item.href ? (
               <ExampleStory
                 title={item.label}
                 description={item.description}
                 image={`${base}assets/brands/${item.logo}`}
                 href={`${base}docs/${item.href}`}
               />
+            ) : item.logo && item.featured ? (
+              <span class:list={['featured-partner']} data-featured>
+                <span class:list={['featured-badge']}>{t.featuredPartner}</span>
+                <BrandLogo src={`${base}assets/brands/${item.logo}`} name="" />
+                <strong>{item.label}</strong>
+              </span>
             ) : item.logo ? (
-              <BrandLogo src={`${base}assets/brands/${item.logo}`} name={item.label} />
+              <BrandLogo
+                src={`${base}assets/brands/${item.logo}`}
+                name={item.label}
+                data-featured={item.featured}
+              />
             ) : (
               <>
                 {item.href ? (
@@ -75,17 +105,61 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
             )
           )}
         </TickerDemo>
+        {recipe.kind === 'featured-menu' && (
+          <div class:list={['selected-category']} role="status" aria-live="polite">
+            <span class:list={['featured-badge']}>{t.selectedCategory}</span>
+            <strong data-featured-selection>{row.items.find(item => item.featured)?.label}</strong>
+            <p data-featured-description>{row.items.find(item => item.featured)?.description}</p>
+          </div>
+        )}
       </DemoPanel>
     ))}
     <DemoFooter
       note={recipe.note}
       controls={
+        featured ||
         recipe.kind === 'dynamic' ||
         recipe.kind === 'controls' ||
         recipe.kind === 'drag' ||
         vertical
       }
     >
+      {featured && (
+        <div class:list={['featured-controls']}>
+          <div
+            role="group"
+            aria-label={t.featuredPositionLabel}
+            class:list={['direction-controls']}
+          >
+            <span>{t.featuredPositionLabel}</span>
+            {(['start', 'center', 'end'] as const).map(position => (
+              <Button
+                variant="ghost"
+                context="ticker"
+                data-example-featured-position={position}
+                aria-pressed={recipe.rows[0].featuredPosition === position}
+                disabled
+              >
+                {position === 'center' ? t.center : position === 'start' ? t.left : t.right}
+              </Button>
+            ))}
+          </div>
+          <div role="group" aria-label={t.featuredAxisLabel} class:list={['direction-controls']}>
+            <span>{t.featuredAxisLabel}</span>
+            {(['horizontal', 'vertical'] as const).map(axis => (
+              <Button
+                variant="ghost"
+                context="ticker"
+                data-example-featured-axis={axis}
+                aria-pressed={axis === 'horizontal'}
+                disabled
+              >
+                {t[axis]}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
       {recipe.kind === 'drag' && (
         <div class:list={['direction-controls']}>
           <Button
@@ -169,6 +243,41 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
     const { signal } = lifecycle
     const demo = element.querySelector<HTMLElement>('ticker-demo')
     const controller = () => getDemoController(demo)
+    element.addEventListener(
+      'click',
+      event => {
+        const target = event.target
+        const button =
+          target instanceof Element
+            ? target.closest<HTMLButtonElement>('button[data-example-feature]')
+            : null
+        if (!button) return
+        const news = controller()
+        if (!news) return
+        const original = Array.from(
+          element.querySelectorAll<HTMLButtonElement>('button[data-example-feature]')
+        ).find(
+          item =>
+            !item.closest('.ticker-clone') &&
+            item.dataset.exampleFeature === button.dataset.exampleFeature
+        )
+        if (!original) return
+        element
+          .querySelectorAll<HTMLButtonElement>('button[data-example-feature]')
+          .forEach(item => {
+            item.setAttribute(
+              'aria-pressed',
+              String(item.dataset.exampleFeature === original.dataset.exampleFeature)
+            )
+          })
+        news.setFeatured(original)
+        const selection = element.querySelector('[data-featured-selection]')
+        const description = element.querySelector('[data-featured-description]:not(button)')
+        if (selection) selection.textContent = button.textContent
+        if (description) description.textContent = button.dataset.featuredDescription ?? ''
+      },
+      { signal }
+    )
     const add = element.querySelector<HTMLButtonElement>('[data-add]')
     const select = element.querySelector<HTMLSelectElement>('[data-item-select]')
     const position = element.querySelector<HTMLSelectElement>('[data-item-position]')
@@ -177,7 +286,59 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
     const removeButtons = element.querySelectorAll<HTMLButtonElement>(
       'button[data-remove-first], button[data-remove-last], button[data-remove-selected], button[data-remove-position]'
     )
-    const status = element.querySelector('[role=status]')
+    const featuredPositions = element.querySelectorAll<HTMLButtonElement>(
+      'button[data-example-featured-position]'
+    )
+    const featuredAxes = element.querySelectorAll<HTMLButtonElement>(
+      'button[data-example-featured-axis]'
+    )
+    const syncFeatured = () => {
+      const news = controller()
+      const vertical = news?.options.direction === 'up' || news?.options.direction === 'down'
+      featuredPositions.forEach(button => {
+        const position = button.dataset.exampleFeaturedPosition
+        button.disabled = !news
+        button.setAttribute('aria-pressed', String(news?.options.featuredPosition === position))
+        if (position === 'start')
+          button.textContent =
+            (vertical ? element.dataset.featuredTop : element.dataset.featuredLeft) ?? ''
+        if (position === 'end')
+          button.textContent =
+            (vertical ? element.dataset.featuredBottom : element.dataset.featuredRight) ?? ''
+      })
+      featuredAxes.forEach(button => {
+        button.disabled = !news
+        button.setAttribute(
+          'aria-pressed',
+          String(button.dataset.exampleFeaturedAxis === (vertical ? 'vertical' : 'horizontal'))
+        )
+      })
+    }
+    featuredPositions.forEach(button =>
+      button.addEventListener(
+        'click',
+        () => {
+          const position = button.dataset.exampleFeaturedPosition
+          if (position !== 'start' && position !== 'center' && position !== 'end') return
+          controller()?.update({ featuredPosition: position })
+          syncFeatured()
+        },
+        { signal }
+      )
+    )
+    featuredAxes.forEach(button =>
+      button.addEventListener(
+        'click',
+        () => {
+          controller()?.update({
+            direction: button.dataset.exampleFeaturedAxis === 'vertical' ? 'up' : 'left',
+          })
+          syncFeatured()
+        },
+        { signal }
+      )
+    )
+    const status = element.querySelector('.update-status')
     const items = () => [
       ...(controller()?.source.querySelectorAll<HTMLElement>(
         '.ticker-content:not(.ticker-clone) [data-example-item]'
@@ -215,6 +376,7 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
       })
       syncSpeedControl(element.querySelector('ticker-speed'), news?.options.duration)
       syncItems()
+      syncFeatured()
     }
     element.addEventListener('ticker:ready', sync, { signal })
     element.querySelector('ticker-speed input')?.addEventListener(
@@ -310,6 +472,62 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
 <style>
   ticker-example-preview {
     display: block;
+  }
+  .featured-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+  }
+  .featured-controls .direction-controls {
+    align-items: center;
+  }
+  .featured-controls .direction-controls > span {
+    flex-basis: 100%;
+  }
+  ticker-example-preview[data-featured-example='featured-menu'] :global(.ticker-featured > button) {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--palette-on-accent);
+  }
+  ticker-example-preview[data-featured-example='featured-menu']
+    :global(.ticker-frame[data-axis='vertical'] .ticker-featured > button) {
+    flex: 1;
+  }
+  ticker-example-preview[data-featured-example='logos'] :global(.ticker-featured) {
+    justify-content: center;
+  }
+  ticker-example-preview[data-featured-example='logos']
+    :global(.ticker-frame[data-axis='vertical'] .ticker-content) {
+    align-items: center;
+  }
+  .featured-partner {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    min-width: 8rem;
+    background: var(--palette-specimen-surface);
+    border: 0.125rem solid var(--color-accent);
+    border-radius: var(--radius-control);
+  }
+  .featured-badge {
+    font-size: var(--text-small);
+    color: var(--color-text-muted);
+  }
+  .selected-category {
+    display: grid;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+    margin-top: var(--space-md);
+    border: 0.0625rem solid var(--color-border);
+    border-radius: var(--radius-control);
+    background: var(--palette-specimen-surface);
+  }
+  .selected-category p {
+    margin: 0;
+    font-size: var(--text-small);
+    color: var(--color-text-muted);
   }
   .feed-actions {
     display: flex;

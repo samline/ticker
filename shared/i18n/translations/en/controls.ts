@@ -28,6 +28,8 @@ export default {
     position: 'Position in repeated sequence',
     pause: 'Pause animation',
     play: 'Play animation',
+    pausedFocus: 'Temporarily paused while an item has focus.',
+    pausedHover: 'Temporarily paused while the pointer is over the ticker.',
     pauseLabel: 'Pause animation: {label}',
     playLabel: 'Play animation: {label}',
   },
