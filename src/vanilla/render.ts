@@ -69,6 +69,7 @@ interface RuntimeTickerState extends TickerState {
   navigationFrame: number
   navigating: boolean
   navigationRevision: number
+  stepNavigation?: { forward: boolean; position: number; target: number } | undefined
   forceRebuild: boolean
   requested: boolean
   manualOverride: boolean
@@ -440,6 +441,7 @@ const cancelNavigation = (state: RuntimeTickerState): void => {
   cancelFrame(state.navigationFrame)
   state.navigationFrame = 0
   state.navigating = false
+  state.stepNavigation = undefined
 }
 
 const navigate = (
@@ -447,7 +449,8 @@ const navigate = (
   position: number,
   fromDrag = false,
   options: TickerNavigationOptions = {},
-  source: TickerSnapshot['navigationSource'] = fromDrag ? 'drag' : 'api'
+  source: TickerSnapshot['navigationSource'] = fromDrag ? 'drag' : 'api',
+  forward?: boolean
 ): void => {
   const previousPosition = readPosition(state)
   cancelNavigation(state)
@@ -471,6 +474,8 @@ const navigate = (
     (state.measurement?.contentExtent ?? 0) > 0 &&
     position !== previousPosition
   state.navigating = smooth
+  if (smooth && forward !== undefined)
+    state.stepNavigation = { forward, position: previousPosition, target: position }
   const revision = state.navigationRevision
   syncPlayback(state)
   if (state.destroyed || revision !== state.navigationRevision) return
@@ -484,13 +489,16 @@ const navigate = (
     if (state.destroyed || revision !== state.navigationRevision) return
     started ??= time
     const progress = Math.min(1, Math.max(0, (time - started) / duration))
-    seek(state, previousPosition + (position - previousPosition) * (1 - (1 - progress) ** 3))
+    const current = previousPosition + (position - previousPosition) * (1 - (1 - progress) ** 3)
+    if (state.stepNavigation) state.stepNavigation.position = current
+    seek(state, current)
     if (progress < 1) {
       state.navigationFrame = requestFrame(frame)
       return
     }
     state.navigationFrame = 0
     state.navigating = false
+    state.stepNavigation = undefined
     syncPlayback(state)
     if (!state.destroyed && revision === state.navigationRevision) emit(state, 'navigate', source)
   }
@@ -656,7 +664,12 @@ const setupInteraction = (state: RuntimeTickerState): void => {
 
 // Read original item geometry once per command, then project repeated copies
 // mathematically. This also finds preceding copies at the cyclic boundary.
-const itemStep = (state: RuntimeTickerState, forward: boolean, count: number): number => {
+const itemStep = (
+  state: RuntimeTickerState,
+  forward: boolean,
+  count: number,
+  offset = 0
+): number => {
   const period = state.measurement?.contentExtent ?? 0
   if (!period || state.wrapper.dataset.ready !== 'true') return 0
   const viewport = state.wrapper.getBoundingClientRect()
@@ -696,6 +709,9 @@ const itemStep = (state: RuntimeTickerState, forward: boolean, count: number): n
         : rtl
           ? endEdge - rect.left
           : rect.right - startEdge
+      // Measure at the pending destination without seeking or changing the DOM.
+      start -= offset
+      end -= offset
       if (!forward) [start, end] = [extent - end, extent - start]
       // A tiny tolerance excludes floating-point noise at an aligned boundary.
       const cycle = Math.floor((extent - end + 0.001) / period) + 1
@@ -730,7 +746,7 @@ const connectControls = (state: RuntimeTickerState, controls: TickerControls): (
     ...controls,
     behavior: controls.behavior ?? (pixelStep ? 'instant' : 'smooth'),
   }
-  const distance = (forward: boolean) =>
+  const distance = (forward: boolean, offset = 0) =>
     pixelStep
       ? (forward ? 1 : -1) * Number(controls.step)
       : itemStep(
@@ -738,24 +754,30 @@ const connectControls = (state: RuntimeTickerState, controls: TickerControls): (
           forward,
           Number.isSafeInteger(controls.itemsPerStep) && Number(controls.itemsPerStep) > 0
             ? Number(controls.itemsPerStep)
-            : 1
+            : 1,
+          offset
         )
-  previous?.addEventListener(
-    'click',
-    () =>
-      navigate(state, readPosition(state) + distance(false), false, navigationOptions, 'control'),
-    {
-      signal,
-    }
-  )
-  next?.addEventListener(
-    'click',
-    () =>
-      navigate(state, readPosition(state) + distance(true), false, navigationOptions, 'control'),
-    {
-      signal,
-    }
-  )
+  const step = (forward: boolean, source: 'control' | 'keyboard') => {
+    const position = readPosition(state)
+    const pending = state.stepNavigation
+    // Continue same-direction clicks from the intended destination, even over
+    // multiple cycles. Reversals start at the visible position immediately.
+    const remaining = pending?.forward === forward ? pending.target - pending.position : 0
+    navigate(
+      state,
+      position + remaining + distance(forward, remaining),
+      false,
+      navigationOptions,
+      source,
+      forward
+    )
+  }
+  previous?.addEventListener('click', () => step(false, 'control'), {
+    signal,
+  })
+  next?.addEventListener('click', () => step(true, 'control'), {
+    signal,
+  })
   const sync = () => {
     if (!rail) return
     rail.min = '0'
@@ -795,13 +817,12 @@ const connectControls = (state: RuntimeTickerState, controls: TickerControls): (
         : event.key === (state.rtl ? 'ArrowRight' : 'ArrowLeft')
       if (!forward && !backward && event.key !== 'Home' && event.key !== 'End') return
       event.preventDefault()
+      if (forward || backward) {
+        step(forward, 'keyboard')
+        return
+      }
       const period = state.measurement?.contentExtent ?? 0
-      const target =
-        event.key === 'Home'
-          ? 0
-          : event.key === 'End'
-            ? Math.max(0, period - 0.001)
-            : readPosition(state) + distance(forward)
+      const target = event.key === 'Home' ? 0 : Math.max(0, period - 0.001)
       navigate(state, target, false, navigationOptions, 'keyboard')
     },
     { signal }

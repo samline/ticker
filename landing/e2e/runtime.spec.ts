@@ -670,6 +670,139 @@ for (const direction of ['left', 'up', 'down']) {
   })
 }
 
+for (const [direction, dir] of [
+  ['left', 'ltr'],
+  ['right', 'ltr'],
+  ['auto', 'rtl'],
+  ['up', 'ltr'],
+  ['down', 'ltr'],
+]) {
+  test(`${direction}/${dir}: rapid item clicks and rail keys count every step and reverse immediately`, async ({
+    page,
+  }) => {
+    await setup(page, { direction, autoplay: false, navigation: true }, dir)
+    await page.evaluate(() => {
+      const w = window as any
+      const c = w.controller
+      w.disconnect()
+      const vertical = c.element.dataset.axis === 'vertical'
+      c.source.innerHTML = [80, 110, 60, 140]
+        .map(
+          (size, i) =>
+            `<span style="padding:0;flex:none;${vertical ? 'height' : 'width'}:${size}px">${i}</span>`
+        )
+        .join('')
+      c.element.style[vertical ? 'height' : 'width'] = '320px'
+      c.element.style[vertical ? 'scrollPaddingTop' : 'scrollPaddingLeft'] = '24px'
+      c.element.style[vertical ? 'scrollPaddingBottom' : 'scrollPaddingRight'] = '32px'
+      c.refresh()
+      w.connectSteps = (behavior: string, itemsPerStep = 1) => {
+        w.disconnect()
+        w.disconnect = c.connectControls({
+          previous: document.querySelector('#previous'),
+          next: document.querySelector('#next'),
+          rail: document.querySelector('#rail'),
+          behavior,
+          itemsPerStep,
+          duration: 120,
+          preservePlayback: true,
+        })
+      }
+    })
+    await expect.poll(async () => (await state(page)).distance).toBeCloseTo(432, 2)
+    for (const count of [1, 3]) {
+      for (const forward of [true, false]) {
+        const expected = await page.evaluate(
+          ({ count, forward }) => {
+            const w = window as any
+            w.controller.scrollTo(0)
+            w.connectSteps('instant', count)
+            const button = document.querySelector<HTMLButtonElement>(
+              forward ? '#next' : '#previous'
+            )!
+            for (let i = 0; i < 7; i++) button.click()
+            return w.controller.state.position
+          },
+          { count, forward }
+        )
+        const jumps = await page.evaluate(
+          async ({ count, forward }) => {
+            const w = window as any
+            const c = w.controller
+            c.scrollTo(0)
+            w.connectSteps('smooth', count)
+            const button = document.querySelector<HTMLButtonElement>(
+              forward ? '#next' : '#previous'
+            )!
+            const vertical = c.element.dataset.axis === 'vertical'
+            const rtl = c.element.dataset.writingDirection === 'rtl'
+            const key = vertical
+              ? forward
+                ? 'ArrowDown'
+                : 'ArrowUp'
+              : forward !== rtl
+                ? 'ArrowRight'
+                : 'ArrowLeft'
+            const jumps = []
+            for (let i = 0; i < 7; i++) {
+              const before = c.state.position
+              if (count === 3)
+                document
+                  .querySelector('#rail')!
+                  .dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
+              else button.click()
+              jumps.push(Math.abs(c.state.position - before))
+              await new Promise<void>(resolve =>
+                requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+              )
+            }
+            return jumps
+          },
+          { count, forward }
+        )
+        expect(Math.max(...jumps)).toBeLessThan(0.1)
+        await expect
+          .poll(async () => (await state(page)).reasons.includes('navigation'))
+          .toBe(false)
+        expect((await state(page)).position).toBeCloseTo(expected, 2)
+        expect((await state(page)).requested).toBe(false)
+      }
+    }
+    const reversed = await page.evaluate(async () => {
+      const w = window as any
+      const c = w.controller
+      c.scrollTo(0)
+      w.connectSteps('smooth')
+      const rail = document.querySelector('#rail')!
+      const vertical = c.element.dataset.axis === 'vertical'
+      const forward = vertical
+        ? 'ArrowDown'
+        : c.element.dataset.writingDirection === 'rtl'
+          ? 'ArrowLeft'
+          : 'ArrowRight'
+      for (let i = 0; i < 3; i++)
+        rail.dispatchEvent(new KeyboardEvent('keydown', { key: forward, bubbles: true }))
+      await new Promise<void>(resolve =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      )
+      const visible = c.state.position
+      document.querySelector<HTMLButtonElement>('#previous')!.click()
+      return { visible, after: c.state.position }
+    })
+    expect(reversed.after).toBeCloseTo(reversed.visible, 2)
+    await expect.poll(async () => (await state(page)).reasons.includes('navigation')).toBe(false)
+    const actual = (await state(page)).position
+    const expected = await page.evaluate(visible => {
+      const w = window as any
+      w.controller.scrollTo(visible)
+      w.connectSteps('instant')
+      document.querySelector<HTMLButtonElement>('#previous')!.click()
+      return w.controller.state.position
+    }, reversed.visible)
+    expect(actual).toBeCloseTo(expected, 2)
+  })
+}
+
 test('item stepping skips decorations, measures updates, handles oversized and empty sources', async ({
   page,
 }) => {

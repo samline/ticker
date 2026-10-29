@@ -361,4 +361,100 @@ describe('item navigation decisions', () => {
     document.querySelector<HTMLButtonElement>('#next')!.click()
     expect(c.state).toMatchObject({ position: 0, ready: false })
   })
+
+  it.each(['left', 'up', 'auto'] as const)(
+    'counts rapid clicks across cycles and reverses from the visible position for %s',
+    async direction => {
+      vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>
+        window.setTimeout(() => callback(Date.now()), 16)
+      )
+      const { c } = await fixture(direction)
+      const previous = document.querySelector<HTMLButtonElement>('#prev')!
+      const next = document.querySelector<HTMLButtonElement>('#next')!
+      for (const itemsPerStep of [1, 3]) {
+        for (const button of [next, previous]) {
+          c.scrollTo(0)
+          let disconnect = c.connectControls({ previous, next, itemsPerStep, behavior: 'instant' })
+          for (let i = 0; i < 7; i++) button.click()
+          const expected = c.state.position
+          disconnect()
+          c.scrollTo(0)
+          disconnect = c.connectControls({ previous, next, itemsPerStep })
+          let completions = 0
+          const unsubscribe = c.on('navigate', () => completions++)
+          for (let i = 0; i < 7; i++) {
+            button.click()
+            // Include real intermediate movement, not only same-frame clicks.
+            vi.advanceTimersByTime(32)
+          }
+          vi.advanceTimersByTime(336)
+          expect(c.state.position).toBeCloseTo(expected, 4)
+          expect(c.state.reasons).not.toContain('navigation')
+          expect(completions).toBe(1)
+          unsubscribe()
+          disconnect()
+        }
+      }
+      c.scrollTo(0)
+      let disconnect = c.connectControls({ previous, next })
+      next.click()
+      next.click()
+      vi.advanceTimersByTime(96)
+      const visible = c.state.position
+      previous.click()
+      vi.advanceTimersByTime(336)
+      const reversed = c.state.position
+      disconnect()
+      c.scrollTo(visible)
+      disconnect = c.connectControls({ previous, behavior: 'instant' })
+      previous.click()
+      expect(reversed).toBeCloseTo(c.state.position, 4)
+      disconnect()
+    }
+  )
+
+  it('discards pending steps on competing commands and accumulates opted-in smooth pixel steps', async () => {
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>
+      window.setTimeout(() => callback(Date.now()), 16)
+    )
+    const { c } = await fixture()
+    const next = document.querySelector<HTMLButtonElement>('#next')!
+    const rail = document.querySelector<HTMLInputElement>('#rail')!
+    let disconnect = c.connectControls({ next, rail })
+    const cancel = [
+      () => c.pause(),
+      () => c.refresh(),
+      () => c.scrollTo(17),
+      () => {
+        rail.value = '17'
+        rail.dispatchEvent(new Event('input'))
+      },
+    ]
+    for (const command of cancel) {
+      c.scrollTo(0)
+      next.click()
+      next.click()
+      vi.advanceTimersByTime(80)
+      command()
+      vi.advanceTimersByTime(336)
+      const visible = c.state.position
+      expect(c.state.reasons).not.toContain('navigation')
+      next.click()
+      vi.advanceTimersByTime(336)
+      const actual = c.state.position
+      disconnect()
+      c.scrollTo(visible)
+      disconnect = c.connectControls({ next, rail, behavior: 'instant' })
+      next.click()
+      expect(actual).toBeCloseTo(c.state.position, 4)
+      disconnect()
+      disconnect = c.connectControls({ next, rail })
+    }
+    disconnect()
+    c.scrollTo(0)
+    c.connectControls({ next, step: 25, behavior: 'smooth' })
+    for (let i = 0; i < 6; i++) next.click()
+    vi.advanceTimersByTime(336)
+    expect(c.state.position).toBe(150)
+  })
 })

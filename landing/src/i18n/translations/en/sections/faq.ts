@@ -175,7 +175,7 @@ export default {
         },
         {
           kind: 'strong',
-          value: '9.5 KiB gzipped',
+          value: '9.6 KiB gzipped',
         },
         {
           kind: 'text',

@@ -4,6 +4,7 @@
 
 ### Behavior changes
 
+- Rapid connected-arrow clicks and rail arrow keys now count every same-direction step instead of repeatedly targeting the same incoming item. Reversals discard pending steps and move from the visible position; retargeting stays continuous on both axes and in RTL, with one completion event for the final destination.
 - Connected arrows and range arrow keys now smoothly reveal one incoming item by default on horizontal and vertical axes instead of jumping one viewport. Configure `itemsPerStep` for multiple items; movement keeps the first incoming item visible. Explicit positive pixel `step` remains supported and takes precedence. Item stepping excludes wrapper borders and respects CSS scroll-padding so applications can reserve readable space outside edge fades or overlays.
 
 ### Examples

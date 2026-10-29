@@ -56,7 +56,7 @@ export interface TickerEventMap {
 export interface TickerNavigationOptions {
   /** Pixel seeks default to instant; item controls default to smooth cubic ease-out. */
   behavior?: 'instant' | 'smooth'
-  /** Smooth step duration in milliseconds; defaults to 300. */
+  /** Smooth duration from the latest command in milliseconds; defaults to 300. */
   duration?: number
   /** Retain requested playback, including a manual pause; defaults to false. */
   preservePlayback?: boolean

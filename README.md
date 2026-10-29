@@ -192,6 +192,10 @@ Arrows reveal one incoming item by default, including a partially hidden item. S
 `itemsPerStep: 2` to request two; movement stops before the first incoming item
 would leave the opposite edge. Set CSS `scroll-padding` on the wrapper to reserve
 space for edge fades or overlays. A positive pixel `step` overrides item stepping.
+Rapid clicks in the same direction add steps to the pending destination. Changing
+direction discards that destination and steps from the currently visible position.
+Each click retargets the smooth movement without jumping; `duration` runs from the
+latest click. Rail arrow keys follow the same policy.
 
 Use your existing controller instead of resuming on every `navigate` event.
 `preservePlayback` retains manual pause as well as autoplay. Item arrows default

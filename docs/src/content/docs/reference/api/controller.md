@@ -162,7 +162,18 @@ including an explicit manual pause. Focus, hover and all automatic pause causes
 still govern continuous playback after completion. Range input seeks remain
 instant to follow the pointer. Home/End use the connected navigation behavior.
 
-Repeated commands restart from the current position. Drag starts, explicit
+Repeated arrow clicks and rail arrow keys in the same direction add each step to
+the pending destination, including across sequence boundaries. Item geometry is
+projected at that destination, so `itemsPerStep` and its first-item retention cap
+apply to each command. Reversing direction discards pending steps and calculates
+the opposite step from the currently visible position. Smooth movement always
+starts at the visible position without jumping; `duration` runs from the latest
+command. Positive pixel `step` controls also accumulate when explicitly smoothed.
+There is one active transition and one completion event for its final destination,
+not a queue of delayed animations or events. API pixel seeks, range input and
+Home/End replace the destination rather than accumulating item steps.
+
+Drag starts, explicit
 play/pause, refresh/resize, option updates, reduced-motion changes and destroy
 cancel an unfinished step. No canceled completion can restore obsolete playback
 intent. Reduced motion always seeks instantly. Invalid/nonpositive durations
