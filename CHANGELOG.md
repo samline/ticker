@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+No unreleased changes.
+
+## [2.3.0] - 2026-10-29
+
+### Added
+
+- `TickerControls.itemsPerStep` selects the number of incoming items per button or rail arrow-key command; positive safe integers are supported, with a default of one.
+
 ### Behavior changes
 
 - Rapid connected-arrow clicks and rail arrow keys now count every same-direction step instead of repeatedly targeting the same incoming item. Reversals discard pending steps and move from the visible position; retargeting stays continuous on both axes and in RTL, with one completion event for the final destination.

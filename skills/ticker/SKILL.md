@@ -3,12 +3,12 @@ name: ticker
 description: Integrate @samline/ticker marquees into websites, plain HTML, CMS templates or framework components. Use for ticker installation, styling, options, accessible motion and lifecycle; not financial market data or unrelated slider libraries.
 metadata:
   package: '@samline/ticker'
-  package-version: '2.2.0'
+  package-version: '2.3.0'
 ---
 
 # Ticker
 
-Build against the installed `@samline/ticker` version. This skill describes v2.2.0. Check the dependency version and its exports before applying it to another release. For 2.x, do not use the removed enhance()/createTicker() APIs or the former framework-adapter entrypoints; read the changelog when handling 1.x code. Preserve the host project's components, theme and lifecycle conventions; Ticker supplies movement, not a UI framework or financial data.
+Build against the installed `@samline/ticker` version. This skill describes v2.3.0. Check the dependency version and its exports before applying it to another release. For 2.x, do not use the removed enhance()/createTicker() APIs or the former framework-adapter entrypoints; read the changelog when handling 1.x code. Preserve the host project's components, theme and lifecycle conventions; Ticker supplies movement, not a UI framework or financial data.
 
 ## Choose loading, then ownership
 
@@ -17,7 +17,7 @@ Use the site's two loading labels consistently:
 - **Package / ESM:** install with npm, pnpm, yarn or bun. Import `{ ticker }` from `@samline/ticker` (or `/vanilla`) and import `@samline/ticker/style.css` once. Initialize in client code after markup exists. ESM/TypeScript and CommonJS are module formats; neither installs `window.Ticker`.
 - **HTML / CDN:** load `dist/style.css` with `<link>` and `dist/browser/global.global.js` with `<script>`, then call `window.Ticker.ticker(target, options)`. A CDN is only file delivery: self-hosting those same files uses the same API. The JavaScript is an IIFE that exposes the global namespace `window.Ticker`; “Global” is not a third setup. Keep both asset versions equal. The script and source markup must exist before initialization; avoid `async` or a deferred script followed by an immediately executed inline initializer.
 
-For v2.2.0, a CDN URL is `https://cdn.jsdelivr.net/npm/@samline/ticker@2.2.0/dist/browser/global.global.js`, with `style.css` at the same version's dist root. Verify that the chosen release/assets actually exist. A repository version, tag or documentation header does not prove npm/CDN availability. If the project uses a local build, load that build; never silently use an older CDN release with newer APIs.
+For v2.3.0, a CDN URL is `https://cdn.jsdelivr.net/npm/@samline/ticker@2.3.0/dist/browser/global.global.js`, with `style.css` at the same version's dist root. Verify that the chosen release/assets actually exist. A repository version, tag or documentation header does not prove npm/CDN availability. If the project uses a local build, load that build; never silently use an older CDN release with newer APIs.
 
 Select ownership separately from loading:
 
@@ -120,7 +120,7 @@ Apply the same CSS gap to the source sequence and generated track. Refresh after
 editing originals. Interactive clones need delegation and cannot duplicate
 framework component hydration, IDs or stateful form controls.
 
-Connected arrows and rail arrow keys reveal one incoming item by default. Set `itemsPerStep` to a positive safe integer to request more; invalid values use 1. Direct measurable sequence children count as items; decorative children with `aria-hidden="true"` are skipped. Reveal partial items fully, and cap multi-item motion before the first incoming item clips at the opposite edge. Oversized items reveal their trailing edge without additional items. Positive pixel `step` overrides item stepping. Range input, dragging and scrollTo/scrollBy remain pixel-based.
+Since v2.3.0, connected arrows and rail arrow keys reveal one incoming item by default. Set `itemsPerStep` to a positive safe integer to request more; invalid values use 1. Direct measurable sequence children count as items; decorative children with `aria-hidden="true"` are skipped. Reveal partial items fully, and cap multi-item motion before the first incoming item clips at the opposite edge. Oversized items reveal their trailing edge without additional items. Positive pixel `step` overrides item stepping. Range input, dragging and scrollTo/scrollBy remain pixel-based.
 
 Rapid same-direction arrow clicks/rail keys accumulate steps at the pending destination. Reversing discards pending steps and moves from the visible position. Each retarget remains continuous and restarts duration from the latest command; completion emits once for the final destination. Explicitly smooth pixel step controls follow this policy too. API seeks, range input and Home/End replace the destination. Do not implement application queues or disable buttons during a step.
 
