@@ -57,7 +57,7 @@ Use `controller.pause()` / `play()` for persistent intent. Read `controller.stat
 
 For changing action labels, display Pause when playback is requested and Play when explicitly paused; update the accessible name with the text. Do not mix changing labels with `aria-pressed`. Focus pause is automatic by default. Do not recreate pause ownership with application CSS.
 
-By default, `scrollTo(px)` / `scrollBy(px)` seek instantly in logical reading order, wrap modulo one sequence and leave playback paused. `navigation: true` enables axis-aware pointer gestures, preserves perpendicular page scrolling and permits instant navigation with reduced motion. Set `resumeAfterDrag: true` to restore pre-drag playback intent on release; preserve prior manual pause and all environmental pause causes. Buttons, rail and programmatic navigation pause by default; use preservePlayback to retain intent. Change the drag option with `update({ resumeAfterDrag })`; this does not start playback. A complete toggle recipe is at https://samline.github.io/ticker/examples/#drag-playback. Supply native named buttons and a labelled range with `connectControls({ previous, next, rail, step })`; use the host project's existing components and focus styles. The rail spans one repeated period. Do not intercept keys in content inputs.
+By default, `scrollTo(px)` / `scrollBy(px)` seek instantly in logical reading order, wrap modulo one sequence and leave playback paused. `navigation: true` enables axis-aware pointer gestures, preserves perpendicular page scrolling and permits instant navigation with reduced motion. Set `resumeAfterDrag: true` to restore pre-drag playback intent on release; preserve prior manual pause and all environmental pause causes. Buttons, rail and programmatic navigation pause by default; use preservePlayback to retain intent. Change the drag option with `update({ resumeAfterDrag })`; this does not start playback. A complete toggle recipe is at https://samline.github.io/ticker/examples/#drag-playback. Supply native named buttons and a labelled range with `connectControls({ previous, next, rail, itemsPerStep: 1 })`; use the host project's existing components and focus styles. The rail spans one repeated period. Do not intercept keys in content inputs.
 
 `on()` supports ready, playback, update, measure, navigate and destroy; no replay or per-frame public events. Read state for late subscriptions. Destroy clears subscriptions and owned runtime resources. `responsive: [{ query, options }]` uses viewport media queries merged in order after base options; `update()` modifies that base. Explicit pause survives rule changes. Axis changes reset position; same-axis changes preserve pixel distance modulo the new period.
 
@@ -108,7 +108,7 @@ For Shopify, load shared runtime assets once from the layout, initialize each se
 
 For v2.2+, `scrollTo`/`scrollBy` accept `{ behavior: 'smooth', duration: 300,
 preservePlayback: true }`; the same options belong to `connectControls`.
-Defaults remain instant and pause-on-navigation. Preservation retains a manual
+Item arrows and rail arrow keys default to smooth movement on both axes; pixel seeks and positive pixel steps default to instant. Navigation pauses by default. Preservation retains a manual
 pause too. Never resume from every `navigate` event; inspect `navigationSource`
 (`api`, `control`, `rail`, `keyboard`, `drag`) or use the package policy. Smooth
 steps honor reduced motion and cancel when an explicit command, drag, rebuild or
@@ -119,3 +119,7 @@ from a stable owner, and destroy the exact controller before replacing its DOM.
 Apply the same CSS gap to the source sequence and generated track. Refresh after
 editing originals. Interactive clones need delegation and cannot duplicate
 framework component hydration, IDs or stateful form controls.
+
+Connected arrows and rail arrow keys reveal one incoming item by default. Set `itemsPerStep` to a positive safe integer to request more; invalid values use 1. Direct measurable sequence children count as items; decorative children with `aria-hidden="true"` are skipped. Reveal partial items fully, and cap multi-item motion before the first incoming item clips at the opposite edge. Oversized items reveal their trailing edge without additional items. Positive pixel `step` overrides item stepping. Range input, dragging and scrollTo/scrollBy remain pixel-based.
+
+Item stepping excludes wrapper borders and honors CSS scroll-padding on the active axis. Reserve the width of any decorative edge fade or overlay with scroll-padding-inline (horizontal) or scroll-padding-block (vertical), so newly revealed content remains readable. Pixel navigation is unaffected.

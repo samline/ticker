@@ -62,7 +62,9 @@ export const createRecipeMarkup = async ({ recipe, i18n }: RecipeContext) => {
     <button type="button" data-remove-first>${e(t.removeFirst)}</button>
     <button type="button" data-remove-last>${e(t.removeLast)}</button>
     <label>${e(t.itemLabel)} <select data-item-select></select></label>
-    <button type="button" data-remove-selected>${e(t.removeSelected)}</button>`
+    <button type="button" data-remove-selected>${e(t.removeSelected)}</button>
+    <label>${e(t.positionLabel)} <select data-item-position></select></label>
+    <button type="button" data-remove-position>${e(t.removeAtPosition)}</button>`
         : ''
     }${controls}${verticalControls}${dragControls}
   </div>

@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Behavior changes
+
+- Connected arrows and range arrow keys now smoothly reveal one incoming item by default on horizontal and vertical axes instead of jumping one viewport. Configure `itemsPerStep` for multiple items; movement keeps the first incoming item visible. Explicit positive pixel `step` remains supported and takes precedence. Item stepping excludes wrapper borders and respects CSS scroll-padding so applications can reserve readable space outside edge fades or overlays.
+
+### Examples
+
+- Demonstrate removal by stable item key and current position in the live dynamic feed and complete/split CDN/ESM files; refresh copies after each edit.
+
 ## [2.2.0] - 2026-10-28
 
 ### Added

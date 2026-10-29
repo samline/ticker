@@ -66,6 +66,8 @@ export default {
   removeFirst: 'Remove first',
   removeLast: 'Remove last',
   removeSelected: 'Remove selected',
+  removeAtPosition: 'Remove at position',
+  positionLabel: 'Choose a position',
   itemLabel: 'Choose an item',
   itemEmpty: 'No items left',
   removedStatus: 'Removed {item}. Visual copies refreshed.',
@@ -202,10 +204,10 @@ export default {
       kind: 'dynamic',
       title: 'A feed that grows',
       description:
-        'Add or remove announcements while the feed keeps a constant 40 pixels per second. Try removing the first, last or selected item; the original content and its visual copies stay in sync.',
+        'Add or remove announcements while the feed keeps a constant 40 pixels per second. Try removing the first, last or selected item, or choose its current position; the original content and its visual copies stay in sync.',
       docsPath: 'guides/lifecycle/#update-versus-refresh',
       docsLabel: 'Learn when to update() or refresh()',
-      note: 'The application owns the items and calls refresh() after editing the source. Pixel speed keeps the pace steady as the feed grows or shrinks.',
+      note: 'Each item has a stable data-example-item key. Choose an item to remove it by that key, or choose its current position (1 is the first item; JavaScript indexes start at 0). The application edits originals and calls refresh() to synchronize copies. Pixel speed stays steady.',
       rows: [
         {
           label: 'Live example updates',
@@ -254,7 +256,7 @@ export default {
         'Start paused. Use Previous, Next, the position rail or a pointer gesture to explore a repeating sequence. Press Play, then drag: playback resumes after release when hover and focus pauses clear. Smooth arrow steps and the rail preserve your current playback choice, including a manual pause.',
       docsPath: 'reference/api/controller/#manual-navigation',
       docsLabel: 'Read the manual navigation contract',
-      note: 'Arrow buttons ease through one visible extent over 300 ms and respect reduced motion. The rail represents one repeated sequence and wraps at its end. Drag horizontally; vertical page scrolling stays available.',
+      note: 'Arrow buttons reveal one incoming element over 300 ms, including a partially hidden element, and respect reduced motion. Set itemsPerStep in the copied code to request more; motion stops before the first incoming element leaves the opposite edge. The rail represents one repeated sequence and wraps at its end. Drag horizontally; vertical page scrolling stays available.',
       rows: [
         {
           label: 'Manual news navigation',
@@ -276,7 +278,7 @@ export default {
         'A scrolling resource feed with illustrated cards, useful links and descriptions. Each card keeps its own height while the column moves at 28 pixels per second.',
       docsPath: 'reference/configuration/#vertical-and-writing-direction',
       docsLabel: 'Configure vertical movement',
-      note: 'Illustrative technology marks, not product announcements or endorsements. Choose Up or Down to change movement. Hover or focus a link to read; use Previous, Next, the rail or drag to browse.',
+      note: 'Illustrative technology marks, not product announcements or endorsements. Choose Up or Down to change movement. Hover or focus a link to read. Previous and Next smoothly reveal one incoming card at a time; use the rail or drag to browse freely.',
       rows: [
         {
           label: 'Vertical ticker resources',

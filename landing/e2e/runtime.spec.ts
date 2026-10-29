@@ -538,3 +538,282 @@ for (const direction of ['left', 'right', 'up', 'down', 'auto']) {
     expect((await state(page)).requested).toBe(false)
   })
 }
+
+for (const [direction, dir] of [
+  ['left', 'ltr'],
+  ['right', 'ltr'],
+  ['left', 'rtl'],
+  ['up', 'ltr'],
+  ['down', 'ltr'],
+]) {
+  test(`${direction}/${dir}: item steps reveal partial items, cap groups and wrap`, async ({
+    page,
+  }) => {
+    await setup(page, { direction, autoplay: false, navigation: true }, dir)
+    await page.evaluate(() => {
+      const w = window as any
+      w.disconnect()
+      const c = w.controller
+      const vertical = c.element.dataset.axis === 'vertical'
+      c.source.innerHTML = [80, 110, 60, 140]
+        .map(
+          (size, i) =>
+            `<span style="flex:none;padding:0;${vertical ? 'height' : 'width'}:${size}px">${i}</span>`
+        )
+        .join('')
+      c.element.style[vertical ? 'height' : 'width'] = '320px'
+      c.refresh()
+      w.connectItems = (count?: number, step?: number) => {
+        w.disconnect?.()
+        w.disconnect = c.connectControls({
+          previous: document.querySelector('#previous'),
+          next: document.querySelector('#next'),
+          rail: document.querySelector('#rail'),
+          behavior: 'instant',
+          itemsPerStep: count,
+          step,
+        })
+      }
+    })
+    await page.waitForTimeout(80)
+    // Compare actual visible geometry, including clone instances, rather than
+    // assuming animation direction or source order is the physical order.
+    for (const count of [undefined, 1, 2, 3, 100, 0, 1.5, -2]) {
+      for (const forward of [true, false]) {
+        const result = await page.evaluate(
+          ({ count, forward }) => {
+            const w = window as any
+            const c = w.controller
+            c.scrollTo(17.25)
+            w.connectItems(count)
+            const viewport = c.element.getBoundingClientRect()
+            const vertical = c.element.dataset.axis === 'vertical'
+            const rtl = !vertical && getComputedStyle(c.element).direction === 'rtl'
+            const extent = vertical ? viewport.height : viewport.width
+            const period = c.state.distance
+            const intervals = [...c.source.children]
+              .flatMap((el: any) => {
+                const r = el.getBoundingClientRect()
+                let start = vertical
+                  ? r.top - viewport.top
+                  : rtl
+                    ? viewport.right - r.right
+                    : r.left - viewport.left
+                let end = vertical
+                  ? r.bottom - viewport.top
+                  : rtl
+                    ? viewport.right - r.left
+                    : r.right - viewport.left
+                if (!forward) [start, end] = [extent - end, extent - start]
+                return Array.from({ length: 12 }, (_, i) => ({
+                  start: start + (i - 4) * period,
+                  end: end + (i - 4) * period,
+                }))
+              })
+              .filter((r: any) => r.end > extent + 0.001)
+              .sort((a: any, b: any) => a.end - b.end)
+            const n = Number.isSafeInteger(count) && Number(count) > 0 ? Number(count) : 1
+            const delta = Math.min(
+              intervals[Math.min(n, intervals.length) - 1].end - extent,
+              intervals[0].start
+            )
+            const expected = (((17.25 + (forward ? delta : -delta)) % period) + period) % period
+            document.querySelector<HTMLButtonElement>(forward ? '#next' : '#previous')!.click()
+            return { actual: c.state.position, expected }
+          },
+          { count, forward }
+        )
+        expect(
+          Math.min(
+            Math.abs(result.actual - result.expected),
+            Math.abs(Math.abs(result.actual - result.expected) - (await state(page)).distance)
+          ),
+          JSON.stringify({ count, forward, result })
+        ).toBeLessThan(0.001)
+      }
+    }
+    await page.evaluate(() => {
+      const w = window as any
+      w.controller.scrollTo(0)
+      w.connectItems(3, 25.5)
+      document.querySelector<HTMLButtonElement>('#next')!.click()
+    })
+    expect((await state(page)).position).toBeCloseTo(25.5, 4)
+  })
+}
+
+for (const direction of ['left', 'up', 'down']) {
+  test(`${direction}: default item controls animate, keyboard follows items, reduced motion seeks instantly`, async ({
+    page,
+  }) => {
+    await setup(page, { direction, autoplay: false, navigation: true })
+    await page.evaluate(() => {
+      const w = window as any
+      w.disconnect()
+      w.controller.connectControls({
+        next: document.querySelector('#next'),
+        rail: document.querySelector('#rail'),
+      })
+      document.querySelector<HTMLButtonElement>('#next')!.click()
+    })
+    expect((await state(page)).reasons).toContain('navigation')
+    await expect.poll(async () => (await state(page)).reasons.includes('navigation')).toBe(false)
+    const first = (await state(page)).position
+    await page.locator('#rail').press(direction === 'left' ? 'ArrowRight' : 'ArrowDown')
+    expect((await state(page)).reasons).toContain('navigation')
+    await expect.poll(async () => (await state(page)).reasons.includes('navigation')).toBe(false)
+    expect((await state(page)).position).not.toBeCloseTo(first, 2)
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.waitForTimeout(80)
+    await page.locator('#next').click()
+    expect((await state(page)).reasons).not.toContain('navigation')
+  })
+}
+
+test('item stepping skips decorations, measures updates, handles oversized and empty sources', async ({
+  page,
+}) => {
+  await setup(page, { autoplay: false, navigation: true })
+  await page.evaluate(() => {
+    const w = window as any
+    w.disconnect()
+    w.controller.source.innerHTML =
+      '<span style="width:100px;padding:0;flex:none">A</span><span aria-hidden="true" style="width:40px;padding:0;flex:none">·</span><span style="width:450px;padding:0;flex:none">B</span>'
+    w.controller.refresh()
+    w.controller.connectControls({
+      next: document.querySelector('#next'),
+      behavior: 'instant',
+      itemsPerStep: 3,
+    })
+  })
+  await page.waitForTimeout(80)
+  await page.evaluate(() => (window as any).controller.scrollTo(0))
+  await page.locator('#next').click()
+  // 100 + 10.5 + decoration 40 + 10.5 + oversized 450 - viewport 320.
+  expect((await state(page)).position).toBeCloseTo(291, 4)
+  await page.evaluate(() => {
+    const c = (window as any).controller
+    c.source.replaceChildren()
+    c.refresh()
+  })
+  await page.waitForTimeout(80)
+  await page.locator('#next').click()
+  expect((await state(page)).position).toBe(0)
+  expect((await state(page)).ready).toBe(false)
+})
+
+for (const [direction, dir] of [
+  ['left', 'ltr'],
+  ['right', 'ltr'],
+  ['auto', 'rtl'],
+  ['up', 'ltr'],
+  ['down', 'ltr'],
+]) {
+  test(`${direction}/${dir}: item navigation respects borders and asymmetric scroll padding`, async ({
+    page,
+  }) => {
+    await setup(page, { direction, autoplay: false, navigation: true }, dir)
+    await page.evaluate(() => {
+      const w = window as any
+      w.disconnect()
+      const c = w.controller
+      const vertical = c.element.dataset.axis === 'vertical'
+      c.source.innerHTML = [80, 110, 60, 140]
+        .map(
+          (size, i) =>
+            `<span style="padding:0;flex:none;${vertical ? 'height' : 'width'}:${size}px">item-${i}</span>`
+        )
+        .join('')
+      c.element.style[vertical ? 'height' : 'width'] = '320px'
+      c.element.style.border = '2px solid'
+      c.element.style.scrollPadding = vertical ? '10% 0px 24px' : '0px 10% 0px 24px'
+      c.refresh()
+      c.connectControls({
+        previous: document.querySelector('#previous'),
+        next: document.querySelector('#next'),
+      })
+    })
+    await page.waitForTimeout(80)
+    for (const forward of [true, true, true, false, false, false]) {
+      const target = await page.evaluate(forward => {
+        const c = (window as any).controller
+        const frame = c.element
+        const rect = frame.getBoundingClientRect()
+        const vertical = frame.dataset.axis === 'vertical'
+        const rtl = !vertical && getComputedStyle(frame).direction === 'rtl'
+        const low = (vertical ? rect.top : rect.left) + 2 + (vertical ? 32 : 24)
+        const high = (vertical ? rect.bottom : rect.right) - 2 - (vertical ? 24 : 32)
+        const descending = forward === rtl
+        const candidates = [...frame.querySelectorAll('.ticker-content span')]
+          .map((item: any) => {
+            const r = item.getBoundingClientRect()
+            return {
+              text: item.textContent,
+              start: vertical ? r.top : r.left,
+              end: vertical ? r.bottom : r.right,
+            }
+          })
+          .filter((r: any) => (descending ? r.start < low - 0.5 : r.end > high + 0.5))
+          .sort((a: any, b: any) => (descending ? b.start - a.start : a.end - b.end))
+        return candidates[0]?.text
+      }, forward)
+      expect(target).toBeTruthy()
+      await page.locator(forward ? '#next' : '#previous').click()
+      await expect.poll(async () => (await state(page)).reasons.includes('navigation')).toBe(false)
+      expect(
+        await page.evaluate(target => {
+          const c = (window as any).controller
+          const rect = c.element.getBoundingClientRect()
+          const vertical = c.element.dataset.axis === 'vertical'
+          const low = (vertical ? rect.top : rect.left) + 2 + (vertical ? 32 : 24)
+          const high = (vertical ? rect.bottom : rect.right) - 2 - (vertical ? 24 : 32)
+          return [...c.element.querySelectorAll('.ticker-content span')].some((item: any) => {
+            const r = item.getBoundingClientRect()
+            return (
+              item.textContent === target &&
+              (vertical ? r.top : r.left) >= low - 0.5 &&
+              (vertical ? r.bottom : r.right) <= high + 0.5
+            )
+          })
+        }, target)
+      ).toBe(true)
+    }
+  })
+}
+
+test('removes a desired original by stable identifier and current item position, then refreshes clones', async ({
+  page,
+}) => {
+  await setup(page, { autoplay: false, navigation: true })
+  await page.evaluate(() => {
+    const c = (window as any).controller
+    c.source.innerHTML = ['a', 'b', 'c', 'd']
+      .map(id => `<span data-item-id="${id}" style="padding:0;flex:none;width:90px">${id}</span>`)
+      .join('')
+    c.refresh()
+  })
+  await page.waitForTimeout(80)
+  await page.evaluate(() => {
+    const c = (window as any).controller
+    c.source.querySelector('[data-item-id="b"]')?.remove()
+    c.refresh()
+  })
+  await expect(page.locator('.ticker-content:not(.ticker-clone) [data-item-id]')).toHaveText([
+    'a',
+    'c',
+    'd',
+  ])
+  await expect(page.locator('.ticker-clone [data-item-id="b"]')).toHaveCount(0)
+  await page.evaluate(() => {
+    const c = (window as any).controller
+    // Zero-based index among current items; decoration is not included.
+    c.source.querySelectorAll('[data-item-id]')[1]?.remove()
+    c.refresh()
+  })
+  await expect(page.locator('.ticker-content:not(.ticker-clone) [data-item-id]')).toHaveText([
+    'a',
+    'd',
+  ])
+  await expect(page.locator('.ticker-clone [data-item-id="c"]')).toHaveCount(0)
+  await expect.poll(async () => (await state(page)).distance).toBeCloseTo(201, 4)
+})

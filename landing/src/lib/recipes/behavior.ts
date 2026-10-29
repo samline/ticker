@@ -46,6 +46,7 @@ if (news) {
     recipe.rows.some(row => row.navigation)
       ? `
   news.connectControls({
+    itemsPerStep: 1,
     ${recipe.id === 'manual-navigation' ? "behavior: 'smooth', duration: 300, preservePlayback: true," : ''}
     previous: example.querySelector('[data-previous]'),
     next: example.querySelector('[data-next]'),
@@ -96,9 +97,10 @@ if (news) {
     recipe.kind === 'dynamic'
       ? `
   const select = example.querySelector('[data-item-select]');
+  const position = example.querySelector('[data-item-position]');
   const status = example.querySelector('[role=status]');
   const items = () => [...news.source.querySelectorAll('[data-example-item]')];
-  const removeButtons = example.querySelectorAll('[data-remove-first], [data-remove-last], [data-remove-selected]');
+  const removeButtons = example.querySelectorAll('[data-remove-first], [data-remove-last], [data-remove-selected], [data-remove-position]');
   const syncItems = () => {
     const selected = select.value;
     const current = items();
@@ -106,6 +108,11 @@ if (news) {
     if (current.some(item => item.dataset.exampleItem === selected)) select.value = selected;
     if (!current.length) select.add(new Option(${js(t.itemEmpty)}, ''));
     select.disabled = !current.length;
+    const index = Math.min(Number(position.value) || 0, current.length - 1);
+    position.replaceChildren(...current.map((_, index) => new Option(String(index + 1), String(index))));
+    if (current.length) position.value = String(Math.max(0, index));
+    else position.add(new Option(${js(t.itemEmpty)}, ''));
+    position.disabled = !current.length;
     removeButtons.forEach(button => { button.disabled = !current.length; });
   };
   const removeItem = item => {
@@ -116,10 +123,15 @@ if (news) {
     syncItems();
     status.textContent = ${js(t.removedStatus)}.replace('{item}', label);
   };
+  // These helpers belong to the application, not the Ticker controller.
+  // Stable keys survive reordering; indexes refer to the current item list.
+  const removeById = id => removeItem(items().find(item => item.dataset.exampleItem === id));
+  const removeAt = index => removeItem(items()[index]);
+  example.querySelector('[data-remove-position]').addEventListener('click', () => removeAt(Number(position.value)), { signal });
   example.querySelector('[data-remove-first]').addEventListener('click', () => removeItem(items()[0]), { signal });
   example.querySelector('[data-remove-last]').addEventListener('click', () => removeItem(items().at(-1)), { signal });
   example.querySelector('[data-remove-selected]').addEventListener('click', () => {
-    removeItem(items().find(item => item.dataset.exampleItem === select.value));
+    removeById(select.value);
   }, { signal });
   syncItems();
   let count = 0;

@@ -172,3 +172,7 @@ range, keyboard, API and drag. Cancel pending transitions on competing commands,
 drag, changed geometry, explicit refresh, reduced motion and destruction. An
 unchanged automatic measurement must not cancel a running step. Keep the live
 manual-navigation example, copied files, public skill and API types aligned.
+
+Connected navigation arrows and rail arrow keys use `itemsPerStep` (default 1) with smooth motion by default on both axes, measured by the package from direct sequence children excluding `aria-hidden="true"` decorations. Explicit `behavior: 'instant'` and reduced motion disable smoothing. Multi-item movement retains the first incoming item; positive pixel `step` overrides this behavior. Keep the live manual-navigation recipe, copied files, controller reference and public skill synchronized. Pixel seeking, pointer dragging and range input retain their existing contracts.
+
+Item navigation must reveal content inside the readable viewport, excluding wrapper borders and honoring CSS scroll-padding for application-owned fades/overlays. TickerDemo ties its horizontal scroll-padding to the fade width and clears it for vertical layouts. Verify actual link/card visibility outside overlays, not only a mathematically aligned outer edge.

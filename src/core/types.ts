@@ -54,7 +54,7 @@ export interface TickerEventMap {
 }
 
 export interface TickerNavigationOptions {
-  /** Instant by default. Smooth uses a package-owned cubic ease-out. */
+  /** Pixel seeks default to instant; item controls default to smooth cubic ease-out. */
   behavior?: 'instant' | 'smooth'
   /** Smooth step duration in milliseconds; defaults to 300. */
   duration?: number
@@ -66,7 +66,9 @@ export interface TickerControls extends TickerNavigationOptions {
   previous?: HTMLButtonElement
   next?: HTMLButtonElement
   rail?: HTMLInputElement
-  /** CSS pixels per button press; defaults to the visible extent. */
+  /** Items to reveal per arrow/keyboard step; positive integer, defaults to 1. */
+  itemsPerStep?: number
+  /** Positive CSS pixels per step; overrides item navigation when supplied. */
   step?: number
 }
 

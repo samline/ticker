@@ -181,15 +181,22 @@ const strip = ticker('#news-ticker', { navigation: true, autoplay: true })
 const disconnect = strip?.connectControls({
   previous: document.querySelector<HTMLButtonElement>('#previous')!,
   next: document.querySelector<HTMLButtonElement>('#next')!,
+  itemsPerStep: 1,
   behavior: 'smooth',
   duration: 300,
   preservePlayback: true,
 })
 ```
 
+Arrows reveal one incoming item by default, including a partially hidden item. Set
+`itemsPerStep: 2` to request two; movement stops before the first incoming item
+would leave the opposite edge. Set CSS `scroll-padding` on the wrapper to reserve
+space for edge fades or overlays. A positive pixel `step` overrides item stepping.
+
 Use your existing controller instead of resuming on every `navigate` event.
-`preservePlayback` retains manual pause as well as autoplay. Instant navigation
-that pauses playback remains the default. Reduced motion always seeks instantly.
+`preservePlayback` retains manual pause as well as autoplay. Item arrows default
+to smooth movement on both axes; pixel seeks and explicit pixel steps remain instant
+by default. Navigation pauses playback unless preservation is enabled. Reduced motion always seeks instantly.
 See the controller documentation for cancellation and `navigationSource` events.
 
 ## Documentation

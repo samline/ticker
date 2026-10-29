@@ -459,7 +459,9 @@ test('prose styles do not add a second frame to shared code blocks or underline 
 
 test('changelog replaces migration and keeps the historical URL useful', async ({ page }) => {
   const source = await readFile(new URL('../../CHANGELOG.md', import.meta.url), 'utf8')
-  const versions = [...source.matchAll(/^## (\[[^\]]+\] - \S+)/gm)].map(match => match[1])
+  const versions = [...source.matchAll(/^## (Unreleased|\[[^\]]+\] - \S+)/gm)].map(
+    match => match[1]
+  )
   await page.goto('changelog/')
   await expect(page.locator('#article-title')).toHaveText('Changelog')
   await expect(page.locator('ticker-docs-article h2')).toHaveText(versions)

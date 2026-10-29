@@ -12,7 +12,7 @@ interface Props {
   speed?: number
   autoplay?: boolean
   navigation?: boolean
-  smoothNavigation?: boolean
+  preserveNavigationPlayback?: boolean
   resumeAfterDrag?: boolean
   rtl?: boolean
   responsive?: import('@samline/ticker').TickerResponsiveRule[]
@@ -26,7 +26,7 @@ const {
   speed,
   autoplay = true,
   navigation = false,
-  smoothNavigation = false,
+  preserveNavigationPlayback = false,
   resumeAfterDrag = false,
   responsive = [],
   rtl = false,
@@ -44,7 +44,7 @@ const i18n = getI18n(Astro)
   data-speed={speed}
   data-autoplay={String(autoplay)}
   data-navigation={String(navigation)}
-  data-smooth-navigation={String(smoothNavigation)}
+  data-preserve-navigation-playback={String(preserveNavigationPlayback)}
   data-resume-after-drag={String(resumeAfterDrag)}
   data-responsive={JSON.stringify(responsive)}
   data-kind={kind}
@@ -130,8 +130,9 @@ const i18n = getI18n(Astro)
       demoControllers.set(element, controller)
       if (element.dataset.navigation === 'true')
         controller.connectControls({
-          behavior: element.dataset.smoothNavigation === 'true' ? 'smooth' : 'instant',
-          preservePlayback: element.dataset.smoothNavigation === 'true',
+          itemsPerStep: 1,
+          behavior: 'smooth',
+          preservePlayback: element.dataset.preserveNavigationPlayback === 'true',
           previous: controls.querySelector<HTMLButtonElement>('[data-previous]')!,
           next: controls.querySelector<HTMLButtonElement>('[data-next]')!,
           rail: controls.querySelector<HTMLInputElement>('[data-position]')!,
@@ -181,6 +182,7 @@ const i18n = getI18n(Astro)
 
 <style>
   .ticker-frame[data-axis='vertical'] {
+    scroll-padding-inline: 0;
     height: 22rem;
   }
   .ticker-frame[data-axis='vertical'] .ticker-content {
@@ -196,6 +198,8 @@ const i18n = getI18n(Astro)
     display: none;
   }
   .ticker-frame {
+    --ticker-edge-fade: 1.5rem;
+    scroll-padding-inline: var(--ticker-edge-fade);
     position: relative;
     background: transparent;
     border: 0;
@@ -207,7 +211,7 @@ const i18n = getI18n(Astro)
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 1.5rem;
+    width: var(--ticker-edge-fade);
     z-index: 2;
     pointer-events: none;
   }
@@ -216,7 +220,7 @@ const i18n = getI18n(Astro)
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 1.5rem;
+    width: var(--ticker-edge-fade);
     z-index: 2;
     pointer-events: none;
   }

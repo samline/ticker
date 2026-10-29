@@ -34,8 +34,12 @@ const removeOffer = (item?: Element | null) => {
 const items = [...(offers?.source.querySelectorAll('[data-offer]') ?? [])]
 removeOffer(items[0]) // First original item.
 removeOffer(items.at(-1)) // Last original item.
-removeOffer(offers?.source.querySelector('[data-offer="sale"]'))
+removeOffer(offers?.source.querySelector('[data-offer="sale"]')) // Stable application key.
+removeOffer(offers?.source.querySelector('#offer-42')) // Original DOM id.
+removeOffer(offers?.source.querySelectorAll('[data-offer]')[2]) // Current third item (zero-based index).
 ```
+
+Re-query the item list after each edit: positions change when earlier items are removed, while an application key or original DOM id identifies the same item. If adopting prebuilt wrapper markup, scope selectors to its original `.ticker-content:not(.ticker-clone)` first.
 
 `removeOffer` is an application helper, not a Ticker method. Target original nodes rather than `.ticker-clone` copies; the package still owns measurement, playback and clone cleanup. Removing every item leaves the runtime waiting for measurable content; appending a new item and refreshing makes the feed ready again.
 

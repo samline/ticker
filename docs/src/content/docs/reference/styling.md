@@ -76,6 +76,27 @@ The runtime measures the track's computed horizontal `column-gap` (falling back 
 
 Classes passed through `options.class` are controller-owned. Other wrapper classes are preserved across `update()` calls.
 
+## Readable navigation area
+
+Item-based arrows and rail arrow keys honor the wrapper's CSS `scroll-padding`,
+including logical properties and percentages, on the active axis. Use it to keep
+revealed items clear of fades or overlays; wrapper borders are also excluded.
+The application owns this spacing. It does not alter the animation period,
+continuous playback, pixel seeks, dragging or range pointer input.
+
+```css
+.ticker-wrapper.with-edge-fades {
+  scroll-padding-inline: 1.5rem;
+}
+
+.ticker-wrapper.with-top-overlay[data-axis='vertical'] {
+  scroll-padding-block-start: 2rem;
+}
+```
+
+`auto` means zero inset. Individual insets are limited to half the clipping area;
+if they leave no viewing area, item navigation uses the full clipping area.
+
 ## Seamless loops
 
 The runtime keeps fractional content widths when calculating `--ticker-distance`. The animation travels exactly one sequence width plus the horizontal track gap, so the first clone aligns with the original when a horizontal direction restarts. Vertical directions use the content height plus `row-gap` instead. Leave this runtime-owned variable unchanged.

@@ -65,6 +65,7 @@ const getReducedMotionMedia = (): ReducedMotionMedia | null => {
 }
 
 interface RuntimeTickerState extends TickerState {
+  itemRoot: HTMLElement
   navigationFrame: number
   navigating: boolean
   navigationRevision: number
@@ -653,6 +654,67 @@ const setupInteraction = (state: RuntimeTickerState): void => {
   })
 }
 
+// Read original item geometry once per command, then project repeated copies
+// mathematically. This also finds preceding copies at the cyclic boundary.
+const itemStep = (state: RuntimeTickerState, forward: boolean, count: number): number => {
+  const period = state.measurement?.contentExtent ?? 0
+  if (!period || state.wrapper.dataset.ready !== 'true') return 0
+  const viewport = state.wrapper.getBoundingClientRect()
+  const styles = window.getComputedStyle(state.wrapper)
+  const vertical = state.vertical
+  const rtl = state.rtl && !vertical
+  const leadingBorder = parseFloat(vertical ? styles.borderTopWidth : styles.borderLeftWidth) || 0
+  const trailingBorder =
+    parseFloat(vertical ? styles.borderBottomWidth : styles.borderRightWidth) || 0
+  const clipExtent = (vertical ? viewport.height : viewport.width) - leadingBorder - trailingBorder
+  const padding = (value: string): number => {
+    const number = parseFloat(value) || 0
+    return Math.max(
+      0,
+      Math.min(clipExtent / 2, value.endsWith('%') ? (number * clipExtent) / 100 : number)
+    )
+  }
+  let leading = padding(vertical ? styles.scrollPaddingTop : styles.scrollPaddingLeft)
+  let trailing = padding(vertical ? styles.scrollPaddingBottom : styles.scrollPaddingRight)
+  // Ignore an empty requested viewing area rather than trapping the controls.
+  if (leading + trailing >= clipExtent) leading = trailing = 0
+  const extent = clipExtent - leading - trailing
+  const startEdge = (vertical ? viewport.top : viewport.left) + leadingBorder + leading
+  const endEdge = (vertical ? viewport.bottom : viewport.right) - trailingBorder - trailing
+  const candidates = Array.from(state.itemRoot.children)
+    .flatMap(item => {
+      if (item.getAttribute('aria-hidden') === 'true') return []
+      const rect = item.getBoundingClientRect()
+      if (!(state.vertical ? rect.height : rect.width)) return []
+      let start = state.vertical
+        ? rect.top - startEdge
+        : rtl
+          ? endEdge - rect.right
+          : rect.left - startEdge
+      let end = state.vertical
+        ? rect.bottom - startEdge
+        : rtl
+          ? endEdge - rect.left
+          : rect.right - startEdge
+      if (!forward) [start, end] = [extent - end, extent - start]
+      // A tiny tolerance excludes floating-point noise at an aligned boundary.
+      const cycle = Math.floor((extent - end + 0.001) / period) + 1
+      return [{ start: start + cycle * period, end: end + cycle * period }]
+    })
+    .sort((a, b) => a.end - b.end)
+  if (!candidates.length) return 0
+  const first = candidates[0]!
+  const index = count - 1
+  const target =
+    candidates[index % candidates.length]!.end +
+    Math.floor(index / candidates.length) * period -
+    extent
+  // Keep the first incoming item fully visible. Oversized items cannot fit:
+  // reveal their trailing edge and do not advance additional items this time.
+  const limit = Math.max(first.start, first.end - extent)
+  return (forward ? 1 : -1) * Math.min(target, limit)
+}
+
 const connectControls = (state: RuntimeTickerState, controls: TickerControls): (() => void) => {
   if (state.destroyed) return () => {}
   const abort = new AbortController()
@@ -663,20 +725,33 @@ const connectControls = (state: RuntimeTickerState, controls: TickerControls): (
         name => [name, rail.getAttribute(name)] as const
       )
     : []
-  const distance = () =>
-    Number.isFinite(controls.step) && Number(controls.step) > 0
-      ? Number(controls.step)
-      : state.measurement?.wrapperExtent || 1
+  const pixelStep = Number.isFinite(controls.step) && Number(controls.step) > 0
+  const navigationOptions: TickerNavigationOptions = {
+    ...controls,
+    behavior: controls.behavior ?? (pixelStep ? 'instant' : 'smooth'),
+  }
+  const distance = (forward: boolean) =>
+    pixelStep
+      ? (forward ? 1 : -1) * Number(controls.step)
+      : itemStep(
+          state,
+          forward,
+          Number.isSafeInteger(controls.itemsPerStep) && Number(controls.itemsPerStep) > 0
+            ? Number(controls.itemsPerStep)
+            : 1
+        )
   previous?.addEventListener(
     'click',
-    () => navigate(state, readPosition(state) - distance(), false, controls, 'control'),
+    () =>
+      navigate(state, readPosition(state) + distance(false), false, navigationOptions, 'control'),
     {
       signal,
     }
   )
   next?.addEventListener(
     'click',
-    () => navigate(state, readPosition(state) + distance(), false, controls, 'control'),
+    () =>
+      navigate(state, readPosition(state) + distance(true), false, navigationOptions, 'control'),
     {
       signal,
     }
@@ -726,8 +801,8 @@ const connectControls = (state: RuntimeTickerState, controls: TickerControls): (
           ? 0
           : event.key === 'End'
             ? Math.max(0, period - 0.001)
-            : readPosition(state) + (forward ? 1 : -1) * distance()
-      navigate(state, target, false, controls, 'keyboard')
+            : readPosition(state) + distance(forward)
+      navigate(state, target, false, navigationOptions, 'keyboard')
     },
     { signal }
   )
@@ -829,6 +904,7 @@ const initTicker = (wrapper: HTMLElement): void => {
     wrapper,
     track,
     content,
+    itemRoot: content,
     ...createEmptyTickerState(),
     navigationFrame: 0,
     navigating: false,
@@ -1037,6 +1113,8 @@ const enhanceElement = (element: HTMLElement, options: NormalizedTickerOptions):
   if (element !== content && element.isConnected) element.remove()
 
   initTicker(wrapper)
+  const state = tickersState.get(wrapper)
+  if (state) state.itemRoot = content
   return wrapper
 }
 

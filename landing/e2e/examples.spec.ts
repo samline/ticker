@@ -160,6 +160,9 @@ test('keeps the original recipes first and edits the dynamic feed at a constant 
   const add = recipe.getByRole('button', { name: 'Add an update' })
   await expect(add).toBeVisible()
   await expect(add).toBeEnabled()
+  await expect(
+    recipe.getByRole('combobox', { name: 'Choose a position', exact: true })
+  ).toHaveValue('0')
   const originals = recipe.locator('.ticker-content:not(.ticker-clone) [data-example-item]')
   const speed = () =>
     recipe.locator('.ticker-frame').evaluate(frame => {
@@ -192,12 +195,26 @@ test('keeps the original recipes first and edits the dynamic feed at a constant 
     recipe.locator('.ticker-clone [data-example-item]').filter({ hasText: 'New update 1' })
   ).toHaveCount(0)
   await expect(recipe.locator('.ticker-frame')).toHaveAttribute('data-user-paused', 'true')
-  for (let i = 0; i < 3; i++)
+  await recipe
+    .getByRole('combobox', { name: 'Choose a position', exact: true })
+    .selectOption({ value: '1' })
+  await recipe.getByRole('button', { name: 'Remove at position', exact: true }).click()
+  await expect(originals).toHaveText(['Design approved', 'New update 2'])
+  await expect(
+    recipe.locator('.ticker-clone [data-example-item]').filter({ hasText: 'Ready to ship' })
+  ).toHaveCount(0)
+  for (let i = 0; i < 2; i++)
     await recipe.getByRole('button', { name: 'Remove first', exact: true }).click()
   await expect(originals).toHaveCount(0)
   await expect(recipe.locator('.ticker-clone')).toHaveCount(0)
   await expect(recipe.getByRole('combobox', { name: 'Choose an item', exact: true })).toBeDisabled()
   await expect(recipe.getByRole('button', { name: 'Remove selected', exact: true })).toBeDisabled()
+  await expect(
+    recipe.getByRole('button', { name: 'Remove at position', exact: true })
+  ).toBeDisabled()
+  await expect(
+    recipe.getByRole('combobox', { name: 'Choose a position', exact: true })
+  ).toBeDisabled()
   await add.click()
   await expect(originals).toHaveCount(1)
   await expect(recipe.locator('.ticker-frame')).toHaveAttribute('data-ready', 'true')
@@ -375,6 +392,14 @@ test('every copied CDN and npm document executes as a standalone example', async
           .selectOption({ label: 'New update 1' })
         await standalone.getByRole('button', { name: 'Remove selected', exact: true }).click()
         await expect(originals).toHaveCount(2)
+        await standalone
+          .getByRole('combobox', { name: 'Choose a position', exact: true })
+          .selectOption({ value: '1' })
+        await standalone.getByRole('button', { name: 'Remove at position', exact: true }).click()
+        await expect(originals).toHaveText(['Design approved'])
+        await expect(standalone.locator('.ticker-clone [data-example-item="item-2"]')).toHaveCount(
+          0
+        )
       }
       if (id === 'brand-logos' || id === 'vertical-news')
         await expect(
@@ -440,6 +465,24 @@ test('every copied CDN and npm document executes as a standalone example', async
         await standalone.getByRole('button', { name: 'Play animation', exact: true }).click()
       await standalone.getByRole('button', { name: 'Pause animation', exact: true }).click()
       await expect(standalone.locator('button[data-pause]')).toHaveText('Play animation')
+      if (id === 'dynamic-content') {
+        const originals = standalone.locator(
+          '[data-row]:not(.ticker-clone [data-row]) [data-example-item]'
+        )
+        await standalone
+          .getByRole('combobox', { name: 'Choose an item', exact: true })
+          .selectOption('item-1')
+        await standalone.getByRole('button', { name: 'Remove selected', exact: true }).click()
+        await expect(originals).toHaveText(['Project created', 'Ready to ship'])
+        await standalone
+          .getByRole('combobox', { name: 'Choose a position', exact: true })
+          .selectOption({ value: '1' })
+        await standalone.getByRole('button', { name: 'Remove at position', exact: true }).click()
+        await expect(originals).toHaveText(['Project created'])
+        await expect(standalone.locator('.ticker-clone [data-example-item="item-2"]')).toHaveCount(
+          0
+        )
+      }
       await checkCachedPageLifecycle(standalone)
       expect(errors).toEqual([])
       await standalone.close()
@@ -688,4 +731,89 @@ test('mixed RTL characters start in autoplay with inherited direction', async ({
   await expect(
     recipe.getByRole('button', { name: 'Pause animation: RTL mixed content', exact: true })
   ).toBeVisible()
+})
+
+test('manual arrows reveal the entire incoming link outside both edge fades', async ({ page }) => {
+  for (const theme of ['light', 'dark']) {
+    for (const [width, textSize] of [
+      [320, '100%'],
+      [672, '100%'],
+      [1440, '100%'],
+      [672, '200%'],
+      [1440, '200%'],
+    ]) {
+      await page.setViewportSize({ width: Number(width), height: 900 })
+      await page.goto('examples/#manual-navigation')
+      await page.evaluate(
+        ({ theme, textSize }) => {
+          document.documentElement.dataset.theme = theme
+          document.documentElement.style.fontSize = String(textSize)
+        },
+        { theme, textSize }
+      )
+      const recipe = page.locator('#manual-navigation')
+      await expect(recipe.locator('ticker-demo')).toHaveAttribute('data-initialized', 'true')
+      await page.evaluate(() => document.fonts.ready)
+      await expect
+        .poll(() =>
+          recipe.locator('.ticker-frame').evaluate(frame => {
+            const content = frame.querySelector('.ticker-content:not(.ticker-clone)')!
+            const track = frame.querySelector('.ticker-track')!
+            const measured = parseFloat(
+              (frame as HTMLElement).style.getPropertyValue('--ticker-distance')
+            )
+            return Math.abs(
+              measured -
+                content.getBoundingClientRect().width -
+                parseFloat(getComputedStyle(track).columnGap)
+            )
+          })
+        )
+        .toBeLessThan(0.001)
+      for (const forward of [true, true, true, true, false, false, false, false]) {
+        const target = await recipe.locator('.ticker-frame').evaluate((frame, forward) => {
+          const viewport = frame.getBoundingClientRect()
+          // The actual decorative overlays, not the navigation implementation,
+          // define the readable bounds used by this regression.
+          const left = viewport.left + parseFloat(getComputedStyle(frame, '::before').width)
+          const right = viewport.right - parseFloat(getComputedStyle(frame, '::after').width)
+          const links = [...frame.querySelectorAll('.ticker-content > a')].map(link => ({
+            text: link.textContent,
+            left: link.getBoundingClientRect().left,
+            right: link.getBoundingClientRect().right,
+          }))
+          const incoming = links
+            .filter(link => (forward ? link.right > right + 0.5 : link.left < left - 0.5))
+            .sort((a, b) => (forward ? a.right - b.right : b.left - a.left))[0]
+          return incoming?.text
+        }, forward)
+        expect(target).toBeTruthy()
+        await recipe
+          .getByRole('button', { name: forward ? 'Next items' : 'Previous items', exact: true })
+          .click()
+        await page.waitForTimeout(380)
+        const fullyVisible = await recipe.locator('.ticker-frame').evaluate((frame, target) => {
+          const viewport = frame.getBoundingClientRect()
+          const left = viewport.left + parseFloat(getComputedStyle(frame, '::before').width)
+          const right = viewport.right - parseFloat(getComputedStyle(frame, '::after').width)
+          const links = [...frame.querySelectorAll('.ticker-content > a')]
+            .filter(link => link.textContent === target)
+            .map(link => {
+              const r = link.getBoundingClientRect()
+              return { left: r.left, right: r.right, width: r.width }
+            })
+          return {
+            left,
+            right,
+            links,
+            fits: links.some(r => r.left >= left - 0.5 && r.right <= right + 0.5),
+          }
+        }, target)
+        expect(
+          fullyVisible.fits,
+          `${theme}/${width}/${textSize}/${forward}: ${target}: ${JSON.stringify(fullyVisible)}`
+        ).toBe(true)
+      }
+    }
+  }
 })

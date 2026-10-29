@@ -38,7 +38,7 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
           speed={row.speed}
           autoplay={row.autoplay}
           navigation={row.navigation}
-          smoothNavigation={recipe.id === 'manual-navigation'}
+          preserveNavigationPlayback={recipe.id === 'manual-navigation'}
           resumeAfterDrag={row.resumeAfterDrag}
           rtl={row.rtl}
           responsive={row.responsive}
@@ -123,6 +123,15 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
           <Button variant="ghost" data-remove-selected disabled>
             {t.removeSelected}
           </Button>
+          <label class:list={['item-choice']}>
+            {t.positionLabel}
+            <select data-item-position disabled>
+              <option>{t.itemEmpty}</option>
+            </select>
+          </label>
+          <Button variant="ghost" data-remove-position disabled>
+            {t.removeAtPosition}
+          </Button>
         </div>
       )}
       {(recipe.kind === 'controls' || vertical) && (
@@ -162,10 +171,11 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
     const controller = () => getDemoController(demo)
     const add = element.querySelector<HTMLButtonElement>('[data-add]')
     const select = element.querySelector<HTMLSelectElement>('[data-item-select]')
+    const position = element.querySelector<HTMLSelectElement>('[data-item-position]')
     const resume = element.querySelector<HTMLButtonElement>('button[data-example-resume]')
     const directions = element.querySelectorAll<HTMLButtonElement>('button[data-example-direction]')
     const removeButtons = element.querySelectorAll<HTMLButtonElement>(
-      'button[data-remove-first], button[data-remove-last], button[data-remove-selected]'
+      'button[data-remove-first], button[data-remove-last], button[data-remove-selected], button[data-remove-position]'
     )
     const status = element.querySelector('[role=status]')
     const items = () => [
@@ -183,6 +193,15 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
       if (current.some(item => item.dataset.exampleItem === selected)) select.value = selected
       if (!current.length) select.add(new Option(element.dataset.itemEmpty ?? '', ''))
       select.disabled = !current.length
+      if (position) {
+        const index = Math.min(Number(position.value) || 0, current.length - 1)
+        position.replaceChildren(
+          ...current.map((_, index) => new Option(String(index + 1), String(index)))
+        )
+        if (current.length) position.value = String(Math.max(0, index))
+        else position.add(new Option(element.dataset.itemEmpty ?? '', ''))
+        position.disabled = !current.length
+      }
       removeButtons.forEach(button => {
         button.disabled = !current.length
       })
@@ -246,7 +265,9 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
             ? current[0]
             : button.hasAttribute('data-remove-last')
               ? current.at(-1)
-              : current.find(item => item.dataset.exampleItem === select?.value)
+              : button.hasAttribute('data-remove-position')
+                ? current[Number(position?.value)]
+                : current.find(item => item.dataset.exampleItem === select?.value)
           if (!item) return
           const label = item.textContent ?? ''
           const separator = item.nextElementSibling

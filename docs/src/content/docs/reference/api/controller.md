@@ -78,7 +78,9 @@ Use changing action labels as above without `aria-pressed`. Environmental pauses
 
 ## Manual navigation
 
-`scrollTo(position)` seeks to a logical CSS-pixel distance; `scrollBy(distance)` adds to the current logical position. Both wrap modulo one complete content-and-gap period. By default they act instantly and leave playback explicitly paused. Negative values wrap backward. Nonfinite values are ignored. Buttons default to one visible extent per click; provide a positive `step` to use a fixed distance. There is no item snapping.
+`scrollTo(position)` seeks to a logical CSS-pixel distance; `scrollBy(distance)` adds to the current logical position. Both wrap around at the sequence boundaries, including the gap between repetitions. By default they act instantly and leave playback explicitly paused. Negative values wrap backward. Nonfinite values are ignored.
+
+Buttons and rail arrow keys default to revealing one item per step. `itemsPerStep` accepts a positive safe integer (default `1`; invalid values fall back to `1`). Items are the measurable direct element children of the original sequence; decorative children with `aria-hidden="true"` are skipped. A partially hidden incoming item counts as the first item: movement reveals its trailing edge. Larger counts stop before that first incoming item would be clipped at the opposite edge, so fewer items may be revealed. Gaps, variable sizes, cyclic copies, vertical layouts and logical RTL order are measured at each command. The readable area excludes wrapper borders and honors CSS `scroll-padding` on the active axis; reserve space there for edge fades or overlays. An oversized item cannot fit: the step reveals its trailing edge without advancing additional items. A positive CSS-pixel `step` overrides `itemsPerStep` for existing fixed-distance integrations. Dragging, range input and `scrollTo`/`scrollBy` remain pixel-based.
 
 ```ts
 const news = ticker('#news', { autoplay: false, navigation: true })
@@ -86,7 +88,7 @@ const disconnect = news?.connectControls({
   previous: document.querySelector<HTMLButtonElement>('#previous')!,
   next: document.querySelector<HTMLButtonElement>('#next')!,
   rail: document.querySelector<HTMLInputElement>('#position')!,
-  step: 120,
+  itemsPerStep: 2,
 })
 ```
 
@@ -150,13 +152,15 @@ const disconnect = news?.connectControls({
 })
 ```
 
-`behavior` defaults to `instant`, `duration` defaults to 300 milliseconds, and
+`behavior` defaults to `smooth` for item arrows and rail arrow keys on either axis,
+and to `instant` for pixel seeks or positive pixel `step` controls. An explicit
+`behavior` overrides either default. `duration` defaults to 300 milliseconds, and
 `preservePlayback` defaults to false. Smooth steps use a cubic ease-out and pause
 continuous CSS playback while seeking. `reasons` contains `navigation` during the
 step. `requested` retains the existing intent when preservation is enabled,
 including an explicit manual pause. Focus, hover and all automatic pause causes
 still govern continuous playback after completion. Range input seeks remain
-instant to follow the pointer; keyboard steps can be smooth.
+instant to follow the pointer. Home/End use the connected navigation behavior.
 
 Repeated commands restart from the current position. Drag starts, explicit
 play/pause, refresh/resize, option updates, reduced-motion changes and destroy

@@ -171,11 +171,11 @@ export default {
         {
           kind: 'text',
           value:
-            'Size depends on the entrypoint and your bundler’s tree shaking. The locally built v2.2.0 browser bundle is approximately ',
+            'Size depends on the entrypoint and your bundler’s tree shaking. The current local browser IIFE build is approximately ',
         },
         {
           kind: 'strong',
-          value: '8.7 KiB gzipped',
+          value: '9.5 KiB gzipped',
         },
         {
           kind: 'text',
