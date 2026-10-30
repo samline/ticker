@@ -184,3 +184,8 @@ Featured-menu and featured-logo previews compose TickerDemo, shared Button and B
 Playback feedback distinguishes requested intent from effective movement. TickerDemo and copied files display hover/focus reasons while preserving the manual Pause/Play action. Featured recipes explicitly opt out of hover pause, enable navigation/resume-after-drag, keep keyboard focus pause, and expose axis-aware position controls. Keep their selected-category content and labeled partner card consistent between preview and copied files. Use distinct hooks for playback explanations and application update announcements.
 
 Playback explanations must reserve their wrapped geometry with accessibility-hidden message samples. Showing or clearing hover/focus feedback must not move controls between pointer down and pointer up; verify the actual Pause click after keyboard selection in previews and copied files.
+
+The 2.5.0 manual-navigation example opts into `resumeDelay: 1500` in TickerDemo
+and its generated complete/split files. Ticker owns the timer and cancellation;
+do not add a site queue, disabled arrows or application play() timeout. Other
+recipes retain the zero default. Keep preview/copy execution tests aligned.

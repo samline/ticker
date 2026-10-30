@@ -346,6 +346,126 @@ describe('ticker playback and measurement', () => {
     disconnect()
   })
 
+  it('holds a reading pause after each seek, resets it on another click and preserves manual intent', async () => {
+    const { instance } = await createTicker()
+    intersect(true)
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>
+      window.setTimeout(() => callback(Date.now()), 16)
+    )
+    const next = document.createElement('button')
+    document.body.append(next)
+    const completed = vi.fn()
+    instance.on('navigate', completed)
+    instance.connectControls({
+      next,
+      step: 20,
+      behavior: 'smooth',
+      duration: 96,
+      preservePlayback: true,
+      resumeDelay: 500,
+    })
+    next.click()
+    vi.advanceTimersByTime(112)
+    expect(instance.state.position).toBeCloseTo(20)
+    expect(completed).toHaveBeenCalledTimes(1)
+    expect(instance.state).toMatchObject({ requested: true, playing: false })
+    expect(instance.state.reasons).toContain('navigation')
+    vi.advanceTimersByTime(400)
+    next.click()
+    vi.advanceTimersByTime(112)
+    expect(instance.state.position).toBeCloseTo(40)
+    vi.advanceTimersByTime(499)
+    expect(instance.state.playing).toBe(false)
+    vi.advanceTimersByTime(1)
+    expect(instance.state.playing).toBe(true)
+    expect(completed).toHaveBeenCalledTimes(2)
+    instance.pause()
+    next.click()
+    vi.advanceTimersByTime(700)
+    expect(instance.state).toMatchObject({ requested: false, playing: false })
+    expect(instance.state.reasons).toEqual(['manual'])
+  })
+
+  it('cancels reading timers on competing commands and destruction', async () => {
+    const { instance } = await createTicker()
+    intersect(true)
+    const options = { preservePlayback: true, resumeDelay: 500 }
+    for (const cancel of [
+      () => instance.pause(),
+      () => instance.play(),
+      () => instance.scrollTo(17),
+      () => instance.refresh(),
+    ]) {
+      instance.play().scrollBy(20, options)
+      expect(instance.state.reasons).toContain('navigation')
+      cancel()
+      vi.advanceTimersByTime(16)
+      expect(instance.state.reasons).not.toContain('navigation')
+      vi.advanceTimersByTime(600)
+      expect(instance.state.reasons).not.toContain('navigation')
+    }
+    instance.play().scrollBy(20, options).destroy()
+    vi.advanceTimersByTime(600)
+    expect(instance.state.destroyed).toBe(true)
+  })
+
+  it('releases only the reading pause while hover, focus and visibility causes remain active', async () => {
+    const { instance, wrapper, content } = await createTicker()
+    instance.update({ pauseOnHover: true })
+    vi.advanceTimersByTime(16)
+    intersect(true)
+    instance.scrollBy(20, { preservePlayback: true, resumeDelay: 100 })
+    wrapper.dispatchEvent(new MouseEvent('mouseenter'))
+    content.querySelector('button')!.focus()
+    hidden = true
+    document.dispatchEvent(new Event('visibilitychange'))
+    vi.advanceTimersByTime(100)
+    expect(instance.state).toMatchObject({ requested: true, playing: false })
+    expect(instance.state.reasons).toEqual(['hover', 'focus', 'hidden'])
+    wrapper.dispatchEvent(new MouseEvent('mouseleave'))
+    content.querySelector('button')!.blur()
+    hidden = false
+    document.dispatchEvent(new Event('visibilitychange'))
+    expect(instance.state.playing).toBe(true)
+  })
+
+  it('keeps reduced-motion seeks instant and cancels the reading interval on a policy change', async () => {
+    const { instance } = await createTicker()
+    intersect(true)
+    instance.scrollTo(20, { preservePlayback: true, resumeDelay: 500 })
+    media.matches = true
+    media.dispatchEvent(new Event('change'))
+    vi.advanceTimersByTime(16)
+    expect(instance.state.reasons).not.toContain('navigation')
+    instance.scrollTo(30, { behavior: 'smooth', preservePlayback: true, resumeDelay: 100 })
+    expect(instance.state.position).toBeCloseTo(30)
+    vi.advanceTimersByTime(100)
+    expect(instance.state).toMatchObject({ requested: true, playing: false })
+    expect(instance.state.reasons).toEqual(['reduced-motion'])
+  })
+
+  it('cancels a reading interval when the motion-completion listener pauses playback', async () => {
+    const { instance } = await createTicker()
+    intersect(true)
+    instance.on('navigate', () => instance.pause())
+    instance.scrollBy(20, { preservePlayback: true, resumeDelay: 100 })
+    expect(instance.state.reasons).toEqual(['manual'])
+    vi.advanceTimersByTime(200)
+    expect(instance.state).toMatchObject({ requested: false, playing: false })
+  })
+
+  it.each([undefined, -1, NaN, Infinity, 0])(
+    'ignores invalid reading delay %s',
+    async resumeDelay => {
+      const { instance } = await createTicker()
+      intersect(true)
+      instance.scrollBy(20, { preservePlayback: true, resumeDelay })
+      expect(instance.state.playing).toBe(true)
+      instance.scrollBy(20, { resumeDelay: 500 })
+      expect(instance.state.reasons).toEqual(['manual'])
+    }
+  )
+
   it('cancels a smooth step on explicit pause, repeated commands, rebuild and destroy', async () => {
     const { instance } = await createTicker()
     intersect(true)

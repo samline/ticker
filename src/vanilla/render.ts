@@ -70,6 +70,7 @@ interface RuntimeTickerState extends TickerState {
   featured: ReturnType<typeof createFeatured>
   itemRoot: HTMLElement
   navigationFrame: number
+  navigationTimer: number
   navigating: boolean
   navigationRevision: number
   stepNavigation?: { forward: boolean; position: number; target: number } | undefined
@@ -451,6 +452,8 @@ const parseResponsive = (value?: string): NonNullable<TickerOptions['responsive'
 const cancelNavigation = (state: RuntimeTickerState): void => {
   state.navigationRevision++
   cancelFrame(state.navigationFrame)
+  window.clearTimeout(state.navigationTimer)
+  state.navigationTimer = 0
   state.navigationFrame = 0
   state.navigating = false
   state.stepNavigation = undefined
@@ -476,6 +479,12 @@ const navigate = (
     rebuildTickerState(state, true)
   }
   const duration = options.duration === undefined ? 300 : options.duration
+  const resumeDelay =
+    options.preservePlayback &&
+    Number.isFinite(options.resumeDelay) &&
+    Number(options.resumeDelay) > 0
+      ? Math.min(Number(options.resumeDelay), 2147483647)
+      : 0
   const smooth =
     !fromDrag &&
     options.behavior === 'smooth' &&
@@ -485,15 +494,36 @@ const navigate = (
     typeof window.requestAnimationFrame === 'function' &&
     (state.measurement?.contentExtent ?? 0) > 0 &&
     position !== previousPosition
-  state.navigating = smooth
+  state.navigating = smooth || resumeDelay > 0
   if (smooth && forward !== undefined)
     state.stepNavigation = { forward, position: previousPosition, target: position }
   const revision = state.navigationRevision
   syncPlayback(state)
   if (state.destroyed || revision !== state.navigationRevision) return
+  const complete = () => {
+    state.navigationFrame = 0
+    state.stepNavigation = undefined
+    if (resumeDelay > 0) {
+      state.navigationTimer = window.setTimeout(() => {
+        if (state.destroyed || revision !== state.navigationRevision) return
+        state.navigationTimer = 0
+        state.navigating = false
+        syncPlayback(state)
+      }, resumeDelay)
+    } else {
+      state.navigating = false
+      syncPlayback(state)
+    }
+    if (
+      !state.destroyed &&
+      revision === state.navigationRevision &&
+      (smooth || Math.abs(state.position - previousPosition) > 0.000001)
+    )
+      emit(state, 'navigate', source)
+  }
   if (!smooth) {
     seek(state, position)
-    if (Math.abs(state.position - previousPosition) > 0.000001) emit(state, 'navigate', source)
+    complete()
     return
   }
   let started: number | undefined
@@ -508,11 +538,7 @@ const navigate = (
       state.navigationFrame = requestFrame(frame)
       return
     }
-    state.navigationFrame = 0
-    state.navigating = false
-    state.stepNavigation = undefined
-    syncPlayback(state)
-    if (!state.destroyed && revision === state.navigationRevision) emit(state, 'navigate', source)
+    complete()
   }
   state.navigationFrame = requestFrame(frame)
 }
@@ -1003,6 +1029,7 @@ const initTicker = (wrapper: HTMLElement, itemRoot?: HTMLElement): void => {
     revealingFocus: false,
     ...createEmptyTickerState(),
     navigationFrame: 0,
+    navigationTimer: 0,
     navigating: false,
     navigationRevision: 0,
     forceRebuild: false,

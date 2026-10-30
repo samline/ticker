@@ -149,6 +149,7 @@ const disconnect = news?.connectControls({
   behavior: 'smooth',
   duration: 300,
   preservePlayback: true,
+  resumeDelay: 1500,
 })
 ```
 
@@ -161,6 +162,17 @@ step. `requested` retains the existing intent when preservation is enabled,
 including an explicit manual pause. Focus, hover and all automatic pause causes
 still govern continuous playback after completion. Range input seeks remain
 instant to follow the pointer. Home/End use the connected navigation behavior.
+
+Since 2.5.0, `resumeDelay` optionally holds continuous playback after the
+seek for a reading interval in milliseconds (default `0`; finite positive values
+only, capped at the browser timer limit). It requires `preservePlayback: true`.
+Each command replaces the previous interval. `navigate` fires when the movement
+finishes; `reasons` retains `navigation` until the interval expires. Manual pause,
+focus and other automatic causes still apply afterward. Explicit play/pause,
+competing seeks, refresh, changed geometry, reduced motion and destroy cancel
+the wait. Reduced motion still makes seeking instant. Range pointer input and
+dragging do not apply the reading interval. Verify npm/CDN availability or use
+a matching local build while publication is pending.
 
 Repeated arrow clicks and rail arrow keys in the same direction add each step to
 the pending destination, including across sequence boundaries. Item geometry is

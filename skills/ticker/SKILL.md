@@ -3,12 +3,12 @@ name: ticker
 description: Integrate @samline/ticker marquees into websites, plain HTML, CMS templates or framework components. Use for ticker installation, styling, options, accessible motion and lifecycle; not financial market data or unrelated slider libraries.
 metadata:
   package: '@samline/ticker'
-  package-version: '2.4.0'
+  package-version: '2.5.0'
 ---
 
 # Ticker
 
-Build against the installed `@samline/ticker` version. This skill describes v2.4.0. Check the dependency version and its exports before applying it to another release. For 2.x, do not use the removed enhance()/createTicker() APIs or the former framework-adapter entrypoints; read the changelog when handling 1.x code. Preserve the host project's components, theme and lifecycle conventions; Ticker supplies movement, not a UI framework or financial data.
+Build against the installed `@samline/ticker` version. This skill describes v2.5.0. Check the dependency version and its exports before applying it to another release. For 2.x, do not use the removed enhance()/createTicker() APIs or the former framework-adapter entrypoints; read the changelog when handling 1.x code. Preserve the host project's components, theme and lifecycle conventions; Ticker supplies movement, not a UI framework or financial data.
 
 ## Choose loading, then ownership
 
@@ -17,7 +17,7 @@ Use the site's two loading labels consistently:
 - **Package / ESM:** install with npm, pnpm, yarn or bun. Import `{ ticker }` from `@samline/ticker` (or `/vanilla`) and import `@samline/ticker/style.css` once. Initialize in client code after markup exists. ESM/TypeScript and CommonJS are module formats; neither installs `window.Ticker`.
 - **HTML / CDN:** load `dist/style.css` with `<link>` and `dist/browser/global.global.js` with `<script>`, then call `window.Ticker.ticker(target, options)`. A CDN is only file delivery: self-hosting those same files uses the same API. The JavaScript is an IIFE that exposes the global namespace `window.Ticker`; “Global” is not a third setup. Keep both asset versions equal. The script and source markup must exist before initialization; avoid `async` or a deferred script followed by an immediately executed inline initializer.
 
-For v2.4.0, a CDN URL is `https://cdn.jsdelivr.net/npm/@samline/ticker@2.4.0/dist/browser/global.global.js`, with `style.css` at the same version's dist root. Verify that the chosen release/assets actually exist. A repository version, tag or documentation header does not prove npm/CDN availability. If the project uses a local build, load that build; never silently use an older CDN release with newer APIs.
+For v2.5.0, a CDN URL is `https://cdn.jsdelivr.net/npm/@samline/ticker@2.5.0/dist/browser/global.global.js`, with `style.css` at the same version's dist root. Verify that the chosen release/assets actually exist. A repository version, tag or documentation header does not prove npm/CDN availability. If the project uses a local build, load that build; never silently use an older CDN release with newer APIs.
 
 Select ownership separately from loading:
 
@@ -139,3 +139,12 @@ Application CSS owns background/border/padding and must reach the node outside `
 A Pause action can coexist with `state.requested: true` and `state.playing: false`: focus, hover, visibility and reduced motion temporarily block requested playback. Show a separate hover/focus explanation from `state.reasons`, rather than resuming on every click or relabeling an automatic pause as manual intent. Clicking a source item can give it focus, so the default focus pause lasts until focus leaves. Opt out with `pauseOnHover: false` and/or `pauseOnFocus: false` when the integration supplies suitable explicit reading controls. `resumeAfterDrag: true` restores pre-drag intent only; connected controls need `preservePlayback: true` to retain their prior intent. With navigation and resume-after-drag enabled, mouse actions preserve existing focus on moving and featured non-input content; fixed content remains clickable without initiating a drag. Keyboard focus still pauses by default.
 
 Reserve the wrapped height of hover/focus feedback with accessibility-hidden message samples or an equivalent stable layout. Clearing focus must not shift a control between pointer down and pointer up and lose its click.
+
+## Reading interval (since 2.5.0)
+
+Use `resumeDelay: 1500` in navigation/connected-control options for a reading pause.
+With `preservePlayback: true`, a finite positive delay holds automatic playback
+after seeking so the user can read the incoming item. Default is zero; each
+command replaces the wait and explicit play/pause cancels it. `navigate` reports
+motion completion while the `navigation` pause reason remains during the wait.
+Requires 2.5.0 or later; verify publication or use a matching local build.

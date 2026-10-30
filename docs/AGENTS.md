@@ -85,3 +85,9 @@ Item navigation must reveal content inside the readable viewport, excluding wrap
 Rapid same-direction connected-arrow clicks and rail keys accumulate at the pending destination. Reversals discard pending steps and calculate from the visible position; every retarget starts there without a positional jump and restarts duration. Project original item geometry at the pending destination without seeking the DOM, retaining signed travel across multiple cycles. Keep this policy inside the runtime, with no application queue or disabled controls. Pixel API seeks, range input, Home/End and existing cancellation commands replace/cancel pending steps. Test both axes, physical directions, RTL, grouping, cycle crossings, keyboard, reversals and cancellation.
 
 Featured support starts in 2.4.0. Configuration, controller, styling and TypeScript references must explain the single-original rule, first-direct-marker precedence, explicit selection/null override, physical/logical alignment, focus/order restoration and removal behavior. Verify npm/CDN availability separately from prepared releases; copied examples pin matching release assets. Feature positioning and uncovered-area keyboard navigation belong to the runtime, not docs/site scripts.
+
+The 2.5.0 `resumeDelay` control/navigation option is opt-in, defaults to zero and
+requires preservePlayback. Document the navigation pause through the reading
+interval, motion-completion event timing and cancellation; pointer range seeks
+and drag do not apply the delay. Keep types, public skill and matching delivery
+pins synchronized without claiming npm publication from a version/tag.

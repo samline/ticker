@@ -13,6 +13,36 @@ const ids = [
   'playback-controls',
 ]
 
+async function checkReadingInterval(page: Page, recipe: Locator) {
+  const frame = recipe.locator('.ticker-wrapper')
+  const pause = recipe.locator('button[data-pause]')
+  if ((await pause.textContent())?.includes('Play')) await pause.click()
+  await frame.scrollIntoViewIfNeeded()
+  await page.mouse.move(5, 5)
+  await expect(frame).toHaveAttribute('data-playing', 'true')
+  const track = recipe.locator('.ticker-track')
+  const transform = () => track.evaluate(el => getComputedStyle(el).transform)
+  const before = await transform()
+  await recipe.locator('button[data-next]').click()
+  await expect.poll(transform).not.toBe(before)
+  await expect
+    .poll(() =>
+      track.evaluate(async el => {
+        const before = getComputedStyle(el).transform
+        await new Promise<void>(resolve =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        )
+        return before === getComputedStyle(el).transform
+      })
+    )
+    .toBe(true)
+  const held = await transform()
+  await page.waitForTimeout(400)
+  expect(await transform()).toBe(held)
+  await expect(frame).toHaveAttribute('data-playing', 'false')
+  await expect(frame).toHaveAttribute('data-playing', 'true')
+}
+
 async function checkCachedPageLifecycle(page: Page) {
   const wrappers = await page.locator('.ticker-wrapper').count()
   const pause = page.locator('button[data-pause]')
@@ -535,6 +565,8 @@ test('every copied CDN and npm document executes as a standalone example', async
         await checkDragModes(standalone, standalone.locator('.ticker-recipe'))
       if (id === 'featured-menu' || id === 'featured-logo')
         await checkFeaturedControls(standalone, standalone.locator('.ticker-recipe'))
+      if (id === 'manual-navigation')
+        await checkReadingInterval(standalone, standalone.locator('.ticker-recipe'))
       await checkCachedPageLifecycle(standalone)
       // The same example must also run when copied into three independent files.
       const splitHtml =
@@ -612,6 +644,8 @@ test('every copied CDN and npm document executes as a standalone example', async
       }
       if (id === 'featured-menu' || id === 'featured-logo')
         await checkFeaturedControls(standalone, standalone.locator('.ticker-recipe'))
+      if (id === 'manual-navigation')
+        await checkReadingInterval(standalone, standalone.locator('.ticker-recipe'))
       await checkCachedPageLifecycle(standalone)
       expect(errors).toEqual([])
       await standalone.close()
@@ -863,6 +897,16 @@ test('mixed RTL characters start in autoplay with inherited direction', async ({
   await expect(
     recipe.getByRole('button', { name: 'Pause animation: RTL mixed content', exact: true })
   ).toBeVisible()
+})
+
+test('manual navigation preview holds the incoming card before resuming playback', async ({
+  page,
+}) => {
+  await page.goto('examples/#manual-navigation')
+  await page.evaluate(() => document.fonts.ready)
+  const recipe = page.locator('#manual-navigation')
+  await expect(recipe.locator('ticker-demo')).toHaveAttribute('data-initialized', 'true')
+  await checkReadingInterval(page, recipe)
 })
 
 test('manual arrows reveal the entire incoming link outside both edge fades', async ({ page }) => {

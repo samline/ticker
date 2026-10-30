@@ -196,3 +196,32 @@ Preserve native identity, listeners, focus, requested playback and original orde
 Featured support starts in 2.4.0. Keep package version/publication separate: copied recipes pin the prepared release, and users must verify npm/CDN availability or self-host a matching build. Existing recipe order, pinned assets and complete/split output remain intact.
 
 Featured example follow-up: use visible selection styling, associated category content and a labeled principal-partner card, with axis-aware position buttons. The demos opt out of hover pause and enable navigation/resume-after-drag. Keyboard focus remains a pause with explicit status text. Audit requested versus effective playback across every recipe; temporary hover/focus pauses must be explained independently of the manual action label. Preserve opt-in mouse focus behavior for fixed actions without starting a drag or intercepting editable inputs. Keep copied files and pause-policy documentation aligned.
+
+## Navigation reading interval — 2.5.0 preparation
+
+`resumeDelay` belongs to TickerNavigationOptions and defaults to zero. With
+`preservePlayback`, hold the navigation pause after motion completes; emit
+`navigate` at the final destination and release only the temporary pause when
+the timer expires. New commands replace the timer; lifecycle and competing
+commands cancel it. Keep explicit pause intent and environmental causes intact.
+The 2.5.0 preparation adds this optional API; a tag/push does not establish npm publication. The manual-navigation preview and copied complete/split files demonstrate 1,500ms; other demos retain the zero default.
+
+Initial implementation validation, before version preparation: 84 unit tests passed with 91.24% line,
+85.71% function, 79.37% branch and 87.19% statement coverage. All 49 runtime
+browser tests passed, including four-axis reading intervals, rapid clicks,
+reversals and manual pause. Package build/typecheck/manifest smoke test and
+changed-file formatting passed. Landing/Docs checks passed; combined build
+verified 2,072 links across 42 pages. The Petland consumer uses an explicit local
+pnpm patch with a 1,500ms interval; its verify command and live track-position
+samples passed after renewing a stale development dependency prebundle.
+No package version, publication, push, deployment or performance measurement changed.
+
+Release validation for 2.5.0 (2026-10-30): 87 package tests passed with
+92.18% lines, 88.09% functions, 80.41% branches and 88.21% statements. Typecheck,
+build, package smoke/46-file dry-run manifest, both app checks and all formatting
+checks passed. All 92 Landing browser tests passed, including the new preview
+and complete/split CDN/ESM reading intervals. Combined Docs passed 31 tests with
+five optional host-fixture skips; standalone Docs passed 30 with six skips
+(including its combined-only typography check). The site audit verified 2,076
+links across 42 pages. Browser review compared Home, Examples and controller
+documentation. npm reported 2.4.0 as latest; 2.5.0 publication remains pending.

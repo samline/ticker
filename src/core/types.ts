@@ -65,6 +65,8 @@ export interface TickerNavigationOptions {
   duration?: number
   /** Retain requested playback, including a manual pause; defaults to false. */
   preservePlayback?: boolean
+  /** Reading pause after seeking, in milliseconds; defaults to 0. Requires preservePlayback. */
+  resumeDelay?: number
 }
 
 export interface TickerControls extends TickerNavigationOptions {

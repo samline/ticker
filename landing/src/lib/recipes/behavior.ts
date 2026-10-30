@@ -56,6 +56,7 @@ if (news) {
   news.connectControls({
     itemsPerStep: 1,
     ${recipe.id === 'manual-navigation' || recipe.rows.some(row => row.featuredPosition) ? "behavior: 'smooth', duration: 300, preservePlayback: true," : ''}
+    ${recipe.id === 'manual-navigation' ? 'resumeDelay: 1500,' : ''}
     previous: example.querySelector('[data-previous]'),
     next: example.querySelector('[data-next]'),
     rail: example.querySelector('[data-position]'),

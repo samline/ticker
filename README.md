@@ -84,11 +84,11 @@ The runtime preserves fractional measurements in both directions. Match item spa
 Choose **Package / ESM** when installing with npm, pnpm or bun and importing Ticker in your application. Choose **HTML / CDN** when loading the standalone script in plain HTML, WordPress or Shopify without a bundler. Both use the same controller API. A CDN only delivers the files; you can self-host the same script and stylesheet.
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.4.0/dist/style.css" />
-<script src="https://unpkg.com/@samline/ticker@2.4.0/dist/browser/global.global.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.5.0/dist/style.css" />
+<script src="https://unpkg.com/@samline/ticker@2.5.0/dist/browser/global.global.js"></script>
 ```
 
-> Pin the version in production. Replace `2.4.0` with the version you ship. Verify that it is published before using npm/CDN URLs; preparing a release does not publish it.
+> Pin the version in production. Replace `2.5.0` with the version you ship. Verify that it is published before using npm/CDN URLs; preparing a release does not publish it.
 
 The standalone script (an IIFE) exposes `window.Ticker`. “Global” describes this object, not another loading mode. The optional `@samline/ticker/browser` registry module is an ESM/CJS import and does not install that object. See [loading terms](https://samline.github.io/ticker/docs/guides/html-and-browser/#loading-terms).
 
@@ -192,6 +192,7 @@ const disconnect = strip?.connectControls({
   behavior: 'smooth',
   duration: 300,
   preservePlayback: true,
+  resumeDelay: 1500,
 })
 ```
 
@@ -205,7 +206,10 @@ Each click retargets the smooth movement without jumping; `duration` runs from t
 latest click. Rail arrow keys follow the same policy.
 
 Use your existing controller instead of resuming on every `navigate` event.
-`preservePlayback` retains manual pause as well as autoplay. Item arrows default
+`preservePlayback` retains manual pause as well as autoplay. Since 2.5.0, the
+`resumeDelay` option adds a reading pause in milliseconds after seeking (default
+`0`, requires `preservePlayback: true`). Each new command replaces that wait;
+explicit playback commands cancel it. Item arrows default
 to smooth movement on both axes; pixel seeks and explicit pixel steps remain instant
 by default. Navigation pauses playback unless preservation is enabled. Reduced motion always seeks instantly.
 See the controller documentation for cancellation and `navigationSource` events.
@@ -233,7 +237,7 @@ Read [CHANGELOG.md](CHANGELOG.md) or the [published changelog](https://samline.g
 
 ## AI agent skill
 
-The public [Ticker skill](https://samline.github.io/ticker/skills/ticker/SKILL.md) teaches an agent how to choose a Ticker integration, load CSS, manage controllers, preserve accessible motion and avoid nonexistent APIs. It is self-contained and describes v2.4.0; agents must verify their installed version.
+The public [Ticker skill](https://samline.github.io/ticker/skills/ticker/SKILL.md) teaches an agent how to choose a Ticker integration, load CSS, manage controllers, preserve accessible motion and avoid nonexistent APIs. It is self-contained and describes v2.5.0; agents must verify their installed version.
 
 Download [SKILL.md](https://samline.github.io/ticker/skills/ticker/SKILL.md) into a `ticker/` folder in your agent's supported skill directory. For agents that discover project skills from `.agents/skills/`:
 

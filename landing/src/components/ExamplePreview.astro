@@ -48,6 +48,7 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
           pauseOnHover={row.pauseOnHover}
           navigation={row.navigation}
           preserveNavigationPlayback={recipe.id === 'manual-navigation' || featured}
+          navigationResumeDelay={recipe.id === 'manual-navigation' ? 1500 : 0}
           resumeAfterDrag={row.resumeAfterDrag}
           rtl={row.rtl}
           responsive={row.responsive}

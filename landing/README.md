@@ -405,3 +405,25 @@ Follow-up validation on 2026-10-29: 77 package unit tests passed with 91.11% lin
 Release preparation for 2.4.0 (2026-10-29): browser IIFE 48,440 bytes raw / 11,368 bytes gzip (11.1 KiB); CSS 4,166 bytes raw / 929 bytes gzip (0.9 KiB). FAQ reflects this local build. These are transfer sizes, not performance measurements. npm registry inspection still returned 2.2.0 as the latest published release; preparing Git 2.4.0 does not publish npm/CDN assets.
 
 Final 2.4.0 validation (2026-10-29): all 77 package tests passed (91.11% lines, 85.54% functions, 79.02% branches, 87.15% statements), along with type checking, build and the actual npm manifest smoke test. Both app checks and formatting checks passed. All 87 Landing browser tests passed, including complete/split HTML/CDN and ESM execution, pointer selection of visible repeated categories on both axes, focus-to-Pause clicking and preserved playback intent. Combined Docs passed 31 tests with five optional host-fixture skips; standalone Docs passed 30 with six skips (the five host fixtures and combined-only typography check). The final site audit verified 2,070 links across 42 pages. Manual in-app browser checks confirmed that clicking a repeated category during autoplay selects its original and keeps playing. Playback feedback reserves its wrapped height so blur does not move controls between pointer down and pointer up. No new performance benchmark or npm publication was performed.
+
+## Reading interval — 2.5.0 preparation
+
+The manual-navigation preview and generated complete/split files opt into
+`resumeDelay: 1500` with preserved playback. The package holds the final card
+for 1.5 seconds after seeking, replaces the wait on each new command and keeps
+manual pause effective. Other recipes retain the zero default. TickerDemo
+passes this through navigationResumeDelay; the application owns no timer.
+A preview regression and complete/split CDN/ESM execution check verify the
+stationary interval and subsequent autoplay. This prepares 2.5.0; npm/CDN
+publication remains a separate maintainer action.
+
+2.5.0 local release validation (2026-10-30): all 92 Landing browser tests passed,
+including exact complete/split copies, the reading interval preview, four-axis
+runtime waits, rapid clicks/reversals, manual pause, themes, responsive/enlarged
+text, no-JavaScript, keyboard and lifecycle checks. The package passed all 87
+unit tests, coverage thresholds, typecheck, build and its 46-file npm-manifest
+smoke test. Both app checks/formatting and the 2,076-link/42-page combined build
+passed. Combined Docs: 31 passed / 5 optional skips; standalone: 30 passed / 6 skips.
+Browser IIFE: 49,119 bytes raw / 11,514 bytes gzip (11.2 KiB); CSS: 4,166 / 929 bytes.
+These are local transfer sizes, not a performance benchmark. npm latest was
+verified as 2.4.0; 2.5.0 still requires the maintainer's publication.

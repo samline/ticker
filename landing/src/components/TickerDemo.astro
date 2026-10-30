@@ -16,6 +16,7 @@ interface Props {
   pauseOnHover?: boolean
   navigation?: boolean
   preserveNavigationPlayback?: boolean
+  navigationResumeDelay?: number
   resumeAfterDrag?: boolean
   rtl?: boolean
   responsive?: import('@samline/ticker').TickerResponsiveRule[]
@@ -33,6 +34,7 @@ const {
   pauseOnHover = true,
   navigation = false,
   preserveNavigationPlayback = false,
+  navigationResumeDelay = 0,
   resumeAfterDrag = false,
   responsive = [],
   rtl = false,
@@ -56,6 +58,7 @@ const i18n = getI18n(Astro)
   data-paused-hover={i18n.controls.ticker.pausedHover}
   data-navigation={String(navigation)}
   data-preserve-navigation-playback={String(preserveNavigationPlayback)}
+  data-navigation-resume-delay={navigationResumeDelay}
   data-resume-after-drag={String(resumeAfterDrag)}
   data-responsive={JSON.stringify(responsive)}
   data-kind={kind}
@@ -152,6 +155,7 @@ const i18n = getI18n(Astro)
           itemsPerStep: 1,
           behavior: 'smooth',
           preservePlayback: element.dataset.preserveNavigationPlayback === 'true',
+          resumeDelay: Number(element.dataset.navigationResumeDelay),
           previous: controls.querySelector<HTMLButtonElement>('[data-previous]')!,
           next: controls.querySelector<HTMLButtonElement>('[data-next]')!,
           rail: controls.querySelector<HTMLInputElement>('[data-position]')!,

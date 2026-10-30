@@ -539,6 +539,57 @@ for (const direction of ['left', 'right', 'up', 'down', 'auto']) {
   })
 }
 
+for (const direction of ['left', 'right', 'up', 'down']) {
+  test(`${direction}: reading delay holds the final card and restarts after rapid or slow clicks`, async ({
+    page,
+  }) => {
+    await setup(page, { direction, autoplay: true, navigation: true, pauseOnHover: false })
+    await page.evaluate(() => {
+      const w = window as any
+      w.disconnect()
+      w.disconnect = w.controller.connectControls({
+        previous: document.querySelector('#previous'),
+        next: document.querySelector('#next'),
+        step: 25,
+        behavior: 'smooth',
+        duration: 80,
+        preservePlayback: true,
+        resumeDelay: 600,
+      })
+    })
+    await page.locator('#next').click()
+    // Wait for motion completion, not autoplay resumption.
+    await expect
+      .poll(async () =>
+        page.evaluate(() => (window as any).events.filter((e: any[]) => e[0] === 'navigate').length)
+      )
+      .toBe(1)
+    const held = (await state(page)).position
+    await page.waitForTimeout(160)
+    expect((await state(page)).position).toBeCloseTo(held, 2)
+    expect((await state(page)).playing).toBe(false)
+    // A slow click during the reading interval and a rapid burst replace its timer.
+    await page.locator('#next').click()
+    await page.locator('#next').click()
+    await page.locator('#previous').click()
+    await expect
+      .poll(async () =>
+        page.evaluate(() => (window as any).events.filter((e: any[]) => e[0] === 'navigate').length)
+      )
+      .toBeGreaterThan(1)
+    await page.waitForTimeout(150)
+    const final = (await state(page)).position
+    await page.waitForTimeout(160)
+    expect((await state(page)).position).toBeCloseTo(final, 2)
+    await expect.poll(async () => (await state(page)).playing).toBe(true)
+    await page.evaluate(() => (window as any).controller.pause())
+    await page.locator('#next').click()
+    await page.waitForTimeout(850)
+    expect(await state(page)).toMatchObject({ requested: false, playing: false })
+    expect((await state(page)).reasons).not.toContain('navigation')
+  })
+}
+
 for (const [direction, dir] of [
   ['left', 'ltr'],
   ['right', 'ltr'],

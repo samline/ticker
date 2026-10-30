@@ -4,6 +4,16 @@
 
 No unreleased changes.
 
+## [2.5.0] - 2026-10-30
+
+### Added
+
+- Opt-in `resumeDelay` navigation/control option holds autoplay after seeking for a reading interval. Repeated commands replace the wait; manual playback intent and automatic pause causes remain effective. The default remains immediate resumption. `navigate` reports motion completion while the temporary `navigation` pause continues through the interval.
+
+### Examples
+
+- Manual-navigation preview and complete/split Package / ESM and HTML / CDN recipes demonstrate a 1,500 ms reading interval. Public types, documentation, skill and delivery pins target 2.5.0. Publication remains a separate maintainer action.
+
 ## [2.4.0] - 2026-10-29
 
 ### Added

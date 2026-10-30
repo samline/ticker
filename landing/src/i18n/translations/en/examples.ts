@@ -269,7 +269,7 @@ export default {
         'Start paused. Use Previous, Next, the position rail or a pointer gesture to explore a repeating sequence. Press Play, then drag: playback resumes after release when hover and focus pauses clear. Smooth arrow steps and the rail preserve your current playback choice, including a manual pause.',
       docsPath: 'reference/api/controller/#manual-navigation',
       docsLabel: 'Read the manual navigation contract',
-      note: 'Arrow buttons reveal one incoming element over 300 ms, including a partially hidden element, and respect reduced motion. Set itemsPerStep in the copied code to request more; motion stops before the first incoming element leaves the opposite edge. Rapid same-direction clicks add steps; reversing starts from the visible position. The rail represents one repeated sequence and wraps at its end. Drag horizontally; vertical page scrolling stays available.',
+      note: 'Arrow buttons reveal one incoming element over 300 ms, including a partially hidden element, and respect reduced motion. Set itemsPerStep in the copied code to request more; motion stops before the first incoming element leaves the opposite edge. Rapid same-direction clicks add steps; reversing starts from the visible position. With playback enabled, resumeDelay: 1500 holds the destination for 1.5 seconds after movement; each new arrow command replaces the wait. Manual pause stays paused. This option requires 2.5.0; verify publication or use a matching local build. The rail represents one repeated sequence and wraps at its end. Drag horizontally; vertical page scrolling stays available.',
       rows: [
         {
           label: 'Manual news navigation',

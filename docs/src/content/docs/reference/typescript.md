@@ -174,13 +174,14 @@ interface TickerNavigationOptions {
   behavior?: 'instant' | 'smooth'
   duration?: number
   preservePlayback?: boolean
+  resumeDelay?: number // Since 2.5.0; milliseconds, default 0
 }
 ```
 
 `TickerControls` extends these options. Navigate event snapshots additionally
 expose optional `navigationSource: 'api' | 'control' | 'rail' | 'keyboard' | 'drag'`.
 The transient `navigation` pause reason prevents CSS autoplay competing with a
-smooth seek. See the [controller reference](../api/controller/#smooth-steps-and-playback-intent).
+smooth seek and an optional reading interval. See the [controller reference](../api/controller/#smooth-steps-and-playback-intent).
 
 ## `TickerFeaturedPosition`
 

@@ -166,3 +166,20 @@ Featured validation on 2026-10-29: Docs check passed without Astro diagnostics, 
 The accessibility guide now distinguishes requested playback from automatic hover/focus/environmental pauses, explains click-to-focus and drag-release behavior, and documents opting out with pauseOnHover/pauseOnFocus or preserving intent with connected controls. Gallery feedback shows temporary pause causes separately from the manual Pause/Play action. The follow-up passed the 31-test combined Docs suite and 30-test standalone suite with their documented optional/combined-only skips.
 
 Release preparation for 2.4.0 (2026-10-29): configuration, controller, types, styling, accessibility, pinned assets and the public skill are synchronized. Accessibility explains inert copies, stable-key delegation to originals, temporary versus manual pauses and reserving feedback geometry to avoid lost pointer clicks. Both app checks/formatting passed; the final combined build audited 2,070 links across 42 pages. Combined Docs passed 31 browser tests with five optional host-fixture skips; standalone Docs passed 30 with six skips including its combined-only typography check. The final Landing suite passed all 87 tests and the package passed all 77 unit tests plus build/type/manifest checks. npm publication remains the maintainer’s separate action.
+
+## Reading interval — 2.5.0 preparation
+
+Controller and TypeScript references describe `resumeDelay`, its zero default,
+required preservePlayback, motion-completion event timing, environmental pauses
+and cancellation. The README and public skill show a 1,500ms interval; active
+CDN and CMS asset pins target 2.5.0. Historical since-version notes remain intact.
+This is an additive package capability rather than a change to default autoplay
+or a consumer-owned timer. npm publication remains the maintainer's action.
+
+2.5.0 local release validation (2026-10-30): combined Docs passed 31 tests with
+five optional host-fixture skips; standalone Docs passed 30 with six skips
+(including combined-only title typography). Both app checks/formatting passed;
+the site audit verified 2,076 links across 42 pages. All 92 Landing browser tests and
+87 package unit tests passed, along with coverage, typecheck, build and the
+actual npm manifest smoke test. npm latest remained 2.4.0 at registry inspection;
+2.5.0 publication remains pending. No new performance benchmark was collected.
