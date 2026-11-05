@@ -3,6 +3,22 @@ name: Deploy landing and docs to GitHub Pages
 on:
   push:
     branches: [main]
+    # Skip deploys for changes that cannot alter the built site (tests, CI,
+    # maintenance notes). Package source, root README/CHANGELOG and skills feed
+    # the site, so they still deploy.
+    paths-ignore:
+      - '.github/workflows/ci.yml'
+      - '.agents/**'
+      - '**/AGENTS.md'
+      - 'landing/README.md'
+      - 'docs/README.md'
+      - 'shared/README.md'
+      - 'docs/CONTENT-AUDIT.md'
+      - 'tests/**'
+      - 'landing/tests/**'
+      - 'landing/e2e/**'
+      - 'docs/e2e/**'
+      - '**/playwright*.config.ts'
   workflow_dispatch:
 
 permissions:
