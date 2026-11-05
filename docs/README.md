@@ -184,6 +184,6 @@ the site audit verified 2,076 links across 42 pages. All 92 Landing browser test
 actual npm manifest smoke test. npm latest remained 2.4.0 at registry inspection;
 2.5.0 publication remains pending. No new performance benchmark was collected.
 
-## Drag inertia — 2.6.0 preparation
+## Drag inertia — 2.6.0
 
 Controller, configuration and TypeScript references document `inertia`, `inertiaDeceleration` and `inertiaMaxVelocity` (and `data-inertia*`). CDN and CMS pins target 2.6.0; historical since-version notes remain intact.

@@ -108,7 +108,7 @@ const feed = ticker('#feed', {
 })
 ```
 
-Set `inertia: true` (`data-inertia="true"`) to continue a released touch or mouse drag with momentum. The release velocity is estimated from the last ~100 ms of pointer samples (including coalesced events), limited by `inertiaMaxVelocity` (px/s, default 2500) and decelerated linearly at `inertiaDeceleration` (px/s², default 1800), so a 1200 px/s flick travels about 400 px in 0.67 s. Releases slower than about 100 px/s, `pointercancel`, lost pointer capture and `prefers-reduced-motion: reduce` never glide. The glide uses the `navigation` pause reason, wraps continuously modulo the period, emits one `navigate` event when it starts and one when it ends (`navigationSource: 'drag'`) and is cancelled by any competing command or a new touch. With `resumeAfterDrag: true` autoplay resumes when the glide ends, not during it. `will-change: transform` stays on while dragging or gliding. Responsive rules can set all three options.
+Since 2.6.0, set `inertia: true` (`data-inertia="true"`) to continue a released touch or mouse drag with momentum. The release velocity is estimated from the last ~100 ms of pointer samples (including coalesced events), limited by `inertiaMaxVelocity` (px/s, default 2500) and decelerated linearly at `inertiaDeceleration` (px/s², default 1800), so a 1200 px/s flick travels about 400 px in 0.67 s. Releases slower than about 100 px/s, `pointercancel`, lost pointer capture and `prefers-reduced-motion: reduce` never glide. The glide uses the `navigation` pause reason, wraps continuously modulo the period, emits one `navigate` event when it starts and one when it ends (`navigationSource: 'drag'`) and is cancelled by any competing command or a new touch. With `resumeAfterDrag: true` autoplay resumes when the glide ends, not during it. `will-change: transform` stays on while dragging or gliding. Responsive rules can set all three options.
 
 Try both modes in the [interactive drag example](/ticker/examples/#drag-playback). The Resume after drag control changes the option without starting playback.
 
@@ -173,8 +173,7 @@ finishes; `reasons` retains `navigation` until the interval expires. Manual paus
 focus and other automatic causes still apply afterward. Explicit play/pause,
 competing seeks, refresh, changed geometry, reduced motion and destroy cancel
 the wait. Reduced motion still makes seeking instant. Range pointer input and
-dragging do not apply the reading interval. Verify npm/CDN availability or use
-a matching local build while publication is pending.
+dragging do not apply the reading interval.
 
 Repeated arrow clicks and rail arrow keys in the same direction add each step to
 the pending destination, including across sequence boundaries. Item geometry is

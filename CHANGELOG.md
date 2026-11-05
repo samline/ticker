@@ -12,7 +12,7 @@ No unreleased changes.
 
 ### Examples
 
-- The drag-playback example enables `inertia` with `resumeAfterDrag`; complete/split Package / ESM and HTML / CDN recipes carry the option. Public docs, README, skill and delivery pins target 2.6.0. Publication remains a separate maintainer action.
+- The drag-playback example enables `inertia` with `resumeAfterDrag`; complete/split Package / ESM and HTML / CDN recipes carry the option. Public docs, README, skill and delivery pins target 2.6.0.
 
 ### Behavior changes
 
@@ -26,7 +26,7 @@ No unreleased changes.
 
 ### Examples
 
-- Manual-navigation preview and complete/split Package / ESM and HTML / CDN recipes demonstrate a 1,500 ms reading interval. Public types, documentation, skill and delivery pins target 2.5.0. Publication remains a separate maintainer action.
+- Manual-navigation preview and complete/split Package / ESM and HTML / CDN recipes demonstrate a 1,500 ms reading interval. Public types, documentation, skill and delivery pins target 2.5.0.
 
 ## [2.4.0] - 2026-10-29
 
@@ -42,7 +42,7 @@ No unreleased changes.
 ### Examples
 
 - Explain temporary hover/focus pauses in live and copied examples, with configuration guidance for changing those policies. Reserve message geometry so clearing focus does not move controls and lose a pointer click.
-- Add selected-category and centered-logo recipes with position/orientation controls, drag navigation, associated category content and a labeled partner card. Every visible category button, including repeated copies, selects the original through stable keys. Complete and split files pin the prepared release; npm publication remains a separate maintainer action.
+- Add selected-category and centered-logo recipes with position/orientation controls, drag navigation, associated category content and a labeled partner card. Every visible category button, including repeated copies, selects the original through stable keys. Complete and split files pin the prepared release;
 
 ## [2.3.0] - 2026-10-29
 

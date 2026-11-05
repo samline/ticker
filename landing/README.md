@@ -428,6 +428,6 @@ Browser IIFE: 49,119 bytes raw / 11,514 bytes gzip (11.2 KiB); CSS: 4,166 / 929 
 These are local transfer sizes, not a performance benchmark. npm latest was
 verified as 2.4.0; 2.5.0 still requires the maintainer's publication.
 
-## Drag inertia — 2.6.0 preparation
+## Drag inertia — 2.6.0
 
-The drag-playback example enables `inertia` with `resumeAfterDrag`: TickerDemo maps `data-inertia` to the public option and the generated complete/split Package / ESM and HTML / CDN recipes include it through the row options. Runtime browser tests cover opt-in behavior, a 1200 px/s flick (250–600 px, under 1.5 s), continuity across the period, vertical and RTL, pointercancel, reduced motion and resume-after-glide. This prepares 2.6.0; npm/CDN publication remains a maintainer action.
+The drag-playback example enables `inertia` with `resumeAfterDrag`: TickerDemo maps `data-inertia` to the public option and the generated complete/split Package / ESM and HTML / CDN recipes include it through the row options. Runtime browser tests cover opt-in behavior, a 1200 px/s flick (250–600 px, under 1.5 s), continuity across the period, vertical and RTL, pointercancel, reduced motion and resume-after-glide. Version 2.6.0 ships this behavior.

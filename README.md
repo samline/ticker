@@ -88,7 +88,7 @@ Choose **Package / ESM** when installing with npm, pnpm or bun and importing Tic
 <script src="https://unpkg.com/@samline/ticker@2.6.0/dist/browser/global.global.js"></script>
 ```
 
-> Pin the version in production. Replace `2.6.0` with the version you ship. Verify that it is published before using npm/CDN URLs; preparing a release does not publish it.
+> Pin the version in production. Replace `2.6.0` with the version you ship.
 
 The standalone script (an IIFE) exposes `window.Ticker`. “Global” describes this object, not another loading mode. The optional `@samline/ticker/browser` registry module is an ESM/CJS import and does not install that object. See [loading terms](https://samline.github.io/ticker/docs/guides/html-and-browser/#loading-terms).
 
@@ -121,7 +121,7 @@ For optional ID-based ownership, `window.Ticker.newTicker({ id, options })` crea
 
 Keep one original fixed while the remaining sequence passes behind it. Mark a direct item with `data-featured`; when several are marked, the first in original DOM order wins and the rest move normally. Configure `featuredPosition` (`start`, `center`, `end`, or axis-specific physical edges). `controller.setFeatured(item)` replaces it; `setFeatured(null)` clears it; `controller.featured` exposes the original. Featured items are excluded from clones and repeat distance, retain identity/focus and return to their original position on release/destroy.
 
-Featured items require version 2.4.0 or later and matching JavaScript and stylesheet. Verify npm/CDN availability before using a prepared release; a Git tag does not publish the package. See [featured configuration](https://samline.github.io/ticker/docs/reference/configuration/#featured-items) and the [gallery](https://samline.github.io/ticker/examples/#featured-menu) for the complete contract and runnable examples.
+Featured items require version 2.4.0 or later and matching JavaScript and stylesheet. See [featured configuration](https://samline.github.io/ticker/docs/reference/configuration/#featured-items) and the [gallery](https://samline.github.io/ticker/examples/#featured-menu) for the complete contract and runnable examples.
 
 ## API at a glance
 

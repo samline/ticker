@@ -196,7 +196,7 @@ The runtime owns `data-ready` (measured), `data-active` (viewport), `data-playin
 
 ## Featured items
 
-Featured support requires **2.4.0 or later** and matching JavaScript and stylesheet. Verify npm/CDN availability before using a prepared release; use a matching local build while publication is pending.
+Featured support requires **2.4.0 or later** and matching JavaScript and stylesheet.
 
 Mark one **direct item** of the original sequence with `data-featured`. Ticker moves that original into a fixed `.ticker-featured` layer inside the wrapper. It never clones the selected original, leaves no moving gap, and excludes it from the repeat distance and item navigation. Other items pass behind it. This works with enhanced sources and explicit track/content markup.
 
@@ -237,4 +237,4 @@ Focus pauses still apply. Keyboard focus reveals original content in an uncovere
 
 A featured-only sequence remains visible but not ready and clone-free; adding moving content and refreshing recovers normal playback. Removing the featured node and refreshing clears the overlay without resurrecting it. Destruction restores a retained original to its comment-marked position and removes the layer. The operation preserves requested playback and native element identity/listeners, and restores focus when moving the focused original.
 
-Try the [selected-category example](/ticker/examples/#featured-menu) and [centered-logo example](/ticker/examples/#featured-logo). Copied files pin the prepared release; verify its npm/CDN publication or self-host a matching build.
+Try the [selected-category example](/ticker/examples/#featured-menu) and [centered-logo example](/ticker/examples/#featured-logo). Copied files pin the prepared release.

@@ -270,7 +270,7 @@ export default {
         'Start paused. Use Previous, Next, the position rail or a pointer gesture to explore a repeating sequence. Press Play, then drag: playback resumes after release when hover and focus pauses clear. Smooth arrow steps and the rail preserve your current playback choice, including a manual pause.',
       docsPath: 'reference/api/controller/#manual-navigation',
       docsLabel: 'Read the manual navigation contract',
-      note: 'Arrow buttons reveal one incoming element over 300 ms, including a partially hidden element, and respect reduced motion. Set itemsPerStep in the copied code to request more; motion stops before the first incoming element leaves the opposite edge. Rapid same-direction clicks add steps; reversing starts from the visible position. With playback enabled, resumeDelay: 1500 holds the destination for 1.5 seconds after movement; each new arrow command replaces the wait. Manual pause stays paused. This option requires 2.5.0; verify publication or use a matching local build. The rail represents one repeated sequence and wraps at its end. Drag horizontally; vertical page scrolling stays available.',
+      note: 'Arrow buttons reveal one incoming element over 300 ms, including a partially hidden element, and respect reduced motion. Set itemsPerStep in the copied code to request more; motion stops before the first incoming element leaves the opposite edge. Rapid same-direction clicks add steps; reversing starts from the visible position. With playback enabled, resumeDelay: 1500 holds the destination for 1.5 seconds after movement; each new arrow command replaces the wait. Manual pause stays paused. This option requires 2.5.0. The rail represents one repeated sequence and wraps at its end. Drag horizontally; vertical page scrolling stays available.',
       rows: [
         {
           label: 'Manual news navigation',
@@ -407,7 +407,7 @@ export default {
       kind: 'drag',
       title: 'Drag and choose what happens next',
       description:
-        'Drag the moving strip with a mouse or touch and flick it: the strip keeps gliding after release, then stops. Turn Resume after drag on to continue playback once the glide ends, or off to leave the strip paused.',
+        'Requires 2.6.0 or later. Drag the moving strip with a mouse or touch and flick it: the strip keeps gliding after release, then stops. Turn Resume after drag on to continue playback once the glide ends, or off to leave the strip paused.',
       docsPath: 'reference/api/controller/#manual-navigation',
       docsLabel: 'Read about drag playback',
       note: 'With the option on, release and move the pointer away to clear hover pause. With it off, press Play before trying another drag. Changing the option does not start playback or clear a manual pause.',
@@ -438,7 +438,7 @@ export default {
         'Browse a category menu that is wider than its container. Your selection stays visible with its associated content while the other categories move behind it. Try another position, switch axes or drag the moving items.',
       docsPath: 'reference/configuration/#featured-items',
       docsLabel: 'Read the featured item contract',
-      note: 'Requires version 2.4.0 or later; verify npm/CDN publication or use a matching local build. Every visible category button selects its original, including repeated copies. The selected category is fixed and never cloned. Drag the moving items; playback resumes after release. Hover does not pause this example; keyboard focus pauses it with a visible explanation. The fixed selection remains clickable. Category buttons update the content below without navigating away.',
+      note: 'Requires version 2.4.0 or later. Every visible category button selects its original, including repeated copies. The selected category is fixed and never cloned. Drag the moving items; playback resumes after release. Hover does not pause this example; keyboard focus pauses it with a visible explanation. The fixed selection remains clickable. Category buttons update the content below without navigating away.',
       rows: [
         {
           label: 'Choose a category',
@@ -485,7 +485,7 @@ export default {
         'Give a principal partner its own labeled card while the other logos move behind it. Move the featured card, switch to a vertical layout or drag the surrounding logos.',
       docsPath: 'reference/configuration/#featured-items',
       docsLabel: 'Configure a fixed original item',
-      note: 'Requires version 2.4.0 or later; verify npm/CDN publication or use a matching local build. The principal card stays fixed while you drag the moving logos. Playback resumes after release. Hover does not pause this example; keyboard focus still pauses it with a visible explanation. Only the first marked original is featured. Brand marks are illustrative and do not imply endorsement.',
+      note: 'Requires version 2.4.0 or later. The principal card stays fixed while you drag the moving logos. Playback resumes after release. Hover does not pause this example; keyboard focus still pauses it with a visible explanation. Only the first marked original is featured. Brand marks are illustrative and do not imply endorsement.',
       rows: [
         {
           label: 'Featured technology mark',

@@ -17,7 +17,7 @@ Use the site's two loading labels consistently:
 - **Package / ESM:** install with npm, pnpm, yarn or bun. Import `{ ticker }` from `@samline/ticker` (or `/vanilla`) and import `@samline/ticker/style.css` once. Initialize in client code after markup exists. ESM/TypeScript and CommonJS are module formats; neither installs `window.Ticker`.
 - **HTML / CDN:** load `dist/style.css` with `<link>` and `dist/browser/global.global.js` with `<script>`, then call `window.Ticker.ticker(target, options)`. A CDN is only file delivery: self-hosting those same files uses the same API. The JavaScript is an IIFE that exposes the global namespace `window.Ticker`; “Global” is not a third setup. Keep both asset versions equal. The script and source markup must exist before initialization; avoid `async` or a deferred script followed by an immediately executed inline initializer.
 
-For v2.6.0, a CDN URL is `https://cdn.jsdelivr.net/npm/@samline/ticker@2.6.0/dist/browser/global.global.js`, with `style.css` at the same version's dist root. Verify that the chosen release/assets actually exist. A repository version, tag or documentation header does not prove npm/CDN availability. If the project uses a local build, load that build; never silently use an older CDN release with newer APIs.
+For v2.6.0, a CDN URL is `https://cdn.jsdelivr.net/npm/@samline/ticker@2.6.0/dist/browser/global.global.js`, with `style.css` at the same version's dist root. Use the same version for the script and stylesheet. A repository version, tag or documentation header does not prove npm/CDN availability. If the project uses a local build, load that build; never silently use an older CDN release with newer APIs.
 
 Select ownership separately from loading:
 
@@ -128,11 +128,11 @@ Item stepping excludes wrapper borders and honors CSS scroll-padding on the acti
 
 ## Featured items (since 2.4.0)
 
-Use version 2.4.0 or later with its matching stylesheet; verify publication or install/build the matching checkout. Mark a direct original item `data-featured`; only the first marked original in authored DOM order is fixed, with other marked originals moving/cloning normally. Nested markers are ignored. `featuredPosition` defaults to `center`; logical `start`/`end` follow horizontal LTR/RTL and vertical top/bottom; physical `left`/`right` apply horizontally and `top`/`bottom` vertically, with orthogonal values centering.
+Use version 2.4.0 or later with its matching stylesheet. Mark a direct original item `data-featured`; only the first marked original in authored DOM order is fixed, with other marked originals moving/cloning normally. Nested markers are ignored. `featuredPosition` defaults to `center`; logical `start`/`end` follow horizontal LTR/RTL and vertical top/bottom; physical `left`/`right` apply horizontally and `top`/`bottom` vertically, with orthogonal values centering.
 
 `controller.setFeatured(original)` replaces the selection and `controller.featured` reads it. Keep original references; the selected node moves outside the animated source into `.ticker-featured`. It is never cloned and contributes no gap/period/item step. Invalid foreign/nested/clone targets throw `RangeError`. `setFeatured(null)` restores the item and suppresses markers until destruction; explicit selection remains authoritative across refresh. Marker edits need `refresh()`. Removal/refresh must not resurrect removed items. Destruction restores surviving content/order and removes the overlay. Requested playback and native identity/listeners/focus are preserved.
 
-Application CSS owns background/border/padding and must reach the node outside `.ticker-content`; give overlays a readable surface and leave room for other content. Application selection ARIA is independent. For an actionable repeated menu, enable `interactiveClones` and delegate clicks by a stable item key to its original before calling `setFeatured`; copies are inert by default and clone targets are rejected. Focus reveals moving originals beside the overlay; default focus pause remains active. Feature-only content stays visible and clone-free without a moving sequence. Gallery files pin the prepared release. Verify npm/CDN availability before running them, or self-host the matching dist build.
+Application CSS owns background/border/padding and must reach the node outside `.ticker-content`; give overlays a readable surface and leave room for other content. Application selection ARIA is independent. For an actionable repeated menu, enable `interactiveClones` and delegate clicks by a stable item key to its original before calling `setFeatured`; copies are inert by default and clone targets are rejected. Focus reveals moving originals beside the overlay; default focus pause remains active. Feature-only content stays visible and clone-free without a moving sequence. Gallery files pin the prepared release. Self-hosting the matching dist build is also supported.
 
 ## Explain automatic pauses
 
@@ -147,4 +147,4 @@ With `preservePlayback: true`, a finite positive delay holds automatic playback
 after seeking so the user can read the incoming item. Default is zero; each
 command replaces the wait and explicit play/pause cancels it. `navigate` reports
 motion completion while the `navigation` pause reason remains during the wait.
-Requires 2.5.0 or later; verify publication or use a matching local build.
+Requires 2.5.0 or later.
