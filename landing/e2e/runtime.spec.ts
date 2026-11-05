@@ -290,8 +290,13 @@ test('touch gestures distinguish taps from drags and leave perpendicular page sc
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
   expect((await state(page)).position).toBeCloseTo(72)
   expect((await state(page)).requested).toBe(false)
-  await page.evaluate(() => (window as any).controller.scrollTo(0))
   await expect(page).toHaveURL(/#one$/)
+  // A touch drag fires no click; it must not swallow the next keyboard activation.
+  await page.waitForTimeout(50)
+  await link.focus()
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL(/#drag-target$/)
+  await page.evaluate(() => (window as any).controller.scrollTo(0))
   const position = (await state(page)).position
   await cdp.send('Input.dispatchTouchEvent', {
     type: 'touchStart',
@@ -308,6 +313,55 @@ test('touch gestures distinguish taps from drags and leave perpendicular page sc
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0)
   await context.close()
 })
+
+for (const [direction, dir] of [
+  ['left', 'ltr'],
+  ['auto', 'rtl'],
+  ['up', 'ltr'],
+] as const) {
+  test(`${direction}/${dir}: focusing an offscreen original seeks instead of scrolling the wrapper`, async ({
+    page,
+  }) => {
+    await setup(page, { direction, autoplay: false }, dir)
+    const vertical = direction === 'up'
+    // A narrow clip leaves originals in the wrapper's natively scrollable overflow.
+    await page.evaluate(() => {
+      document.querySelector<HTMLElement>('#host')!.style.width = '120px'
+      document.querySelector<HTMLElement>('.ticker-wrapper')!.style.maxHeight = '40px'
+      ;(window as any).controller.refresh()
+    })
+    await page.waitForTimeout(100)
+    const wrapper = page.locator('.ticker-wrapper')
+    const originals = page.locator('.ticker-content:not(.ticker-clone) :is(a, button, input)')
+    const before = (await state(page)).position
+    let revealed = 0
+    for (let index = 0; index < 3; index++) {
+      const item = originals.nth(index)
+      await item.focus()
+      await expect.poll(() => wrapper.evaluate(el => [el.scrollLeft, el.scrollTop])).toEqual([0, 0])
+      const result = await item.evaluate((el, vertical) => {
+        const r = el.getBoundingClientRect()
+        const w = el.closest('.ticker-wrapper')!.getBoundingClientRect()
+        const t = el.closest('.ticker-track')!.getBoundingClientRect()
+        return {
+          visible: vertical
+            ? r.top >= w.top - 0.5 && r.bottom <= w.bottom + 0.5
+            : r.left >= w.left - 0.5 && r.right <= w.right + 0.5,
+          // The loop stays covered: repeated copies still fill both viewport edges.
+          covered: vertical
+            ? t.top <= w.top && t.bottom >= w.bottom
+            : t.left <= w.left && t.right >= w.right,
+        }
+      }, vertical)
+      expect(result.covered).toBe(true)
+      if (result.visible) revealed++
+    }
+    // At least one native reveal became a logical seek rather than a scroll offset.
+    expect((await state(page)).position).not.toBeCloseTo(before)
+    expect(revealed).toBeGreaterThan(0)
+    expect((await state(page)).requested).toBe(false)
+  })
+}
 
 test('ready/measure ordering, late subscriptions, images and content changes retain constant speed', async ({
   page,

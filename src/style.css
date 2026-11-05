@@ -146,12 +146,14 @@
   isolation: isolate;
 }
 
+/* :where() scopes the runtime layer without raising its specificity, so an
+   application class named ticker-featured elsewhere is not repositioned. */
 .ticker-wrapper:has(> .ticker-featured) > .ticker-track,
-.ticker-featured {
+:where(.ticker-wrapper) > .ticker-featured {
   grid-area: 1 / 1;
 }
 
-.ticker-featured {
+:where(.ticker-wrapper) > .ticker-featured {
   display: flex;
   position: relative;
   z-index: 1;

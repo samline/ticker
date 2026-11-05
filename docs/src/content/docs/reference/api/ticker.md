@@ -68,6 +68,10 @@ For ordinary source content, the factory:
 
 For adopted markup it applies normalized attributes to the existing wrapper and initializes its existing track/content pair. If the required track or content is missing, the factory returns `null`.
 
+## Repeated calls
+
+Since 3.0.0, calling `ticker()` again for a source or wrapper that already has a live controller returns that same controller instead of wrapping the enhanced source a second time. Options passed to the repeated call are applied with `update(options)`; a call without options changes nothing. After `destroy()` (or removal under the page manager), the next call creates a new controller.
+
 ## Server behavior
 
 Passing a selector when `document` is unavailable returns `null`. Importing the function itself is server-safe. Passing a real `HTMLElement` inherently requires a DOM implementation.

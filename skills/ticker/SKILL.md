@@ -3,12 +3,12 @@ name: ticker
 description: Integrate @samline/ticker marquees into websites, plain HTML, CMS templates or framework components. Use for ticker installation, styling, options, accessible motion and lifecycle; not financial market data or unrelated slider libraries.
 metadata:
   package: '@samline/ticker'
-  package-version: '2.6.0'
+  package-version: '3.0.0'
 ---
 
 # Ticker
 
-Build against the installed `@samline/ticker` version. This skill describes v2.6.0. Check the dependency version and its exports before applying it to another release. For 2.x, do not use the removed enhance()/createTicker() APIs or the former framework-adapter entrypoints; read the changelog when handling 1.x code. Preserve the host project's components, theme and lifecycle conventions; Ticker supplies movement, not a UI framework or financial data.
+Build against the installed `@samline/ticker` version. This skill describes v3.0.0. Check the dependency version and its exports before applying it to another release. For 2.x and later, do not use the removed enhance()/createTicker() APIs or the former framework-adapter entrypoints; read the changelog when handling 1.x code. Preserve the host project's components, theme and lifecycle conventions; Ticker supplies movement, not a UI framework or financial data.
 
 ## Choose loading, then ownership
 
@@ -17,7 +17,7 @@ Use the site's two loading labels consistently:
 - **Package / ESM:** install with npm, pnpm, yarn or bun. Import `{ ticker }` from `@samline/ticker` (or `/vanilla`) and import `@samline/ticker/style.css` once. Initialize in client code after markup exists. ESM/TypeScript and CommonJS are module formats; neither installs `window.Ticker`.
 - **HTML / CDN:** load `dist/style.css` with `<link>` and `dist/browser/global.global.js` with `<script>`, then call `window.Ticker.ticker(target, options)`. A CDN is only file delivery: self-hosting those same files uses the same API. The JavaScript is an IIFE that exposes the global namespace `window.Ticker`; “Global” is not a third setup. Keep both asset versions equal. The script and source markup must exist before initialization; avoid `async` or a deferred script followed by an immediately executed inline initializer.
 
-For v2.6.0, a CDN URL is `https://cdn.jsdelivr.net/npm/@samline/ticker@2.6.0/dist/browser/global.global.js`, with `style.css` at the same version's dist root. Use the same version for the script and stylesheet. A repository version, tag or documentation header does not prove npm/CDN availability. If the project uses a local build, load that build; never silently use an older CDN release with newer APIs.
+For v3.0.0, a CDN URL is `https://cdn.jsdelivr.net/npm/@samline/ticker@3.0.0/dist/browser/global.global.js`, with `style.css` at the same version's dist root. Use the same version for the script and stylesheet. A repository version, tag or documentation header does not prove npm/CDN availability. If the project uses a local build, load that build; never silently use an older CDN release with newer APIs.
 
 Select ownership separately from loading:
 
@@ -148,3 +148,7 @@ after seeking so the user can read the incoming item. Default is zero; each
 command replaces the wait and explicit play/pause cancels it. `navigate` reports
 motion completion while the `navigation` pause reason remains during the wait.
 Requires 2.5.0 or later.
+
+## 3.0.0 behavior
+
+Calling `ticker()` again for a live source or wrapper returns the same controller (options go through `update()`), so do not rely on a second call to create an independent instance; destroy first. A native scroll of the wrapper (focus reveal, find-in-page, fragments) becomes a logical seek. Registry entries disappear when their controller is destroyed by any owner.

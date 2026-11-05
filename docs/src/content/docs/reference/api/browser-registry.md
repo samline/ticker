@@ -51,6 +51,7 @@ browser.available.news
 - `getTicker(id)` returns the live registered wrapper or `null`.
 - `getTickers()` returns a shallow snapshot; deleting keys from it cannot change the live registry.
 - `available` is the live mutable id-to-wrapper object. Treat it as read-only consumer state.
+- Since 3.0.0, an entry is removed whenever its controller is destroyed by any owner: `controller.destroy()`, the registry, or removal from the document under `mount()`. `getTicker(id)` then returns `null` instead of a detached wrapper.
 
 ## Destruction
 

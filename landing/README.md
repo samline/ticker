@@ -431,3 +431,7 @@ verified as 2.4.0; 2.5.0 still requires the maintainer's publication.
 ## Drag inertia — 2.6.0
 
 The drag-playback example enables `inertia` with `resumeAfterDrag`: TickerDemo maps `data-inertia` to the public option and the generated complete/split Package / ESM and HTML / CDN recipes include it through the row options. Runtime browser tests cover opt-in behavior, a 1200 px/s flick (250–600 px, under 1.5 s), continuity across the period, vertical and RTL, pointercancel, reduced motion and resume-after-glide. Version 2.6.0 ships this behavior.
+
+## Runtime audit — 3.0.0 (2026-11-05)
+
+Browser IIFE: 55,688 bytes raw / 12,983 bytes gzip (12.7 KiB); CSS: 4,353 / 966 bytes (0.9 KiB), measured from the local tsup build with gzip. FAQ copy reflects this build; these are not performance measurements. Copied recipes and CDN snippets pin 3.0.0, which requires the maintainer's npm publication (npm latest was 2.6.0 at the time of the audit).

@@ -43,6 +43,13 @@ export const newTicker = ({ id, options = {} }: NewTickerInput): TickerInstance 
   if (!instance?.element) return null
   registered.set(id, instance)
   available[id] = instance.element
+  // Direct destroy() or DOM removal under mount() must not leave a detached
+  // wrapper retained and reported by getTicker()/available.
+  instance.on('destroy', () => {
+    if (registered.get(id) !== instance) return
+    registered.delete(id)
+    delete available[id]
+  })
   return instance
 }
 export const getTicker = (id: string): HTMLElement | null => available[id] ?? null

@@ -4,6 +4,26 @@
 
 No unreleased changes.
 
+## [3.0.0] - 2026-11-05
+
+### Behavior changes
+
+- `ticker(target)` for a source or wrapper that already has a live controller now returns that controller (applying any passed options through `update()`) instead of wrapping the enhanced source a second time and nesting tickers. A destroyed controller is replaced as before.
+- A native scroll of the `overflow: hidden` wrapper (focusing an offscreen original, find-in-page or fragment navigation) is converted into an equivalent logical seek and the scroll offset is reset, preserving playback intent. Static reduced-motion rows without `navigation` keep native scrolling.
+
+### Fixed
+
+- Keyboard focus on an offscreen original no longer leaves the wrapper permanently scrolled, which offset the loop and could expose an uncovered edge until reload.
+- A touch drag (which produces no click) or a mouse drag released outside the ticker no longer swallows the next click or keyboard activation inside it.
+- The browser registry drops an entry when its controller is destroyed directly or by DOM removal under `mount()`, instead of retaining the detached wrapper in `available` / `getTicker()`.
+- Batched `IntersectionObserver` callbacks use the latest entry, so a quick enter/leave sequence no longer leaves the ticker in the wrong active state.
+- `destroy()` cancels a pending throttled drag `navigate` frame.
+- The `.ticker-featured` layer rules are scoped to ticker wrappers with `:where()`, so an unrelated application element using that class is not repositioned.
+
+### Examples
+
+- Package, CDN and skill pins target 3.0.0. The FAQ size figure reflects the current browser build.
+
 ## [2.6.0] - 2026-11-04
 
 ### Added

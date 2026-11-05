@@ -103,6 +103,9 @@ interface RuntimeTickerState extends TickerState {
 }
 
 const tickersState = new Map<HTMLElement, RuntimeTickerState>()
+// Source and wrapper elements map to their live controller, so repeated
+// initialization cannot nest a second wrapper around an enhanced source.
+const controllers = new WeakMap<HTMLElement, TickerInstance>()
 let managerState: TickerManagerState = createEmptyManagerState()
 
 const modulo = (value: number, period: number): number =>
@@ -708,6 +711,35 @@ const setupInteraction = (state: RuntimeTickerState): void => {
     },
     { signal }
   )
+  // overflow:hidden is still programmatically scrollable: focusing an offscreen
+  // original, find-in-page or fragment navigation would offset the loop until
+  // reload. Convert that native scroll into an equivalent logical seek.
+  wrapper.addEventListener(
+    'scroll',
+    () => {
+      const left = wrapper.scrollLeft
+      const top = wrapper.scrollTop
+      const measurement = state.measurement
+      // Static reduced-motion rows have no seekable track; native scroll is their reveal.
+      if (
+        (!left && !top) ||
+        !measurement ||
+        (measurement.reducedMotion && wrapper.dataset.navigation !== 'true')
+      )
+        return
+      wrapper.scrollLeft = 0
+      wrapper.scrollTop = 0
+      // A featured overlay already revealed focus beside itself on focusin; the
+      // browser's own reveal ignores the overlay, so recompute instead of adding it.
+      if (state.featured.element && state.itemRoot.contains(document.activeElement)) {
+        revealFocused(state)
+        return
+      }
+      const delta = state.vertical ? top : state.rtl ? -left : left
+      if (delta) navigate(state, readPosition(state) + delta, false, { preservePlayback: true })
+    },
+    { passive: true, signal }
+  )
   // Captured load also catches images inserted after initialization.
   content.addEventListener('load', () => scheduleRebuild(state), { capture: true, signal })
   document.fonts?.ready
@@ -731,12 +763,14 @@ const setupInteraction = (state: RuntimeTickerState): void => {
     | undefined
   let resumeIntent: { requested: boolean; manualOverride: boolean; revision: number } | undefined
   let suppressClick = false
+  let suppressTimer = 0
   wrapper.addEventListener(
     'pointerdown',
     event => {
       if (wrapper.dataset.navigation !== 'true' || event.isPrimary === false || event.button !== 0)
         return
       suppressClick = false
+      window.clearTimeout(suppressTimer)
       if ((event.target as Element).closest('input, textarea, select, [contenteditable]')) return
       // Preserve focus for opt-in mouse actions on both moving and fixed items.
       // Fixed content stays clickable, but must not begin a drag controller.
@@ -804,6 +838,15 @@ const setupInteraction = (state: RuntimeTickerState): void => {
     if (pointer?.id !== event.pointerId) return
     const finished = pointer
     pointer = undefined
+    if (finished.dragging) {
+      // A drag's synthetic click follows pointerup in the same task. Touch drags
+      // and releases elsewhere fire none, so do not swallow a later activation.
+      window.clearTimeout(suppressTimer)
+      suppressTimer = window.setTimeout(() => {
+        suppressTimer = 0
+        suppressClick = false
+      })
+    }
     if (wrapper.hasPointerCapture?.(event.pointerId)) wrapper.releasePointerCapture(event.pointerId)
     delete wrapper.dataset.dragging
     const resume = () => {
@@ -880,6 +923,7 @@ const setupInteraction = (state: RuntimeTickerState): void => {
       wrapper.releasePointerCapture(pointer.id)
     pointer = undefined
     resumeIntent = undefined
+    window.clearTimeout(suppressTimer)
     delete wrapper.dataset.dragging
     delete wrapper.dataset.gliding
   })
@@ -1099,8 +1143,9 @@ const setupObservers = (state: RuntimeTickerState): void => {
 
   if (typeof window.IntersectionObserver === 'function') {
     state.intersectionObserver = new IntersectionObserver(
-      ([entry]) => {
-        const isActive = entry?.isIntersecting ?? true
+      entries => {
+        // A batch can hold several transitions for this target; the last is current.
+        const isActive = entries[entries.length - 1]?.isIntersecting ?? true
         if (wrapper.dataset.active !== String(isActive)) {
           wrapper.dataset.active = isActive ? 'true' : 'false'
         }
@@ -1118,6 +1163,8 @@ const destroyTicker = (wrapper: HTMLElement): void => {
   if (!state) return
 
   if (state.frameId) cancelFrame(state.frameId)
+  if (state.dragEmitFrame) cancelFrame(state.dragEmitFrame)
+  state.dragEmitFrame = 0
   if (state.resizeTimeout) clearTimeout(state.resizeTimeout)
 
   state.position = readPosition(state)
@@ -1387,6 +1434,9 @@ export const ticker = (
 ): TickerInstance | null => {
   const source = resolveTarget(target)
   if (!source) return null
+  const existing = controllers.get(source)
+  if (existing?.element && !existing.state.destroyed)
+    return Object.keys(initialOptions).length ? existing.update(initialOptions) : existing
 
   const ownsWrapper = !source.matches(TICKER_SELECTOR)
   const originalContent = ownsWrapper
@@ -1562,6 +1612,8 @@ export const ticker = (
     },
     destroy() {
       if (!wrapper) return
+      controllers.delete(source)
+      controllers.delete(wrapper)
       destroyTicker(wrapper)
       if (ownsWrapper) {
         if (originalContent && contentParent)
@@ -1577,6 +1629,8 @@ export const ticker = (
     },
   }
 
+  controllers.set(source, instance)
+  controllers.set(wrapper, instance)
   return instance
 }
 
