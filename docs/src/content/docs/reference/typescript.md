@@ -52,6 +52,9 @@ interface TickerOptions {
   pauseOnFocus?: boolean
   navigation?: boolean
   resumeAfterDrag?: boolean
+  inertia?: boolean
+  inertiaDeceleration?: number
+  inertiaMaxVelocity?: number
   responsive?: readonly TickerResponsiveRule[]
   direction?: TickerDirection
   pauseOnHover?: boolean

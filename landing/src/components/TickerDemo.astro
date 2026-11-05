@@ -18,6 +18,7 @@ interface Props {
   preserveNavigationPlayback?: boolean
   navigationResumeDelay?: number
   resumeAfterDrag?: boolean
+  inertia?: boolean
   rtl?: boolean
   responsive?: import('@samline/ticker').TickerResponsiveRule[]
 }
@@ -36,6 +37,7 @@ const {
   preserveNavigationPlayback = false,
   navigationResumeDelay = 0,
   resumeAfterDrag = false,
+  inertia = false,
   responsive = [],
   rtl = false,
 } = Astro.props
@@ -60,6 +62,7 @@ const i18n = getI18n(Astro)
   data-preserve-navigation-playback={String(preserveNavigationPlayback)}
   data-navigation-resume-delay={navigationResumeDelay}
   data-resume-after-drag={String(resumeAfterDrag)}
+  data-inertia={String(inertia)}
   data-responsive={JSON.stringify(responsive)}
   data-kind={kind}
   data-pause-text={i18n.controls.ticker.pause}
@@ -145,6 +148,7 @@ const i18n = getI18n(Astro)
         interactiveClones: element.dataset.interactiveClones === 'true',
         navigation: element.dataset.navigation === 'true',
         resumeAfterDrag: element.dataset.resumeAfterDrag === 'true',
+        inertia: element.dataset.inertia === 'true',
         responsive: JSON.parse(element.dataset.responsive ?? '[]'),
         pauseOnHover: element.dataset.pauseOnHover !== 'false',
       })

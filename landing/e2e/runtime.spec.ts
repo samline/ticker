@@ -416,6 +416,149 @@ test('resumeAfterDrag restores intent on pointer cancellation while reduced moti
   }
 })
 
+// Installed before the gesture so sampling starts on release; a round trip
+// after the flick would miss the fastest part of the glide.
+const watchGlide = (page: Page) =>
+  page.evaluate(() => {
+    const w = window as any
+    const wrapper = document.querySelector('.ticker-wrapper') as HTMLElement
+    const period = w.controller.state.distance
+    const navigations = () => w.events.filter(([name]: [string]) => name === 'navigate').length
+    w.glide = new Promise(resolve => {
+      wrapper.addEventListener(
+        'pointerup',
+        () => {
+          const before = navigations()
+          const started = performance.now()
+          let previous = w.controller.state.position
+          let travelled = 0
+          const deltas: number[] = []
+          const tick = () => {
+            const position = w.controller.state.position
+            // Shortest signed distance on the circular sequence.
+            let delta = position - previous
+            if (delta > period / 2) delta -= period
+            if (delta < -period / 2) delta += period
+            deltas.push(delta)
+            travelled += delta
+            previous = position
+            if (wrapper.dataset.gliding === 'true' || performance.now() - started < 50)
+              requestAnimationFrame(tick)
+            else
+              resolve({
+                deltas,
+                navigations: navigations() - before,
+                travelled,
+                duration: performance.now() - started,
+              })
+          }
+          requestAnimationFrame(tick)
+        },
+        { once: true }
+      )
+    })
+  })
+
+const glideResult = (page: Page) =>
+  page.evaluate(
+    () =>
+      (window as any).glide as Promise<{
+        deltas: number[]
+        navigations: number
+        travelled: number
+        duration: number
+      }>
+  )
+
+const flick = async (page: Page, end: 'up' | 'cancel' = 'up', axis: 'x' | 'y' = 'x') => {
+  const box = (await page.locator('.ticker-wrapper').boundingBox())!
+  const at = (travel: number) =>
+    axis === 'x'
+      ? ([box.x + 120 - travel, box.y + 20] as const)
+      : ([box.x + 20, box.y + 60 - travel] as const)
+  await page.mouse.move(...at(0))
+  await page.mouse.down()
+  for (let step = 1; step <= 6; step += 1)
+    await page.mouse.move(...at(step * (axis === 'x' ? 18 : 9)))
+  if (end === 'cancel')
+    await page.locator('.ticker-wrapper').dispatchEvent('pointercancel', { pointerId: 1 })
+  else await page.mouse.up()
+}
+
+// The flick is faster than the 1200px/s limit, so the glide is deterministic:
+// v²/(2a) = 400px over about 0.67s.
+test('inertia is opt-in and glides to a stop after a flick without a period jump', async ({
+  page,
+}) => {
+  await setup(page, { navigation: true, autoplay: false })
+  await flick(page)
+  await expect(page.locator('.ticker-wrapper')).not.toHaveAttribute('data-gliding', 'true')
+  await page.evaluate(() => (window as any).controller.destroy())
+
+  await page.reload()
+  await setup(page, { navigation: true, autoplay: false, inertia: true, inertiaMaxVelocity: 1200 })
+  await watchGlide(page)
+  await flick(page)
+  await expect(page.locator('.ticker-wrapper')).toHaveAttribute('data-gliding', 'true')
+  expect((await state(page)).reasons).toContain('navigation')
+  expect(await page.locator('.ticker-track').evaluate(el => getComputedStyle(el).willChange)).toBe(
+    'transform'
+  )
+  const glide = await glideResult(page)
+  // Content kept moving in the drag direction, wrapped continuously and stopped.
+  expect(glide.travelled).toBeGreaterThan(250)
+  expect(glide.travelled).toBeLessThan(600)
+  expect(glide.duration).toBeLessThan(1500)
+  expect(Math.min(...glide.deltas)).toBeGreaterThanOrEqual(-0.5)
+  expect(Math.max(...glide.deltas)).toBeLessThan(40)
+  expect(glide.navigations).toBeLessThanOrEqual(2)
+  const stopped = (await state(page)).position
+  await page.waitForTimeout(120)
+  expect((await state(page)).position).toBeCloseTo(stopped, 3)
+  expect((await state(page)).reasons).not.toContain('navigation')
+})
+
+for (const [direction, dir] of [
+  ['up', 'ltr'],
+  ['down', 'ltr'],
+  ['auto', 'rtl'],
+] as const) {
+  test(`${direction}/${dir}: inertia glides along the drag axis and stops`, async ({ page }) => {
+    await setup(
+      page,
+      { navigation: true, autoplay: false, inertia: true, inertiaMaxVelocity: 1200, direction },
+      dir
+    )
+    await watchGlide(page)
+    await flick(page, 'up', direction === 'auto' ? 'x' : 'y')
+    await expect(page.locator('.ticker-wrapper')).toHaveAttribute('data-gliding', 'true')
+    const glide = await glideResult(page)
+    const signs = new Set(glide.deltas.filter(delta => Math.abs(delta) > 0.01).map(Math.sign))
+    expect(signs.size).toBe(1)
+    expect(Math.abs(glide.travelled)).toBeGreaterThan(50)
+    expect(glide.duration).toBeLessThan(1500)
+    expect(glide.navigations).toBeLessThanOrEqual(2)
+    await expect(page.locator('.ticker-wrapper')).not.toHaveAttribute('data-gliding', 'true')
+  })
+}
+
+test('inertia resumes autoplay after the glide, not during it, and ignores cancel and reduced motion', async ({
+  page,
+}) => {
+  await setup(page, { navigation: true, inertia: true, resumeAfterDrag: true, pauseOnFocus: false })
+  await flick(page)
+  await expect(page.locator('.ticker-wrapper')).toHaveAttribute('data-gliding', 'true')
+  expect((await state(page)).playing).toBe(false)
+  await expect.poll(async () => (await state(page)).playing).toBe(true)
+
+  await flick(page, 'cancel')
+  await expect(page.locator('.ticker-wrapper')).not.toHaveAttribute('data-gliding', 'true')
+
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await flick(page)
+  await expect(page.locator('.ticker-wrapper')).not.toHaveAttribute('data-gliding', 'true')
+})
+
 test('smooth arrow navigation retains autoplay, respects pause, and reports control intent', async ({
   page,
 }) => {

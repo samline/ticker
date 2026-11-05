@@ -74,6 +74,8 @@ interface RuntimeTickerState extends TickerState {
   navigating: boolean
   navigationRevision: number
   stepNavigation?: { forward: boolean; position: number; target: number } | undefined
+  glide?: { end: (completed: boolean) => void } | undefined
+  dragEmitFrame: number
   forceRebuild: boolean
   requested: boolean
   manualOverride: boolean
@@ -457,6 +459,10 @@ const cancelNavigation = (state: RuntimeTickerState): void => {
   state.navigationFrame = 0
   state.navigating = false
   state.stepNavigation = undefined
+  const glide = state.glide
+  state.glide = undefined
+  delete state.wrapper.dataset.gliding
+  glide?.end(false)
 }
 
 const navigate = (
@@ -518,8 +524,17 @@ const navigate = (
       !state.destroyed &&
       revision === state.navigationRevision &&
       (smooth || Math.abs(state.position - previousPosition) > 0.000001)
-    )
-      emit(state, 'navigate', source)
+    ) {
+      if (!fromDrag) {
+        emit(state, 'navigate', source)
+      } else if (!state.dragEmitFrame) {
+        // High-frequency digitizers must not scale the number of events.
+        state.dragEmitFrame = requestFrame(() => {
+          state.dragEmitFrame = 0
+          emit(state, 'navigate', 'drag')
+        })
+      }
+    }
   }
   if (!smooth) {
     seek(state, position)
@@ -541,6 +556,69 @@ const navigate = (
     complete()
   }
   state.navigationFrame = requestFrame(frame)
+}
+
+// Continue a released drag with constant deceleration. It reuses the navigation
+// revision/frame ownership, so competing commands cancel it like smooth seeks.
+const glide = (
+  state: RuntimeTickerState,
+  velocity: number,
+  deceleration: number,
+  onEnd: (completed: boolean) => void
+): boolean => {
+  if (
+    typeof window.requestAnimationFrame !== 'function' ||
+    !(state.measurement?.contentExtent ?? 0) ||
+    !velocity ||
+    !(deceleration > 0)
+  )
+    return false
+  cancelNavigation(state)
+  const revision = state.navigationRevision
+  const sign = Math.sign(velocity)
+  const speed = Math.abs(velocity)
+  const duration = speed / deceleration
+  const origin = readPosition(state)
+  state.navigating = true
+  state.wrapper.dataset.gliding = 'true'
+  const end = (completed: boolean) => {
+    onEnd(completed)
+  }
+  state.glide = { end }
+  syncPlayback(state)
+  emit(state, 'navigate', 'drag')
+  if (state.destroyed || revision !== state.navigationRevision) return true
+  let started: number | undefined
+  const frame = (time: number) => {
+    if (state.destroyed || revision !== state.navigationRevision) return
+    started ??= time
+    const elapsed = Math.min(duration, Math.max(0, (time - started) / 1000))
+    seek(state, origin + sign * (speed * elapsed - (deceleration * elapsed * elapsed) / 2))
+    if (elapsed < duration) {
+      state.navigationFrame = requestFrame(frame)
+      return
+    }
+    state.navigationFrame = 0
+    state.glide = undefined
+    state.navigating = false
+    delete state.wrapper.dataset.gliding
+    syncPlayback(state)
+    emit(state, 'navigate', 'drag')
+    end(true)
+  }
+  state.navigationFrame = requestFrame(frame)
+  return true
+}
+
+const GLIDE_WINDOW_MS = 100
+const GLIDE_MIN_VELOCITY = 100
+
+const exitVelocity = (samples: Array<{ t: number; p: number }>, now: number): number => {
+  const last = samples[samples.length - 1]
+  if (samples.length < 2 || !last || now - last.t > GLIDE_WINDOW_MS) return 0
+  const first = samples.find(sample => last.t - sample.t <= GLIDE_WINDOW_MS) ?? last
+  const elapsed = Math.max(8, last.t - first.t)
+  return ((last.p - first.p) / elapsed) * 1000
 }
 
 const revealFocused = (state: RuntimeTickerState): void => {
@@ -647,8 +725,11 @@ const setupInteraction = (state: RuntimeTickerState): void => {
         requested: boolean
         manualOverride: boolean
         revision: number
+        samples: Array<{ t: number; p: number }>
+        inherited: boolean
       }
     | undefined
+  let resumeIntent: { requested: boolean; manualOverride: boolean; revision: number } | undefined
   let suppressClick = false
   wrapper.addEventListener(
     'pointerdown',
@@ -662,6 +743,8 @@ const setupInteraction = (state: RuntimeTickerState): void => {
       if (event.pointerType === 'mouse' && wrapper.dataset.resumeAfterDrag === 'true')
         event.preventDefault()
       if ((event.target as Element).closest('[data-ticker-featured]')) return
+      // A new touch during a glide keeps the intent of the interrupted drag.
+      const inherited = state.glide ? resumeIntent : undefined
       cancelNavigation(state)
       syncPlayback(state)
       pointer = {
@@ -670,9 +753,11 @@ const setupInteraction = (state: RuntimeTickerState): void => {
         y: event.clientY,
         start: readPosition(state),
         dragging: false,
-        requested: state.requested,
-        manualOverride: state.manualOverride,
-        revision: state.intentRevision,
+        requested: inherited?.requested ?? state.requested,
+        manualOverride: inherited?.manualOverride ?? state.manualOverride,
+        revision: inherited?.revision ?? state.intentRevision,
+        samples: [],
+        inherited: !!inherited,
       }
     },
     { signal }
@@ -689,15 +774,29 @@ const setupInteraction = (state: RuntimeTickerState): void => {
           return
         }
         if (Math.abs(primary) < 6) return
-        pointer.requested = state.requested
-        pointer.manualOverride = state.manualOverride
-        pointer.revision = state.intentRevision
+        if (!pointer.inherited) {
+          pointer.requested = state.requested
+          pointer.manualOverride = state.manualOverride
+          pointer.revision = state.intentRevision
+        }
         pointer.dragging = true
+        wrapper.dataset.dragging = 'true'
         wrapper.setPointerCapture?.(event.pointerId)
       }
       event.preventDefault()
       suppressClick = true
-      navigate(state, pointer.start - primary * (state.rtl && !state.vertical ? -1 : 1), true)
+      const sign = state.rtl && !state.vertical ? -1 : 1
+      // Coalesced events keep the high-frequency digitizer samples that the
+      // browser would otherwise discard before velocity estimation.
+      const coalesced = event.getCoalescedEvents?.()
+      for (const sample of coalesced?.length ? coalesced : [event]) {
+        const delta = state.vertical ? sample.clientY - pointer.y : sample.clientX - pointer.x
+        pointer.samples.push({ t: sample.timeStamp, p: -delta * sign })
+      }
+      const newest = pointer.samples[pointer.samples.length - 1]!.t
+      while (pointer.samples.length > 2 && newest - pointer.samples[0]!.t > GLIDE_WINDOW_MS * 2)
+        pointer.samples.shift()
+      navigate(state, pointer.start - primary * sign, true)
     },
     { signal }
   )
@@ -706,17 +805,45 @@ const setupInteraction = (state: RuntimeTickerState): void => {
     const finished = pointer
     pointer = undefined
     if (wrapper.hasPointerCapture?.(event.pointerId)) wrapper.releasePointerCapture(event.pointerId)
+    delete wrapper.dataset.dragging
+    const resume = () => {
+      if (
+        !state.destroyed &&
+        finished.dragging &&
+        finished.requested &&
+        finished.revision === state.intentRevision &&
+        wrapper.dataset.resumeAfterDrag === 'true'
+      ) {
+        state.requested = true
+        state.manualOverride = finished.manualOverride
+        syncPlayback(state)
+      }
+    }
+    resumeIntent = undefined
     if (
       !state.destroyed &&
       finished.dragging &&
-      finished.requested &&
-      finished.revision === state.intentRevision &&
-      wrapper.dataset.resumeAfterDrag === 'true'
+      event.type === 'pointerup' &&
+      wrapper.dataset.inertia === 'true' &&
+      !getReducedMotionMedia()?.matches
     ) {
-      state.requested = true
-      state.manualOverride = finished.manualOverride
-      syncPlayback(state)
+      const maximum = Number(wrapper.dataset.inertiaMaxVelocity)
+      const raw = exitVelocity(finished.samples, event.timeStamp)
+      const velocity =
+        Math.abs(raw) < GLIDE_MIN_VELOCITY ? 0 : Math.sign(raw) * Math.min(Math.abs(raw), maximum)
+      resumeIntent = {
+        requested: finished.requested,
+        manualOverride: finished.manualOverride,
+        revision: finished.revision,
+      }
+      if (
+        glide(state, velocity, Number(wrapper.dataset.inertiaDeceleration), completed => {
+          if (completed) resume()
+        })
+      )
+        return
     }
+    resume()
   }
   wrapper.addEventListener(
     'dragstart',
@@ -752,6 +879,9 @@ const setupInteraction = (state: RuntimeTickerState): void => {
     if (pointer && wrapper.hasPointerCapture?.(pointer.id))
       wrapper.releasePointerCapture(pointer.id)
     pointer = undefined
+    resumeIntent = undefined
+    delete wrapper.dataset.dragging
+    delete wrapper.dataset.gliding
   })
 }
 
@@ -1029,6 +1159,7 @@ const initTicker = (wrapper: HTMLElement, itemRoot?: HTMLElement): void => {
     revealingFocus: false,
     ...createEmptyTickerState(),
     navigationFrame: 0,
+    dragEmitFrame: 0,
     navigationTimer: 0,
     navigating: false,
     navigationRevision: 0,
@@ -1158,6 +1289,9 @@ const normalizeClassName = (className = ''): string =>
     .filter(token => token && token !== 'ticker-wrapper')
     .join(' ')
 
+const positive = (value: unknown, fallback: number): number =>
+  typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : fallback
+
 const normalizeOptions = (options: TickerOptions = {}): NormalizedTickerOptions => ({
   duration: validateDuration(options.duration),
   featuredPosition: normalizeFeaturedPosition(options.featuredPosition),
@@ -1166,6 +1300,9 @@ const normalizeOptions = (options: TickerOptions = {}): NormalizedTickerOptions 
   pauseOnFocus: options.pauseOnFocus !== false,
   navigation: options.navigation === true,
   resumeAfterDrag: options.resumeAfterDrag === true,
+  inertia: options.inertia === true,
+  inertiaDeceleration: positive(options.inertiaDeceleration, 1800),
+  inertiaMaxVelocity: positive(options.inertiaMaxVelocity, 2500),
   responsive: (Array.isArray(options.responsive) ? options.responsive : []).map(rule => ({
     query: String(rule.query),
     options: { ...rule.options },
@@ -1193,6 +1330,9 @@ const applyOptions = (
   wrapper.dataset.pauseOnFocus = String(next.pauseOnFocus)
   wrapper.dataset.navigation = String(next.navigation)
   wrapper.dataset.resumeAfterDrag = String(next.resumeAfterDrag)
+  wrapper.dataset.inertia = String(next.inertia)
+  wrapper.dataset.inertiaDeceleration = String(next.inertiaDeceleration)
+  wrapper.dataset.inertiaMaxVelocity = String(next.inertiaMaxVelocity)
   wrapper.dataset.duration = String(next.duration)
   wrapper.dataset.direction = next.direction
   wrapper.dataset.pauseOnHover = next.pauseOnHover ? 'true' : 'false'
@@ -1271,6 +1411,9 @@ export const ticker = (
         pauseOnFocus: source.dataset.pauseOnFocus !== 'false',
         navigation: source.dataset.navigation === 'true',
         resumeAfterDrag: source.dataset.resumeAfterDrag === 'true',
+        inertia: source.dataset.inertia === 'true',
+        inertiaDeceleration: Number(source.dataset.inertiaDeceleration),
+        inertiaMaxVelocity: Number(source.dataset.inertiaMaxVelocity),
         responsive: parseResponsive(source.dataset.responsive),
         direction: validateDirection(source.dataset.direction),
         pauseOnHover: source.dataset.pauseOnHover === 'true',

@@ -19,6 +19,12 @@ export interface TickerOptions {
   navigation?: boolean
   /** Restore prior playback intent after pointer dragging; defaults to false. */
   resumeAfterDrag?: boolean
+  /** Continue a released pointer drag with momentum; defaults to false. */
+  inertia?: boolean
+  /** Momentum deceleration in CSS pixels per second squared; defaults to 1800. */
+  inertiaDeceleration?: number
+  /** Maximum release velocity used by momentum, in CSS pixels per second; defaults to 2500. */
+  inertiaMaxVelocity?: number
   /** Viewport media queries, merged in array order after base options. */
   responsive?: readonly TickerResponsiveRule[]
   direction?: TickerDirection

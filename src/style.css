@@ -29,7 +29,9 @@
   pointer-events: none;
 }
 
-.ticker-wrapper[data-ready='true'][data-playing='true'] .ticker-track {
+.ticker-wrapper[data-ready='true'][data-playing='true'] .ticker-track,
+.ticker-wrapper[data-ready='true'][data-dragging='true'] .ticker-track,
+.ticker-wrapper[data-ready='true'][data-gliding='true'] .ticker-track {
   will-change: transform;
 }
 

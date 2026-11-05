@@ -90,6 +90,18 @@ describe('extended controller', () => {
     expect(c.options.resumeAfterDrag).toBe(false)
     c.update({ resumeAfterDrag: true })
     expect(c.options.resumeAfterDrag).toBe(true)
+    expect(c.options).toMatchObject({
+      inertia: false,
+      inertiaDeceleration: 1800,
+      inertiaMaxVelocity: 2500,
+    })
+    c.update({ inertia: true, inertiaDeceleration: 900, inertiaMaxVelocity: -1 })
+    expect(c.options).toMatchObject({
+      inertia: true,
+      inertiaDeceleration: 900,
+      inertiaMaxVelocity: 2500,
+    })
+    expect(c.element!.dataset.inertia).toBe('true')
     const options = c.options
     expect(options).not.toBe(c.options)
   })

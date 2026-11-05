@@ -4,6 +4,20 @@
 
 No unreleased changes.
 
+## [2.6.0] - 2026-11-04
+
+### Added
+
+- Opt-in `inertia`, `inertiaDeceleration` and `inertiaMaxVelocity` options (`data-inertia*` in HTML, supported in `responsive` rules) continue a released pointer drag with linear-deceleration momentum, estimated from the last ~100 ms of pointer samples including coalesced events. Defaults (off, 1800 px/s², 2500 px/s) leave existing behavior unchanged; slow releases, `pointercancel`, lost capture and reduced motion do not glide. With `resumeAfterDrag`, autoplay resumes when the glide ends.
+
+### Examples
+
+- The drag-playback example enables `inertia` with `resumeAfterDrag`; complete/split Package / ESM and HTML / CDN recipes carry the option. Public docs, README, skill and delivery pins target 2.6.0. Publication remains a separate maintainer action.
+
+### Behavior changes
+
+- Drag `navigate` events are now emitted at most once per animation frame instead of once per `pointermove`, and `will-change: transform` is retained while dragging or gliding.
+
 ## [2.5.0] - 2026-10-30
 
 ### Added

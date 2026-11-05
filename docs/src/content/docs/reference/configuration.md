@@ -18,6 +18,9 @@ interface TickerOptions {
   pauseOnFocus?: boolean
   navigation?: boolean
   resumeAfterDrag?: boolean
+  inertia?: boolean
+  inertiaDeceleration?: number
+  inertiaMaxVelocity?: number
   responsive?: readonly TickerResponsiveRule[]
   interactiveClones?: boolean
   class?: string
@@ -26,20 +29,23 @@ interface TickerOptions {
 
 ## Options table
 
-| Option              | Default    | Normalization and behavior                                                                                           |
-| ------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------- |
-| `duration`          | `20`       | Positive finite seconds per cycle; invalid values fall back to 20.                                                   |
-| `featuredPosition`  | `'center'` | Since 2.4.0: fixed original alignment; invalid values become `center`. See [Featured items](#featured-items).        |
-| `speed`             | `0`        | Positive finite CSS pixels per second overrides duration. Invalid, zero or negative values disable speed mode.       |
-| `direction`         | `'left'`   | Exact `left`, `right`, `up`, `down`, `auto`; invalid values become `left`.                                           |
-| `autoplay`          | `true`     | Only `false` starts paused. `play()` and `pause()` change intent independently of automatic pause causes.            |
-| `pauseOnHover`      | `false`    | Only `true` enables pointer hover pause.                                                                             |
-| `pauseOnFocus`      | `true`     | Only `false` disables focus pause. Focus moving between descendants never resumes playback.                          |
-| `resumeAfterDrag`   | `false`    | Only `true` restores pre-drag playback intent on release; existing manual and environmental pauses remain effective. |
-| `navigation`        | `false`    | Only `true` enables pointer dragging and manual navigation in reduced motion.                                        |
-| `responsive`        | `[]`       | Ordered viewport media-query rules; see below.                                                                       |
-| `interactiveClones` | `false`    | Only `true` enables interactive repeated copies.                                                                     |
-| `class`             | `''`       | Whitespace-separated wrapper classes; excludes reserved `ticker-wrapper`.                                            |
+| Option                | Default    | Normalization and behavior                                                                                           |
+| --------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------- |
+| `duration`            | `20`       | Positive finite seconds per cycle; invalid values fall back to 20.                                                   |
+| `featuredPosition`    | `'center'` | Since 2.4.0: fixed original alignment; invalid values become `center`. See [Featured items](#featured-items).        |
+| `speed`               | `0`        | Positive finite CSS pixels per second overrides duration. Invalid, zero or negative values disable speed mode.       |
+| `direction`           | `'left'`   | Exact `left`, `right`, `up`, `down`, `auto`; invalid values become `left`.                                           |
+| `autoplay`            | `true`     | Only `false` starts paused. `play()` and `pause()` change intent independently of automatic pause causes.            |
+| `pauseOnHover`        | `false`    | Only `true` enables pointer hover pause.                                                                             |
+| `pauseOnFocus`        | `true`     | Only `false` disables focus pause. Focus moving between descendants never resumes playback.                          |
+| `resumeAfterDrag`     | `false`    | Only `true` restores pre-drag playback intent on release; existing manual and environmental pauses remain effective. |
+| `inertia`             | `false`    | Only `true` continues a released drag with momentum.                                                                 |
+| `inertiaDeceleration` | `1800`     | Positive momentum deceleration in CSS px/s²; invalid values use the default.                                         |
+| `inertiaMaxVelocity`  | `2500`     | Positive release-velocity limit in CSS px/s; invalid values use the default.                                         |
+| `navigation`          | `false`    | Only `true` enables pointer dragging and manual navigation in reduced motion.                                        |
+| `responsive`          | `[]`       | Ordered viewport media-query rules; see below.                                                                       |
+| `interactiveClones`   | `false`    | Only `true` enables interactive repeated copies.                                                                     |
+| `class`               | `''`       | Whitespace-separated wrapper classes; excludes reserved `ticker-wrapper`.                                            |
 
 ## `duration`
 
@@ -147,19 +153,22 @@ partners?.update({ direction: 'right' })
 
 ## Declarative attributes
 
-| Attribute                 | Accepted value                                                           | Default  |
-| ------------------------- | ------------------------------------------------------------------------ | -------- |
-| `data-duration`           | Positive numeric text, parsed with `parseFloat`.                         | `20`     |
-| `data-featured-position`  | Since 2.4.0: `start`, `center`, `end`, `left`, `right`, `top`, `bottom`. | `center` |
-| `data-speed`              | Positive finite numeric text, parsed with `Number`.                      | `0`      |
-| `data-direction`          | `left`, `right`, `up`, `down`, `auto`.                                   | `left`   |
-| `data-autoplay`           | Exact string `false` starts paused.                                      | `true`   |
-| `data-pause-on-focus`     | Exact string `false` disables focus pause.                               | `true`   |
-| `data-pause-on-hover`     | Exact string `true`.                                                     | `false`  |
-| `data-resume-after-drag`  | Exact string `true`; restores pre-drag playback intent.                  | `false`  |
-| `data-navigation`         | Exact string `true`.                                                     | `false`  |
-| `data-interactive-clones` | Exact string `true`.                                                     | `false`  |
-| `data-responsive`         | JSON array of `{ query, options }` rules; malformed input becomes `[]`.  | `[]`     |
+| Attribute                   | Accepted value                                                           | Default  |
+| --------------------------- | ------------------------------------------------------------------------ | -------- |
+| `data-duration`             | Positive numeric text, parsed with `parseFloat`.                         | `20`     |
+| `data-featured-position`    | Since 2.4.0: `start`, `center`, `end`, `left`, `right`, `top`, `bottom`. | `center` |
+| `data-speed`                | Positive finite numeric text, parsed with `Number`.                      | `0`      |
+| `data-direction`            | `left`, `right`, `up`, `down`, `auto`.                                   | `left`   |
+| `data-autoplay`             | Exact string `false` starts paused.                                      | `true`   |
+| `data-pause-on-focus`       | Exact string `false` disables focus pause.                               | `true`   |
+| `data-pause-on-hover`       | Exact string `true`.                                                     | `false`  |
+| `data-resume-after-drag`    | Exact string `true`; restores pre-drag playback intent.                  | `false`  |
+| `data-navigation`           | Exact string `true`.                                                     | `false`  |
+| `data-inertia`              | Exact string `true`; momentum after a released drag.                     | `false`  |
+| `data-inertia-deceleration` | Positive number, CSS px/s².                                              | `1800`   |
+| `data-inertia-max-velocity` | Positive number, CSS px/s.                                               | `2500`   |
+| `data-interactive-clones`   | Exact string `true`.                                                     | `false`  |
+| `data-responsive`           | JSON array of `{ query, options }` rules; malformed input becomes `[]`.  | `[]`     |
 
 ```html
 <div

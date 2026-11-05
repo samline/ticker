@@ -84,11 +84,11 @@ The runtime preserves fractional measurements in both directions. Match item spa
 Choose **Package / ESM** when installing with npm, pnpm or bun and importing Ticker in your application. Choose **HTML / CDN** when loading the standalone script in plain HTML, WordPress or Shopify without a bundler. Both use the same controller API. A CDN only delivers the files; you can self-host the same script and stylesheet.
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.5.0/dist/style.css" />
-<script src="https://unpkg.com/@samline/ticker@2.5.0/dist/browser/global.global.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@2.6.0/dist/style.css" />
+<script src="https://unpkg.com/@samline/ticker@2.6.0/dist/browser/global.global.js"></script>
 ```
 
-> Pin the version in production. Replace `2.5.0` with the version you ship. Verify that it is published before using npm/CDN URLs; preparing a release does not publish it.
+> Pin the version in production. Replace `2.6.0` with the version you ship. Verify that it is published before using npm/CDN URLs; preparing a release does not publish it.
 
 The standalone script (an IIFE) exposes `window.Ticker`. “Global” describes this object, not another loading mode. The optional `@samline/ticker/browser` registry module is an ESM/CJS import and does not install that object. See [loading terms](https://samline.github.io/ticker/docs/guides/html-and-browser/#loading-terms).
 
@@ -204,6 +204,16 @@ Rapid clicks in the same direction add steps to the pending destination. Changin
 direction discards that destination and steps from the currently visible position.
 Each click retargets the smooth movement without jumping; `duration` runs from the
 latest click. Rail arrow keys follow the same policy.
+
+Since 2.6.0, `inertia: true` (or `data-inertia="true"`) lets a released touch or mouse
+drag glide to a stop. `inertiaDeceleration` (default `1800` px/s²) and
+`inertiaMaxVelocity` (default `2500` px/s) tune it; slow releases, cancelled
+gestures and reduced motion do not glide, and `resumeAfterDrag` resumes autoplay
+when the glide ends.
+
+```ts
+ticker('#feed', { navigation: true, inertia: true, resumeAfterDrag: true })
+```
 
 Use your existing controller instead of resuming on every `navigate` event.
 `preservePlayback` retains manual pause as well as autoplay. Since 2.5.0, the

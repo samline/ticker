@@ -50,6 +50,7 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
           preserveNavigationPlayback={recipe.id === 'manual-navigation' || featured}
           navigationResumeDelay={recipe.id === 'manual-navigation' ? 1500 : 0}
           resumeAfterDrag={row.resumeAfterDrag}
+          inertia={row.inertia}
           rtl={row.rtl}
           responsive={row.responsive}
         >
