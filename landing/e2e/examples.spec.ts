@@ -17,7 +17,12 @@ async function checkReadingInterval(page: Page, recipe: Locator) {
   const frame = recipe.locator('.ticker-wrapper')
   const pause = recipe.locator('button[data-pause]')
   if ((await pause.textContent())?.includes('Play')) await pause.click()
-  await frame.scrollIntoViewIfNeeded()
+  // Late layout (fonts, fragment scrolling) can move the preview after the first
+  // scroll; an offscreen ticker is correctly inactive, so re-establish visibility.
+  await expect(async () => {
+    await frame.scrollIntoViewIfNeeded()
+    await expect(frame).toHaveAttribute('data-active', 'true', { timeout: 1000 })
+  }).toPass({ timeout: 10000 })
   await page.mouse.move(5, 5)
   await expect(frame).toHaveAttribute('data-playing', 'true')
   const track = recipe.locator('.ticker-track')
