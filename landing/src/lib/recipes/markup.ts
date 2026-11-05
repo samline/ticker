@@ -55,7 +55,7 @@ export const createRecipeMarkup = async ({ recipe, i18n }: RecipeContext) => {
     : ''
   const dragControls =
     recipe.kind === 'drag'
-      ? `<button type="button" data-example-resume aria-label="${e(t.resumeAfterDrag)}" aria-pressed="${recipe.rows[0].resumeAfterDrag === true}">${e(t.resumeAfterDrag)} <span data-resume-state aria-hidden="true">${e(recipe.rows[0].resumeAfterDrag ? t.enabled : t.disabled)}</span></button>`
+      ? `<button type="button" data-example-resume aria-label="${e(t.resumeAfterDrag)}" aria-pressed="${recipe.rows[0].resumeAfterDrag === true}">${e(t.resumeAfterDrag)} <span data-resume-state aria-hidden="true">${e(recipe.rows[0].resumeAfterDrag ? t.enabled : t.disabled)}</span></button><button type="button" data-example-inertia aria-label="${e(t.inertia)}" aria-pressed="${recipe.rows[0].inertia === true}">${e(t.inertia)} <span data-inertia-state aria-hidden="true">${e(recipe.rows[0].inertia ? t.enabled : t.disabled)}</span></button>`
       : ''
   const isFeatured = recipe.rows.some(row => row.featuredPosition)
   const featuredControls = isFeatured

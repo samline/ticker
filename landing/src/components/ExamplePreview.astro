@@ -177,6 +177,19 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
               {recipe.rows[0].resumeAfterDrag ? t.enabled : t.disabled}
             </span>
           </Button>
+          <Button
+            variant="ghost"
+            context="ticker"
+            data-example-inertia
+            disabled
+            aria-label={t.inertia}
+            aria-pressed={recipe.rows[0].inertia === true}
+          >
+            {t.inertia}
+            <span data-inertia-state aria-hidden="true">
+              {recipe.rows[0].inertia ? t.enabled : t.disabled}
+            </span>
+          </Button>
         </div>
       )}
       {recipe.kind === 'dynamic' && (
@@ -284,6 +297,7 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
     const select = element.querySelector<HTMLSelectElement>('[data-item-select]')
     const position = element.querySelector<HTMLSelectElement>('[data-item-position]')
     const resume = element.querySelector<HTMLButtonElement>('button[data-example-resume]')
+    const inertia = element.querySelector<HTMLButtonElement>('button[data-example-inertia]')
     const directions = element.querySelectorAll<HTMLButtonElement>('button[data-example-direction]')
     const removeButtons = element.querySelectorAll<HTMLButtonElement>(
       'button[data-remove-first], button[data-remove-last], button[data-remove-selected], button[data-remove-position]'
@@ -373,6 +387,7 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
       const news = controller()
       if (add) add.disabled = !news
       if (resume) resume.disabled = !news
+      if (inertia) inertia.disabled = !news
       directions.forEach(button => {
         button.disabled = !news
       })
@@ -397,6 +412,20 @@ const directions = vertical ? (['up', 'down'] as const) : (['left', 'right'] as 
         news.update({ resumeAfterDrag: enabled })
         resume.setAttribute('aria-pressed', String(enabled))
         const state = resume.querySelector('[data-resume-state]')
+        if (state)
+          state.textContent = (enabled ? element.dataset.resumeOn : element.dataset.resumeOff) ?? ''
+      },
+      { signal }
+    )
+    inertia?.addEventListener(
+      'click',
+      () => {
+        const news = controller()
+        if (!news) return
+        const enabled = !news.options.inertia
+        news.update({ inertia: enabled })
+        inertia.setAttribute('aria-pressed', String(enabled))
+        const state = inertia.querySelector('[data-inertia-state]')
         if (state)
           state.textContent = (enabled ? element.dataset.resumeOn : element.dataset.resumeOff) ?? ''
       },

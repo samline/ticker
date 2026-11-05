@@ -96,6 +96,15 @@ async function checkDragModes(page: Page, recipe: Locator) {
   await pause.click()
   await drag()
   await expect(frame).toHaveAttribute('data-playing', 'false')
+  const inertia = recipe.getByRole('button', { name: 'Inertia', exact: true })
+  await expect(inertia).toHaveAttribute('aria-pressed', 'true')
+  await expect(frame).toHaveAttribute('data-inertia', 'true')
+  await inertia.click()
+  await expect(inertia).toHaveAttribute('aria-pressed', 'false')
+  await expect(inertia).toContainText('Off')
+  await expect(frame).toHaveAttribute('data-inertia', 'false')
+  await inertia.click()
+  await expect(frame).toHaveAttribute('data-inertia', 'true')
 }
 
 async function checkRepeatedCategory(recipe: Locator) {

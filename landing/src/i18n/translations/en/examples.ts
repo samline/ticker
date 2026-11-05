@@ -90,6 +90,7 @@ export default {
   speed: 'Loop duration (seconds)',
   direction: 'Direction',
   resumeAfterDrag: 'Resume after drag',
+  inertia: 'Inertia',
   enabled: 'On',
   disabled: 'Off',
   left: 'Left',
@@ -407,7 +408,7 @@ export default {
       kind: 'drag',
       title: 'Drag and choose what happens next',
       description:
-        'Requires 2.6.0 or later. Drag the moving strip with a mouse or touch and flick it: the strip keeps gliding after release, then stops. Turn Resume after drag on to continue playback once the glide ends, or off to leave the strip paused.',
+        'Requires 2.6.0 or later. Drag the moving strip with a mouse or touch and flick it: the strip keeps gliding after release, then stops. Switch Inertia off to compare with a plain drag. Turn Resume after drag on to continue playback once the glide ends, or off to leave the strip paused.',
       docsPath: 'reference/api/controller/#manual-navigation',
       docsLabel: 'Read about drag playback',
       note: 'With the option on, release and move the pointer away to clear hover pause. With it off, press Play before trying another drag. Changing the option does not start playback or clear a manual pause.',

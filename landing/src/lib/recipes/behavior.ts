@@ -116,6 +116,13 @@ if (news) {
     news.update({ resumeAfterDrag: enabled });
     resumeButton.setAttribute('aria-pressed', String(enabled));
     resumeButton.querySelector('[data-resume-state]').textContent = enabled ? ${js(t.enabled)} : ${js(t.disabled)};
+  }, { signal });
+  const inertiaButton = example.querySelector('[data-example-inertia]');
+  inertiaButton.addEventListener('click', () => {
+    const enabled = !news.options.inertia;
+    news.update({ inertia: enabled });
+    inertiaButton.setAttribute('aria-pressed', String(enabled));
+    inertiaButton.querySelector('[data-inertia-state]').textContent = enabled ? ${js(t.enabled)} : ${js(t.disabled)};
   }, { signal });`
       : ''
   }

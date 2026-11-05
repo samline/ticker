@@ -108,9 +108,15 @@ const feed = ticker('#feed', {
 })
 ```
 
+### Drag inertia
+
 Since 2.6.0, set `inertia: true` (`data-inertia="true"`) to continue a released touch or mouse drag with momentum. The release velocity is estimated from the last ~100 ms of pointer samples (including coalesced events), limited by `inertiaMaxVelocity` (px/s, default 2500) and decelerated linearly at `inertiaDeceleration` (px/s², default 1800), so a 1200 px/s flick travels about 400 px in 0.67 s. Releases slower than about 100 px/s, `pointercancel`, lost pointer capture and `prefers-reduced-motion: reduce` never glide. The glide uses the `navigation` pause reason, wraps continuously modulo the period, emits one `navigate` event when it starts and one when it ends (`navigationSource: 'drag'`) and is cancelled by any competing command or a new touch. With `resumeAfterDrag: true` autoplay resumes when the glide ends, not during it. `will-change: transform` stays on while dragging or gliding. Responsive rules can set all three options.
 
-Try both modes in the [interactive drag example](/ticker/examples/#drag-playback). The Resume after drag control changes the option without starting playback.
+```ts
+ticker('#feed', { navigation: true, inertia: true, resumeAfterDrag: true })
+```
+
+Try both modes, and switch Inertia on and off, in the [interactive drag example](/ticker/examples/#drag-playback). The Resume after drag control changes the option without starting playback.
 
 ## Events
 
