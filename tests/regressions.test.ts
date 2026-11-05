@@ -201,4 +201,47 @@ describe('audit regressions', () => {
     expect(getComputedStyle(card).position).not.toBe('relative')
     expect(getComputedStyle(card).zIndex).not.toBe('1')
   })
+
+  it('strips form control names from clones so radio groups and submissions stay original', async () => {
+    document.getElementById('source')!.innerHTML =
+      '<label><input type="radio" name="plan" value="basic" checked> Basic</label>' +
+      '<input type="text" name="nickname" value="Rowan">'
+    const controller = await create()
+    const wrapper = controller.element!
+    const original = wrapper.querySelector<HTMLInputElement>(
+      '.ticker-content:not(.ticker-clone) input[type="radio"]'
+    )!
+    expect(wrapper.querySelectorAll('.ticker-clone').length).toBeGreaterThan(0)
+    expect(original.checked).toBe(true)
+    expect(original.name).toBe('plan')
+    expect(wrapper.querySelectorAll('.ticker-clone [name]')).toHaveLength(0)
+    const form = document.createElement('form')
+    wrapper.before(form)
+    form.appendChild(wrapper)
+    expect([...new FormData(form).entries()]).toEqual([
+      ['plan', 'basic'],
+      ['nickname', 'Rowan'],
+    ])
+  })
+
+  it('removes runtime classes and custom properties from an adopted wrapper on destroy', async () => {
+    document.body.innerHTML =
+      '<div id="adopted" class="ticker-wrapper authored" data-ticker>' +
+      '<div class="ticker-track" data-ticker-track><div class="ticker-content" data-ticker-content>' +
+      '<span>One</span></div></div></div>'
+    const { ticker } = await import('../src/vanilla/render')
+    const controller = ticker('#adopted', { class: 'authored added extra', pauseOnHover: true })!
+    const wrapper = controller.element!
+    measure(wrapper)
+    vi.advanceTimersByTime(16)
+    expect(wrapper.classList.contains('added')).toBe(true)
+    expect(wrapper.style.getPropertyValue('--ticker-distance')).not.toBe('')
+    controller.destroy()
+    expect([...wrapper.classList]).toEqual(['ticker-wrapper', 'authored'])
+    expect(
+      wrapper.querySelector('.ticker-track')!.classList.contains('ticker-pause-on-hover')
+    ).toBe(false)
+    for (const property of ['--ticker-position', '--ticker-duration', '--ticker-distance'])
+      expect(wrapper.style.getPropertyValue(property)).toBe('')
+  })
 })

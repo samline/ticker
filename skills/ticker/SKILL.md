@@ -151,4 +151,4 @@ Requires 2.5.0 or later.
 
 ## 3.0.0 behavior
 
-Calling `ticker()` again for a live source or wrapper returns the same controller (options go through `update()`), so do not rely on a second call to create an independent instance; destroy first. A native scroll of the wrapper (focus reveal, find-in-page, fragments) becomes a logical seek. Registry entries disappear when their controller is destroyed by any owner.
+Calling `ticker()` again for a live source or wrapper returns the same controller (options go through `update()`), so do not rely on a second call to create an independent instance; destroy first. A native scroll of the wrapper (focus reveal, find-in-page, fragments) becomes a logical seek. Registry entries disappear when their controller is destroyed by any owner. Clones drop form-control `name` attributes; read submitted values from originals. Destroying adopted markup removes runtime custom properties and option-added classes.

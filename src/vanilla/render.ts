@@ -253,8 +253,13 @@ const getTickerElements = (root: ParentNode): HTMLElement[] => {
 const isTickerContentElement = (element: HTMLElement): boolean =>
   element.matches('[data-ticker-content], .ticker-content')
 
+const FORM_CONTROL_SELECTOR =
+  'input[name], select[name], textarea[name], button[name], output[name], fieldset[name], object[name]'
+
 const makeCloneAccessible = (clone: Element, interactiveClones: boolean): void => {
   clone.classList.add(TICKER_CLONE_CLASS)
+  // Clones must not join radio groups or submit form data in place of the original.
+  clone.querySelectorAll(FORM_CONTROL_SELECTOR).forEach(el => el.removeAttribute('name'))
 
   if (interactiveClones) return
 
@@ -1158,6 +1163,8 @@ const setupObservers = (state: RuntimeTickerState): void => {
   }
 }
 
+const RUNTIME_PROPERTIES = ['--ticker-position', '--ticker-duration', '--ticker-distance']
+
 const destroyTicker = (wrapper: HTMLElement): void => {
   const state = tickersState.get(wrapper)
   if (!state) return
@@ -1177,6 +1184,8 @@ const destroyTicker = (wrapper: HTMLElement): void => {
   state.featured.destroy()
 
   tickersState.delete(wrapper)
+  RUNTIME_PROPERTIES.forEach(property => wrapper.style.removeProperty(property))
+  state.track.classList.remove('ticker-pause-on-hover')
   wrapper.dataset.active = 'false'
   wrapper.dataset.playing = 'false'
   wrapper.dataset.ready = 'false'
@@ -1471,11 +1480,13 @@ export const ticker = (
       }
   let currentOptions = normalizeOptions({ ...markupOptions, ...initialOptions })
   let wrapper: HTMLElement | null
+  const authoredClasses = new Set<string>()
 
   if (ownsWrapper) {
     wrapper = enhanceElement(source, currentOptions)
   } else {
     wrapper = source
+    source.classList.forEach(name => authoredClasses.add(name))
     applyOptions(wrapper, {}, currentOptions)
     initTicker(wrapper)
   }
@@ -1597,7 +1608,6 @@ export const ticker = (
       cancelNavigation(runtime)
       const nextOptions = normalizeOptions({ ...currentOptions, ...options })
       if ('autoplay' in options) {
-        cancelNavigation(runtime)
         runtime.intentRevision++
         runtime.requested = nextOptions.autoplay
         runtime.manualOverride = false
@@ -1614,7 +1624,12 @@ export const ticker = (
       if (!wrapper) return
       controllers.delete(source)
       controllers.delete(wrapper)
+      const appliedClasses = runtime.configured?.class?.split(/\s+/).filter(Boolean) ?? []
       destroyTicker(wrapper)
+      if (!ownsWrapper)
+        appliedClasses
+          .filter(name => !authoredClasses.has(name))
+          .forEach(name => wrapper!.classList.remove(name))
       if (ownsWrapper) {
         if (originalContent && contentParent)
           contentParent.insertBefore(originalContent, contentNext ?? null)

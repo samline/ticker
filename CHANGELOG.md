@@ -16,6 +16,8 @@ No unreleased changes.
 - Keyboard focus on an offscreen original no longer leaves the wrapper permanently scrolled, which offset the loop and could expose an uncovered edge until reload.
 - A touch drag (which produces no click) or a mouse drag released outside the ticker no longer swallows the next click or keyboard activation inside it.
 - The browser registry drops an entry when its controller is destroyed directly or by DOM removal under `mount()`, instead of retaining the detached wrapper in `available` / `getTicker()`.
+- Clones drop the `name` attribute of their form controls, so a cloned checked radio no longer unchecks the original in the same group and named clone fields are not submitted with a form.
+- Destroying an adopted `[data-ticker]` / `.ticker-wrapper` element removes the runtime `--ticker-position`, `--ticker-duration` and `--ticker-distance` properties, the track's hover-pause class and `class` option values the element did not already carry.
 - Batched `IntersectionObserver` callbacks use the latest entry, so a quick enter/leave sequence no longer leaves the ticker in the wrong active state.
 - `destroy()` cancels a pending throttled drag `navigate` frame.
 - The `.ticker-featured` layer rules are scoped to ticker wrappers with `:where()`, so an unrelated application element using that class is not repositioned.

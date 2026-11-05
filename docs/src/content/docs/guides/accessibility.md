@@ -12,7 +12,7 @@ An infinite ticker repeats content visually. Repeating links or buttons in the a
 
 ## Default clone behavior
 
-Generated clones receive `aria-hidden="true"`, `role="presentation"`, and `inert` when supported. In older browsers, focusable descendants receive `tabindex="-1"`. The stylesheet disables pointer events for these clones.
+Generated clones receive `aria-hidden="true"`, `role="presentation"`, and `inert` when supported. In older browsers, focusable descendants receive `tabindex="-1"`. The stylesheet disables pointer events for these clones. Every clone, interactive or not, also loses the `name` attribute of its form controls, so a cloned radio cannot uncheck the original in the same group and only originals are submitted with a form.
 
 Browsers can scroll an `overflow: hidden` wrapper to reveal a focused original, a find-in-page match or a fragment target. Since 3.0.0 the runtime converts that native scroll into an equivalent logical seek, keeping the loop seamless; playback intent is preserved. Static reduced-motion rows without `navigation` keep native scrolling as their only reveal.
 

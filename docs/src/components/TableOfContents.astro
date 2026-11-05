@@ -40,10 +40,17 @@ const items = headings.filter(h => h.depth === 2 || h.depth === 3)
     let frame = 0
     const lifecycle = new AbortController()
     const { signal } = lifecycle
+    const decodeFragment = (fragment: string) => {
+      try {
+        return decodeURIComponent(fragment)
+      } catch {
+        return fragment
+      }
+    }
     const entries = Array.from(element.querySelectorAll<HTMLAnchorElement>('a[href^="#"]'))
       .map(link => ({
         link,
-        heading: document.getElementById(decodeURIComponent(link.hash.slice(1))),
+        heading: document.getElementById(decodeFragment(link.hash.slice(1))),
       }))
       .filter(entry => entry.heading)
     const header = document.querySelector('ticker-docs-header')

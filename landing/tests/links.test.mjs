@@ -43,6 +43,12 @@ for (const [name, html, error] of [
     '<meta http-equiv="refresh" content="0;url=missing/">',
     /Broken local destination/,
   ],
+  [
+    'malformed fragment encoding',
+    '<h1 id="top">Top</h1><a href="#100%">Bad</a>',
+    /Malformed percent-encoding/,
+  ],
+  ['malformed path encoding', '<a href="docs/%E0%A4%A/">Bad</a>', /Malformed percent-encoding/],
   ['redirect loop', '<meta http-equiv="refresh" content="0;url=./">', /Redirect loop/],
 ]) {
   test(`rejects ${name}`, async t => {

@@ -561,3 +561,28 @@ for (const width of [1440, 390]) {
     expect(failures).toEqual([])
   })
 }
+
+test('mobile header icon buttons stay square with legible icons', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 800 })
+  for (const path of ['', 'reference/api/controller/']) {
+    await page.goto(path)
+    const icons = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>('header button')]
+        .filter(button => button.offsetParent && button.querySelector('svg'))
+        .map(button => {
+          const box = button.getBoundingClientRect()
+          return {
+            name: button.getAttribute('aria-label') ?? button.textContent?.trim(),
+            width: Math.round(box.width),
+            height: Math.round(box.height),
+            icon: button.querySelector('svg')!.getBoundingClientRect().width,
+          }
+        })
+    )
+    expect(icons.length, path).toBeGreaterThanOrEqual(3)
+    for (const icon of icons) {
+      expect(icon.width, `${path} ${icon.name}`).toBe(icon.height)
+      expect(icon.icon, `${path} ${icon.name}`).toBeGreaterThan(14)
+    }
+  }
+})
