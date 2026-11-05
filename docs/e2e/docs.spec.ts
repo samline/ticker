@@ -520,23 +520,44 @@ for (const control of ['menu', 'search']) {
 }
 
 for (const width of [1440, 390]) {
-  test(`reference tables keep camelCase option identifiers on one line at ${width}px`, async ({
-    page,
-  }) => {
+  test(`no documentation page breaks identifiers or overflows at ${width}px`, async ({ page }) => {
+    test.setTimeout(120000)
     await page.setViewportSize({ width, height: 900 })
-    await page.goto('reference/configuration/')
-    const broken = await page.evaluate(() =>
-      [...document.querySelectorAll('ticker-docs-article table')].flatMap(table =>
-        [...table.querySelectorAll('td:first-child code')]
-          // Kebab-case attributes may wrap at their hyphens, never inside a word.
-          .filter(code => !code.textContent?.includes('-') && code.getClientRects().length > 1)
-          .map(code => code.textContent)
-      )
-    )
-    expect(broken).toEqual([])
-    // Wide tables scroll inside their own container instead of overflowing the page.
-    expect(
-      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
-    ).toBe(true)
+    await page.goto('getting-started/')
+    const paths = await page.evaluate(() => {
+      const base = '/ticker/docs/'
+      return [
+        ...new Set(
+          [...document.querySelectorAll('a[href]')]
+            .map(link => new URL((link as HTMLAnchorElement).href).pathname)
+            .filter(
+              path => path.startsWith(base) && !path.includes('.') && !path.endsWith('/changelog/')
+            )
+        ),
+      ]
+    })
+    expect(paths.length).toBeGreaterThan(20)
+    const failures: string[] = []
+    for (const path of paths) {
+      await page.goto(path, { waitUntil: 'load' })
+      const result = await page.evaluate(() => {
+        // Table identifiers must stay whole; spaces and hyphens are valid break points. Prose may
+        // still wrap long inline code anywhere so it never overflows the column.
+        const whole = (code: Element) => !/[\s-]/.test(code.textContent ?? '')
+        return {
+          broken: [
+            ...document.querySelectorAll(
+              'ticker-docs-article td code, ticker-docs-article th code'
+            ),
+          ]
+            .filter(code => whole(code) && code.getClientRects().length > 1)
+            .map(code => code.textContent),
+          overflow: document.documentElement.scrollWidth > window.innerWidth,
+        }
+      })
+      if (result.broken.length || result.overflow)
+        failures.push(`${path} ${JSON.stringify(result)}`)
+    }
+    expect(failures).toEqual([])
   })
 }
