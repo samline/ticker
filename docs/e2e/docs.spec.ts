@@ -518,3 +518,25 @@ for (const control of ['menu', 'search']) {
     await expect(trigger).toBeFocused()
   })
 }
+
+for (const width of [1440, 390]) {
+  test(`reference tables keep camelCase option identifiers on one line at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto('reference/configuration/')
+    const broken = await page.evaluate(() =>
+      [...document.querySelectorAll('ticker-docs-article table')].flatMap(table =>
+        [...table.querySelectorAll('td:first-child code')]
+          // Kebab-case attributes may wrap at their hyphens, never inside a word.
+          .filter(code => !code.textContent?.includes('-') && code.getClientRects().length > 1)
+          .map(code => code.textContent)
+      )
+    )
+    expect(broken).toEqual([])
+    // Wide tables scroll inside their own container instead of overflowing the page.
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
+    ).toBe(true)
+  })
+}
