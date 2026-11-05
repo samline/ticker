@@ -11,6 +11,7 @@ permissions:
 jobs:
   package:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
@@ -26,6 +27,7 @@ jobs:
 
   docs:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: docs
@@ -43,12 +45,24 @@ jobs:
       - run: npm run check
       - run: npm run format:check
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
+        timeout-minutes: 5
       - run: npm run test:browser
       - run: npm audit --audit-level=high
 
+  # Browser suites run on parallel runners: the landing examples spec (about
+  # half of the landing time), the rest of landing, and the combined docs suite.
+  # Chromium is installed without --with-deps: the runner already has its system
+  # libraries and apt only added fallback fonts, which once took ten minutes on a
+  # throttled mirror.
   landing:
+    name: landing (${{ matrix.suite }})
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [examples, site, docs]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
@@ -62,9 +76,14 @@ jobs:
       - run: npm ci --prefix shared
       - run: npm ci --prefix landing
       - run: npm ci --prefix docs
-      - run: npm run landing:check
-      - run: npm --prefix landing run format:check
+      - if: matrix.suite == 'site'
+        run: npm run landing:check
+      - if: matrix.suite == 'site'
+        run: npm --prefix landing run format:check
       - run: npm run site:build
-      - run: npm exec --prefix landing -- playwright install --with-deps chromium
-      - run: npm --prefix landing run test:browser
-      - run: npm run site:test:browser
+      - run: npm exec --prefix landing -- playwright install chromium
+        timeout-minutes: 5
+      - if: matrix.suite != 'docs'
+        run: npm --prefix landing run test:browser -- --project=${{ matrix.suite }}
+      - if: matrix.suite == 'docs'
+        run: npm run site:test:browser

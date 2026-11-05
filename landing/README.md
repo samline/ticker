@@ -39,7 +39,7 @@ npm --prefix landing run test:browser
 
 The Playwright suite uses an isolated preview on port 4324 with `--ignore-lock`, avoiding Astro's agent-detected background mode and existing preview locks. Its base URL is currently `/ticker/`. Browser tests cover both themes, viewport changes from 320 to 1440 and back, breakpoint boundaries, enlarged root text, every demo tab, keyboard navigation, modal focus, repeated menu instances, disconnect/reconnect cleanup, reduced motion and navigation without JavaScript. Axe checks supplement these tests; they do not establish complete accessibility conformance.
 
-CI runs the maintained landing's formatting, source checks, build and browser suite. Format authored files with `npm --prefix landing run format`. Generated output, npm lockfiles, licensed brand assets and installed third-party skills are excluded from formatting.
+CI runs the maintained landing's formatting, source checks, build and browser suite. The suite has two Playwright projects, `examples` (examples.spec.ts, about half of its time) and `site` (everything else); locally `test:browser` runs both in one worker, while CI runs each project and the combined docs suite on parallel runners (`--project=examples`, `--project=site`). CI installs Chromium without `--with-deps`: the runner already has its libraries, and the apt step only added fallback fonts but once took ten minutes on a throttled Ubuntu mirror. Every CI job and browser install has a timeout so a stalled mirror fails fast. Format authored files with `npm --prefix landing run format`. Generated output, npm lockfiles, licensed brand assets and installed third-party skills are excluded from formatting.
 
 ## Architecture and ownership
 
