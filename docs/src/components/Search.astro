@@ -17,7 +17,6 @@ const id = `docs-search-${crypto.randomUUID()}`
   data-base={import.meta.env.BASE_URL}
   data-title={s.label}
   data-close={s.close}
-  data-handle={s.handle}
   data-loading={s.loading}
   data-empty={s.empty}
   data-error={s.error}
@@ -118,7 +117,6 @@ const id = `docs-search-${crypto.randomUUID()}`
       direction: 'top',
       showHandle: true,
       handleOnly: true,
-      handleAriaLabel: element.dataset.handle,
       handleClassName: 'docs-search-handle',
       autoFocus: true,
       ariaLabel: element.dataset.title,

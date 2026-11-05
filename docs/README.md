@@ -122,7 +122,7 @@ Framework integrations now covers React, Vue, Svelte, Astro, Shopify and WordPre
 
 The 2026-10-20 integration pass passed docs:check with zero diagnostics, landing:check (17 Node tests), both app formatting checks, and the combined build/link audit (2,013 links across 42 pages). All 34 combined Docs browser tests passed, including the five compiled/copied framework and CMS tests, all-article metadata/accessibility in both themes and responsive title/navigation checks. Host tests used an isolated development install, not production framework dependencies. Shopify Liquid and stubbed WordPress PHP/asset execution do not claim a live merchant/CMS deployment.
 
-Drawer integration uses the published 5.0.2 root createDrawer API, native cloned content and owned-controller destruction. Native Drawer keeps focus, dismissal, gestures and locking; the site keeps its own ARIA state and lifecycle cleanup.
+Drawer integration uses the published 5.1.1 root createDrawer API, native cloned content and owned-controller destruction. Native Drawer keeps focus, dismissal, gestures and locking; the site keeps its own ARIA state and lifecycle cleanup.
 
 ## Current page visibility in documentation navigation
 

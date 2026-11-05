@@ -217,8 +217,9 @@ test('search keeps close visible after result scrolling and supports native upwa
   await close.click()
   await expect(panel).not.toBeVisible()
   await trigger.click()
-  const handle = panel.getByRole('button', { name: 'Drag up to close search' })
-  // Drawer 4.2.1 intentionally ignores gestures for 500ms after opening, even with reduced motion.
+  // Drawer 5.1 keeps the handle a pointer-only affordance (aria-hidden, no name) without snap points.
+  const handle = panel.locator('.docs-search-handle')
+  // Drawer intentionally ignores gestures for 500ms after opening, even with reduced motion.
   await page.waitForTimeout(550)
   const box = (await handle.boundingBox())!
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)

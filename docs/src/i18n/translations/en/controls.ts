@@ -25,7 +25,6 @@ export default {
     placeholder: 'Search APIs, guides, and examples…',
     hint: 'Ctrl / ⌘ K',
     close: 'Close search',
-    handle: 'Drag up to close search',
     initial: 'Find an API, integration pattern, or answer.',
     loading: 'Searching…',
     empty: 'No results. Try another term.',
