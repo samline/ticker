@@ -125,7 +125,7 @@ Keep Framework integrations as a useful guide, not a replacement for lifecycle r
 
 ## Drawer dependency — 2026-10-21
 
-Both apps pin the published @samline/drawer 5.1.1. Home menu, Docs menu and Search import createDrawer from the root entry, clone their existing DOM/template content through a native content factory and retain the returned controller. Destroy that exact owner during cleanup; do not look it up again by id or restore removed browser.newDrawer/destroyDrawer helpers. Preserve application-owned ARIA reset, abortable listeners, Pagefind/debounce behavior, native modal/scroll/focus ownership and the scoped public vendor stylesheet. Verify independent/reopened instances, detach/reinsert in one mutation batch, search dragging, focus and background scroll. Keep package locks current; a version label alone is not a migration. This is a site dependency change, not a change to the documented package's API or version.
+Both apps pin the published @samline/drawer 5.1.2. Home menu, Docs menu and Search import createDrawer from the root entry, clone their existing DOM/template content through a native content factory and retain the returned controller. Destroy that exact owner during cleanup; do not look it up again by id or restore removed browser.newDrawer/destroyDrawer helpers. Preserve application-owned ARIA reset, abortable listeners, Pagefind/debounce behavior, native modal/scroll/focus ownership and the scoped public vendor stylesheet. Verify independent/reopened instances, detach/reinsert in one mutation batch, search dragging, focus and background scroll. Keep package locks current; a version label alone is not a migration. This is a site dependency change, not a change to the documented package's API or version.
 
 Validation for this dependency migration: clean npm ci installs resolved 5.0.2 in both apps; both Astro checks, 17 landing Node tests and both formatting checks passed. The combined build audited 2,013 links across 42 pages. Eight landing navigation/lifecycle tests and nine combined Docs menu/search tests passed, including both themes, focus, scroll, native search dragging, debounce and same-batch reinsertion. This bounded change did not alter shared presentation or collect new performance measurements.
 
@@ -241,3 +241,7 @@ A landing CI run spent 9m52s in `playwright install --with-deps` because the Azu
 ## Drawer 5.1.1 update — 2026-11-05
 
 Both apps now pin @samline/drawer 5.1.1 (5.1.0 behavior changes: the built-in handle is a named button only with snap points, otherwise a pointer-only aria-hidden affordance; overlay clicks need press and release on the overlay; reduced-motion support in the package stylesheet; 5.1.1 restores inline height/bottom after the soft keyboard). Search no longer passes handleAriaLabel/`handle` copy and its test locates `.docs-search-handle`; close, Escape and backdrop stay the accessible alternatives.
+
+## Drawer 5.1.2 update — 2026-11-05
+
+Both apps now pin @samline/drawer 5.1.2, which only changes closing: focus returns to the trigger with `preventScroll`, so closing a menu or Search no longer scrolls the page. No site code changed; keep checking focus restoration without background scroll.
