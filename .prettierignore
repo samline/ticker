@@ -5,7 +5,9 @@ docs/dist/
 docs/node_modules/
 node_modules/
 
-# Vendored landing skills and generated provenance.
+# Vendored skills and generated provenance.
+.agents/skills/
+skills-lock.json
 landing/.agents/
 landing/skills-lock.json
 
