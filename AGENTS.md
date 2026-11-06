@@ -245,3 +245,7 @@ Both apps now pin @samline/drawer 5.1.1 (5.1.0 behavior changes: the built-in ha
 ## Drawer 5.1.2 update — 2026-11-05
 
 Both apps now pin @samline/drawer 5.1.2, which only changes closing: focus returns to the trigger with `preventScroll`, so closing a menu or Search no longer scrolls the page. No site code changed; keep checking focus restoration without background scroll.
+
+## Agent skills and memory location
+
+Agents, Claude included, store and read project skills and memory in `.agents/`. Skills are created and edited only in `.agents/skills/`. `.claude/skills` is a tracked relative symlink to `../.agents/skills` because Claude Code loads project skills only from `.claude/skills/`; never keep a second copy there. The root library is currently empty (the public integration skill lives in `skills/ticker/` and is not an agent skill for this repository); the symlink resolves once a skill is added. The per-app libraries in `landing/.agents/skills` and `docs/.agents/skills` are separate upstream installs for those apps. On Windows, clone with `git config core.symlinks true`.

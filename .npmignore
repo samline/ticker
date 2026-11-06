@@ -23,6 +23,7 @@ AGENTS.md
 .gitignore
 .npmignore
 .agents/
+.claude/
 .codex/
 .github/
 .prettierignore
