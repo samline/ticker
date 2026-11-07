@@ -249,3 +249,20 @@ Both apps now pin @samline/drawer 5.1.2, which only changes closing: focus retur
 ## Agent skills and memory location
 
 Agents, Claude included, store and read project skills and memory in `.agents/`. Skills are created and edited only in `.agents/skills/`. `.claude/skills` is a tracked relative symlink to `../.agents/skills` because Claude Code loads project skills only from `.claude/skills/`; never keep a second copy there. The root library holds seven upstream skills installed with `npx autoskills -y -a codex`; `skills-lock.json` records their sources and hashes. Keep their content and licenses untouched and outside formatting. The public integration skill lives in `skills/ticker/` and is not an agent skill for this repository. The per-app libraries in `landing/.agents/skills` and `docs/.agents/skills` are separate upstream installs for those apps. On Windows, clone with `git config core.symlinks true`.
+
+## Header synchronization — 2026-11-06
+
+The landing Header and shared Logo carry template `61cc0d8`'s responsive fix:
+GitHub is icon-only and the version badge hides from 64rem to 75rem, while
+GitHub keeps its accessible name and Get started remains visible. Preserve
+that compact range when synchronizing the theme. The header regression covers
+Home, Examples and Docs at 1024, 1100, 1200, 1280 and 1440 pixels, including
+the longest sibling package name; it fails on the previous build at 1024px.
+This changes the website only and requires no npm release.
+
+Validation: both app diagnostics and format checks passed, as did 19 tooling
+tests and the combined build (2,096 links across 42 pages). Landing passed
+100/100 Chromium tests. Combined Docs passed 35 tests; its five initially
+skipped framework/CMS cases then all passed with the optional React/Vue/Svelte
+and Liquid dependencies installed externally, covering all 40 distinct cases.
+The 1024px header was also visually reviewed beside Drawer and Notify.
