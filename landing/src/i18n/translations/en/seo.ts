@@ -1,5 +1,5 @@
 export default {
-  title: '@samline/ticker — Accessible JavaScript Marquees',
+  title: 'Accessible JavaScript marquees',
   description:
     'Accessible, dependency-free ticker tapes for JavaScript, TypeScript and HTML. Animate announcements, logos and prices with built-in reduced-motion support.',
   keywords: [

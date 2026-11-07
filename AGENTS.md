@@ -266,3 +266,14 @@ tests and the combined build (2,096 links across 42 pages). Landing passed
 skipped framework/CMS cases then all passed with the optional React/Vue/Svelte
 and Liquid dependencies installed externally, covering all 40 distinct cases.
 The 1024px header was also visually reviewed beside Drawer and Notify.
+
+## Identity convention — 2026-11-06
+
+README structure follows the canonical template proposal, including TOC/resource
+roles, installation blocks, API/guide tables, entrypoints and skill source/download.
+Shared site-identity.mjs composes `<subject> — <npm name>` once for document and
+social titles. Footer display credit is explicitly samline, independent of npm
+author metadata. Keep the identity check in verify/release/CI, and test the real
+configured header name before a substituted sibling. The maintained policy is
+https://github.com/samline/package-landing-docs/blob/main/.agents/identity.md;
+package-specific API content and runtime publication remain separate.

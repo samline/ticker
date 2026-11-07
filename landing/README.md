@@ -435,3 +435,28 @@ The drag-playback example enables `inertia` with `resumeAfterDrag`: TickerDemo m
 ## Runtime audit — 3.0.0 (2026-11-05)
 
 Browser IIFE: 55,688 bytes raw / 12,983 bytes gzip (12.7 KiB); CSS: 4,353 / 966 bytes (0.9 KiB), measured from the local tsup build with gzip. FAQ copy reflects this build; these are not performance measurements. Copied recipes and CDN snippets pin 3.0.0, which requires the maintainer's npm publication (npm latest was 2.6.0 at the time of the audit).
+
+## Shared identity convention — 2026-11-06
+
+The canonical convention lives in the template's .agents/identity.md. Runtime
+READMEs share section order, manager installation blocks, API/entrypoint and
+guide table roles, resource links and the maintained skill source/download.
+The scaffold at scripts/package-readme-template.md supplies the common structure;
+package-specific examples and API claims remain grounded in this package.
+
+Document, Open Graph and Twitter titles compose an unbranded subject with
+` — @samline/ticker` once. Docs index uses Documentation and Examples uses Examples.
+The footer credits samline explicitly, separately from npm author metadata.
+Run site:check:identity against the combined artifact; keep the helper, checker/library
+and scaffold synchronized when porting template changes. Browser regressions
+cover title/social agreement, footer links and the real configured header name.
+These changes affect website/documentation only and require no npm release.
+
+Validation: both app checks passed; Landing's 30 tooling tests and all 100
+Landing browser tests passed. The combined build/link/identity audit passed
+(2,100 links across 42 pages after adding the missing footer changelog link).
+The broad Docs run passed its 35 existing cases; the new identity case exposed
+the missing link, which was added through the typed route map/catalog. Both
+final header/identity cases then passed. Five optional framework/CMS fixtures
+were not rerun for this metadata/footer update; they passed during the preceding
+header port, and their sources/runtime are unchanged. CI retains the full suites.

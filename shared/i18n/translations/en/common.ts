@@ -4,6 +4,7 @@ export default {
   packageName: packageInfo.name,
   version: packageInfo.version,
   author: packageInfo.author,
+  footerAuthor: 'samline',
   externalLinkHint: '(opens in a new tab)',
   license: 'MIT',
   versionLabel: 'v{version}',

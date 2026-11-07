@@ -1,3 +1,6 @@
+import common from '../../../../../shared/i18n/translations/en/common'
+import { footerCredit } from '../../../../../shared/lib/site-identity.mjs'
+
 export default {
   mainLabel: 'Main navigation',
   skipContent: 'Skip to content',
@@ -41,7 +44,8 @@ export default {
     setup: 'Installation guide',
     examples: 'Working examples',
     skill: 'Ticker skill for AI agents',
+    changelog: 'Changelog',
     backToTop: 'Back to top',
-    credit: 'Samuel Olvera · Made for the open web.',
+    credit: footerCredit(common.footerAuthor),
   },
 } as const

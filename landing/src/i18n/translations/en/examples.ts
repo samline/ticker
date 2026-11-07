@@ -40,6 +40,7 @@ const news = [
 ]
 export default {
   title: 'Ticker examples — Copy, paste, make it move',
+  seoTitle: 'Examples',
   description:
     'Working Ticker recipes with complete HTML/CDN and npm examples. Try announcements, logos, sample prices, opposite rows, dynamic content and controls.',
   keywords: ['ticker examples', 'marquee examples', 'copy and paste HTML', 'vanilla JavaScript'],

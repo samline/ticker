@@ -20,15 +20,15 @@ An accessible, dependency-free ticker for JavaScript, TypeScript and plain HTML.
 
 ## Installation
 
-```bash
+```sh
 npm install @samline/ticker
 ```
 
-```bash
+```sh
 pnpm add @samline/ticker
 ```
 
-```bash
+```sh
 bun add @samline/ticker
 ```
 
@@ -73,10 +73,6 @@ What this does:
 - Reuses visual clones when responsive measurements are unchanged and pauses animation outside the viewport or while the document is hidden.
 - Restores the original source element when `destroy()` runs.
 
-### Seamless loops
-
-The runtime preserves fractional measurements in both directions. Match item spacing to the horizontal track gap and include any decorative separator at the end of the sequence. See [Styling: seamless loops](https://samline.github.io/ticker/docs/reference/styling/#seamless-loops) for the CSS pattern.
-
 ## HTML / CDN
 
 <a id="cdn--browser"></a>
@@ -117,6 +113,10 @@ For optional ID-based ownership, `window.Ticker.newTicker({ id, options })` crea
 - Browser-global integrations for WordPress, Shopify, and plain HTML.
 - Declarative tickers that are discovered as the DOM changes.
 
+### Seamless loops
+
+The runtime preserves fractional measurements in both directions. Match item spacing to the horizontal track gap and include any decorative separator at the end of the sequence. See [Styling: seamless loops](https://samline.github.io/ticker/docs/reference/styling/#seamless-loops) for the CSS pattern.
+
 ### Featured items
 
 Keep one original fixed while the remaining sequence passes behind it. Mark a direct item with `data-featured`; when several are marked, the first in original DOM order wins and the rest move normally. Configure `featuredPosition` (`start`, `center`, `end`, or axis-specific physical edges). `controller.setFeatured(item)` replaces it; `setFeatured(null)` clears it; `controller.featured` exposes the original. Featured items are excluded from clones and repeat distance, retain identity/focus and return to their original position on release/destroy.
@@ -125,16 +125,16 @@ Featured items require version 2.4.0 or later and matching JavaScript and styles
 
 ## API at a glance
 
-| Group                 | API                                                                                                                                                                                                                                                          |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Controller factory    | [`ticker()`](https://samline.github.io/ticker/docs/reference/api/ticker/)                                                                                                                                                                                    |
-| Controller lifecycle  | [`update()`](https://samline.github.io/ticker/docs/reference/api/update/) · [`refresh()`](https://samline.github.io/ticker/docs/reference/api/refresh/) · [`destroy()`](https://samline.github.io/ticker/docs/reference/api/destroy/)                        |
-| Declarative lifecycle | [`mount()`](https://samline.github.io/ticker/docs/reference/api/mount/) · [`refresh()`](https://samline.github.io/ticker/docs/reference/api/refresh/#declarative-page-refresh) · [`unmount()`](https://samline.github.io/ticker/docs/reference/api/unmount/) |
-| Browser registry      | [`newTicker()` and registry helpers](https://samline.github.io/ticker/docs/reference/api/browser-registry/)                                                                                                                                                  |
-| Featured              | [`featured` and `setFeatured()`](https://samline.github.io/ticker/docs/reference/api/controller/#featured-selection)                                                                                                                                         |
-| Configuration         | [`TickerOptions`](https://samline.github.io/ticker/docs/reference/configuration/)                                                                                                                                                                            |
-| Core utilities        | [Defaults, state factories, and validators](https://samline.github.io/ticker/docs/reference/core/)                                                                                                                                                           |
-| Types                 | [TypeScript reference](https://samline.github.io/ticker/docs/reference/typescript/)                                                                                                                                                                          |
+| API                                                                                                                                                                                                                                                          | Purpose               |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
+| [`ticker()`](https://samline.github.io/ticker/docs/reference/api/ticker/)                                                                                                                                                                                    | Controller factory    |
+| [`update()`](https://samline.github.io/ticker/docs/reference/api/update/) · [`refresh()`](https://samline.github.io/ticker/docs/reference/api/refresh/) · [`destroy()`](https://samline.github.io/ticker/docs/reference/api/destroy/)                        | Controller lifecycle  |
+| [`mount()`](https://samline.github.io/ticker/docs/reference/api/mount/) · [`refresh()`](https://samline.github.io/ticker/docs/reference/api/refresh/#declarative-page-refresh) · [`unmount()`](https://samline.github.io/ticker/docs/reference/api/unmount/) | Declarative lifecycle |
+| [`newTicker()` and registry helpers](https://samline.github.io/ticker/docs/reference/api/browser-registry/)                                                                                                                                                  | Browser registry      |
+| [`featured` and `setFeatured()`](https://samline.github.io/ticker/docs/reference/api/controller/#featured-selection)                                                                                                                                         | Featured              |
+| [`TickerOptions`](https://samline.github.io/ticker/docs/reference/configuration/)                                                                                                                                                                            | Configuration         |
+| [Defaults, state factories, and validators](https://samline.github.io/ticker/docs/reference/core/)                                                                                                                                                           | Core utilities        |
+| [TypeScript reference](https://samline.github.io/ticker/docs/reference/typescript/)                                                                                                                                                                          | Types                 |
 
 The controller exposes `element`, `source`, `state`, and an immutable options snapshot. Playback, navigation, events and viewport rules are documented in the [controller reference](https://samline.github.io/ticker/docs/reference/api/controller/). `update()` and instance `refresh()` are chainable; `destroy()` owns teardown and restoration.
 
@@ -226,9 +226,9 @@ See the controller documentation for cancellation and `navigationSource` events.
 
 ## Documentation
 
-Read the full guides and API reference in the **[documentation](https://samline.github.io/ticker/docs/)**. Explore **[working examples](https://samline.github.io/ticker/examples/)** with complete HTML / CDN and npm code to copy and adapt.
+Read the [documentation](https://samline.github.io/ticker/docs/) for the full guides and API contracts, and explore [working examples](https://samline.github.io/ticker/examples/) with complete and separate source files for both loading modes.
 
-| Doc                                                                             | Purpose                                                        |
+| Guide                                                                           | What it covers                                                 |
 | ------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | [Installation](https://samline.github.io/ticker/docs/getting-started/)          | Installation, first ticker, ownership, and lifecycle.          |
 | [Configuration](https://samline.github.io/ticker/docs/reference/configuration/) | Every option, default, normalization rule, and data attribute. |
@@ -243,11 +243,13 @@ Read the full guides and API reference in the **[documentation](https://samline.
 
 ## Changelog
 
-Read [CHANGELOG.md](CHANGELOG.md) or the [published changelog](https://samline.github.io/ticker/docs/changelog/) for release history and explicitly marked breaking changes. Review the notes before upgrading.
+Read [CHANGELOG.md](CHANGELOG.md) or the [published changelog](https://samline.github.io/ticker/docs/changelog/) for release history and explicitly marked breaking and behavior changes. Review the notes before upgrading.
 
 ## AI agent skill
 
 The public [Ticker skill](https://samline.github.io/ticker/skills/ticker/SKILL.md) teaches an agent how to choose a Ticker integration, load CSS, manage controllers, preserve accessible motion and avoid nonexistent APIs. It is self-contained and describes v3.0.0; agents must verify their installed version.
+
+The maintained [repository source](skills/ticker/SKILL.md) and website download are the same file.
 
 Download [SKILL.md](https://samline.github.io/ticker/skills/ticker/SKILL.md) into a `ticker/` folder in your agent's supported skill directory. For agents that discover project skills from `.agents/skills/`:
 
@@ -257,7 +259,7 @@ curl --fail --location https://samline.github.io/ticker/skills/ticker/SKILL.md \
   --output .agents/skills/ticker/SKILL.md
 ```
 
-When working from this repository, copy `skills/ticker/SKILL.md` instead. Keep the filename `SKILL.md`; ask the agent to use the Ticker skill to implement a marquee, announcement strip, logo row or another supported pattern. Discovery paths and explicit invocation syntax depend on the agent.
+When working from this repository, copy `skills/ticker/SKILL.md` instead. Keep the filename `SKILL.md`; discovery paths and invocation syntax depend on the agent.
 
 ## License
 

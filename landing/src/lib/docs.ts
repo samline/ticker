@@ -2,6 +2,7 @@
 export const docsRoutes = {
   overview: '',
   setup: 'getting-started/',
+  changelog: 'changelog/',
   options: 'reference/configuration/',
   update: 'reference/api/update/',
   content: 'guides/lifecycle/#update-versus-refresh',

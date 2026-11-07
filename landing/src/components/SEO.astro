@@ -2,6 +2,7 @@
 import { getI18n, getLocale } from '../i18n/utils'
 import { serializeJsonLd } from '../../../shared/lib/serialize'
 import packageInfo from '../../../package.json'
+import { documentTitle } from '../../../shared/lib/site-identity.mjs'
 
 const i18n = getI18n(Astro)
 const locale = getLocale(Astro.currentLocale)
@@ -15,6 +16,7 @@ const {
   description = i18n.seo.description,
   keywords = i18n.seo.keywords,
 } = Astro.props
+const metaTitle = documentTitle(title, packageInfo.name)
 const canonical = Astro.site
   ? new URL(
       Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`,
@@ -54,7 +56,7 @@ const schema = {
       '@type': 'WebPage',
       '@id': canonical ? `${canonical}#webpage` : undefined,
       url: canonical,
-      name: title,
+      name: metaTitle,
       description,
       inLanguage: locale,
       isPartOf: canonical ? { '@id': `${home}#website` } : undefined,
@@ -68,7 +70,7 @@ const schema = {
 }
 ---
 
-<title>{title}</title>
+<title>{metaTitle}</title>
 <meta name="description" content={description} />
 <meta name="keywords" content={keywords.join(', ')} />
 <meta name="author" content={i18n.common.author} />
@@ -86,7 +88,7 @@ const schema = {
 {canonical && <link rel="canonical" href={canonical} />}
 <link rel="icon" type="image/svg+xml" href={icon} />
 <meta property="og:type" content="website" />
-<meta property="og:title" content={title} />
+<meta property="og:title" content={metaTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:site_name" content={i18n.common.packageName} />
 <meta property="og:locale" content={i18n.seo.social.locale} />
@@ -102,7 +104,7 @@ const schema = {
   </>
 )}
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content={title} />
+<meta name="twitter:title" content={metaTitle} />
 <meta name="twitter:description" content={description} />
 {image && (
   <>
