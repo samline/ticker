@@ -454,7 +454,7 @@ These changes affect website/documentation only and require no npm release.
 
 Validation: both app checks passed; Landing's 30 tooling tests and all 100
 Landing browser tests passed. The combined build/link/identity audit passed
-(2,100 links across 42 pages after adding the missing footer changelog link).
+(2,099 links across 42 pages after adding the missing footer changelog link).
 The broad Docs run passed its 35 existing cases; the new identity case exposed
 the missing link, which was added through the typed route map/catalog. Both
 final header/identity cases then passed. Five optional framework/CMS fixtures
