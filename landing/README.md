@@ -460,3 +460,8 @@ the missing link, which was added through the typed route map/catalog. Both
 final header/identity cases then passed. Five optional framework/CMS fixtures
 were not rerun for this metadata/footer update; they passed during the preceding
 header port, and their sources/runtime are unchanged. CI retains the full suites.
+
+The footer's narrow-layout columns use intrinsic auto-fit sizing, matching the
+canonical template. Keep long links such as Changelog usable at 320px with 200%
+text; fixed two-column widths overflow there. Both enlarged-title browser
+regressions and the identity case pass with the final footer.
