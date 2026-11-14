@@ -83,7 +83,7 @@
   ],
   "author": "Samuel Olvera (samline)",
   "license": "MIT",
-  "homepage": "https://samline.github.io/ticker",
+  "homepage": "https://samline.github.io/ticker/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/samline/ticker.git"
