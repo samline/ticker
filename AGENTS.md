@@ -277,3 +277,7 @@ author metadata. Keep the identity check in verify/release/CI, and test the real
 configured header name before a substituted sibling. The maintained policy is
 https://github.com/samline/package-landing-docs/blob/main/.agents/identity.md;
 package-specific API content and runtime publication remain separate.
+
+## Hero title convention — 2026-11-13
+
+The Home H1 is the package name ("Ticker") with one serif promise accent ("Give your content motion."), like the sibling packages. Periods do not stack: the title has none, the accent at most one, and only the kicker uses two short sentences. The template enforces this with `heroHeadingProblems` in `check:content`; keep `seo.ts` imageAlt in sync with the accent.

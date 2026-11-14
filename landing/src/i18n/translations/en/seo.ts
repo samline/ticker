@@ -16,7 +16,7 @@ export default {
   social: {
     locale: 'en_US',
     imageAlt:
-      'Ticker: A little motion. A lot of possibility. Accessible, dependency-free ticker tapes for the web.',
+      'Ticker: Give your content motion. Accessible, dependency-free ticker tapes for the web.',
     tagline: 'Accessible ticker tapes for the open web.',
     details: 'Zero dependencies · TypeScript ready · MIT licensed',
     items: ['Announcements', 'Logos', 'Prices'],

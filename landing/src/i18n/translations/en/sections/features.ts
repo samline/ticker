@@ -1,5 +1,5 @@
 export default {
-  eyebrow: '01 / Less code. More care.',
+  eyebrow: '01 / Less code, more care',
   title: 'Thoughtful by default.',
   titleAccent: 'Effortless by design.',
   items: {
