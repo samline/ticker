@@ -39,10 +39,6 @@ const documents = await createRecipeFiles({ recipe, i18n })
   <Disclosure class:list={['code-disclosure']}>
     <span slot="summary">{t.code}</span>
     <div class:list={['code-body']}>
-      <div class:list={['code-notes']}>
-        <p class:list={['note']}>{t.instructions}</p>
-        <p class:list={['note']}>{t.sourceNote}</p>
-      </div>
       <Tabs id={`example-${recipe.id}`} label={t.format} items={t.formats}>
         {t.formats.map(item => (
           <TabPanel id={item.id} label={item.label} class:list={['example-code-panel']}>
@@ -78,23 +74,11 @@ const documents = await createRecipeFiles({ recipe, i18n })
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-lg);
   }
-  p {
-    color: var(--color-text-muted);
-    line-height: 1.75;
-  }
-  .note {
-    font-size: var(--text-small);
-    margin: 0;
-  }
   .code-body {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-md);
     padding: var(--space-sm);
-  }
-  .code-notes {
-    display: grid;
-    gap: var(--space-xs);
   }
   .example-code-panel {
     margin-bottom: 0;

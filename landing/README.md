@@ -257,7 +257,7 @@ The gallery uses shared secondary Buttons for its jump navigation, with visible 
 
 The agent skill source lives at ../skills/ticker/SKILL.md. The /skills/ticker/SKILL.md endpoint serves that file at build time; Examples and the footer link its download. Keep the file self-contained, validate it after edits and synchronize its version/API claims with the package. No separately edited public copy or generated preview bundle is needed.
 
-Example code disclosures use one aligned content inset and explicit gaps for notes, tabs and source. Their grid tracks can shrink to zero, preserving code-only scrolling on narrow screens. Keep the open disclosure in responsive/enlarged-text checks; a collapsed panel does not prove its contents fit.
+Example code disclosures use one aligned content inset and explicit gaps for tabs and source. Keep loading-mode tabs directly above the file tabs, with installation instructions in the installation guide. Their grid tracks can shrink to zero, preserving code-only scrolling on narrow screens. Keep the open disclosure in responsive/enlarged-text checks; a collapsed panel does not prove its contents fit.
 
 Code highlighting has one configuration in ../shared/lib/code-theme.mjs. Home catalogs store whole code strings and language identifiers; Examples uses the same CodeFrame renderer for complete HTML documents. Do not recreate manual token colors or plain pre tags beside it. The docs Markdown adapter uses the same theme and shared frame.
 

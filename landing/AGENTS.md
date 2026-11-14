@@ -133,7 +133,7 @@ Keep Home LiveDemo's data-panel hooks on DemoPanel roots; shared Tabs requires t
 
 The distributable Ticker integration skill lives in ../skills/ticker/SKILL.md and is served by the build-time skills/ticker/SKILL.md endpoint. Do not install it into users' agents automatically. Keep version/contracts aligned with the package, preserve self-contained downloads and audit the endpoint links.
 
-Example code disclosures align summary text, notes, tabs and CodeFrame to the same inner inset. Group notes with a single gap, remove the final TabPanel's bottom margin, and keep bottom padding equal to horizontal padding. The body grid needs minmax(0, 1fr) so long source lines scroll inside CodeFrame instead of expanding the document. Responsive checks must include an open code disclosure.
+Example code disclosures align summary text, tabs and CodeFrame to the same inner inset. Loading-mode tabs sit directly above file tabs; keep installation and delivery explanations in the installation guide. Remove the final TabPanel's bottom margin and keep bottom padding equal to horizontal padding. The body grid needs minmax(0, 1fr) so long source lines scroll inside CodeFrame instead of expanding the document. Responsive checks must include an open code disclosure.
 
 Recipe sections own the single divider between examples. Keep code disclosures borderless so their bottom edge does not duplicate the next section's top border. Use 2.5rem vertical padding per recipe (2rem below 48rem), keeping the combined space between recipes compact and anchor compensation synchronized.
 
