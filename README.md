@@ -80,11 +80,11 @@ What this does:
 Choose **Package / ESM** when installing with npm, pnpm or bun and importing Ticker in your application. Choose **HTML / CDN** when loading the standalone script in plain HTML, WordPress or Shopify without a bundler. Both use the same controller API. A CDN only delivers the files; you can self-host the same script and stylesheet.
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@samline/ticker@3.0.0/dist/style.css" />
-<script src="https://unpkg.com/@samline/ticker@3.0.0/dist/browser/global.global.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@samline/ticker@4.0.0/dist/style.css" />
+<script src="https://cdn.jsdelivr.net/npm/@samline/ticker@4.0.0/dist/browser/ticker.global.js"></script>
 ```
 
-> Pin the version in production. Replace `3.0.0` with the version you ship.
+> Pin the version in production. Replace `4.0.0` with the version you ship.
 
 The standalone script (an IIFE) exposes `window.Ticker`. “Global” describes this object, not another loading mode. The optional `@samline/ticker/browser` registry module is an ESM/CJS import and does not install that object. See [loading terms](https://samline.github.io/ticker/docs/guides/html-and-browser/#loading-terms).
 

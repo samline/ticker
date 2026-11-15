@@ -19,4 +19,3 @@ export const getTickers = Ticker.getTickers
 export const destroyTicker = Ticker.destroyTicker
 export const destroyTickers = Ticker.destroyTickers
 export const available = Ticker.available
-export default Ticker

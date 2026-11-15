@@ -17,10 +17,14 @@ export default defineConfig([
     outDir: 'dist',
   },
   {
+    // ticker.global.js is the family name; global.global.js stays as an alias
+    // for v3 CDN URLs.
     entry: {
+      'browser/ticker': 'src/browser/global.ts',
       'browser/global': 'src/browser/global.ts',
     },
     format: ['iife'],
+    minify: true,
     dts: true,
     sourcemap: true,
     clean: false,

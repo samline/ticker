@@ -26,7 +26,7 @@ ${separate ? '<link rel="stylesheet" href="./style.css">' : `<style>\n${css}\n</
 ${markup}
 </main>
 
-${mode === 'cdn' ? `<script src="${cdn}browser/global.global.js"></script>\n\n` : ''}${separate ? '<script type="module" src="./main.js"></script>' : `<script type="module">\n${scriptFor(mode)}\n</script>`}
+${mode === 'cdn' ? `<script src="${cdn}browser/ticker.global.js"></script>\n\n` : ''}${separate ? '<script type="module" src="./main.js"></script>' : `<script type="module">\n${scriptFor(mode)}\n</script>`}
 </body>
 </html>`
   const codeOptions = await resolveConfig(

@@ -7,12 +7,8 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
     exclude: ['node_modules', 'dist'],
     coverage: {
-      thresholds: {
-        branches: 65,
-        functions: 80,
-        lines: 85,
-        statements: 80,
-      },
+      include: ['src/**'],
+      thresholds: { branches: 90, functions: 95, lines: 95, statements: 95 },
     },
   },
 })

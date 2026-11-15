@@ -1,23 +1,28 @@
-coverage/
-dist/
-docs/.astro/
-docs/dist/
-docs/node_modules/
-node_modules/
-
-# Vendored skills and generated provenance.
-.agents/skills/
-skills-lock.json
-landing/.agents/
-landing/skills-lock.json
-
-docs/.agents/
-docs/skills-lock.json
-
-# Generated browser reports and vendor assets.
-landing/test-results/
-docs/test-results/
-landing/playwright-report/
-docs/playwright-report/
-landing/public/assets/
-**/package-lock.json
+# Managed by package-landing-docs (family/templates/package). Edit there, then run node family/scripts/sync.mjs.
+dist
+coverage
+node_modules
+.astro
+pnpm-lock.yaml
+CHANGELOG.md
+test-results
+playwright-report
+site
+# The canonical README template keeps placeholder lines Prettier would indent.
+scripts/package-readme-template.md
+# The website has its own formatter (bun run site:format).
+landing
+docs
+shared
+brief
+site-tools
+site-tests
+site-e2e
+SITE.md
+REFERENCE.md
+playwright.site.config.ts
+project.config.json
+content-audit.json
+design-reference.json
+# Third-party agent skills keep their upstream formatting.
+.agents/skills

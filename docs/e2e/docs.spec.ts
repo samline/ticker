@@ -385,7 +385,7 @@ test('installation reuses accessible tabs with exact copying for each package ma
     )
     if (name === 'CDN') {
       await expect(panel.locator('code')).toContainText('/dist/style.css')
-      await expect(panel.locator('code')).toContainText('/dist/browser/global.global.js')
+      await expect(panel.locator('code')).toContainText('/dist/browser/ticker.global.js')
     }
   }
   await installation.getByRole('tab', { name: 'CDN', exact: true }).press('Home')
@@ -466,7 +466,9 @@ test('changelog replaces migration and keeps the historical URL useful', async (
   await page.goto('changelog/')
   await expect(page.locator('#article-title')).toHaveText('Changelog')
   await expect(page.locator('ticker-docs-article h2')).toHaveText(versions)
-  await expect(page.getByRole('heading', { name: 'Breaking changes', exact: true })).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Breaking changes', exact: true }).first()
+  ).toBeVisible()
   await expect(page.locator('.sidebar nav')).not.toContainText('Migrating to v2')
   await page.goto('guides/migration/')
   await expect(page).toHaveURL(/\/changelog\/$/)

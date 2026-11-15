@@ -1,7 +1,7 @@
 {
   "name": "@samline/ticker",
-  "version": "3.0.0",
-  "packageManager": "bun@1.3.14",
+  "version": "4.0.0",
+  "packageManager": "pnpm@12.9.1",
   "description": "An accessible, dependency-free ticker (marquee) for vanilla JavaScript, TypeScript, and plain HTML.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -19,6 +19,7 @@
     "node": ">=20"
   },
   "sideEffects": [
+    "./dist/browser/ticker.global.js",
     "./dist/browser/global.global.js",
     "./dist/style.css"
   ],
@@ -44,9 +45,10 @@
       "require": "./dist/browser/index.cjs"
     },
     "./browser/global": {
-      "default": "./dist/browser/global.global.js"
+      "default": "./dist/browser/ticker.global.js"
     },
-    "./style.css": "./dist/style.css"
+    "./style.css": "./dist/style.css",
+    "./package.json": "./package.json"
   },
   "scripts": {
     "clean": "rm -rf dist coverage",
@@ -59,19 +61,23 @@
     "test:coverage": "vitest run --coverage",
     "test:package": "node scripts/test-package.mjs",
     "test:watch": "vitest",
-    "docs:dev": "npm --prefix docs run dev",
-    "docs:build": "npm --prefix docs run build",
-    "docs:check": "npm --prefix docs run check",
-    "prepublishOnly": "bun run clean && bun run build && bun run typecheck && bun run test:coverage && bun run test:package && npm pack --dry-run",
-    "landing:build": "npm --prefix landing run build",
-    "landing:dev": "npm --prefix landing run dev -- --host 127.0.0.1",
-    "landing:check": "npm --prefix landing run check",
-    "landing:preview": "npm --prefix landing run preview -- --host 127.0.0.1",
+    "docs:dev": "bun run --cwd docs dev",
+    "docs:build": "bun run --cwd docs build",
+    "docs:check": "bun run --cwd docs check",
+    "prepublishOnly": "bun run clean && bun run build && bun run typecheck && bun run test:coverage && bun run test:package",
+    "landing:build": "bun run --cwd landing build",
+    "landing:dev": "bun run --cwd landing dev -- --host 127.0.0.1",
+    "landing:check": "bun run --cwd landing check",
+    "landing:preview": "bun run --cwd landing preview -- --host 127.0.0.1",
     "site:assets": "node scripts/site-assets.mjs",
-    "site:build": "npm run site:assets && npm run docs:build && npm run landing:build && node landing/scripts/check-site.mjs --docs && npm run site:check:identity",
-    "docs:test:browser": "npm --prefix docs run test:browser",
-    "site:test:browser": "npm --prefix docs run test:combined",
-    "site:check:identity": "node scripts/check-identity.mjs"
+    "site:build": "bun run site:assets && bun run docs:build && bun run landing:build && node landing/scripts/check-site.mjs --docs && bun run site:check:identity",
+    "docs:test:browser": "bun run --cwd docs test:browser",
+    "site:test:browser": "bun run --cwd docs test:combined",
+    "site:check:identity": "node scripts/check-identity.mjs",
+    "test:e2e": "playwright test",
+    "size": "node scripts/check-size.mjs",
+    "check": "bun run format:check && bun run typecheck && bun run test:coverage && bun run build && bun run size && bun run test:package && bun run test:e2e",
+    "release": "bun run check && pnpm publish"
   },
   "keywords": [
     "ticker",
@@ -83,7 +89,7 @@
   ],
   "author": "Samuel Olvera (samline)",
   "license": "MIT",
-  "homepage": "https://samline.github.io/ticker",
+  "homepage": "https://samline.github.io/ticker/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/samline/ticker.git"
@@ -91,20 +97,23 @@
   "bugs": {
     "url": "https://github.com/samline/ticker/issues"
   },
-  "overrides": {
-    "esbuild": "^0.28.1",
-    "nanoid": "^3.3.18",
-    "postcss": "^8.5.23",
-    "vite": "^8.0.0"
-  },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "@types/node": "^24.13.5",
-    "@vitest/coverage-v8": "^5.0.1",
+    "@vitest/coverage-v8": "^5.1.0",
+    "esbuild": "^0.28.2",
     "jsdom": "^26.1.0",
     "prettier": "^3.9.0",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
     "vite": "^8.0.0",
-    "vitest": "^5.0.1"
+    "vitest": "^5.1.0"
+  },
+  "unpkg": "./dist/browser/ticker.global.js",
+  "jsdelivr": "./dist/browser/ticker.global.js",
+  "size": {
+    "./dist/index.js": 10050,
+    "./dist/browser/index.js": 9500,
+    "./dist/browser/ticker.global.js": 9750
   }
 }

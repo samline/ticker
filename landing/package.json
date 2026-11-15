@@ -10,7 +10,7 @@
     "build": "astro build && node scripts/include-docs.mjs && node scripts/check-site.mjs && node scripts/check-links.mjs",
     "preview": "astro preview",
     "astro": "astro",
-    "check": "node scripts/check-translations.mjs && astro check && npm run test",
+    "check": "node scripts/check-translations.mjs && astro check && bun run test",
     "format": "prettier --plugin prettier-plugin-astro --config ../.prettierrc.cjs --write . ../shared",
     "format:check": "prettier --plugin prettier-plugin-astro --config ../.prettierrc.cjs --check . ../shared",
     "test": "node --test tests/*.test.mjs",
@@ -21,7 +21,7 @@
     "@resvg/resvg-js": "^2.6.2",
     "@samline/drawer": "5.1.2",
     "@tailwindcss/vite": "4.3.0",
-    "astro": "^7.3.8",
+    "astro": "^7.4.12",
     "tailwindcss": "4.3.0"
   },
   "private": true,

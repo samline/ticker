@@ -18,7 +18,7 @@ export const files = [
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Ticker news</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@samline/ticker@3.0.0/dist/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@samline/ticker@4.0.0/dist/style.css">
     <link rel="stylesheet" href="./style.css">
   </head>
   <body>
@@ -26,7 +26,7 @@ export const files = [
       <a href="/one">First story</a>
       <a href="/two">Second story</a>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/@samline/ticker@3.0.0/dist/browser/global.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@samline/ticker@4.0.0/dist/browser/ticker.global.js"></script>
     <script type="module" src="./main.js"></script>
   </body>
 </html>` },
@@ -64,7 +64,7 @@ Ticker has two loading setups. Both run in the browser and return the same contr
 | **Package / ESM**    | Install with npm, pnpm, yarn or bun; import `ticker` in your application.   | Load `@samline/ticker/style.css` once. Use your existing build tool. CommonJS exports are also available.                               |
 | **HTML / CDN**       | Load the standalone JavaScript with a `<script>` tag and CSS with `<link>`. | Initialize through `window.Ticker.ticker(...)`; no bundler is needed.                                                                   |
 | **CDN**              | A server that delivers the package files.                                   | jsDelivr or unpkg can deliver the HTML script and stylesheet. Self-hosting those same files works too.                                  |
-| **Global / IIFE**    | The script format and the object it exposes.                                | The standalone file `dist/browser/global.global.js` installs `window.Ticker`. It is the HTML / CDN build, not another integration mode. |
+| **Global / IIFE**    | The script format and the object it exposes.                                | The standalone file `dist/browser/ticker.global.js` installs `window.Ticker`. It is the HTML / CDN build, not another integration mode. |
 | **Browser registry** | Optional ID-based ownership through `newTicker()` and registry helpers.     | Available as an imported `browser` object or through `window.Ticker`. The `/browser` module is not the standalone script.               |
 
 Start with `ticker(target, options)` unless you need ID-based lookup. Do not load both the imported module and the standalone script for the same ticker. Choose controller ownership or the declarative page manager independently of how the files are delivered.

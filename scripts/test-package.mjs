@@ -12,6 +12,7 @@ const requiredFiles = [
   'dist/index.d.cts',
   'dist/browser/index.js',
   'dist/browser/index.cjs',
+  'dist/browser/ticker.global.js',
   'dist/browser/global.global.js',
   'dist/style.css',
 ]
@@ -35,10 +36,17 @@ assert.equal(typeof browser.default.ticker, 'function')
 assert.equal(browser.default.newTicker, browser.newTicker)
 assert.equal(globalThis.Ticker, undefined)
 
-const source = readFileSync(resolve('dist/browser/global.global.js'), 'utf8')
+// ticker.global.js is the family name; global.global.js is the v3 alias.
+const source = readFileSync(resolve('dist/browser/ticker.global.js'), 'utf8')
+const withoutMap = code => code.replace(/\n\/\/# sourceMappingURL=.*\n?$/, '')
+assert.equal(
+  withoutMap(source),
+  withoutMap(readFileSync(resolve('dist/browser/global.global.js'), 'utf8'))
+)
 const context = { console }
 vm.runInNewContext(source, context)
 assert.equal(typeof context.Ticker.ticker, 'function')
+assert.equal('default' in context.Ticker, false)
 assert.equal(typeof context.Ticker.newTicker, 'function')
 assert.equal(typeof context.Ticker.destroyTicker, 'function')
 

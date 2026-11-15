@@ -282,6 +282,16 @@ package-specific API content and runtime publication remain separate.
 
 The Home H1 is the package name ("Ticker") with one serif promise accent ("Give your content motion."), like the sibling packages. Periods do not stack: the title has none, the accent at most one, and only the kicker uses two short sentences. The template enforces this with `heroHeadingProblems` in `check:content`; keep `seo.ts` imageAlt in sync with the accent.
 
+## pnpm migration and 4.0.0 — 2026-11-15
+
+Ticker moved from Bun/npm installs to pnpm with the family tooling (managed CI, Prettier, size budgets, `tests/e2e`). Lessons:
+
+- `pnpm-workspace.yaml` holds `landing`, `docs` and `shared`; each app keeps its own scripts (`npm --prefix <app> run …` only runs scripts, it never installs). Overrides live in the `# Repository overrides` block (sync keeps it); pnpm ignores the npm `overrides` field.
+- The managed CI has no website job: `.github/workflows/site.yml` runs the app checks, `pnpm audit`, the package smoke test and the three browser suites (examples, site, docs); `deploy.yml` builds with `bun run site:build` and uploads `landing/dist`.
+- 4.0.0 renames the IIFE to `dist/browser/ticker.global.js` and keeps `global.global.js` as an alias built from the same entry; `scripts/test-package.mjs` checks both are identical apart from the source-map line. The classic script has no `default` member. The IIFE is minified (about 9.1 KiB gzip; the FAQ figure follows it).
+- Coverage meets 90/95/95/95. `tests/coverage-*.test.ts` drive pointer drags with plain `Event`s (jsdom has no PointerEvent), inertia glides, native wrapper scroll, rail keys, the document manager and the registry. WebKit does not tab to links: assert inertness instead of pressing Tab.
+- ticker's website is the design source of package-landing-docs (REFERENCE.md pins it), not an embedded copy of it, so the family audit does not expect `project.config.json` here.
+
 <!-- samline:family:start -->
 
 ## Family conventions (@samline)

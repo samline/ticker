@@ -4,6 +4,23 @@
 
 No unreleased changes.
 
+## [4.0.0] - 2026-11-15
+
+### Breaking changes
+
+- The classic script no longer defines `window.Ticker.default` (or `TickerBundle.default`): use the named members such as `window.Ticker.ticker()`, which are unchanged.
+- The browser bundle is now `dist/browser/ticker.global.js`, which the `./browser/global` export, `unpkg` and `jsdelivr` point to. `dist/browser/global.global.js` is still published as an alias, so v3 script URLs keep working after updating the version.
+
+### Changed
+
+- The browser bundle is minified (about 9.3 KB gzip instead of 13 KB).
+- `homepage` ends with a slash, and every CDN snippet uses jsDelivr.
+- Installs use pnpm (`pnpm-lock.yaml`); the vulnerable development dependencies (Astro, Vitest, `source-map-js`) are updated. The package has no runtime dependencies, so this does not affect consumers.
+
+### Examples
+
+- Package, CDN and skill pins target 4.0.0 and the new bundle name.
+
 ## [3.0.0] - 2026-11-05
 
 ### Behavior changes

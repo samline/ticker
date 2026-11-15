@@ -84,7 +84,7 @@ export const createRecipeMarkup = async ({ recipe, i18n }: RecipeContext) => {
         : ''
     }${controls}${verticalControls}${dragControls}${featuredControls}
   </div>
-  <p>${e(recipe.note)}</p>${recipe.rows.some(row => row.items.some(item => item.logo)) ? `\n  <p><a href="${e(manifest.homepage + '/attribution/')}" target="_blank" rel="noopener noreferrer">${e(t.brandAttribution)}</a></p>` : ''}
+  <p>${e(recipe.note)}</p>${recipe.rows.some(row => row.items.some(item => item.logo)) ? `\n  <p><a href="${e(manifest.homepage.replace(/\/$/, '') + '/attribution/')}" target="_blank" rel="noopener noreferrer">${e(t.brandAttribution)}</a></p>` : ''}
   <p data-example-updates role="status" aria-live="polite"></p>
   <noscript><p>${e(t.noJs)}</p></noscript>
 </section>`
