@@ -179,26 +179,6 @@ Treat the package, catalogs, docs, generated metadata and examples as one releas
 
 Use targeted checks first, then the required build and relevant browser checks for the affected behavior. For an actual release, rebuild the package if measurements/examples depend on built output, remeasure size claims and run `npm run site:build`. Keep attribution and source records intact. Document real remaining limitations instead of claiming that automated checks prove everything.
 
-## Installed project skills
-
-`npx autoskills` was run inside `landing/`. CLI v0.3.6 detected Astro, Tailwind CSS, TypeScript, Playwright, Vite and Node.js and installed ten skills under `.agents/skills/`. `skills-lock.json` records sources and computed hashes. Both are versioned so the learning aids can travel with this landing.
-
-| Skill                                              | Source                                         |
-| -------------------------------------------------- | ---------------------------------------------- |
-| accessibility, seo                                 | `addyosmani/web-quality-skills`                |
-| astro                                              | `astrolicious/agent-skills`                    |
-| frontend-design                                    | `anthropics/skills`                            |
-| tailwind-css-patterns                              | `giuseppe-trisciuoglio/developer-kit`          |
-| typescript-advanced-types, nodejs-backend-patterns | `wshobson/agents`                              |
-| nodejs-best-practices                              | `sickn33/antigravity-awesome-skills`           |
-| playwright-best-practices                          | `currents-dev/playwright-best-practices-skill` |
-| vite                                               | `antfu/skills`                                 |
-
-Read the relevant installed SKILL.md when its workflow applies. They are third-party guidance, not a mandate to add a backend, client framework or unnecessary dependencies. Follow the user's request and this project's actual version/contracts when generic examples differ. Do not reformat vendored skills or edit their hashes by hand.
-
-To rediscover skills for a copied project, run `npx autoskills` in that project's landing directory; `npx autoskills@0.3.6` selects the discovery-tool version used here. Review the resulting directory and lock diff. Tool-version pinning alone does not freeze upstream skill content. Keep local project instructions when refreshing installed guidance, and update these provenance notes if the selected skills or workflow change.
-
-The codebase-memory exploration workflow is supplied separately by the development environment; it is not one of the ten autoskills selections. Configure the target project’s exploration tools and adapt that instruction when reusing this playbook.
 
 ## Copy controls, persistent navigation and documentation journeys
 

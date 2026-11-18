@@ -60,15 +60,6 @@ English is the only published locale. Astro config declares it explicitly. UI co
 
 [The dated content audit](CONTENT-AUDIT.md) records the review of all original sources and the recovered CSS-contract details. Keep the migration inventory and this review context when reorganizing content.
 
-## Installed skills
-
-`npx autoskills -y` was executed inside `docs/` using autoskills 0.4.1. Nine upstream skills are versioned under `.agents/skills/`; `skills-lock.json` records sources and hashes. Applied Astro (official collection/i18n APIs), Tailwind (shared tokens and responsive layout), frontend-design (continuity with the existing landing), accessibility (native controls/focus/overflow), and Playwright (role-based, retrying browser assertions). SEO and TypeScript guidance informed component metadata and typed catalogs. The two Node backend skills are installed discovery results; this static site needs no backend.
-
-Do not reformat or rewrite upstream skill content or computed hashes. Review installer/lock diffs when refreshing skills. The user's requirements and actual Astro 7/package contracts override generic framework/version/font examples in a skill.
-
-Reusable primitives live in `../shared/components/`: Icon, IconButton (composing the shared Button), TextField and LinkCard own their markup and scoped styles. SearchResultCard composes LinkCard and provides the inert result template that Search clones; the client script only fills its escaped text/URL fields. Pagination uses the same LinkCard. DrawerStyles centralizes the vendor stylesheet adaptation for both menus without copying animations. Close buttons rendered by Drawer remain package-owned.
-
-The collection/i18n design follows the official [Content Collections guide](https://docs.astro.build/en/guides/content-collections/) and [i18n recipe](https://docs.astro.build/en/recipes/i18n/): validated build-time entries supply typed data and Markdown rendering, while interface catalogs and content language remain separate responsibilities.
 
 ## Shared site foundations
 

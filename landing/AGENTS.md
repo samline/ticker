@@ -46,7 +46,7 @@ These instructions apply to the maintained Astro landing. Read README.md for rat
 - Test repeated controls/menus, unique DOM/ARIA IDs, unrelated matching classes and disconnect/reconnect cleanup when behavior changes. Review contrast in both themes. Automated axe results are evidence, not a claim of complete conformance.
 - Run `npm run landing:check`, `npm --prefix landing run format:check` and `npm run landing:build` after maintained source changes. Build before `npm --prefix landing run test:browser`; run relevant browser checks for UI/behavior changes. The suite uses the compiled base path and an isolated foreground preview with `--ignore-lock`.
 - Use `npm run site:build` for the combined release artifact. A standalone landing build may include stale existing documentation output. Check links/fragments and execute examples against current package behavior.
-- Format authored landing files with its Prettier script. Leave `.agents/`, `skills-lock.json`, npm locks, generated output and third-party assets untouched by formatting. The root .gitignore owns generated-output, environment and browser-report exclusions for every app; do not duplicate it in app directories.
+- Format authored landing files with its Prettier script. Leave lockfiles, generated output and third-party assets untouched by formatting. The root .gitignore owns generated-output, environment and browser-report exclusions for every app; do not duplicate it in app directories.
 
 ## SEO and publication contracts
 
@@ -77,7 +77,7 @@ Search for old identifiers/values as well as new ones. Update README.md and this
 ## Project skills and exploration
 
 - For structural codebase exploration, use the installed codebase-memory skill: graph first, check cited-path coverage, then read source for stale/partial/unusable coverage. Do not claim exhaustive coverage from a clean best-effort result.
-- `npx autoskills` installed ten third-party skills in `.agents/skills/`; `skills-lock.json` records their provenance/hashes. Keep these files versioned and preserve upstream content. README.md lists sources and the discovery-tool version.
+- Agent skills live in the repository root `.agents/skills/`; this app keeps no second copy.
 - Read a relevant SKILL.md when its workflow applies. Generic skill guidance does not override the user's requirements or the actual Astro 7/Tailwind 4/package contracts. Backend-oriented installed skills do not imply that this static landing needs a backend.
 - When refreshing skills, review the installation and lock diff, keep project instructions, and update provenance notes. Do not manually rewrite skill hashes or reformat vendored references. Pinning the discovery tool alone does not freeze upstream skill content.
 - For a new package, follow README.md's replication checklist and replace package-specific imports, examples, links, assets, namespaces, URLs, docs packaging and tests before considering the copy complete.

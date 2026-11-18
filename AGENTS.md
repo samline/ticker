@@ -32,8 +32,7 @@ Performance is a shared site requirement for Home, Examples and Docs. Preserve r
 ### Goals and evidence
 
 - Aim for at least 95 mobile performance and 100 desktop, and retain 100 accessibility, best practices and SEO in PageSpeed. These are engineering targets, not guaranteed scores or evidence of complete accessibility. Investigate metric regressions even when the overall score stays green; do not change the design merely to chase a perfect score.
-- Track FCP, LCP, TBT, CLS and Speed Index separately. Aim for near-zero initialization CLS and TBT; prioritize visible content and responsiveness over diagnostic counts. Lighthouse TBT is not field INP. Missing field data means unknown real-user performance, not a Core Web Vitals pass.
-- The published Home report `jszyvpap9c` on 2026-10-19 measured 97 mobile / 100 desktop. Mobile FCP/LCP were 1.4/1.7 s, TBT 10 ms, CLS 0 and Speed Index 4.4 s; accessibility, best practices and SEO were 100. This predates commit `4d18f4a`; do not describe it as validation of that commit. It covers Home only.
+- Track FCP, LCP, TBT, CLS and Speed Index separately. Aim for near-zero initialization CLS and TBT; prioritize visible content and responsiveness over diagnostic counts. Lighthouse TBT is not field INP. Mobile FCP/LCP were 1.4/1.7 s, TBT 10 ms, CLS 0 and Speed Index 4.4 s; accessibility, best practices and SEO were 100. This predates commit `4d18f4a`; do not describe it as validation of that commit. It covers Home only.
 
 ### Loading and asset conventions
 
@@ -107,8 +106,6 @@ All five root test files, four landing Node test files, ten landing browser spec
 
 Persisted pagehide preserves controllers/listeners for back/forward restoration. A non-persisted departure aborts copied-example listeners and destroys its controllers; use the same lifecycle guidance in docs and the public skill. Regression checks exercise both persisted transitions and the later real cleanup, plus separate/complete CDN and ESM output.
 
-Validation for this review: landing:check passed with zero Astro diagnostics and 17 Node tests; docs:check passed with zero diagnostics and complete article/source coverage; both app format checks passed. site:build verified 1,882 links across 41 generated pages. All 48 landing browser tests and 27 combined documentation browser tests passed, including narrow/enlarged-text, both themes, no-JavaScript, keyboard, copy and reconnect coverage. The copied CDN/ESM complete/split execution test passed again after the final blank-line and abortable pagehide-listener changes. Inspected Home, Examples and Docs screenshots in both themes. The package build and test:package passed, including the actual npm dry-run manifest. Persisted pagehide/pageshow was simulated in Chromium; this does not claim a separate native browser-history cache benchmark. No package API, version or publication changed.
-
 ## Reusable theme synchronization
 
 The companion template is https://github.com/samline/package-landing-docs, local sibling ../package-landing-docs. Its UPSTREAM.md records deliberate ports; REFERENCE.md/design-reference.json pin the reviewed Ticker revision. The first synchronization after c74ec91 reviews a5ed5ae, 24b4c19, a4c2899 and 4d18f4a. Keep that reference current when reusable site conventions change; compare committed source, not another agent's uncommitted changes.
@@ -127,40 +124,25 @@ Keep Framework integrations as a useful guide, not a replacement for lifecycle r
 
 Both apps pin the published @samline/drawer 6.0.0. Home menu, Docs menu and Search import createDrawer from the root entry, clone their existing DOM/template content through a native content factory and retain the returned controller. Destroy that exact owner during cleanup; do not look it up again by id or restore removed browser.newDrawer/destroyDrawer helpers. Preserve application-owned ARIA reset, abortable listeners, Pagefind/debounce behavior, native modal/scroll/focus ownership and the scoped public vendor stylesheet. Verify independent/reopened instances, detach/reinsert in one mutation batch, search dragging, focus and background scroll. Keep package locks current; a version label alone is not a migration. This is a site dependency change, not a change to the documented package's API or version.
 
-Validation for this dependency migration: clean npm ci installs resolved 5.0.2 in both apps; both Astro checks, 17 landing Node tests and both formatting checks passed. The combined build audited 2,013 links across 42 pages. Eight landing navigation/lifecycle tests and nine combined Docs menu/search tests passed, including both themes, focus, scroll, native search dragging, debounce and same-batch reinsertion. This bounded change did not alter shared presentation or collect new performance measurements.
-
 ## Public README structure
 
 Keep sibling READMEs aligned around identity and resource links, a table of contents, Installation, Quick start, optional HTML / CDN, Capabilities, API at a glance, Documentation, Changelog, AI agent skill and License. Package-specific lifecycle, entrypoint and TypeScript details remain subsections; preserve meaningful public anchors. Runtime READMEs teach the actual package, not website internals. The template uses the same progression but describes its configuration/commands and adaptation workflow rather than inventing a runtime API or npm installation. Keep release notes in CHANGELOG.md and link to them. Keep skills discoverable with a real source/download path and agent-dependent installation guidance. Review snippets, local/external links and formatting after documentation changes; no browser or performance run is needed for README-only edits.
 
 ## Documentation navigation visibility — 2026-10-26
 
-The human reported that deep active sidebar links were hidden below the menu
-viewport in Astro, Ticker, Drawer and the package landing/docs template. Keep the
+Deep active sidebar links must not hide below the menu viewport. Keep the
 current page visible within the menu on mounting/navigation/resize, without
 scrolling the article or stealing focus. Preserve manual menu exploration and
 clean up observers through mountElements. Mobile menus let Drawer focus their
 dialog rather than an offscreen first link. Regression tests cover direct deep
 URLs, actual navigation, resize, same-batch remount and repeated mobile opening.
-Validation: Docs and Landing checks passed with zero Astro diagnostics;
-combined build verified 2,013 links across 42 pages. An initial broad Docs run
-passed 31 tests with five optional host-fixture skips. After the final mobile
-body correction, all three selected browser tests passed: desktop current-page
-visibility, mobile/enlarged-text/close behavior and all-article accessibility.
-The combined artifact was refreshed from those final Docs. This does not claim
-new runtime/package publication validation.
 
-The human clarified active-page placement: try to bring it toward the top
+Active-page placement: try to bring it toward the top
 using the menu's natural scroll range. Do not add margins, padding, pseudo
 spacers or any artificial blank space to force final items upward. Native
 scrollTop clamping is intentional. Preserve the article position, manual menu
 scrolling and the reachable mobile close control. The temporary spacer approach
 was rejected and removed from all four projects.
-
-Natural-scroll correction validated: both targeted browser regressions pass in
-each of the four projects (eight total). All combined artifacts rebuilt and
-passed their link audits. The SEO preview was inspected: article scroll remains
-0, the sidebar has no generated ::after content and no trailing-space variable.
 
 ## Navigation integration contract
 
@@ -206,33 +188,13 @@ the timer expires. New commands replace the timer; lifecycle and competing
 commands cancel it. Keep explicit pause intent and environmental causes intact.
 The 2.5.0 preparation adds this optional API; a tag/push does not establish npm publication. The manual-navigation preview and copied complete/split files demonstrate 1,500ms; other demos retain the zero default.
 
-Initial implementation validation, before version preparation: 84 unit tests passed with 91.24% line,
-85.71% function, 79.37% branch and 87.19% statement coverage. All 49 runtime
-browser tests passed, including four-axis reading intervals, rapid clicks,
-reversals and manual pause. Package build/typecheck/manifest smoke test and
-changed-file formatting passed. Landing/Docs checks passed; combined build
-verified 2,072 links across 42 pages. The Petland consumer uses an explicit local
-pnpm patch with a 1,500ms interval; its verify command and live track-position
-samples passed after renewing a stale development dependency prebundle.
-No package version, publication, push, deployment or performance measurement changed.
-
-Release validation for 2.5.0 (2026-10-30): 87 package tests passed with
-92.18% lines, 88.09% functions, 80.41% branches and 88.21% statements. Typecheck,
-build, package smoke/46-file dry-run manifest, both app checks and all formatting
-checks passed. All 92 Landing browser tests passed, including the new preview
-and complete/split CDN/ESM reading intervals. Combined Docs passed 31 tests with
-five optional host-fixture skips; standalone Docs passed 30 with six skips
-(including its combined-only typography check). The site audit verified 2,076
-links across 42 pages. Browser review compared Home, Examples and controller
-documentation. npm reported 2.4.0 as latest; 2.5.0 publication remains pending.
-
 ## Drag inertia — 2.6.0
 
 `inertia`, `inertiaDeceleration` (1800 px/s²) and `inertiaMaxVelocity` (2500 px/s) are opt-in package options with `data-inertia*` equivalents and responsive support. Release velocity comes from the last ~100 ms of pointer samples (coalesced events included); under ~100 px/s, pointercancel, lost capture and reduced motion never glide. The glide reuses the navigation revision/frame and the `navigation` pause reason, emits one `navigate` at start and end, and `resumeAfterDrag` resumes only when it ends. Drag `navigate` events are throttled to one per frame. TickerDemo passes `data-inertia`; the drag-playback row enables it and the copied recipes inherit row options. Keep README, docs, skill, CHANGELOG and the runtime browser tests (horizontal, vertical, RTL, cancel, reduced motion, resume) synchronized. Pointer-coarse default activation was left undecided: it stays opt-in.
 
 ## Runtime audit — 3.0.0 (2026-11-05)
 
-Repeated `ticker()` calls for a live source/wrapper return the existing controller (options via `update()`); never nest a second wrapper. Clones keep authored IDs: stripping them was tried and rejected because applications (and the runtime fixtures) style copies by id selector. Native scroll of the clipping wrapper (focus reveal, find-in-page, fragments) becomes a logical seek, except static reduced-motion rows without navigation. The drag click-suppression flag clears after release. Registry entries follow controller destruction from any owner. IntersectionObserver uses the latest entry. Clones drop form-control `name` attributes (radio groups/submission stay with originals); destroying adopted markup removes runtime `--ticker-*` properties and option classes it did not already carry. `.ticker-featured` layer rules are scoped with `:where(.ticker-wrapper) >` to keep specificity. Regression tests live in `tests/regressions.test.ts` and the runtime browser spec. Lessons and open items: `.agents/audit-2026-11.md`. 3.0.0 was pushed, tagged and published to npm at the maintainer's request on 2026-11-05; confirm with `npm view @samline/ticker version` before relying on CDN pins.
+Repeated `ticker()` calls for a live source/wrapper return the existing controller (options via `update()`); never nest a second wrapper. Clones keep authored IDs: stripping them was tried and rejected because applications (and the runtime fixtures) style copies by id selector. Native scroll of the clipping wrapper (focus reveal, find-in-page, fragments) becomes a logical seek, except static reduced-motion rows without navigation. The drag click-suppression flag clears after release. Registry entries follow controller destruction from any owner. IntersectionObserver uses the latest entry. Clones drop form-control `name` attributes (radio groups/submission stay with originals); destroying adopted markup removes runtime `--ticker-*` properties and option classes it did not already carry. `.ticker-featured` layer rules are scoped with `:where(.ticker-wrapper) >` to keep specificity. Regression tests live in `tests/regressions.test.ts` and the runtime browser spec.
 
 ## CI timing — 2026-11-05
 
@@ -259,13 +221,6 @@ that compact range when synchronizing the theme. The header regression covers
 Home, Examples and Docs at 1024, 1100, 1200, 1280 and 1440 pixels, including
 the longest sibling package name; it fails on the previous build at 1024px.
 This changes the website only and requires no npm release.
-
-Validation: both app diagnostics and format checks passed, as did 19 tooling
-tests and the combined build (2,096 links across 42 pages). Landing passed
-100/100 Chromium tests. Combined Docs passed 35 tests; its five initially
-skipped framework/CMS cases then all passed with the optional React/Vue/Svelte
-and Liquid dependencies installed externally, covering all 40 distinct cases.
-The 1024px header was also visually reviewed beside Drawer and Notify.
 
 ## Identity convention — 2026-11-06
 
@@ -308,6 +263,7 @@ This block is synced from the template that owns the family conventions ([packag
 - `bun run check` must pass: format, typecheck, unit tests with coverage thresholds, build, size budgets, e2e in Chromium, Firefox and WebKit.
 - README is the package guide and the site's source of truth; public text in English. Any public API change updates tests, README, docs, examples and `skills/<name>/SKILL.md` together.
 - Releases: Keep a Changelog entry for every user-facing change, semver, pinned CDN URLs bumped before release. Publishing is manual (`bun run release` by the maintainer); CI never publishes; no `--provenance`.
+- Public repository: no dated reports, handoff notes, transcripts or client names; private notes go in the ignored `.local/`. Site examples with state offer Reset; icons are SVG, never Unicode glyphs.
 - Never add AI attribution to commits, tags or pull requests.
 
 <!-- samline:family:end -->

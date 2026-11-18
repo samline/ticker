@@ -1,4 +1,5 @@
 ---
+import Icon from '../../../shared/components/Icon.astro'
 import { getI18n } from '../i18n/utils'
 import Section from '../components/Section.astro'
 import Box from '../../../shared/components/Box.astro'
@@ -24,7 +25,7 @@ const t = getI18n(Astro).examples
     <div class:list={['gallery-actions']}>
       <Button context="hero" href="#announcements" variant="primary">
         {t.exploreAction}
-        <span aria-hidden="true">↓</span>
+        <Icon name="arrow-down" size="1em" weight={2} />
       </Button>
       <Button
         context="hero"
@@ -32,7 +33,7 @@ const t = getI18n(Astro).examples
         variant="secondary"
       >
         {t.installAction}
-        <span aria-hidden="true">↗</span>
+        <Icon name="arrow-right" size="1em" weight={2} />
       </Button>
     </div>
     <p class:list={['accessibility']}>{t.accessibility}</p>
@@ -47,7 +48,7 @@ const t = getI18n(Astro).examples
         {t.recipes.map(recipe => (
           <Button variant="secondary" href={`#${recipe.id}`} class:list={['recipe-link']}>
             {recipe.navigationLabel}
-            <span aria-hidden="true">↓</span>
+            <Icon name="arrow-down" size="1em" weight={2} />
           </Button>
         ))}
       </nav>

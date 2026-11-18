@@ -58,7 +58,7 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
                   <span class:list={['menu-link-description']}>{item.description}</span>
                 </span>
                 <span class:list={['menu-arrow']} aria-hidden="true">
-                  ↗
+                  <Icon name="arrow-right" size="1em" weight={2} />
                 </span>
               </a>
             </li>
@@ -70,7 +70,7 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
             <li>
               <a href="https://github.com/samline/ticker" target="_blank" rel="noopener noreferrer">
                 {i18n.common.links.github}
-                <span aria-hidden="true">↗</span>
+                <Icon name="arrow-up-right" size="1em" weight={2} />
                 <span class:list={['sr-only']}>{i18n.common.externalLinkHint}</span>
               </a>
             </li>
@@ -81,7 +81,7 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
                 rel="noopener noreferrer"
               >
                 {i18n.common.links.npm}
-                <span aria-hidden="true">↗</span>
+                <Icon name="arrow-up-right" size="1em" weight={2} />
                 <span class:list={['sr-only']}>{i18n.common.externalLinkHint}</span>
               </a>
             </li>
@@ -99,6 +99,7 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
 
 <script>
   import { mountElements } from '../../../shared/lib/mount-elements'
+  import { closeIcon } from '../../../shared/lib/close-icon'
 
   import { createDrawer } from '@samline/drawer'
 
@@ -143,7 +144,7 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
       ariaLabel: element.dataset.dialogLabel,
       contentClassName: 'mobile-menu-panel',
       overlayClassName: 'mobile-menu-overlay',
-      closeButton: { className: 'menu-close', icon: '×', ariaLabel: element.dataset.closeLabel },
+      closeButton: { className: 'menu-close', icon: closeIcon(), ariaLabel: element.dataset.closeLabel },
       onOpenChange: open => {
         trigger.setAttribute('aria-expanded', String(open))
         if (open)

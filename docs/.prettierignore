@@ -6,5 +6,3 @@ test-results/
 playwright-report/
 
 # Preserve upstream skills and installer provenance.
-.agents/
-skills-lock.json
