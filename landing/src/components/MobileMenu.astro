@@ -144,7 +144,11 @@ const instanceId = `mobile-menu-${crypto.randomUUID()}`
       ariaLabel: element.dataset.dialogLabel,
       contentClassName: 'mobile-menu-panel',
       overlayClassName: 'mobile-menu-overlay',
-      closeButton: { className: 'menu-close', icon: closeIcon(), ariaLabel: element.dataset.closeLabel },
+      closeButton: {
+        className: 'menu-close',
+        icon: closeIcon(),
+        ariaLabel: element.dataset.closeLabel,
+      },
       onOpenChange: open => {
         trigger.setAttribute('aria-expanded', String(open))
         if (open)

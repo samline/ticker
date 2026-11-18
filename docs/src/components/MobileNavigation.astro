@@ -59,7 +59,11 @@ const id = `docs-menu-${crypto.randomUUID()}`
       ariaLabel: element.dataset.label,
       contentClassName: 'docs-menu-panel',
       overlayClassName: 'docs-menu-overlay',
-      closeButton: { icon: closeIcon(), ariaLabel: element.dataset.close, className: 'docs-menu-close' },
+      closeButton: {
+        icon: closeIcon(),
+        ariaLabel: element.dataset.close,
+        className: 'docs-menu-close',
+      },
       onOpenChange: open => button.setAttribute('aria-expanded', String(open)),
     })
     element.addEventListener(

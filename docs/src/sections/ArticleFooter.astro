@@ -23,13 +23,17 @@ const previous = pages[index - 1],
     {previous && (
       <LinkCard href={href(previous[0])} variant="compact">
         <span>{t.previous}</span>
-        <strong><Icon name="arrow-left" size="1em" weight={2} /> {previous[1]}</strong>
+        <strong>
+          <Icon name="arrow-left" size="1em" weight={2} /> {previous[1]}
+        </strong>
       </LinkCard>
     )}
     {next && (
       <LinkCard href={href(next[0])} variant="compact">
         <span>{t.next}</span>
-        <strong>{next[1]} <Icon name="arrow-right" size="1em" weight={2} /></strong>
+        <strong>
+          {next[1]} <Icon name="arrow-right" size="1em" weight={2} />
+        </strong>
       </LinkCard>
     )}
   </nav>

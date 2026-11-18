@@ -179,7 +179,6 @@ Treat the package, catalogs, docs, generated metadata and examples as one releas
 
 Use targeted checks first, then the required build and relevant browser checks for the affected behavior. For an actual release, rebuild the package if measurements/examples depend on built output, remeasure size claims and run `npm run site:build`. Keep attribution and source records intact. Document real remaining limitations instead of claiming that automated checks prove everything.
 
-
 ## Copy controls, persistent navigation and documentation journeys
 
 CodeBlock and InstallCommand share CopyButton. CodeBlock passes the exact joined token values, so syntax markup and filenames never reach the clipboard. CopyButton uses a native named button, instance-local state, an atomic live status and a captured abort signal for asynchronous cleanup. Its success label resets after two seconds; repeated clicks restart the instance timer, and disconnect clears it. If clipboard access fails, it selects the owning code source and announces manual-copy instructions. Without JavaScript the copy button stays hidden while code remains readable. Keep source ownership marked with data-copy-source, and verify success, permission denial and independent feedback after changes.

@@ -60,7 +60,6 @@ English is the only published locale. Astro config declares it explicitly. UI co
 
 [The dated content audit](CONTENT-AUDIT.md) records the review of all original sources and the recovered CSS-contract details. Keep the migration inventory and this review context when reorganizing content.
 
-
 ## Shared site foundations
 
 CodeFrame no longer duplicates its complete source in a clipboard attribute. Shared CopyButton reads the current rendered code from its owning frame at click time; an explicit text prop remains available for commands. Article only frames native Markdown/MDX code and labels its language, without caching another clipboard source. Exact copies, newline preservation and denied-clipboard selection remain covered by the browser suites.
