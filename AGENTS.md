@@ -210,7 +210,7 @@ Both apps now pin @samline/drawer 5.1.2, which only changes closing: focus retur
 
 ## Agent skills and memory location
 
-Agents, Claude included, store and read project skills and memory in `.agents/`. Skills are created and edited only in `.agents/skills/`. `.claude/skills` is a tracked relative symlink to `../.agents/skills` because Claude Code loads project skills only from `.claude/skills/`; never keep a second copy there. The root library holds seven upstream skills installed with `npx autoskills -y -a codex`; `skills-lock.json` records their sources and hashes. Keep their content and licenses untouched and outside formatting. The public integration skill lives in `skills/ticker/` and is not an agent skill for this repository. The per-app libraries in `landing/.agents/skills` and `docs/.agents/skills` are separate upstream installs for those apps. On Windows, clone with `git config core.symlinks true`.
+Agents, Claude included, store and read project skills and memory in `.agents/`. Skills are created and edited only in `.agents/skills/`. `.claude/skills` is a tracked relative symlink to `../.agents/skills` because Claude Code loads project skills only from `.claude/skills/`; never keep a second copy there. The root library holds the upstream work skills installed with `npx autoskills -y -a universal` (the `bun` skill removed, as the family rules require); `skills-lock.json` records their sources and hashes. Keep their content and licenses untouched and outside formatting. The public integration skill lives in `skills/ticker/` and is not an agent skill for this repository. On Windows, clone with `git config core.symlinks true`.
 
 ## Header synchronization — 2026-11-06
 
@@ -264,6 +264,8 @@ This block is synced from the template that owns the family conventions ([packag
 - README is the package guide and the site's source of truth; public text in English. Any public API change updates tests, README, docs, examples and `skills/<name>/SKILL.md` together.
 - Releases: Keep a Changelog entry for every user-facing change, semver, pinned CDN URLs bumped before release. Publishing is manual (`bun run release` by the maintainer); CI never publishes; no `--provenance`.
 - Public repository: no dated reports, handoff notes, transcripts or client names; private notes go in the ignored `.local/`. Site examples with state offer Reset; icons are SVG, never Unicode glyphs.
+- Work skills: `npx autoskills -y -a universal`, tracked with `skills-lock.json`, minus the `bun` skill (it contradicts pnpm installs), plus `modern-web-guidance`, consulted before HTML, CSS or client-side JavaScript work.
+- Always explore code through the `codebase-memory` skill and graph when `codebase-memory-mcp` is installed; read source for gaps.
 - Never add AI attribution to commits, tags or pull requests.
 
 <!-- samline:family:end -->
