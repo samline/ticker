@@ -78,7 +78,14 @@ const fitDescription = (text: string, font: Font, max: number) => {
   }
   const words = text.split(/\s+/)
   for (let n = words.length - 1; n > 0; n--) {
-    const lines = wrap(words.slice(0, n).join(' ').replace(/[,;:.]+$/, '') + '…', font, max)
+    const lines = wrap(
+      words
+        .slice(0, n)
+        .join(' ')
+        .replace(/[,;:.]+$/, '') + '…',
+      font,
+      max
+    )
     if (lines) return lines
   }
   return []
