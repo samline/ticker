@@ -112,15 +112,24 @@ async function checkDragModes(page: Page, recipe: Locator) {
   await expect(frame).toHaveAttribute('data-inertia', 'true')
 }
 
-async function checkRepeatedCategory(recipe: Locator) {
+async function checkRepeatedCategory(recipe: Locator, axis?: 'horizontal' | 'vertical') {
   const pause = recipe.locator('button[data-pause]')
   if ((await pause.textContent())?.includes('Pause')) await pause.click()
-  await expect(recipe.locator('.ticker-wrapper')).toHaveAttribute('data-playing', 'false')
+  const wrapper = recipe.locator('.ticker-wrapper')
+  await expect(wrapper).toHaveAttribute('data-playing', 'false')
+  // End navigates to the measured period; before the (re)measurement after an
+  // axis change or font load the period is 0 and End lands on the start.
+  if (axis) await expect(wrapper).toHaveAttribute('data-axis', axis)
+  await expect(wrapper).toHaveAttribute('data-ready', 'true')
   const rail = recipe.locator('[data-position]')
-  await rail.press('End')
-  await expect
-    .poll(async () => Number(await rail.inputValue()))
-    .toBeCloseTo(Number(await rail.getAttribute('max')) - 0.001, 2)
+  await expect.poll(async () => Number(await rail.getAttribute('max'))).toBeGreaterThan(0)
+  await expect(async () => {
+    await rail.press('End')
+    expect(Number(await rail.inputValue())).toBeCloseTo(
+      Number(await rail.getAttribute('max')) - 0.001,
+      2
+    )
+  }).toPass()
   await recipe.locator('.ticker-wrapper').scrollIntoViewIfNeeded()
   const visible = await recipe.locator('.ticker-wrapper').evaluate(frame => {
     const viewport = frame.getBoundingClientRect()
@@ -1153,6 +1162,6 @@ test('visible repeated featured categories respond to pointer selection on both 
   const menu = page.locator('#featured-menu')
   for (const axis of ['horizontal', 'vertical']) {
     await menu.locator(`button[data-example-featured-axis="${axis}"]`).click()
-    await checkRepeatedCategory(menu)
+    await checkRepeatedCategory(menu, axis as 'horizontal' | 'vertical')
   }
 })
