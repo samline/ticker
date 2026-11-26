@@ -4,7 +4,6 @@ export default defineConfig([
   {
     entry: {
       index: 'src/index.ts',
-      style: 'src/style.css',
       'core/index': 'src/core/index.ts',
       'vanilla/index': 'src/vanilla/index.ts',
       'browser/index': 'src/browser/index.ts',
@@ -15,6 +14,12 @@ export default defineConfig([
     clean: true,
     target: 'es2020',
     outDir: 'dist',
+  },
+  {
+    entry: { style: 'src/style.css' },
+    sourcemap: true,
+    clean: false,
+    target: 'es2020',
   },
   {
     // ticker.global.js is the family name; global.global.js stays as an alias
