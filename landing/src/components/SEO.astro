@@ -84,7 +84,21 @@ const schema = {
 />
 <meta name="referrer" content="strict-origin-when-cross-origin" />
 <meta name="color-scheme" content="light dark" />
-<meta name="theme-color" content="#1d1c23" />
+<!-- The toolbar matches the page background per scheme (--theme-bg); Theme.astro sets every meta to the resolved theme's data-color. -->
+<meta
+  name="theme-color"
+  media="(prefers-color-scheme: light)"
+  content="#faf9fc"
+  data-scheme="light"
+  data-color="#faf9fc"
+/>
+<meta
+  name="theme-color"
+  media="(prefers-color-scheme: dark)"
+  content="#1d1c23"
+  data-scheme="dark"
+  data-color="#1d1c23"
+/>
 {canonical && <link rel="canonical" href={canonical} />}
 <link rel="icon" type="image/svg+xml" href={icon} />
 <meta property="og:type" content="website" />
