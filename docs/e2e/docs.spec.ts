@@ -571,7 +571,10 @@ test('mobile header icon buttons stay square with legible icons', async ({ page 
     await page.goto(path)
     const icons = await page.evaluate(() =>
       [...document.querySelectorAll<HTMLElement>('header button')]
-        .filter(button => button.offsetParent && button.querySelector('svg'))
+        // Page header only: code frames also render a <header> with an icon copy button.
+        .filter(
+          button => button.offsetParent && button.querySelector('svg') && !button.closest('main')
+        )
         .map(button => {
           const box = button.getBoundingClientRect()
           return {

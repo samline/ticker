@@ -15,6 +15,8 @@ test('Docs uses the shared local font families without external font services', 
   expect(
     await page.evaluate(() =>
       Array.from(document.fonts, font => ({ family: font.family, status: font.status }))
+        // Metric-matched fallbacks are local() faces that never download.
+        .filter(font => !font.family.endsWith(' Fallback'))
     )
   ).toEqual([
     { family: 'Inter', status: 'loaded' },
